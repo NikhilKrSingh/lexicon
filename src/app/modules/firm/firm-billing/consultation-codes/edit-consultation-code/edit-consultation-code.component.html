@@ -1,0 +1,67 @@
+<div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Edit Consultation Code - {{consultationCode?.code}}</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <!-- <div class="alert alert-warning d-flex justify-content-between no-shadow">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-warning"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h4 class="mr-24 mt-0 mb-4">Warning</h4>
+          <span>
+            Changes made to the code name will be applied to all historical entries of this code.
+          </span>
+        </div>
+      </div>
+    </div> -->
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <ng-select id="editBillingCodesConsultationType" [items]="typeList" placeholder="Select Type" [(ngModel)]="selectedType" [bindValue]="'id'"
+        [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [readonly]="true">
+      </ng-select>
+    </div>
+    <ng-container [formGroup]='consultationCodeForm'>
+      <div class="form-group">
+        <label>Code <sup>*</sup></label>
+        <input id="editBillingCodesConsultationCode" type="text" class="form-control" formControlName='code'>
+      </div>
+      <div class="position-relative"
+        [ngClass]="(consultationCodeForm.controls.name.invalid && pressedSave)?'form-group has-error':'form-group'">
+        <label>Name <sup>*</sup></label>
+        <span class="count-char">{{consultationCodeForm?.controls['name']?.value?.length || 0}}/50</span>
+        <input id="editBillingCodesconsultationName" type="text" class="form-control" placeholder="Enter a name" formControlName='name' maxlength="50" (blur)="validateConsultationFeeCode();">
+        <span class="field-message text-danger" *ngIf="(consultationCodeForm.controls.name.invalid && pressedSave)"><em
+            class="icon icon-error mr-4"></em>
+          Please enter a name
+        </span>
+      </div>
+      <div class="form-group" [class.has-error]='consultationCodeError.billType'>
+        <label>Bill Type <sup>*</sup></label>
+        <ng-select
+          id="consultationBillType"
+          [items]="consultationBillTypes"
+          placeholder="Select bill type"
+          formControlName="billType"
+          [bindValue]="'id'"
+          [bindLabel]="'name'"
+          (change)="selectBillType($event)"
+          [notFoundText]="'No record found'"
+          [selectOnTab]="true"
+          [clearable]='false'>
+        </ng-select>
+        <app-validation-message [errorMessage]='consultationCodeError.billTypeMessage' *ngIf='consultationCodeError.billType'></app-validation-message>
+      </div>
+      <div  class="form-group position-relative" [class.has-error]='consultationCodeError.rate && pressedSave' *ngIf='consultationCodeForm?.value?.billType != openConsultationFeeType?.id'>
+        <label>Rate <sup>*</sup></label>
+        <input type="text" id="billingCodeRate" class="form-control" #rateInpt [maxlength]='rateInpt | decimalMaxLength' placeholder="Enter a rate" formControlName="rate" (blur)="validateConsultationFeeCode();formatRate()" prefix="$" mask="separator.2" thousandSeparator="," (keydown)='rateKeyEnter($event)'>
+        <app-validation-message [errorMessage]='consultationCodeError.rateMessage' *ngIf='consultationCodeError.rate && pressedSave'></app-validation-message>
+      </div>
+    </ng-container>
+
+  </div>
+  <div class="modal-footer">
+    <button id="editBillingCodesConsultationCancelBtn" type="button" class="btn btn-light" (click)="close()">Cancel</button>
+    <button id="editBillingCodesConsultationSaveBtn" type="button" class="btn btn-primary" (click)='save()'>Save</button>
+  </div>

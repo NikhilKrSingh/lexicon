@@ -1,0 +1,136 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">{{(viewMode === 'issue') ? 'Issue' : 'View'}} Chargeback</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="custom-table">
+    <ngx-datatable #table class="material common-table history-table charge-table" [rows]="chargeDetails"
+      [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" rowHeight="auto" [scrollbarH]='false'
+      id="chargedetails-tbl" [rowClass]='getRowClass'>
+
+      <ngx-datatable-row-detail rowHeight="auto" #myDetailRow (toggle)="onDetailToggle($event)">
+        <ng-template let-row="row" ngx-datatable-row-detail-template>
+          <div class="table-responsive">
+            <table class="table table-striped table-borderless">
+              <ng-container *ngIf="row.transactionType.name === 'Payment'">
+                <thead>
+                  <tr>
+                    <th class="pl-40 w-25">Date of Payment</th>
+                    <th class="w-25">Target Account</th>
+                    <th class="w-25">Payment Method</th>
+                    <th class="w-25 ac-th">Transaction Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pl-40 align-top">
+                      <span class="helper-text font-weight-normal">{{row?.postingDate | date:
+                        'MM/dd/yyyy'}}</span>
+                    </td>
+                    <td class="w-25">
+                      <app-account-detail [row]='row' [isSource]='false'></app-account-detail>
+                    </td>
+                    <td class="w-25">
+                      <app-account-detail [row]='row' [isSource]='true'></app-account-detail>
+                    </td>
+                    <td>{{row.confirmationNumber}}</td>
+                  </tr>
+                </tbody>
+              </ng-container>
+              <ng-container *ngIf="row.transactionType.name === 'Chargeback'">
+                <thead>
+                  <tr>
+                    <th class="pl-40 pm-width">Initial Posting Date</th>
+                    <th class="w-100">Transaction Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pl-40">
+                      {{row.postingDate | date: 'MM/dd/yyyy'}}
+                    </td>
+                    <td>
+                      {{row.confirmationNumber}}
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+            </table>
+          </div>
+        </ng-template>
+      </ngx-datatable-row-detail>
+
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="" name="" [width]="120">
+        <ng-template let-row='row' let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+          <a href="javascript:void(0)" style="width: 12px;" class="icon font-10 mr-16"
+            [class.icon-angle-down]="!expanded" [class.icon-angle-up]="expanded" title="Expand/Collapse Row"
+            (click)="toggleExpandRow(row)">
+          </a>
+          <strong>{{(row.transactionType.name === 'Payment') ? 'Original Charge' : 'Chargeback'}}</strong>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="postingDate" name="Posting Date"
+        [width]="100">
+        <ng-template let-row='row' let-value="value" ngx-datatable-cell-template>
+          {{value | date: 'MM/dd/yyyy'}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="transactionType.name" name="Type" [width]="100">
+        <ng-template let-value="value" ngx-datatable-cell-template>
+          {{value}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="postedBy.name" name="Posting By" [width]="120">
+        <ng-template let-row='row' let-value="value" ngx-datatable-cell-template>
+          <span>{{value}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="amount" name="Amount" [width]="80">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf="value && row.transactionType.name === 'Payment'">
+            {{value | usdCurrency}}
+          </span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="endingBalance" name="Ending Balance"
+        [width]="100">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf="value && row.transactionType.name === 'Payment'"> {{value | usdCurrency}}
+          </span>
+          <span *ngIf="row.transactionType.name === 'Chargeback'">See Table </span>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="status" name="Status" [width]="80">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span [class.due-date-passed]="value == 'Failed'">{{value}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+  <div class="form-group position-relative mb-0 mt-40" [formGroup]="chargeForm">
+    <label>Reason<sup *ngIf="viewMode === 'issue'">*</sup></label>
+    <span class="count-char"></span>
+    <textarea *ngIf="viewMode === 'issue'" class="form-control" rows="4" formControlName="chargeBackReason"
+      placeholder="Please enter a reason for the chargeback">
+    </textarea>
+  </div>
+  <div class="form-group position-relative mb-0" *ngIf="viewMode === 'view'">
+    {{(chargeDetails && chargeDetails.length > 0) ? chargeDetails[0].chargeBackReason : ''}}
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn" [ngClass]="viewMode === 'view' ? 'btn-primary' : 'btn-light'" (click)="close()"
+    id='cancel-btn'>
+    {{(viewMode === 'view') ? 'Close' : 'Cancel'}}
+  </button>
+
+  <button type="button" class="btn btn-primary" *ngIf="viewMode === 'issue'" (click)='save()'
+    [disabled]="!chargeForm.valid || chargeBackLoading" id="issue-chargeback">
+    Issue Chargeback
+  </button>
+</div>
+
+<app-loader [active]='chargeBackLoading'></app-loader>

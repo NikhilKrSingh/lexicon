@@ -1,0 +1,7 @@
+export enum BillingCodeTypesEnum {
+    HOURLY_CODE ,
+    DISBURSEMENT_TYPE ,
+    WRITE_OFF_CODE ,
+    WRITE_DOWN_CODE,
+    CONSULTATION_FEE_CODE
+}

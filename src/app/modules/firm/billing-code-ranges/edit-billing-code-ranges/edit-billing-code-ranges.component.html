@@ -1,0 +1,544 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item">
+        <a href="javascript:void(0)" routerLink='/firm/code-ranges'>Code Ranges</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Configure Code Ranges</li>
+    </ol>
+    <div class="heading">
+      <h1>Configure Code Ranges</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3 class="mb-16">Code Ranges</h3>
+
+        <div class="row gutter-16">
+          <div class="col-12">
+            <p class="lh-20 mb-8">
+              To avoid user confusion or crossing of code types, do not overlap a code range with  another
+              code range that is already being used by existing codes.
+            </p>
+
+            <p class="lh-20">
+              Changes will only affect new codes, not existing codes.
+            </p>
+          </div>
+        </div>
+
+        <ng-container *ngIf='billingCodeRanges'>
+          <div class="info-block ">
+            <h3 class="mb-16">Fees</h3>
+            <div class="form-group">
+              <label class="mb-8">Hourly Codes</label>
+              <ng-container *ngIf='hourlyCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='hourlyCode?.rangeError || hourlyCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="hourlyCode.minRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(hourlyCode, "min")' (change)='changeInput(hourlyCode)' id="code-range-hourly-code">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(hourlyCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(hourlyCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='hourlyCode?.rangeError || hourlyCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="hourlyCode.maxRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(hourlyCode, "max")' (change)='changeInput(hourlyCode)' id="code-range-hourly-code-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(hourlyCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(hourlyCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='hourlyCode?.rangeError || hourlyCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert" id="error-display">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{hourlyCode.rangeError || hourlyCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+            <div class="form-group">
+              <label class="mb-8">Fixed Fee Services</label>
+              <ng-container *ngIf='fixedFeeCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='fixedFeeCode?.rangeError || fixedFeeCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="fixedFeeCode.minRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(fixedFeeCode, "min")' (change)='changeInput(fixedFeeCode)' id="code-range-fixed-fee-service">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(fixedFeeCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(fixedFeeCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='fixedFeeAddOnCode?.rangeError || fixedFeeAddOnCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="fixedFeeCode.maxRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(fixedFeeCode, "max")' (change)='changeInput(fixedFeeCode)' id="code-range-fixed-fee-service-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(fixedFeeCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(fixedFeeCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='fixedFeeCode?.rangeError || fixedFeeCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert" id="error-display">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{fixedFeeCode.rangeError || fixedFeeCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+            <div class="form-group">
+              <label class="mb-8">Fixed Fee Add-ons</label>
+              <ng-container *ngIf='fixedFeeAddOnCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='fixedFeeAddOnCode?.rangeError || fixedFeeAddOnCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="fixedFeeAddOnCode.minRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(fixedFeeAddOnCode, "min")'
+                            (change)='changeInput(fixedFeeAddOnCode)' id="code-range-fixed-fee-addon-service">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(fixedFeeAddOnCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(fixedFeeAddOnCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='fixedFeeAddOnCode?.rangeError || fixedFeeAddOnCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="fixedFeeAddOnCode.maxRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(fixedFeeAddOnCode, "max")'
+                            (change)='changeInput(fixedFeeAddOnCode)' id="code-range-fixed-fee-addon-service-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(fixedFeeAddOnCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(fixedFeeAddOnCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='fixedFeeAddOnCode?.rangeError || fixedFeeAddOnCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{fixedFeeAddOnCode.rangeError || fixedFeeAddOnCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+            <div class="form-group">
+              <label class="mb-8">Consultation Codes</label>
+              <ng-container *ngIf='consultationCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='consultationCode?.rangeError || consultationCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="consultationCode.minRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(consultationCode, "min")'
+                            (change)='changeInput(consultationCode)' id="code-range-consultation-code">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(consultationCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(consultationCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='consultationCode?.rangeError || consultationCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="consultationCode.maxRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(consultationCode, "max")'
+                            (change)='changeInput(consultationCode)' id="code-range-consultation-code-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(consultationCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(consultationCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='consultationCode?.rangeError || consultationCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{consultationCode.rangeError || consultationCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="info-block pt-24">
+            <h3 class="mb-16">Disbursements</h3>
+            <div class="form-group">
+              <label class="mb-8">Disbursement Types</label>
+              <ng-container *ngIf='disbursementTypeCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='disbursementTypeCode?.rangeError || disbursementTypeCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="disbursementTypeCode.minRange" type="text"
+                            class="form-control white-form-control" (blur)='addTrailingZero(disbursementTypeCode, "min")'
+                            (change)='changeInput(disbursementTypeCode)' id="code-range-disbursement-type">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(disbursementTypeCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(disbursementTypeCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='disbursementTypeCode?.rangeError || disbursementTypeCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="disbursementTypeCode.maxRange" type="text"
+                            class="form-control white-form-control" (blur)='addTrailingZero(disbursementTypeCode, "max")'
+                            (change)='changeInput(disbursementTypeCode)' id="code-range-disbursement-type-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(disbursementTypeCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(disbursementTypeCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='disbursementTypeCode?.rangeError || disbursementTypeCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{disbursementTypeCode.rangeError || disbursementTypeCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="info-block pt-24">
+            <h3 class="mb-16">Write-Downs</h3>
+
+            <div class="form-group">
+              <label class="mb-8">Write-Down Codes</label>
+              <ng-container *ngIf='writeDownCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='writeDownCode?.rangeError || writeDownCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="writeDownCode.minRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(writeDownCode, "min")' (change)='changeInput(writeDownCode)' id="code-range-write-down">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(writeDownCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(writeDownCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='writeDownCode?.rangeError || writeDownCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="writeDownCode.maxRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(writeDownCode, "max")' (change)='changeInput(writeDownCode)' id="code-range-write-down-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(writeDownCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(writeDownCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='writeDownCode?.rangeError || writeDownCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{writeDownCode.rangeError || writeDownCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+
+          </div>
+
+          <div class="info-block pt-24">
+            <h3 class="mb-16">Write-Offs</h3>
+            <div class="form-group">
+              <label class="mb-8">Write-Off Codes</label>
+              <ng-container *ngIf='writeOffCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='writeOffCode?.rangeError || writeOffCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="writeOffCode.minRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(writeOffCode, "min")' (change)='changeInput(writeOffCode)' id="code-range-write-offs">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(writeOffCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(writeOffCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='writeOffCode?.rangeError || writeOffCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="writeOffCode.maxRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(writeOffCode, "max")' (change)='changeInput(writeOffCode)' id="code-range-write-offs-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(writeOffCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(writeOffCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='writeOffCode?.rangeError || writeOffCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{writeOffCode.rangeError || writeOffCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+
+          <div class="info-block pt-24">
+            <h3 class="mb-16">Transaction Reversals</h3>
+            <div class="form-group mb-0">
+              <label class="mb-8">Transaction Reversals Codes</label>
+              <ng-container *ngIf='reservedCheckCode'>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="row gutter-16">
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='reservedCheckCode?.rangeError || reservedCheckCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="reservedCheckCode.minRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(reservedCheckCode, "min")' (change)='changeInput(reservedCheckCode)' id="code-range-write-offs">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(reservedCheckCode, 'min', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(reservedCheckCode, 'min', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-auto font-16 text-center pt-8">
+                        to
+                      </div>
+                      <div class="col-auto">
+                        <div class="position-relative cust-spinner"
+                          [class.has-error]='reservedCheckCode?.rangeError || reservedCheckCode?.emptyError'>
+                          <input mask='00000' [(ngModel)]="reservedCheckCode.maxRange" type="text" class="form-control white-form-control"
+                            (blur)='addTrailingZero(reservedCheckCode, "max")' (change)='changeInput(reservedCheckCode)' id="code-range-write-offs-to">
+                          <div class="cust-spinn-arrow">
+                            <span class="up-spin" (click)="change(reservedCheckCode, 'max', 'up')">
+                              <em class="icon icon-angle-up"></em>
+                            </span>
+                            <span class="down-spin" (click)="change(reservedCheckCode, 'max', 'down')">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf='reservedCheckCode?.rangeError || reservedCheckCode?.emptyError'>
+                  <div class="col-6">
+                    <div class="alert alert-danger d-flex justify-content-between mt-16 mb-0" role="alert">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-error mr-12"></em>
+                        <div class="d-flex">
+                          <h4 class="mb-0 mt-0 mr-16">Error</h4>
+                          <p class="mb-0">
+                            {{reservedCheckCode.rangeError || reservedCheckCode.emptyError}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" [routerLink]="['/firm/code-ranges']" id="code-range-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)='save()' id="code-range-save-btn" [disabled]='loading'>Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-loader [active]='loading'></app-loader>

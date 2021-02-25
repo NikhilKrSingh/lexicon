@@ -1,0 +1,166 @@
+<div class="container">
+  <div class="main-content">
+
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Timekeeping</li>
+    </ol>
+    <div *ngIf='permissionList.TIMEKEEPING_SELFisEdit'>
+      <div class="heading">
+        <h1>My Timesheet</h1>
+      </div>
+      <div class="card mb-64" id="past7DayId">
+        <div class="card-body pb-24 pt-28 d-flex justify-content-between">
+          <div>
+            <span class="d-block helper-text small mb-4">Past 7 Calendar Days</span>
+            <div class="h4 m-0 font-weight-bold">
+              {{startDate | date: 'MM/dd/yyyy'}} – {{endDate| date: 'MM/dd/yyyy'}}
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <div class="mr-60">
+              <span class="d-block helper-text small mb-4">Total Time</span>
+              <div class="h3 m-0 font-weight-bold">{{totalHours}}</div>
+            </div>
+            <div class="mr-60">
+              <span class="d-block helper-text small mb-4">Total Amount</span>
+              <div class="h3 m-0 font-weight-bold" *ngIf="myTimesheetDetail">{{TotalRate| currency}}
+              </div>
+            </div>
+            <button class="btn btn-primary" [routerLink]="['/timekeeping/my-timesheet']" type="button" id="viewMyTimeSheetId">View My
+              Timesheet</button>
+          </div>
+        </div>
+      <app-loader [active]="myTimeLoading"></app-loader>
+      </div>
+    </div>
+
+    <div class="heading">
+      <h1>All Timesheets</h1>
+    </div>
+    <div class="header-search mb-24">
+      <div class="small-search">
+        <div class="header-search-wrapper">
+          <input type="text" class="form-control search-input"
+            placeholder="Search employee name, primary office or job title" [(ngModel)]='allTimesheetFilterText' (keyup)="updateFilter(allTimesheetFilterText)" id="searchId">
+          <button class="btn" type="button" (click)='updateFilter(allTimesheetFilterText)'>Search</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="row gutter-16">
+              <div class="col-7">
+                <div class="form-group">
+                  <label>Primary Office</label>
+                  <app-multiselect-dropdown [title]="title" [selections]="selectedState" [displaySubItem]="stateList"
+                    [filterName]="filterName" (onSelectionChanged)="getSelectedState($event)"
+                    (clearFilter)="clearFilter('state')" (applyFilter)="applyFilter()" id="primaryOfficeId"></app-multiselect-dropdown>
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="form-group">
+                  <label>Status</label>
+                  <ng-select [items]="statusList" placeholder="Select status" (change)='applyFilter()'
+                    [(ngModel)]="selectedStatus" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'"
+                    [notFoundText]="'No record found'" id="statusId">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="position-relative">
+          <div class="custom-table">
+            <ngx-datatable #table class="material common-table no-min-height" [rows]="rows" [columnMode]="ColumnMode.force"
+              [headerHeight]="50" [footerHeight]="footerHeight" [selected]="selected" [messages]="messages"
+              rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+              [selectionType]="'checkbox'" id="allTimesheetId">
+              <ngx-datatable-column [resizeable]="false" prop="name" name="Name" [width]="200">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='row.name' [maxLength]='32'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="email" name="Email Address" [width]="190">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='row.email' [maxLength]='35'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="primaryOffice.name" name="Primary Office" [width]="200">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='row?.primaryOffice?.name' [maxLength]='44'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="jobTitle" name="Title" [width]="150">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='row.jobTitle' [maxLength]='29'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="isVisible" name="Status" [width]="155">
+                <ng-template let-value="value" ngx-datatable-cell-template>{{value ? 'Active' : 'Inactive'}}
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="172"
+                prop='id' *ngIf="permissionList?.TIMEKEEPING_OTHERSisAdmin || permissionList?.TIMEKEEPING_OTHERSisViewOnly">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <div class="d-flex justify-content-end pr-12">
+                    <a href="javascript:void(0);"  (click)='openTimesheet(row)' class="font-weight-medium" id="viewTimeSheetId-{{row?.id}}" *ngIf="(row.id != loggedinUser.id && !permissionList?.TIMEKEEPING_SELFisEdit) ||permissionList?.TIMEKEEPING_SELFisEdit && (permissionList?.TIMEKEEPING_OTHERSisAdmin || permissionList?.TIMEKEEPING_OTHERSisViewOnly)">View Timesheet</a>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                  let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                  let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                            (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                        {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                        {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                          {{ i+1 }} of {{page.totalPages}}</option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager
+                          [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'"
+                          [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage"
+                          [size]="pageSize"
+                          [count]="rowCount"
+                          [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

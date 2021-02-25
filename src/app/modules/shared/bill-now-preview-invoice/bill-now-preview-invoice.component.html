@@ -1,0 +1,90 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb" *ngIf="!isPCBilling">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/matter/list']">Matters</a></li>
+      <li class="breadcrumb-item" aria-current="page" [title]='invoiceDetails?.matter?.name'>
+        <a href="javascript:void(0)" [routerLink]="['/matter/dashboard']" [queryParams]="{matterId: matterId}">
+          <ng-container *ngIf='invoiceDetails?.matter?.name?.length < 30'>
+            {{invoiceDetails?.matter?.name}} -
+          </ng-container>
+          <ng-container *ngIf='invoiceDetails?.matter?.name?.length >= 30'>
+            {{invoiceDetails?.matter?.name?.slice(0, 25)}}... -
+          </ng-container>
+          {{invoiceDetails?.matter?.matterNumber}}
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="javascript:void(0)" *ngIf="!isWorkCompleteFlow" [routerLink]="['/matter/bill-now']"
+          [queryParams]="{matterId: matterId}">
+          Bill Now
+        </a>
+        <a href="javascript:void(0)" *ngIf="isWorkCompleteFlow" [routerLink]="['/matter/bill-now']"
+          [queryParams]="{matterId: matterId, isWorkCompleteFlow: isWorkCompleteFlow}">
+          Mark as Work Complete
+        </a>
+      </li>
+      <li class="breadcrumb-item active">Preview Invoice</li>
+    </ol>
+    <ol class="breadcrumb" *ngIf="isPCBilling">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/contact/all-contact']">Contacts</a></li>
+      <li class="breadcrumb-item">
+        <a href="javascript:void(0)" [routerLink]="['/contact/view-potential-client']"
+          [queryParams]="{clientId: clientId, state: state}">
+          Contact Profile - {{ invoiceDetails?.client?.name }}
+        </a>
+      </li>
+      <li class="breadcrumb-item" aria-current="page">
+        <a href="javascript:void(0)" [routerLink]="['/contact/bill-potential-client']"
+          [queryParams]="{clientId: clientId, state: state}">
+          Bill Now
+        </a>
+      </li>
+      <li class="breadcrumb-item active">Preview Invoice</li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2">Preview Invoice</h2>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Invoice</h2>
+          </div>
+          <ng-container *ngIf='matterId'>
+            <app-common-invoice-pdf [isPCBilling]='isPCBilling' [matterId]='matterId' [billNowData]='billNowModel'
+              [isWorkCompleteFlow]="isWorkCompleteFlow" [callback]='loaderCallback' (getInvoiceDetails)='getInvoiceDetails($event)'>
+            </app-common-invoice-pdf>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group" *ngIf="!isPCBilling">
+        <button type="button" class="btn btn-light" *ngIf="!isWorkCompleteFlow" [routerLink]="['/matter/bill-now']"
+          [queryParams]="{matterId: matterId}" id="return-to-bill-now">
+          Return to Bill Now
+        </button>
+
+        <button type="button" class="btn btn-light" *ngIf="isWorkCompleteFlow" [routerLink]="['/matter/bill-now']"
+          [queryParams]="{matterId: matterId, isWorkCompleteFlow: isWorkCompleteFlow}" id="return-to-bill-now">
+          Return to Mark as Work Complete
+        </button>
+      </div>
+
+      <div class="btn-group" *ngIf="isPCBilling">
+        <button type="button" class="btn btn-light" [routerLink]="['/contact/bill-potential-client']"
+          [queryParams]="{clientId: clientId, state: state }" id="return-to-bill-now">
+          Return to Bill Now
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-loader [active]='loader'></app-loader>

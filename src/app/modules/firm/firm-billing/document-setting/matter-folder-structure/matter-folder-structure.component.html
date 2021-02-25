@@ -1,0 +1,456 @@
+<div class="d-flex justify-content-between align-items-start">
+  <div>
+    <ul class="list-unstyled d-flex dms-bredcumb mb-24 text-xlarge align-items-center flex-wrap">
+      <li *ngFor="let item of firmInfo;trackBy: trackByFn;let last = last;let i=index;" [ngClass]="(last)?'active':''">
+        <a href="JavaScript:void(0);" (click)="onSelect(item,'click', i)" *ngIf="!last">{{item.name}}</a>
+        <span *ngIf="last && item.name">{{item.name}}</span>
+        <span *ngIf="last && item.fileName">
+          <span class="file-icon">
+            <img width="20px" [src]="item.fileName | commonService: 'getFileImage'">
+          </span>{{item.fileName}} - Version History</span>
+      </li>
+    </ul>
+  </div>
+  <div class="btn-group ml-md-24 ml-0">
+    <button class="btn btn-outline-primary btn-icon" *ngIf="firmInfo.length>1" type="button"
+      (click)="openPersonalinfo(NewFolder,'','')" id="create-new-folder">
+      <i class="icon icon-plus"></i> Create New Folder
+    </button>
+    <a (click)="redirectToDocpload()" href="javascript:void(0)" *ngIf="firmInfo.length>2"
+      class="btn btn-outline-primary btn-icon" id="upload-document">
+      <i class="icon icon-upload"></i> Upload Document
+    </a>
+  </div>
+</div>
+<div class="custom-table" *ngIf="!isDocumentListing">
+  <div class="custom-table matter-list">
+    <ngx-datatable #table class="material common-table no-min-height" [class.matter-no-data]="practiceAreaList?.length === 0" (activate)="openPracticeArea($event)"
+      [sorts]="[{prop: 'name', dir: 'asc'}]" [rows]="practiceAreaList" [columnMode]="ColumnMode.force"
+      [headerHeight]="50" [footerHeight]="footerHeight" [messages]="messages" rowHeight="auto"
+      [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" [scrollbarH]="true" id="practice-area-listing-tbl">
+      <ngx-datatable-column [resizeable]="false" prop="name" name="Practice Area Name" [width]="100">
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='true'
+        [width]="700" prop='id'>
+        <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+          <div class="d-flex justify-content-end">
+            <a href="javascript:void(0);" (click)="getFolders(row)" class="font-weight-medium" id="view-folder-index-{{rowIndex}}">View Folder</a>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pangeSelected" *ngIf='rowCount >= 11'
+                (change)="changePage()">
+                <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }} of
+                  {{page.totalPages}}</option>
+              </select>
+              <span *ngIf="rowCount < 11">Page 1 of 1</span>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="table.onFooterPage($event);pageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+
+<div class="custom-table " *ngIf="isDocumentListing">
+  <ngx-datatable #table2
+    class="table table-striped table-borderless table-fileview folderview-table material common-table matter-folder-table"
+    [class.matter-no-data]="folderAndFileList?.length === 0" [rows]="folderAndFileList" [columnMode]="ColumnMode.force"
+    [headerHeight]="50" [footerHeight]="footerHeight2" [selected]="selectedRow" [messages]="messages" rowHeight="auto"
+    [count]="page2.totalElements" [offset]="page2.pageNumber" [limit]="page2.size" [scrollbarH]="true"
+    [selectionType]="SelectionType.single" (sort)="SortingFunction()" [externalSorting]="true"
+    [sorts]="[{prop: 'name', dir: 'asc'}]" id="folder-and-file-listing-tbl">
+
+    
+    <ngx-datatable-column [resizeable]="false" name="Folder Name" prop="name">
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        <div *ngIf="row.isFolder" class="d-flex align-items-center" (dblclick)="onSelect(row, 'folder')">
+          <div class="info-hover position-relative">
+            <span class="file-icon file-folder-icon d-inline-block mr-8 text-large"><em
+                class="icon icon-folder"></em></span>
+            <span>
+              {{row.name | truncate}}</span>
+            <div class="tooltip bs-tooltip-top left" role="tooltip" *ngIf="row.name.length > 30" data-placement="right">
+              <div class="arrow"></div>
+              <div class="tooltip-inner tooltip-lg">
+                <p>{{ row.name }} </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div *ngIf="!row.isFolder" class="d-flex align-items-center"
+          [class.text-muted]="row.dmsFileStatus !=='UploadDone' && row.dmsFileStatus !=='GeneratedFile'" (dblclick)="row.dmsFileStatus==='UploadDone' && downloadDocument(row,false)">
+          <div class="info-hover position-relative">
+            <span class="file-icon">
+              <img width="20px"
+                [class.opacity-5]="row.dmsFileStatus !=='UploadDone' && row.dmsFileStatus !=='GeneratedFile'"
+                [src]="row.name | commonService: 'getFileImage'">
+            </span>
+            <span class=""
+              [class.text-muted]="row.dmsFileStatus !=='UploadDone' && row.dmsFileStatus !=='GeneratedFile'">
+              {{row.name | truncate}}</span>
+            <div class="tooltip bs-tooltip-top left" role="tooltip" *ngIf="row.name.length > 30" data-placement="right">
+              <div class="arrow"></div>
+              <div class="tooltip-inner tooltip-lg">
+                <p>{{ row.name }} </p>
+              </div>
+            </div>
+            <br>
+
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Attributes" [width]="60">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <div>
+          <label class="lbl-tag d-block"
+            [class.text-muted]="row.dmsFileStatus !=='UploadDone' && row.dmsFileStatus !=='GeneratedFile'" for=""
+            *ngIf="row.isFillableTemplate">Fillable Template</label>
+          <label class="lbl-tag d-block"
+            [class.text-muted]="row.dmsFileStatus !== 'UploadDone' && row.dmsFileStatus !== 'GeneratedFile'" for=""
+            *ngIf="row.isDraftingTemplate">Drafting Template</label>
+            <label class="lbl-tag d-block"
+            [class.text-muted]="row.dmsFileStatus !== 'UploadDone' && row.dmsFileStatus !== 'GeneratedFile'" for=""
+            *ngIf="row?.containsESignatureFields && esignEnabled">Contains E-Signature Tokens</label>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="lastUpdated" name="Last Updated" [width]="60">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <div *ngIf="row.lastUpdated">
+          <span class="d-block font-weight-medium lh-20">{{ value | date:'MMM dd, yyyy' }}</span>
+          {{ value | date:'hh:mm a' }}
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Status" [width]="60">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <div class="lbl-wraps d-flex" *ngIf="!row.isFolder">
+          <span *ngIf="row.dmsFileStatus && row.dmsFileStatus == 'SecurityScanPassed'"
+            class="sh-badge text-nowrap font-weight-medium sh-badge-success">Security Scan Passed</span>
+          <span
+            *ngIf="(['UploadCancelled', 'SecurityScanFailedVirus', 'SecurityScanFailedError', 'UploadFailed'] | indexfinder: row.dmsFileStatus) > -1"
+            class="sh-badge text-nowrap font-weight-medium sh-badge-danger">{{(row.dmsFileStatus == 'UploadFailed') ? 'Upload Failed' : 'Security Scan Failed'}}</span>
+          <div *ngIf="row.dmsFileStatus == 'SecurityScanFailedVirus' || row.dmsFileStatus == 'SecurityScanFailedError'"
+            class="info-hover position-relative ml-8">
+            <em class="icon icon-info"></em>
+            <div class="tooltip bs-tooltip-bottom" role="tooltip">
+              <div class="arrow"></div>
+              <div class="tooltip-inner">
+                <h6 class="font-weight-medium my-0">Security Scan Failed</h6>
+                <p>
+                  {{(row.dmsFileStatus == 'SecurityScanFailedVirus') ? row.dmsFileStatusDetails+' detected' : row.dmsFileStatusDetails}}
+                </p>
+              </div>
+            </div>
+          </div>
+          <span *ngIf="row.dmsFileStatus && row.dmsFileStatus == 'SecurityScanInProgress'"
+            class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Security Scan In Progress</span>
+          <span *ngIf="row.dmsFileStatus && row.dmsFileStatus == 'UploadInProgress'"
+            class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Upload In Progress</span>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100" prop='id'>
+      <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+        <div class="d-flex justify-content-end" (dblclick)="onSelect(row, 'folder')">
+          <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+            (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+            (outsideClick)="onClickedOutside($event, rowIndex)"
+            *ngIf="row.dmsFileStatus !== 'SecurityScanInProgress' && row.dmsFileStatus !== 'UploadInProgress' ">
+            <em class="icon icon-dot-verti"
+              *ngIf="row.isFolder || (!row.isFolder &&  ((['UploadCancelled', 'SecurityScanFailedError', 'UploadFailed'] | indexfinder: row.dmsFileStatus) == -1))"></em>
+            <div class="dropdown-menu dropdown-menu-right document-matter" aria-labelledby="dropdownMenuButton"
+              *ngIf="row.isFolder">
+              <a class="dropdown-item" (click)="onSelect(row, 'folder')" id="open-folder-index-{{rowIndex}}">Open Folder</a>
+              <a class="dropdown-item" (click)="editFolder(RenameFolder,row,$event)"
+                *ngIf="(notEditableFolders | indexfinder: row.name) === -1" id="rename-folder-index-{{rowIndex}}">Rename
+                Folder</a>
+              <a class="dropdown-item" (click)="openWarningPopUp(row, false)"
+                *ngIf="(notEditableFolders | indexfinder: row.name) != -1 && row.isSystemFolder" id="rename-folder-index-{{rowIndex}}">Rename
+                Folder</a>
+              <a class="dropdown-item" (click)="downloadFolder(row?.id, row?.name)" id="download-folder-index-{{rowIndex}}">Download
+                Folder</a>
+              <a class="dropdown-item" (click)="removeFolder(row.id)"
+                *ngIf="(notEditableFolders | indexfinder: row.name) === -1" id="delete-folder-index-{{rowIndex}}">Delete
+                Folder</a>
+              <a class="dropdown-item" (click)="openWarningPopUp(row, true)"
+                *ngIf="(notEditableFolders | indexfinder: row.name) != -1 && row.isSystemFolder" id="delete-folder-index-{{rowIndex}}">Delete
+                Folder</a>
+            </div>
+            <div class="dropdown-menu dropdown-menu-right document-matter" aria-labelledby="dropdownMenuButton"
+              *ngIf="!row.isFolder && row.dmsFileStatus === 'UploadDone' || row.dmsFileStatus === 'GeneratedFile'">
+              <a class="dropdown-item" (click)="downloadDocument(row)" id="open-document-index-{{rowIndex}}">Open Document</a>
+              <a class="dropdown-item"
+                (click)="replaceDocument(row)">Replace Document</a>
+              <a class="dropdown-item" (click)="downloadDocument(row)" id="download-index-{{rowIndex}}">Download Document</a>
+              <a class="dropdown-item" (click)="editFile(EditFile,row)" id="modify-dc-pr-index-{{rowIndex}}">Modify Document Properties</a>
+              <a class="dropdown-item" (click)="editFile(RenameFile,row)" id="rename-document-index-{{rowIndex}}">Rename Document</a>
+              <a class="dropdown-item" (click)="removeFile(row.id)" id="delete-dc-index-{{rowIndex}}">Delete Document</a>
+            </div>
+            <div class="dropdown-menu dropdown-menu-right document-matter" aria-labelledby="dropdownMenuButton"
+              *ngIf="!row.isFolder && row.dmsFileStatus === 'SecurityScanFailedVirus' || row.dmsFileStatus === 'SecurityScanPassed'">
+              <a class="dropdown-item" (click)="retry_cancelScan(row, 'retry')"
+                *ngIf="row.dmsFileStatus === 'SecurityScanFailedVirus'" id="retry-scan-index-{{rowIndex}}">Retry Scan</a>
+              <a class="dropdown-item" (click)="retry_cancelScan(row, 'remove')" id="delete-dc-index-{{rowIndex}}">Delete Document</a>
+            </div>
+          </div>
+          <span *ngIf="row.dmsFileStatus=='SecurityScanInProgress' || row.dmsFileStatus === 'UploadInProgress'"
+            (click)="retry_cancelScan(row, 'remove')" id="progress-index-{{rowIndex}}"><i class="icon icon-remove icon-color"></i></span>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-footer>
+      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="pageSelector2" (change)="changePageSize2()">
+                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+              {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pangeSelected2" (change)="changePage2()"
+              *ngIf='rowCount > 10'>
+              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                {{ i+1 }} of {{page2.totalPages}}</option>
+            </select>
+            <span *ngIf="rowCount < 11">Page 1 of 1</span>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                (change)="table2.onFooterPage($event);pageChange2($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<ng-template #NewFolder let-modal>
+  <form [formGroup]="createFolderForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Create New Folder</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group mb-0" [class.has-error]="isExist || (f.folderName.errors && createFolderFormSubmitted)">
+
+        <label>Folder Name <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="Enter folder name" formControlName="folderName" id="folder-name">
+        <span class="field-message text-danger" *ngIf="isExist && !!f.folderName.value"><em
+            class="icon icon-error mr-4"></em>
+          {{ isExistErr }}
+        </span>
+        <span class="field-message text-danger" *ngIf="f.folderName.errors && createFolderFormSubmitted">
+          <span *ngIf="f.folderName.errors.required && createFolderFormSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            {{errorData.create_folder_name_error}}
+          </span>
+        </span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <button type="submit" class="btn btn-primary" (click)='createFolder()' id="create-folder">Create
+        Folder</button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #RenameFolder let-modal>
+  <form [formGroup]="editFolderForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Rename Folder</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group mb-0"
+        [class.has-error]="isExist || (renameFolderForm.targetName.errors && renameFolderFormSubmitted)">
+        <label>Folder Name <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="Enter folder name" formControlName="targetName" id="folder-name">
+
+        <span class="field-message text-danger" *ngIf="renameFolderForm.targetName.errors && renameFolderFormSubmitted">
+          <span *ngIf="renameFolderForm.targetName.errors.required && renameFolderFormSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            Provide a Folder Name
+          </span>
+        </span>
+
+        <span class="field-message text-danger" *ngIf="isExist"><em class="icon icon-error mr-4"></em>
+          {{renameFolderErr}}
+        </span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <button type="submit" class="btn btn-primary" (click)='renameFolder()' id="save-btn">Save
+        Changes</button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #EditFile let-modal>
+  <form [formGroup]="editFileForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Modify Document Properties</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="label mb-0 d-block">File Name</label>
+        <div class="d-flex align-items-center font-weight-medium small lh-24 mt-3">
+          <img [src]="sourceFileName?.name | commonService: 'getFileImage'" width="20px" />
+          <span
+            class="pl-12">{{ sourceFileName.originalFileName ? sourceFileName.originalFileName : sourceFileName.name }}</span>
+        </div>
+      </div>
+      <div class="form-group" [ngClass]="{'has-error': isExist || editFileForm.controls.targetName.invalid}">
+        <label>Document Name <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="Enter a document name" formControlName="targetName"
+          (ngModelChange)="fileNameChanged()" id="document-name" />
+        <span class="field-message text-danger" *ngIf="isExist && !editFileForm.controls.targetName.invalid"><em
+            class="icon icon-error mr-4"></em>
+          {{isExistErr}}
+        </span>
+        <span class="field-message text-danger" *ngIf="editFileForm.controls.targetName.invalid && !isExist"><em
+            class="icon icon-error mr-4"></em>
+          Please provide a name for the file.
+        </span>
+      </div>
+
+      <div class="">
+        <app-multiselect-dropdown [title]="editFileTitle" [selections]="selectedAttArr" [showSearch]="false"
+          [displaySubItem]="docAttributes" [filterName]="'Apply Attributes'" [unsort]="true"
+          [selectedMessage]="'attributes selected'" (onSelectionChanged)="getAttributeSelected($event)"
+          (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clrAttributes()"
+          (applyFilter)="applyFilter()" id="select-attribute-multi"></app-multiselect-dropdown>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');resetForm();" id="cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" [disabled]="!editFileForm.valid || isExist" (click)='updateFile()' id="save-changes">
+        Save Changes
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #RenameFile let-modal>
+  <form [formGroup]="editFileForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Rename Document</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="label mb-0 d-block">File Name</label>
+        <div class="d-flex align-items-center font-weight-medium small lh-24 mt-3">
+          <img [src]="sourceFileName?.name | commonService: 'getFileImage'" width="20px" />
+          <span
+            class="pl-12">{{ sourceFileName.originalFileName ? sourceFileName.originalFileName : sourceFileName.name }}</span>
+        </div>
+      </div>
+      <div class="form-group" [ngClass]="{'has-error': isExist || editFileForm.controls.targetName.invalid}">
+        <label>Document Name <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="Enter Document name" formControlName="targetName"
+          (ngModelChange)="fileNameChanged()" id="document-name">
+        <span class="field-message text-danger" *ngIf="isExist && !editFileForm.controls.targetName.invalid"><em
+            class="icon icon-error mr-4"></em>
+          {{isExist}}
+        </span>
+        <span class="field-message text-danger" *ngIf="editFileForm.controls.targetName.invalid && !isExist"><em
+            class="icon icon-error mr-4"></em>
+          Provide a name for the file.
+        </span>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');resetForm();" id="cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" [disabled]="!editFileForm.valid || isExist" (click)='updateFile()' id="save-changes">
+        Save Changes
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+
+
+<ng-template #WarningPopUp let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">{{warningHeader}}</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex">
+      <em class="icon icon-warning text-warning text-xlarge mr-16"></em>
+      <p class="m-0 lh-20">You cannot rename or delete the {{ folderToDelete }} folder in a configuration.</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="close-btn">Close</button>
+  </div>
+</ng-template>

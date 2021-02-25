@@ -1,0 +1,524 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a id="createratetblsbrddash" [routerLink]="['/dashboard']" href="javascript:void(0)">Admin Settings</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a id="createratetblsbrdratetbls" [routerLink]="['/firm/rate-table']" href="javascript:void(0)">Rate Tables</a>
+      </li>
+      <li *ngIf="!rateTableId" class="breadcrumb-item active" aria-current="page">Create Rate Table</li>
+      <li *ngIf="rateTableId" class="breadcrumb-item active" aria-current="page">{{rateTableDetails?.name}}</li>
+    </ol>
+    <div class="heading">
+      <h1 *ngIf="!rateTableId">Create Rate Table</h1>
+      <h1 *ngIf="rateTableId && !viewMode">Edit Rate Table - {{rateTableDetails?.name}}</h1>
+      <h1 *ngIf="rateTableId && viewMode">{{rateTableDetails?.name}}</h1>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form [formGroup]="createRateForm" *ngIf="!viewMode">
+          <div class="info-block">
+            <div class="row">
+              <div class="col-5">
+                <h2 class="mb-20">Rate Table Details</h2>
+                <div class="form-group" [class.has-error]="(createRateForm?.controls?.name?.errors || nameExist) && (formSubmitted || createRateForm?.controls?.name?.touched)">
+                  <label>Name <sup>*</sup></label>
+                  <input type="text" id="creatratetblsratename" class="form-control" (blur)="checkExist()"
+                    formControlName="name" placeholder="Enter a rate table name">
+                  <span class="field-message text-danger" *ngIf="(createRateForm?.controls?.name?.errors || nameExist) && (formSubmitted || createRateForm?.controls?.name?.touched)">
+                    <em class="icon icon-error mr-4"></em>
+                    <ng-container *ngIf="nameExist; else namerequired">
+                      That Name is already assigned to another rate table.
+                    </ng-container>
+                    <ng-template #namerequired>
+                      Please provide a Name
+                    </ng-template>
+                  </span>
+                </div>
+                <div class="form-group">
+                  <label>Description</label>
+                  <textarea rows="3" id="creatratetblsdescription" class="form-control"
+                    formControlName="description" placeholder="Enter a rate table description"></textarea>
+                </div>
+                <div class="form-group" *ngIf="rateTableId" [class.has-error]="createRateForm?.controls?.effectiveDate?.errors && (formSubmitted || createRateForm?.controls?.effectiveDate?.touched)">
+                  <label>Effective Date <sup>*</sup></label>
+                  <app-date-picker
+                    [isForm]='true'
+                    [dateform]='createRateForm'
+                    controlName='effectiveDate'
+                    [placeholderText]="'Choose a date'"
+                    id="effectivedatecrtId">
+                  </app-date-picker>
+                  <span class="field-message text-danger" *ngIf="createRateForm?.controls?.effectiveDate?.errors && (formSubmitted || createRateForm?.controls?.effectiveDate?.touched)">
+                    <em class="icon icon-error mr-4"></em>
+                    Please provide an Effective Date.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+        <div class="info-block" *ngIf="viewMode">
+          <div class="row">
+            <div class="col-5">
+              <h2 class="mb-20">Rate Table Details</h2>
+              <div class="form-group" >
+                <label>Name</label>
+                <p>{{rateTableDetails?.name}}</p>
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <p>{{rateTableDetails?.description}}</p>
+              </div>
+              <div class="form-group">
+                <label>Effective Date</label>
+                <p>{{rateTableDetails?.effectiveDate | date : 'MM/dd/yyyy'}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-24">
+          <div class="justify-content-between align-items-start" [class.d-flex]="oriJobFamilyRates?.length > 0">
+            <div>
+              <h2 class="mb-24">Job Family Rates</h2>
+            </div>
+            <button class="btn btn-primary" type="button" (click)="setRate('', 'modal-xlg');" *ngIf="!viewMode">Edit Job Family Table Rates</button>
+          </div>
+          <div>
+            <div class="header-search flex-fill d-flex mb-24 col-9 px-0">
+              <form action="#">
+                <div class="header-search-wrapper">
+                  <input type="text" id="slctjobfmlyinputsearch" (keyup)="searchFilters($event)" class="form-control search-input" placeholder="Search job family name">
+                  <button class="btn" type="submit">Search</button>
+                </div>
+              </form>
+            </div>
+            <div class="position-relative">
+              <div class="custom-table">
+                <ngx-datatable #jobfamilynametableselt class="material common-table no-min-height"
+                  id="jobfamilyratetableslisttablsselt"
+                  [class.matter-no-data]="jobFamilyRates?.length === 0"
+                  [rows]="jobFamilyRates"
+                  [columnMode]="ColumnMode.force"
+                  [headerHeight]="50"
+                  [footerHeight]="jfFooterHeight"
+                  [messages]="messages"
+                  rowHeight="auto"
+                  [count]="pages.totalElements"
+                  [offset]="pages.pageNumber"
+                  [limit]="pages.size"
+                  [scrollbarH]="false"
+                  [sorts]="[{prop: 'name', dir: 'asc'}]"
+                  (sort)="updateDatatableFooterPages()">
+
+                  <ngx-datatable-column [resizeable]="false" prop="name" name="Job Family Name" [sortable]="true" [width]="300">
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="baseRate" name="Base Rate" [sortable]="true" [width]="100">
+                    <ng-template let-rowIndex="rowIndex"  let-row="row" let-value="value" ngx-datatable-cell-template>
+                      {{value  | currency : 'USD' : 'symbol': '1.2-2'}}
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="tableRate" name="Table Rate" [sortable]="true" [width]="100">
+                    <ng-template let-rowIndex="rowIndex"  let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <span [class.text-danger]="row.baseRate != row.tableRate">
+                        {{value  | currency : 'USD' : 'symbol': '1.2-2'}}
+                      </span>
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-footer>
+                    <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                      let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                      <div class="d-flex justify-content-between flex-fill">
+                        <div class="d-flex align-items-center">
+                          <div class="table-items d-flex align-items-center mr-36">
+                            Items per page:
+                            <div class=" ml-8">
+                              <select class="custom-select border-less" [formControl]="pageSelectors"
+                                (change)="changePageSizes()">
+                                <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                              </select>
+                            </div>
+                          </div>
+                          <span>
+                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                            {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                          </span>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                          <select class="custom-select border-less" [(ngModel)]="pangeSelecteds" (change)="changePages()">
+                            <option *ngFor='let num of pages.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                              of {{pages.totalPages}}</option>
+                          </select>
+                          <div class="ml-8">
+                            <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                              [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                              [pagerPreviousIcon]="'datatable-icon-prev'"
+                              [pagerNextIcon]="'datatable-icon-skip'"
+                              [page]="curPage"
+                              [size]="pageSize"
+                              [count]="rowCount"
+                              [hidden]="!((rowCount / pageSize) > 1)"
+                              (change)="jobfamilynametableselt.onFooterPage($event);pageChanges($event)">
+                            </datatable-pager>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-footer>
+                </ngx-datatable>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-32" [hidden]="!rateTableId">
+            <h2 class="mb-24">Clients</h2>
+            <div class="alert alert-primary" role="alert" *ngIf="isBlockedForCurrentUser">
+              <div class="d-flex">
+                  <em class="alert-icon icon icon-info text-large"></em>
+                  <div class="d-flex align-items-center flex-wrap">
+                      <h4 class="mr-24 mt-0 mb-0">Blocked Client</h4>
+                      You are blocked on at least one client to whom this rate table is applied.
+                  </div>
+              </div>
+          </div>
+          <div class="header-search flex-fill d-flex mb-24 col-9 px-0">
+            <form action="#">
+              <div class="header-search-wrapper">
+                <input type="text" id="edtrttblclientsearchinput" name="clientSearch" [(ngModel)]="clientSearch" (ngModelChange)="applyFilter()"
+                  class="form-control search-input" placeholder="Search client number, name, office or attorney">
+                <button class="btn" type="submit">Search</button>
+              </div>
+            </form>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label for="exampl2">Responsible Attorney</label>
+                <app-multiselect-dropdown
+                  [title]="titlereasatt"
+                  backgroundColor="#fff"
+                  [selections]="responattorn"
+                  [displaySubItem]="resattrList1"
+                  [filterName]="filterName"
+                  (onSelectionChanged)="selectDropdwnRa($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                  (clearFilter)="clearFilterResponsibleAttorney()"
+                  (applyFilter)="applyFilter()" id="responsible-attorney-multi-ratetable">
+                </app-multiselect-dropdown>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label for="exampl1">Primary Law Office</label>
+                <app-multiselect-dropdown
+                  [title]="title"
+                  backgroundColor="#fff"
+                  [selections]="selectedOffice"
+                  [displaySubItem]="officeList"
+                  [filterName]="filterName"
+                  (onSelectionChanged)="selectDropdwnPo($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                  (clearFilter)="clearFilterPrimaryOffice()"
+                  (applyFilter)="applyFilter()" id="primary-office-multi-ratetable">
+                </app-multiselect-dropdown>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label for="exampl4">Status</label>
+                <app-multiselect-dropdown
+                  [title]="titlestatus"
+                  [selections]="selectedStatus"
+                  [displaySubItem]="dropdownList1"
+                  [filterName]="filterName"
+                  (onSelectionChanged)="selectStatus($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                  (clearFilter)="clearFilter1()"
+                  (applyFilter)="applyFilter()" id="status-multi-ratetable">
+                </app-multiselect-dropdown>
+              </div>
+            </div>
+          </div>
+          <div class="position-relative">
+            <div class="custom-table">
+              <ngx-datatable #jobfamilyclienttable class="material common-table no-min-height"
+                id="jobfamilyratetablesclientlist"
+                [class.matter-no-data]="clientList?.length === 0"
+                [rows]="clientList"
+                [columnMode]="ColumnMode.force"
+                [headerHeight]="50"
+                [footerHeight]="cFooterHeight"
+                [messages]="messages"
+                rowHeight="auto"
+                [count]="pagec.totalElements"
+                [offset]="pagec.pageNumber"
+                [limit]="pagec.size"
+                [scrollbarH]="false"
+                [sorts]="[{prop: 'clientNumber', dir: 'asc'}]"
+                (sort)="clientUpdateDatatableFooterPage()">
+                <ngx-datatable-column [resizeable]="false" prop="clientNumber" name="Client Number" [sortable]="true" [width]="100">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="clientName" name="Name" [sortable]="true" [width]="200">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="responsibleAttorney" name="Responsible Attorney" [sortable]="true" [width]="200">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    {{value[0]?.name}}
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="primanyLawOffice" name="Primary Law Office" [sortable]="true" [width]="200">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [sortable]="true" [width]="90">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="baseRate" name="Action" [headerClass]="'text-right'" [sortable]="false" [width]="100">
+                  <ng-template let-rowIndex="rowIndex"  let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                      <a href="javascript:void(0)" class="font-weight-medium" (click)="viewProfile(row)">View Profile</a>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-footer>
+                  <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                            <select class="custom-select border-less" [formControl]="pageSelectorc"
+                              (change)="clientChangePageSize()">
+                              <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <span>
+                          {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                          {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                          {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                        </span>
+                      </div>
+
+                      <div class="d-flex align-items-center">
+                        <select class="custom-select border-less" [(ngModel)]="pangeSelectedc" (change)="clientChangePage()">
+                          <option *ngFor='let num of pagec.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                            of {{pagec.totalPages}}</option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                            [pagerPreviousIcon]="'datatable-icon-prev'"
+                            [pagerNextIcon]="'datatable-icon-skip'"
+                            [page]="curPage"
+                            [size]="pageSize"
+                            [count]="rowCount"
+                            [hidden]="!((rowCount / pageSize) > 1)"
+                            (change)="jobfamilyclienttable.onFooterPage($event);clientPageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+          </div>
+          <app-loader [active]="clientLoading"></app-loader>
+        </div>
+        <div class="info-block pt-32" [hidden]="!rateTableId">
+          <h2 class="mb-24">Matters</h2>
+          <div class="alert alert-primary" role="alert" *ngIf="isBlockedForCurrentMatter">
+            <div class="d-flex">
+                <em class="alert-icon icon icon-info text-large"></em>
+                <div class="d-flex align-items-center flex-wrap">
+                    <h4 class="mr-24 mt-0 mb-0">Blocked Matter</h4>
+                    You are blocked on at least one matter to which this rate table is applied.
+                </div>
+            </div>
+        </div>
+          <div class="header-search flex-fill d-flex mb-24 col-9 px-0">
+            <form action="#">
+              <div class="header-search-wrapper">
+                <input type="text" id="edtrttblmattersearchinput" name="matterSearch" [(ngModel)]="matterSearch"
+                (ngModelChange)="applyFilterMatter()" class="form-control search-input" placeholder="Search matters">
+                <button class="btn" type="submit">Search</button>
+              </div>
+            </form>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label for="exampl2">Responsible Attorney</label>
+                <app-multiselect-dropdown
+                  [title]="titlematterres"
+                  backgroundColor="#fff"
+                  [selections]="responattornm"
+                  [displaySubItem]="resattrListm"
+                  [filterName]="filterName"
+                  (onSelectionChanged)="selectDropdwnRam($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                  (clearFilter)="clearFilterResponsibleAttorneym()"
+                  (applyFilter)="applyFilterMatter()"
+                  id="responsible-attorney-multi-ratetablemtr">
+                </app-multiselect-dropdown>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label for="exampl2">Practie Area</label>
+                <app-multiselect-dropdown
+                  [title]="titlematterresp"
+                  backgroundColor="#fff"
+                  [selections]="selectedPractice"
+                  [displaySubItem]="practiceAreaList"
+                  [filterName]="filterName"
+                  (onSelectionChanged)="selectDropdwnRap($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                  (clearFilter)="clearFilterResponsibleAttorneyp()"
+                  (applyFilter)="applyFilterMatter()"
+                  id="responsible-attorney-multi-ratetabprtlemtr">
+                </app-multiselect-dropdown>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label for="exampl1">Matter Law Office</label>
+                <app-multiselect-dropdown
+                  [title]="titlem"
+                  backgroundColor="#fff"
+                  [selections]="selectedmOffice"
+                  [displaySubItem]="officeListm"
+                  [filterName]="filterName"
+                  (onSelectionChanged)="selectDropdwnPom($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                  (clearFilter)="clearFilterPrimaryOfficem()"
+                  (applyFilter)="applyFilterMatter()"
+                  id="primary-office-multi-ratetablemtr">
+                </app-multiselect-dropdown>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label for="exampl4">Status</label>
+                <app-multiselect-dropdown
+                  [title]="titlestatusm"
+                  [selections]="selectedStatusm"
+                  [displaySubItem]="statusListm"
+                  [filterName]="filterName"
+                  (onSelectionChanged)="selectStatusm($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                  (clearFilter)="clearFilterst()"
+                  (applyFilter)="applyFilterMatter()" id="status-multi-ratetablemtr">
+                </app-multiselect-dropdown>
+              </div>
+            </div>
+          </div>
+          <div class="position-relative">
+            <div class="custom-table">
+              <ngx-datatable #jobfamilymattertable class="material common-table fix-col-right no-min-height"
+                id="jobfamilyratetablesmatterlist"
+                [class.matter-no-data]="matterList?.length === 0"
+                [rows]="matterList"
+                [columnMode]="ColumnMode.force"
+                [headerHeight]="50"
+                [footerHeight]="mFooterHeight"
+                [messages]="messages"
+                rowHeight="auto"
+                [count]="pagem.totalElements"
+                [offset]="pagem.pageNumber"
+                [limit]="pagem.size"
+                [scrollbarH]="true"
+                [sorts]="[{prop: 'matterNumber', dir: 'asc'}]"
+                (sort)="matterUpdateDatatableFooterPage()">
+
+                <ngx-datatable-column [resizeable]="false" prop="clientName" name="Client Name" [sortable]="true" [width]="250">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="matterNumber" name="Matter Number" [sortable]="true" [width]="200">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="matterName" name="Matter Name" [sortable]="true" [width]="250">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="responsibleAttorney" name="Responsible Attorney" [sortable]="true" [width]="250">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    {{value[0]?.name}}
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="practiceArea" name="Practice Area" [sortable]="true" [width]="250">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    {{value[0]?.name}}
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="matterLawOffice" name="Matter Law Office" [sortable]="true" [width]="300">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [sortable]="true" [width]="120">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" name="Action" [sortable]="false" [width]="147" [headerClass]="'text-right pr-24'" [frozenRight]='true'>
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                      <a href="javascript:void(0)" class="font-weight-medium" [routerLink]="['/matter/dashboard']"
+                      [queryParams]="{matterId: row.matterId}">View Matter</a>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-footer>
+                  <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                            <select class="custom-select border-less" [formControl]="pageSelectorm"
+                              (change)="matterChangePageSize()">
+                              <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <span>
+                          {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                          {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                          {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                        </span>
+                      </div>
+
+                      <div class="d-flex align-items-center">
+                        <select class="custom-select border-less" [(ngModel)]="pangeSelectedm" (change)="matterChangePage()">
+                          <option *ngFor='let num of pagem.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                            of {{pagem.totalPages}}</option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                            [pagerPreviousIcon]="'datatable-icon-prev'"
+                            [pagerNextIcon]="'datatable-icon-skip'"
+                            [page]="curPage"
+                            [size]="pageSize"
+                            [count]="rowCount"
+                            [hidden]="!((rowCount / pageSize) > 1)"
+                            (change)="jobfamilymattertable.onFooterPage($event);matterPageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+          </div>
+          <app-loader [active]="matterLoading"></app-loader>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" id="createratetblscancelbtn" [routerLink]="['/firm/rate-table']" >{{(viewMode) ? 'Back to Rate Tables' : 'Cancel'}}</button>
+        <button type="button" class="btn btn-primary" *ngIf="!viewMode" id="crtratetblssavebtn" (click)="save()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<app-loader [active]="isLoading"></app-loader>

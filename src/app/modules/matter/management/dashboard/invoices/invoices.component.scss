@@ -1,0 +1,10 @@
+.display-not-visible {height: 0; overflow: hidden;}
+
+@print{
+  .display-not-visible {height: auto; overflow:visible;}
+}
+
+.folder-drop-block{
+  height: 240px;
+  overflow: auto;
+}

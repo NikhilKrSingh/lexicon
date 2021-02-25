@@ -1,0 +1,48 @@
+<div class="custom-table corporate-contact">
+  <div class="custom-table matter-list">
+    <ngx-datatable #table class="material common-table"
+                   [rows]="corporateContactList" [sorts]="[{prop: 'person', dir: 'asc'}]"
+                   [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" rowHeight="auto"
+                   [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" [scrollbarH]="true" id="corporate-contact-tbl">
+      <ngx-datatable-column [resizeable]="false" prop="uniqueNumber" name="Contact Number" [width]="170"></ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="person" name="Name" [width]="170"></ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [width]="150"></ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="200"></ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="primaryPhone" name="Phone Number" [width]="200">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span>{{value | mask: '(000) 000-0000' }}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="cellPhone" name="Cell Phone Number" [width]="200">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span>{{value | mask: '(000) 000-0000' }}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' [headerClass]="'text-center'" prop="isPrimary" name="Primary Contact" [width]="130">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <div class="d-flex justify-content-center">
+            
+            <em class="icon icon-check fs-10 icon-color" *ngIf='value'></em>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' [headerClass]="'text-center'" prop="isBilling" name="Billing Contact" [width]="130">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <div class="d-flex justify-content-center">
+            
+            <em class="icon icon-check fs-10 icon-color" *ngIf='value'></em>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' [headerClass]="'text-center'" prop="generalCounsel" name="General Counsel" [width]="130">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <div class="d-flex justify-content-center">
+            
+            <em class="icon icon-check fs-10 icon-color" *ngIf='value'></em>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+    <app-loader [active]="corporateContactLoading"></app-loader>
+  </div>
+</div>

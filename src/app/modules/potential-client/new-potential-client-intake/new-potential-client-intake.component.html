@@ -1,0 +1,160 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)"
+                    [routerLink]="['/contact/potential-client']">Contacts Page</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add New Potential Client Intake</li>
+        </ol>
+        <div class="heading">
+            <h1>Add New Potential Client</h1>
+        </div>
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="scrolling-step-height" [ngStyle]="{'height':fixedHeight+'px'}"></div>
+                <div class="scrolling-steps" [class.fixed-top]="fixedTop"
+                    [ngStyle]="{'top':topbarHeightst+'px','right':fixedRight+'px','left':fixedLeft+'px'}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="text-xlarge mb-4">Create a New Potential Client</h4>
+                            <p class="small lh-20 m-0">A conflict check will be run automatically to complete the
+                                intake.</p>
+                            <div class="d-flex">
+                                <p class="small lh-20 m-0"><sup class="text-danger">*</sup> Section contains required
+                                    fields.</p>
+                                <p class="font-weight-medium text-danger small lh-20 ml-8"
+                                    *ngIf="!isFormValid && formSubmitted">Please enter all required information to
+                                    proceed.</p>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-light" type="button" (click)="cancelConfirm()" id="cancel-confirm-btn">Cancel</button>
+                            <button class="btn btn-outline-primary" type="button" (click)="runConflictsCheck()"
+                                [disabled]="!matterDetails?.valid" id="run-conflict-check">Run Conflict Check</button>
+                            <button class="btn btn-primary" type="button" (click)="savePotentialClient()" [disabled]='isLoading' id="save-new-potential-client">Save New
+                                Potential Client</button>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled scroll-step-menu text-large d-flex mb-0">
+                        <li
+                            [class.has-error]="formSubmitted && (matterDetails?.status === 'INVALID' || !matterDetails)">
+                            <a href="javascript:void(0)" [class.current]="activeTab === 'basicMatterInfo'"
+                                (click)="scrollToElement('basicMatterInfo')" id="basic-matter-info-tab">
+                                <em class="icon icon-info"></em>
+                                Basic Matter Information <sup class="text-danger lh-20 ml-4">*</sup>
+                            </a>
+                        </li>
+                        <li [class.disabled]="!contactTypeSelected"
+                            [class.has-error]="formSubmitted && !isContactInfoValid && contactTypeSelected">
+                            <a href="javascript:void(0)" [class.current]="activeTab === 'contactInfo'"
+                                (click)="scrollToElement('contactInfo')" id="contact-info-tab">
+                                <em class="icon icon-contacts"></em>
+                                Contact Information <sup class="text-danger lh-20 ml-4">*</sup>
+                            </a>
+                        </li>
+                        <li [class.disabled]="!contactTypeSelected">
+                            <a href="javascript:void(0)" [class.current]="activeTab === 'clientAssociations'"
+                                (click)="scrollToElement('clientAssociations')" id="client-associations-tab">
+                                <em class="icon icon-clients"></em>
+                                Client Associations
+                            </a>
+                        </li>
+                        <li [class.disabled]="!contactTypeSelected">
+                            <a href="javascript:void(0)" [class.current]="activeTab === 'scheduling'"
+                                (click)="scrollToElement('scheduling')" id="scheduling-tab">
+                                <em class="icon icon-calendar"></em>
+                                Scheduling
+                            </a>
+                        </li>
+                        <li [class.disabled]="!contactTypeSelected">
+                            <a href="javascript:void(0)" [class.current]="activeTab === 'notes'"
+                                (click)="scrollToElement('notes')" id="notes-tab">
+                                <em class="icon icon-template"></em>
+                                Notes
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="npc-body">
+                    <app-basic-matter-info #basicMatterInfo
+                      [formSubmitted]="formSubmitted"
+                      [refresh]="refresh"
+                      [updateDetails]="updateDetails"
+                      (matterDetails)="getMatterDetails($event)"
+                      (showHideLoader)="showHideLoader($event)"
+                      (stateListArr)="stateListArr($event)"
+                      (blockedList)="getBlockedList($event)">
+                    </app-basic-matter-info>
+                    <ng-container *ngIf="contactTypeSelected">
+                        <app-contact-info #contactInfo [formSubmitted]="formSubmitted" [isTuckerAllenAccount]="isTuckerallenAccount"
+                            (contactInfoDetails)="getContactDetails($event)" [(uniqueNumber)]="uniqueNumber"
+                            [contactType]="matterDetails?.value?.contactType" (showHideLoader)="showHideLoader($event)">
+                        </app-contact-info>
+                        <app-client-association #clientAssociations (getAssociates)="getAssociates($event)"
+                                                [(uniqueNumber)]="uniqueNumber">
+                        </app-client-association>
+                        <app-scheduling #scheduling
+                          [matterDetails]="matterRawValue"
+                          (schedulingDetails)="getSchedulingDetails($event)"
+                          (showHideLoader)="showHideLoader($event)">
+                        </app-scheduling>
+                        <app-notes #notes (getNotes)="getNotes($event)"></app-notes>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #NewPotentialClientCreated let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">New Potential Client Created</h3>
+        <button type="button" class="close" aria-label="Close" (click)="gotoList()" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="alert alert-success d-flex justify-content-between mb-24">
+            <div class="d-flex">
+                <em class="alert-icon icon icon-check-circle icon-success"></em>
+                <div class="d-flex align-items-center flex-wrap">
+                    <h4 class="mr-20 mt-0 mb-0">Success</h4>
+                    <span *ngIf="schedulingDetails" id="new-potential-client-with-event">A new potential client has been created, and a calendar event has been scheduled.</span>
+                    <span *ngIf="!schedulingDetails" id="new-potential-client-without-event">A new potential client has been created, but no event was scheduled.</span>
+                </div>
+            </div>
+        </div>
+        <p class="m-0 lh-20" *ngIf="schedulingDetails">Would you like to view this client’s profile, or view the event in the calendar?</p>
+        <p class="m-0 lh-20" *ngIf="!schedulingDetails">Would you like to view this client’s profile, or create a new event in the calendar?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" *ngIf="schedulingDetails" (click)="navigate('event')" id="view-event-btn">View Event in Calendar</button>
+        <button type="button" *ngIf="!schedulingDetails" class="btn btn-light" (click)="navigate('create')" id="create-event-btn">Create Event in Calendar</button>
+        <button type="button" class="btn btn-primary" (click)="navigate('profile')" id="go-to-potential-client-profile">Go to Potential Client Profile</button>
+    </div>
+</ng-template>
+
+<ng-template #UnsavedChanges let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Unsaved Changes</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id='close-btn'>
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="d-flex align-items-start missing-data">
+            <em class="icon icon-warning text-warning"></em>
+            <div class="lh-20 ml-16">
+                <p class="m-0">Are you sure you want to continue without saving these changes?
+                    This will remove any edits you’ve made.</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="gotoList()" id="yes-continue-without-saving">Yes, continue without saving</button>
+    </div>
+</ng-template>
+
+<app-loader [active]="isLoading"></app-loader>

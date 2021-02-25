@@ -1,0 +1,50 @@
+<div class="multiselect-dropdown dropdown" [ngClass]="{'open':showDropdown, 'disabled': isDisabled}">
+  <button class="multiselect-dropdown-toggle custom-select select text-left" type="button">
+    <span *ngIf="displayFlag" [class.text-secondary]="isHeadingPlaceholder">{{ title }}</span>
+    <div class="multiselect-text position-relative" *ngIf="!displayFlag" (click)="show()">
+      <span class="mr-8" [ngClass]="{'disabled disable-badge': disableSelection, 'badge-primary badge': !disableSelection }" (click)="clear()">
+        <span>{{ title }}</span>
+        <em class="icon icon-close"></em>
+      </span>
+      {{filterName === 'Apply Filter' && selections && selections.length == 1 ? 'filter is selected' : selectedMessage}}
+    </div>
+
+    <span (click)="!isDisabled && show()" class="caret"><em class="icon icon-arrow-down"></em></span>
+  </button>
+
+  <div class="multiselect-dropdown-menu" id="main-class" *ngIf="showDropdown && !isDisabled">
+    <div class="multiselect-dropdown-item search" *ngIf="showSearch">
+      <div class="dropdown-search position-relative">
+        <em class="icon icon-search"></em>
+        <input #searchInput class="form-control" type="text" [placeholder]="placeholder" [(ngModel)]="searchValue"
+          (keyup)="onSearchKeyup($event)" />
+      </div>
+    </div>
+
+    <ul class="list-unstyled m-0 multiselect-dropdown-list text-left" (scroll)="onScroll($event)" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+      <li class="multiselect-dropdown-item" *ngIf="displaySubItem?.length && showAll">
+        <div class="custom-control custom-checkbox m-0 pr-0">
+          <input type="checkbox" class="custom-control-input" id="dropcheck-all"
+            (change)="selectDeselectAll($event)" [(ngModel)]="parentChecked" [checked]="parentChecked">
+          <label class="custom-control-label cursor-pointer full-width" for="dropcheck-all">
+            <h4 class="m-0">All</h4>
+          </label>
+        </div>
+      </li>
+      <li class="multiselect-dropdown-item" *ngFor="let item of ((showAll || unsort) ? displaySubItem : displaySubItem | orderBy);trackBy :trackByFn;"
+        [ngClass]="{'email-not-provide': !item.email}">
+        <div class="custom-control custom-checkbox m-0 pr-0" [ngClass]="{'disabled-checkbox': item.disabled}">
+          <input type="checkbox" class="custom-control-input" id="dropcheck-{{item.id}}"
+            (change)="changeSelection($event, item.id)" [checked]="item.checked" [disabled]="item.disabled">
+          <label class="custom-control-label cursor-pointer full-width" for="dropcheck-{{item.id}}">
+            <h4 class="m-0">{{ item.name }}</h4>
+            <span *ngIf="clientDropdown" class="d-block small helper-text lh-16">
+              {{ item.email ? item.email : 'Email not provided' }}</span>
+          </label>
+        </div>
+      </li>
+    </ul>
+    <button class="btn btn-primary btn-block" type="button" [ngClass]="{'disabled disabled-btn': !displaySubItem?.length || disableSelection}"
+      (click)="apply()">{{filterName}}</button>
+  </div>
+</div>

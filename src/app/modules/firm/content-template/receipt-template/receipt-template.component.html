@@ -1,0 +1,72 @@
+<div class="info-block">
+  <div class="d-flex justify-content-between align-items-center mb-32">
+    <h2 class="mb-0">Configure Receipt Template</h2>
+    <button type="button" class="btn btn-primary btn-icon" (click)="addTemplate()" id="add-template">
+      <em class="icon icon-plus"></em>
+      Add Template
+    </button>
+  </div>
+  <div class="custom-table">
+    <div class="table-responsive">
+      <table class="receipt-template-table table table-striped table-borderless">
+        <thead>
+          <tr>
+            <th class="template-td">Template</th>
+            <th class="filename-td">File Name</th>
+            <th class="text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let template of receiptTemplates; trackBy :trackByFn;let index = index;">
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="custom-control custom-radio">
+                    <input type="radio" id="select_{{template.id}}" name="template-name"
+                      [checked]='template.templateInUse' class="custom-control-input"
+                      (change)='onChangeTemplateInUse(template)'>
+                    <label class="custom-control-label" for="select_{{template.id}}">
+                      <span class="ml-8">{{template.templateName}}</span>
+                    </label>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <a href="javascript:void(0)" class="font-weight-medium"
+                  (click)="onPreviewTemplate(template)">{{template.fileName}}</a>
+              </td>
+              <td class="text-right">
+                <div class="d-flex justify-content-end">
+                  <div class="dropdown dropdown-hover-table" *ngIf="currentActive == index"
+                    [class.active]="currentActive == index" (click)="openMenu(index, $event)" appAutoCloseOutsideClick
+                    (outsideClick)="onClickedOutside($event, index)">
+                    <em class="icon icon-dot-verti"></em>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                      <a *ngIf='!template.isDefault' class="dropdown-item" href="javascript:void(0)"
+                        (click)='editTemplate(template)' id="edit-template-index-{{index}}">
+                        Edit Template
+                      </a>
+                      <a *ngIf='!template.isDefault' class="dropdown-item" href="javascript:void(0)"
+                        (click)='deleteTemplate(template)' id="delete-template-index-{{index}}">
+                        Delete Template
+                      </a>
+                      <a class="dropdown-item" href="javascript:void(0)" (click)='downloadTemplate(template)'
+                        id="download-template-index-{{index}}">
+                        Download Template
+                      </a>
+                    </div>
+                  </div>
+                  <div class="dropdown dropdown-hover-table" *ngIf="currentActive != index"
+                    (click)="openMenu(index, $event)">
+                    <em class="icon icon-dot-verti"></em>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>

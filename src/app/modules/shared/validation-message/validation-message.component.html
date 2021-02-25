@@ -1,0 +1,6 @@
+<ng-container *ngIf="errorMessage">
+  <span class="field-message text-danger d-flex" [style.display]="errorMessage ? 'block': 'none'">
+    <em class="icon icon-error mr-4 mt-0"></em>
+    <span>{{ errorMessage }}</span>
+  </span>
+</ng-container>

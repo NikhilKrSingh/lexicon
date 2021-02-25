@@ -1,0 +1,93 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">WIP Aging Report</li>
+        </ol>
+        <div class="heading">
+            <h1>WIP Aging Report</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-8">Generate Report</h2>
+                <p class="lh-20">Generate your report by selecting the options below.</p>
+                <div class="row">
+                    <div class="col-3">
+                        <div class="form-group mb-20" [class.has-error]="!asOfDate">
+                            <label>As of Date <sup>*</sup></label>
+                            <app-date-picker
+                            [isNgModel]="true"
+                            placeholderText="Select As of Date"
+                            [(data)]="asOfDate"
+                            [maxDate]="asOfDateThreshold">
+                            </app-date-picker>
+                            <span class="field-message text-danger" *ngIf="!asOfDate">
+                                <em class="icon icon-error mr-4"></em>
+                                <span>{{ errorData?.select_as_of_date }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-5">
+                        <div class="form-group mb-24" [class.has-error]="!selectedAge && formSubmitted">
+                            <label>Upper Aging Bucket Limit <sup>*</sup></label>
+                            <ng-select
+                                [items]="ageBucketList"
+                                [(ngModel)]="selectedAge"
+                                [bindValue]="'id'"
+                                [bindLabel]="'name'"
+                                [notFoundText]="'No record found'"
+                                [clearable]="false"
+                                [searchable]="false">
+                            </ng-select>
+                            <span class="field-message text-danger" *ngIf="!selectedAge">
+                                <em class="icon icon-error mr-4"></em>
+                                <span>{{ errorData?.select_upper_age_limit }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+               <form [formGroup]="rollUpForm">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="form-group mb-24" [class.has-error]="rollUpForm.controls['selectedRefundFor']?.errors && formSubmitted">
+                                <label class="mb-16">Roll up the report for <sup>*</sup></label>
+                                <div class="custom-control custom-radio pr-0 d-flex align-items-center" *ngFor="let report of reportFor; trackBy:trackByFn;">
+                                    <input type="radio" id="refundFor{{report?.code}}" formControlName="selectedRefundFor" [value]="report?.code" class="custom-control-input">
+                                    <label class="custom-control-label" for="refundFor{{report?.code}}">{{ report?.name }}</label>
+                                </div>
+                                <span class="field-message text-danger ml-2" *ngIf="rollUpForm.controls['selectedRefundFor'].errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    <span>{{ errorData?.select_rollup_report_for }}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-5" [class.has-error]="rollUpForm.controls['selectedRefundBy']?.errors && formSubmitted">
+                            <label class="mb-16">Roll up the report by <sup>*</sup></label>
+                            <div class="custom-control custom-radio pr-0 d-flex align-items-center" *ngFor="let report of reportBy; trackBy: trackByFn;">
+                                <input type="radio" id="reportBy{{report?.code}}" formControlName="selectedRefundBy" [value]="report?.code" class="custom-control-input">
+                                <label class="custom-control-label" for="reportBy{{report?.code}}">{{ report?.name }}</label>
+                            </div>
+                            <span class="field-message text-danger ml-2" *ngIf="rollUpForm.controls['selectedRefundBy'].errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                <span>{{ errorData?.select_rollup_report_by }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pt-8">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light" [routerLink]="['../../reporting']">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="generateWipAgeReport()">Export to CSV</button>
+            </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+    </div>
+</div>

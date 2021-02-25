@@ -1,0 +1,16 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">{{title}}</h3>
+  <button type="button" class="close" (click)="cancel()" aria-label="Close" id="closeId">
+    <em class="icon icon-close"></em>
+</button>
+</div>
+<div class="modal-body pb-24">
+  <div class="d-flex">
+    <em class="icon icon-warning text-warning text-xlarge mr-16"></em>
+    <p class="m-0 lh-20" [innerHTML]="warningMessage"></p>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="cancel()" id="close-btn">{{cancelBtnText}}</button>
+  <button type="button" *ngIf="showOkButton" class="btn btn-primary" (click)="submit()" id="close-btn">{{okBtnText}}</button>
+</div>

@@ -1,0 +1,22 @@
+.attorney-search-group {
+  width: 150%;
+}
+.search-collapse {
+  &::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 5px;
+    height: 5px;
+    background: rgb(231, 237, 243);
+    opacity: 1;
+    cursor: pointer;
+    z-index: 99;
+    margin: 0px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #413a93;
+    height: 4px;
+    width: 4px;
+    margin: 2px;
+  }
+}

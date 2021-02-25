@@ -1,0 +1,866 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Dashboard Configuration</li>
+    </ol>
+    <div class="heading">
+      <h1>Dashboard Configuration</h1>
+    </div>
+    <div>
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <a href="javascript:void(0);" (click)="selectTab(mytabs)" *ngFor="let mytabs of alltabs1;trackBy: trackByFn" role="tab"
+          class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32">
+            <div *ngIf="selecttabs1 === alltabs1[0]" class="tab-pane fade show active" role="tabpanel">
+              <ng-container *ngIf='!configureWidgetLibrary'>
+                <div class="d-flex align-items-center justify-content-between">
+                  <h3 class="mb-8">Firm Widget Library</h3>
+                  <button class="btn btn-primary" href="javascript:void(0);" (click)="configWidgetLibrary()">
+                    Configure Widget Library
+                  </button>
+                </div>
+                <div class="d-flex align-items-center">
+                  <p class="lh-20 mb-16" *ngIf="profile?.tenantTier?.tierName != 'Iconic'">
+                    These are the widgets you and your users can access. You can add
+                    up to {{profile?.tenantTier?.tierName == "Emerging" ?'10 widgets' : '15 widgets'}}, including
+                    default widgets.
+                  </p>
+                  <p class="lh-20 mb-16" *ngIf="profile?.tenantTier?.tierName == 'Iconic'">
+                    These are the widgets you and your users can access.
+                  </p>
+                </div>
+                <div class="widget-area firm-widget-wrap custom-style-scroll">
+                  <div class="row gutter-24">
+                    <div class="col-4" *ngFor="let item of firmWidgets; trackBy: trackByFn;let i = index; let first = first">
+                      <div class="widget-card firm-widget-card d-flex flex-column justify-content-between">
+                        <div class="widget-card-header-info d-flex align-items-center" *ngIf='item.isDefault || item.isRequired'>
+                          <span class="sh-badge text-nowrap font-weight-medium sh-badge-gray" *ngIf="item.isDefault">
+                            Default
+                          </span>
+                          <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary"
+                            *ngIf="item.isRequired">
+                            Required
+                          </span>
+                        </div>
+                        <div class="d-flex flex-column justify-content-between flex-fill">
+                          <div class="widget-card-header">
+                            <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                            <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">
+                              {{item.description}}</p>
+                          </div>
+                          <div class="widget-card-body">
+                            <div class="chart-image">
+                              <img src="assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg" alt="">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-center" *ngIf="firmWidgets.length == 0">
+                      <p>No widgets found.</p>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf='configureWidgetLibrary'>
+                <h3 class="mb-8">Firm Widget Library</h3>
+                <div class="d-flex align-items-center justify-content-between">
+                  <p class="lh-20 mb-16" *ngIf="profile?.tenantTier?.tierName != 'Iconic'">These are the widgets you and
+                    your users can access. You can add
+                    up to {{profile?.tenantTier?.tierName == "Emerging" ?'10 widgets' : '15 widgets'}}, including
+                    default
+                    widgets.</p>
+                  <p class="lh-20 mb-16" *ngIf="profile?.tenantTier?.tierName == 'Iconic'">These are the widgets you and
+                    your users can access.</p>
+                  <div class="d-flex align-items-center">
+                    <span class="mr-8 help"
+                      *ngIf="profile?.tenantTier?.tierName != 'Iconic'">{{firmWidgets?.length}}/{{profile?.tenantTier?.tierName == "Emerging" ? '10' : '15'}}
+                      selected</span>
+                    <a href="javascript:void(0);" class="font-weight-medium" (click)="clearAllSelections()">
+                      Clear all selections
+                    </a>
+                  </div>
+                </div>
+                <div class="widget-area firm-widget-wrap custom-style-scroll">
+                  <div class="row gutter-24">
+                    <div class="col-4" *ngFor="let item of firmWidgets; trackBy: trackByFn;let i = index; let first = first">
+                      <div
+                        class="widget-card firm-widget-card widget-selected d-flex flex-column justify-content-between"
+                        *ngIf='!item.toDelete'>
+                        <div class="widget-head-top d-flex align-items-center justify-content-between">
+                          <div class="d-flex align-items-center justify-content-between">
+                            <div class="toggle-switch mr-8">
+                              <label>
+                                <input type="checkbox" [value]="true" [(ngModel)]="item.isRequired"
+                                  (click)="toggleRequired(item)" [disabled]="item.isRequired && item.isDefault">
+                                <span class="switch-style custom-switch-index"></span>
+                              </label>
+                            </div>
+                            <span class="font-weight-medium lh-20">
+                              {{item.isRequired? 'Required' : 'Not Required'}}
+                            </span>
+                          </div>
+                          <div class="d-flex align-items-center justify-content-between">
+                            <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary"
+                              *ngIf="item.isDefault">
+                              Default
+                            </span>
+                            <div class="w-iconbg info-hover position-relative ml-8"
+                              (click)="openPersonalinfo(WidgetPermissions,'','modal-xlg', 'permissions')">
+                              <em class="icon icon-user-circle"></em>
+                              <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                                <div class="arrow"></div>
+                                <div class="tooltip-inner text-center small lh-16">
+                                  <p>Widget Permissions</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="w-iconbg info-hover position-relative"
+                              (click)="deleteFirmWidget(item, DeleteWidget)" *ngIf="!item.isDefault">
+                              <em class="icon icon-remove"></em>
+                              <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                                <div class="arrow"></div>
+                                <div class="tooltip-inner text-center small lh-16">
+                                  <p>Delete Widget</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="d-flex flex-column justify-content-between flex-fill">
+                          <div class="widget-card-header">
+                            <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                            <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">
+                              {{item.description}}</p>
+                          </div>
+                          <div class="widget-card-body">
+                            <div class="chart-image">
+                              <img src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg"
+                                alt="">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-center" *ngIf="firmWidgets.length == 0">
+                      <p>No widgets found.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="wid-lib-wrap pt-48">
+                  <h3 class="mb-24 mt-0">Lexicon Widget Library</h3>
+                  <div class="row gutter-16">
+                    
+                    <div class="col-12">
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div class="header-search flex-fill d-flex">
+                          <form action="#">
+                            <div class="header-search-wrapper">
+                              <input type="search" class="form-control search-input" name="q1" id="q1"
+                                autocomplete="off" placeholder="Search widget name" [(ngModel)]="searchedLexWidget"
+                                (keyup)="searchLexiconWidgets(searchedLexWidget, true)">
+                              <button class="btn" type="submit"
+                                (click)="searchLexiconWidgets(searchedLexWidget, true)">Search</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="widget-area widget-libe-area custom-style-scroll">
+                    <div class="row gutter-24" [class.justify-content-center]="displayLexiconWidgets.length == 0">
+                      <div class="col-4" *ngFor="let item of displayLexiconWidgets; trackBy: trackByFn;let i = index; let first = first">
+                        <div class="widget-card d-flex flex-column justify-content-between">
+                          <button type="button" class="select-widget d-flex justify-content-end align-items-center"
+                            (click)="activateWidget(item)"
+                            [disabled]="profile?.tenantTier?.tierName == 'Emerging' && firmWidgets.length == 10 ? true : profile?.tenantTier?.tierName == 'Ascending' && firmWidgets.length == 15 ? true : false">
+                            <span class="w-select-text lh-6 font-weight-medium"
+                              [class.activate-tag]="profile?.tenantTier?.tierName == 'Emerging' && firmWidgets.length == 10 ? false : profile?.tenantTier?.tierName == 'Ascending' && firmWidgets.length == 15 ? false : true">Activate</span>
+                          </button>
+                          <div class="d-flex flex-column justify-content-between flex-fill">
+                            <div class="widget-card-header">
+                              <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                              <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">
+                                {{item.description}}</p>
+                            </div>
+                            <div class="widget-card-body">
+                              <div class="chart-image">
+                                <img src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg"
+                                  alt="">
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                      <div *ngIf="displayLexiconWidgets.length == 0">
+                        <p>No widgets found.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+              <app-loader [active]="widgetsLoading"></app-loader>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[1]" class="tab-pane fade show active" role="tabpanel">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="header-search flex-fill d-flex">
+                  <form action="#">
+                    <div class="header-search-wrapper">
+                      <input type="search" class="form-control search-input" name="q2" id="q2" autocomplete="off"
+                        placeholder="Search collections" [(ngModel)]="searchedWidgetCollection"
+                        (keyup)="searchWidgetCollections(searchedWidgetCollection)">
+                      <button class="btn" type="button"
+                        (click)="searchWidgetCollections(searchedWidgetCollection)">Search</button>
+                    </div>
+                  </form>
+                </div>
+                <div class="btn-group ml-md-24 ml-0">
+                  <button class="btn btn-primary btn-icon" type="button"
+                    (click)="openPersonalinfo(NewWidgetCollection,'','modal-xlg', 'newCollection')"><i
+                      class="icon icon-plus"></i> New Widget Collection</button>
+                </div>
+              </div>
+              <div class="wc-wrap">
+                <div class="row gutter-24" [class.justify-content-center]="widgetCollections.length == 0">
+                  <div class="col-2" *ngFor="let item of widgetCollections; trackBy: trackByFn;let i = index; let first = first">
+                    <div class="wc-block pt-24">
+                      <div class="wc-block-top">
+                        <div class="wc-action d-flex align-items-center justify-content-between">
+                          <div class="w-iconbg info-hover position-relative"
+                            (click)="openPersonalinfo(DeleteWidgetCollection,'','', 'deleteCollection'); selectedDeleteWidgetCollection = item">
+                            <em class="icon icon-remove"></em>
+                            <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                              <div class="arrow"></div>
+                              <div class="tooltip-inner text-center small lh-16">
+                                <p>Delete Collection</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="d-flex align-items-center justify-content-between">
+                            <div class="w-iconbg info-hover position-relative ml-8"
+                              (click)="setCopyCollection(item); openPersonalinfo(EditWidgetCollection,'','modal-xlg', 'copyCollection')">
+                              <em class="icon icon-file-copy"></em>
+                              <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                                <div class="arrow"></div>
+                                <div class="tooltip-inner text-center small lh-16">
+                                  <p>Copy Collection</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="w-iconbg info-hover position-relative ml-8"
+                              (click)="setEditCollection(item); openPersonalinfo(EditWidgetCollection,'','modal-xlg', 'editCollection')">
+                              <em class="icon icon-edit"></em>
+                              <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                                <div class="arrow"></div>
+                                <div class="tooltip-inner text-center small lh-16">
+                                  <p>Edit Collection</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="wc-charts">
+                          <div class="row gutter-8" *ngIf='item.numberOfRows < 3'>
+                            <div *ngFor="let itemId of item.widgets; trackBy: trackByFn;let i = index; let first = first"
+                              [class.col-6]="itemId.width == 50" [class.col-12]="itemId.width == 100">
+                              <div [title]='itemId.name'
+                                class="chart-image wc-chart-block d-flex align-items-center justify-content-center text-center">
+                                <img src="assets/images/Dashboard-Widgets/Small/{{itemId.smallImageType}}.jpg" alt="">
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="row gutter-8" *ngIf='item.numberOfRows >= 3'>
+                            <div
+                              *ngFor="let itemId of item.widgets | slice: 0 : item.widgetsToDisplay; trackBy: trackByFn;let i = index; let first = first"
+                              [class.col-6]="itemId.width == 50" [class.col-12]="itemId.width == 100">
+                              <div [title]='itemId.name'
+                                class="chart-image wc-chart-block d-flex align-items-center justify-content-center text-center">
+                                <img src="assets/images/Dashboard-Widgets/Small/{{itemId.smallImageType}}.jpg" alt="">
+                              </div>
+                            </div>
+                            <div [class.col-6]='item.showMoreWidth == 50' [class.col-12]='item.showMoreWidth == 100'>
+                              <div
+                                class="bg-purple wc-chart-block d-flex align-items-center justify-content-center text-center">
+                                <span class="font-weight-medium">
+                                  +{{item.widgets.length - item.widgetsToDisplay}}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="wc-block-caption">
+                        <div class="text-ellipsis br-12 info-hover">
+                          <span
+                            class="sh-badge text-nowrap font-weight-medium sh-badge-primary">{{item.securityGroupName}}
+                          </span>
+                          <div class="tooltip bs-tooltip-bottom left tooltip-security-group-name" role="tooltip"
+                            *ngIf='item.securityGroupName?.length > 35'>
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner-widget fs-14 lh-20">
+                              <p class="widgetNames">
+                                {{item.securityGroupName}}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="d-flex lh-20 mt-8 flex-nowrap info-hover" id="widgetNames-{{item.id}}">
+                          <div class="text-ellipsis">
+                            {{item.widgets | widgetName}}
+                          </div>
+                          <div class="tooltip bs-tooltip-bottom left" role="tooltip" *ngIf='item.widgets?.length > 2'>
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner-widget fs-14 lh-20">
+                              <p class="widgetNames"
+                                *ngFor="let itemWidgets of item.widgets; trackBy: trackByFn;let i = index; let first = first">
+                                {{itemWidgets.name}}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="widgetCollections.length == 0">
+                    <p>No widget collection found.</p>
+                  </div>
+                </div>
+                <app-loader [active]="collectionLoading"></app-loader>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end pb-24" *ngIf='selecttabs1 == alltabs1[0] && configureWidgetLibrary'>
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" (click)='cancelSaveWidgetLibrary()' id="cancel-btn"
+            [disabled]='widgetsLoading'>
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)='saveWidgetLibrary()' id="save-btn"
+            [disabled]='widgetsLoading'>
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #WidgetPermissions let-modal>
+  <div class="modal-header pb-32">
+    <h3 class="modal-title m-0">Widget Permissions</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+
+    <div class="custom-table">
+      <div class="table-responsive">
+        <table class="table table-striped table-borderless only-radio-table">
+          <thead>
+            <tr>
+              <th class="th-module">User Group</th>
+              <th class="text-center">Deny Access</th>
+              <th class="text-center">User</th>
+              <th class="text-center">Manager</th>
+              <th class="text-center">Admin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>User Group Red</td>
+              <td class="text-center">
+                <div class="custom-control custom-radio pr-0 d-inline-block">
+                  <input type="radio" id="permission-radio-1" name="permission-radio-1" class="custom-control-input"
+                    checked>
+                  <label class="custom-control-label" for="permission-radio-1"></label>
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="custom-control custom-radio pr-0 d-inline-block">
+                  <input type="radio" id="permission-radio-2" name="permission-radio-1" class="custom-control-input"
+                    disabled>
+                  <label class="custom-control-label" for="permission-radio-2"></label>
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="custom-control custom-radio pr-0 d-inline-block">
+                  <input type="radio" id="permission-radio-3" name="permission-radio-1" class="custom-control-input"
+                    disabled>
+                  <label class="custom-control-label" for="permission-radio-3"></label>
+                </div>
+              </td>
+              <td class="text-center">
+                <div class="custom-control custom-radio pr-0 d-inline-block">
+                  <input type="radio" id="permission-radio-4" name="permission-radio-1" class="custom-control-input"
+                    disabled>
+                  <label class="custom-control-label" for="permission-radio-3"></label>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-toolbar d-flex justify-content-between">
+        <div class="d-flex align-items-center">
+          <div class="table-items d-flex align-items-center mr-36">
+            Items per page:
+
+            <div class="dropdown ml-8">
+              <a href="javascript:void(0)" class="dropdown-toggle" (click)="isShow = !isShow">
+                10
+              </a>
+              <div [ngClass]="(isShow)?'dropdown-menu show':'dropdown-menu'" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#">10</a>
+                <a class="dropdown-item" href="#">20</a>
+                <a class="dropdown-item" href="#">50</a>
+              </div>
+            </div>
+          </div>
+          <span>1 - 10 of 1,228 items</span>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="dropdown mr-44">
+            <a href="javascript:void(0)" class="dropdown-toggle" (click)="isShow1 = !isShow1">
+              
+              Page 1 of 40
+            </a>
+            <div [ngClass]="(isShow1)?'dropdown-menu show':'dropdown-menu'" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#">Page 1 of 40</a>
+              <a class="dropdown-item" href="#">Page 2 of 40</a>
+              <a class="dropdown-item" href="#">Page 3 of 40</a>
+            </div>
+          </div>
+          <div class="table-next-prev">
+            <span class="table-arrow table-arrow-left"><em class="icon icon-angle-left"></em></span>
+            <span class="table-arrow table-arrow-right"><em class="icon icon-angle-right"></em></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" data-dismiss="modal" (click)="modal.dismiss('Cross click')">Cancel
+    </button>
+    <button type="button" class="btn btn-primary">Save Permissions</button>
+  </div>
+</ng-template>
+
+<ng-template #NewWidgetCollection let-modal>
+  <div class="modal-header pb-32">
+    <h3 class="modal-title m-0">New Widget Collection</h3>
+    <button type="button" class="close" (click)="modal.close('Cross click')" aria-label="Close" data-dismiss="modal">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div>
+      <div class="row gutter-16" [formGroup]="newWidgetCollectionForm">
+        <div class="col-3">
+          <div class="form-group" [class.has-error]='securityGroupIdError'>
+            <label>User Group <sup>*</sup></label>
+            <ng-select [items]="groupList" placeholder="Select user group" formControlName="securityGroupId"
+              [bindValue]="'securityGroupId'" [bindLabel]="'securityGroup'" [notFoundText]="'No record found'"
+              [searchable]="true" [selectOnTab]="true" (change)='validateUserGroup()'>
+            </ng-select>
+
+            <app-validation-message *ngIf='securityGroupIdError' [errorMessage]='error_data?.user_group_required'>
+            </app-validation-message>
+          </div>
+        </div>
+      </div>
+      <div class="ws-wrap">
+        <div class="d-flex align-items-center justify-content-between pt-24 mb-16">
+          <div class="d-flex align-items-center">
+            <span class="d-block helper-text text-large mr-8">Widget Selections</span>
+            <span class="d-block helper-text font-weight-normal">Arrange widgets to preferred order</span>
+          </div>
+          <div>
+            <a href="javascript:void(0);" class="font-weight-medium" (click)="clearSelectedWidgets()">Clear all
+              selections</a>
+          </div>
+        </div>
+        <div class="widget-area selected-widget-area custom-style-scroll">
+          <div class="row gutter-24">
+            <div class="col-8 mx-auto" [style.height.px]='createGridHeight'>
+              
+              <gridster [options]="gridsterOpts" #createGrid>
+                <gridster-item [item]="item" *ngFor="let item of selectedWidgets; trackBy: trackByFn;let i = index; let first = first">
+                  
+                  <div class="widget-card dash-card widget-selected d-flex flex-column justify-content-between">
+                    <div class="ws-action d-flex align-items-center">
+                      <div class="w-iconbg info-hover position-relative move-cursor move-btn">
+                        <em class="icon icon-move-2"></em>
+                        <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                          <div class="arrow"></div>
+                          <div class="tooltip-inner text-center small lh-16">
+                            <p>Move Widget</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="w-iconbg info-hover position-relative" *ngIf="!item.isDefault && !item.isRequired"
+                        (click)="deleteWidget(item)">
+                        <em class="icon icon-remove"></em>
+                        <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                          <div class="arrow"></div>
+                          <div class="tooltip-inner text-center small lh-16">
+                            <p>Delete Widget</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex flex-column justify-content-between flex-fill">
+                      <div class="widget-card-header">
+                        <div class="d-flex align-items-center">
+                          <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                          <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary ml-8"
+                            *ngIf="item.isDefault || item.isRequired">{{item.isDefault ? 'Default' : 'Required'}}</span>
+                        </div>
+                        <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">{{item.description}}</p>
+                      </div>
+                      <div class="widget-card-body">
+                        <div class="chart-image">
+                          <img class="pie-chart"
+                            src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg" alt="">
+                        </div>
+                      </div>
+                    </div>
+                    <span class="dash-card-dragger">
+                      <img src="../../../../assets/images/icon/resize.svg" alt="">
+                    </span>
+                  </div>
+                  
+                </gridster-item>
+
+
+              </gridster>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fwl-wrap pt-48">
+        <div class="wid-lib-wrap pt-48">
+          <h4 class="mb-24 mt-0">Firm Widget Library</h4>
+          <div class="row gutter-16">
+            
+            <div class="col-12">
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <div class="header-search flex-fill d-flex">
+                  <form action="#">
+                    <div class="header-search-wrapper">
+                      <input type="search" class="form-control search-input" name="q3" id="q3" autocomplete="off"
+                        placeholder="Search widget name" [(ngModel)]="searchedFirmWidget"
+                        (keyup)="searchFirmWidgets(searchedFirmWidget, true, false)">
+                      <button class="btn" type="button"
+                        (click)="searchFirmWidgets(searchedFirmWidget, true, false)">Search</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="widget-area widget-libe-area">
+            <div class="row gutter-24" [class.justify-content-center]="displayFirmWidgets.length == 0">
+              <div class="col-4" *ngFor="let item of displayFirmWidgets; trackBy: trackByFn;let i = index; let first = first">
+                <div class="widget-card d-flex flex-column justify-content-between">
+                  <button type="button" class="select-widget d-flex justify-content-end align-items-center"
+                    (click)="addToWidgetSelections(item)">
+                    <span class="w-select-text lh-16 font-weight-medium activate-tag">Add</span>
+                  </button>
+                  <div class="d-flex flex-column justify-content-between flex-fill">
+                    <div class="widget-card-header">
+                      <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                      <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">
+                        {{item.description}}</p>
+                    </div>
+                    <div class="widget-card-body">
+                      <div class="chart-image">
+                        <img src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg" alt="">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="displayFirmWidgets.length == 0" style="padding: 0px 5px 20px 5px;">
+                <span>No widgets found.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <app-loader [active]='createNewCollectionLoader'></app-loader>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" data-dismiss="modal"
+      (click)="modal.close('Cross click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="validateAndSave(modal, 'newCollection')">Create</button>
+  </div>
+</ng-template>
+
+<ng-template #DeleteWidget let-modal>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title m-0">Delete Widget</h3>
+    <button type="button" class="close" (click)="modal.close('cancel')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-error text-danger fs-24"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">You're about to delete a widget. Are you sure you want to proceed?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" data-dismiss="modal" (click)="modal.close('cancel')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close('delete')">Delete</button>
+  </div>
+</ng-template>
+
+<ng-template #DeleteWidgetCollection let-modal>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title m-0">Delete Widget Collection</h3>
+    <button type="button" class="close" (click)="modal.close('cancel')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-error text-danger fs-24"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">You're about to delete a widget collection. All users subscribed to this collection will
+          lose access. Are you sure you want to proceed?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" data-dismiss="modal" (click)="modal.close('cancel')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close('delete')">Delete</button>
+  </div>
+</ng-template>
+
+<ng-template #EditWidgetCollection let-modal>
+  <div class="modal-header pb-24">
+    <div *ngIf="!isEditSelection">
+      <h3 class="modal-title m-0">{{copy ? 'Copy' : 'Edit'}} Widget Collection</h3>
+      <p class="font-12 pt-12" *ngIf="!copy">All users subscribed to this collection will be notified of changes.</p>
+    </div>
+    <h3 class="modal-title m-0" *ngIf="isEditSelection">Edit Widget Selections</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" data-dismiss="modal">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row gutter-16">
+      <div class="col-3">
+        <div class="form-group" *ngIf="!isEditSelection" [class.has-error]='securityGroupIdError'>
+          <label>User Group <sup>*</sup></label>
+          <ng-select [items]="groupList" placeholder="Select user group" [(ngModel)]="selectedGroupId"
+            [bindValue]="'securityGroupId'" [bindLabel]="'securityGroup'" [notFoundText]="'No record found'"
+            [searchable]="true" [selectOnTab]="true" (change)='validateUserGroup()'>
+          </ng-select>
+          <app-validation-message *ngIf='securityGroupIdError' [errorMessage]='error_data?.user_group_required'>
+          </app-validation-message>
+        </div>
+        
+      </div>
+      
+      <div class="col-12" *ngIf="isEditSelection">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <div class="header-search flex-fill d-flex">
+            <form action="#">
+              <div class="header-search-wrapper">
+                <input type="search" class="form-control search-input" name="q1" id="q1" autocomplete="off"
+                  placeholder="Search widget name" [(ngModel)]="searchedFirmWidget"
+                  (keyup)="searchFirmWidgets(searchedFirmWidget, true, true)">
+                <button class="btn" type="submit"
+                  (click)="searchFirmWidgets(searchedFirmWidget, true, true)">Search</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ws-wrap">
+      <div class="d-flex align-items-center justify-content-between pt-24 mb-16" *ngIf="!isEditSelection">
+        <div class="d-flex align-items-center">
+          <h3 class="d-block helper-text text-large mr-8">Widgets</h3>
+        </div>
+        <div class="btn-group ml-md-24 ml-0">
+          <button class="btn btn-outline-primary btn-icon edit-selection-btn" type="button"
+            (click)="editWidgetSelection(); isEditSelection = !isEditSelection"><i class="icon icon-plus"></i> Edit
+            Widget Selections</button>
+        </div>
+      </div>
+      <div class="widget-area selected-widget-area custom-style-scroll" *ngIf="!isEditSelection">
+        <div class="row gutter-24">
+          <div class="col-8 mx-auto" [style.height.px]='editGridHeight'>
+            
+            <gridster [options]="gridsterOpts" #editGrid *ngIf="!copy">
+              <gridster-item [item]="item"
+                *ngFor="let item of selectedEditWidgetCollection.widgets; trackBy: trackByFn;let i = index; let first = first">
+                <div class="widget-card dash-card widget-selected d-flex flex-column justify-content-between">
+                  <div class="ws-action d-flex align-items-center">
+                    <div class="w-iconbg info-hover position-relative move-cursor move-btn">
+                      <em class="icon icon-move-2"></em>
+                      <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner text-center small lh-16">
+                          <p>Move Widget</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="w-iconbg info-hover position-relative" *ngIf="!item.isDefault && !item.isRequired"
+                      (click)="deleteWidgetInCollection(item)">
+                      <em class="icon icon-remove"></em>
+                      <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner text-center small lh-16">
+                          <p>Delete Widget</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex flex-column justify-content-between flex-fill">
+                    <div class="widget-card-header">
+                      <div class="d-flex align-items-center">
+                        <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                        <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary ml-8"
+                          *ngIf="item.isDefault || item.isRequired">{{item.isDefault ? 'Default' : 'Required'}}</span>
+                      </div>
+                      <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">{{item.description}}</p>
+                    </div>
+                    <div class="widget-card-body">
+                      <div class="chart-image">
+                        <img class="pie-chart"
+                          src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg" alt="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <span class="dash-card-dragger">
+                    <img src="../../../../assets/images/icon/resize.svg" alt="">
+                  </span>
+                </div>
+              </gridster-item>
+            </gridster>
+
+            <gridster [options]="gridsterOpts" #editGrid *ngIf="copy">
+              <gridster-item [item]="item"
+                *ngFor="let item of selectedCopyWidgetCollection.widgets; trackBy: trackByFn;let i = index; let first = first">
+                <div class="widget-card dash-card widget-selected d-flex flex-column justify-content-between">
+                  <div class="ws-action d-flex align-items-center">
+                    <div class="w-iconbg info-hover position-relative move-cursor move-btn">
+                      <em class="icon icon-move-2"></em>
+                      <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner text-center small lh-16">
+                          <p>Move Widget</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="w-iconbg info-hover position-relative" *ngIf="!item.isDefault && !item.isRequired"
+                      (click)="deleteWidgetInCollection(item)">
+                      <em class="icon icon-remove"></em>
+                      <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner text-center small lh-16">
+                          <p>Delete Widget</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex flex-column justify-content-between flex-fill">
+                    <div class="widget-card-header">
+                      <div class="d-flex align-items-center">
+                        <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                        <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary ml-8"
+                          *ngIf="item.isDefault || item.isRequired">{{item.isDefault ? 'Default' : 'Required'}}</span>
+                      </div>
+                      <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">{{item.description}}</p>
+                    </div>
+                    <div class="widget-card-body">
+                      <div class="chart-image">
+                        <img class="pie-chart"
+                          src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg" alt="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <span class="dash-card-dragger">
+                    <img src="../../../../assets/images/icon/resize.svg" alt="">
+                  </span>
+                </div>
+              </gridster-item>
+            </gridster>
+
+            
+          </div>
+        </div>
+      </div>
+      <div class="widget-area" *ngIf="isEditSelection">
+        <div class="row gutter-24" [class.justify-content-center]="firmWidgets.length == 0">
+          <div class="col-4" *ngFor="let item of firmWidgets; trackBy: trackByFn;let i = index; let first = first">
+            <div class="widget-card d-flex flex-column justify-content-between" [class.widget-selected]="item.selected">
+              <button type="button" class="select-widget d-flex justify-content-end align-items-center">
+                <em class="icon icon-check"></em>
+                <span class="w-select-text lh-16 font-weight-medium" (click)="select(item)">Select</span>
+                <span class="w-selected-text lh-16 font-weight-medium" (click)="unselect(item)">Selected</span>
+              </button>
+              <div class="d-flex flex-column justify-content-between flex-fill">
+                <div class="widget-card-header">
+                  <div class="d-flex align-items-center">
+                    <h4 class="m-0 text-xlarge">{{item.name}}</h4>
+                    <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary ml-8"
+                      *ngIf="item.isDefault || item.isRequired">{{item.isDefault ? 'Default' : 'Required'}}</span>
+                  </div>
+                  <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">{{item.description}}</p>
+                </div>
+                <div class="widget-card-body">
+                  <div class="chart-image">
+                    <img src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg" alt="">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="firmWidgets.length == 0">
+            <span>No widgets found.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer" *ngIf="!isEditSelection">
+    <button type="button" class="btn btn-light" data-dismiss="modal"
+      (click)="modal.dismiss('Cross click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="validateAndSave(modal,'editCollection')" *ngIf="!copy">Save
+      Edits</button>
+    <button type="button" class="btn btn-primary" (click)="validateAndSave(modal,'copyCollection')" *ngIf="copy">Create
+      Copy</button>
+  </div>
+  <div class="modal-footer" *ngIf="isEditSelection">
+    <span class="helper-text font-weight-normal">{{selectedNumber}} selected</span>
+    <button type="button" class="btn btn-light"
+      (click)="isEditSelection = !isEditSelection; revertSelections()">Back</button>
+    <button type="button" class="btn btn-primary"
+      (click)="isEditSelection = !isEditSelection; updateWidgetSelections();">Save Selections</button>
+  </div>
+</ng-template>

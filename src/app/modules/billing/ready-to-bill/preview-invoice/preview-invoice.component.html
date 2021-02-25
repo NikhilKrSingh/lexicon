@@ -1,0 +1,49 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item" (click)='goToReadyToBill()'>
+        <a href="javascript:void(0)">Billing</a>
+      </li>
+      <li *ngIf='!matterDetails' class="breadcrumb-item active" aria-current="page">
+        Preview Invoice
+      </li>
+      <li *ngIf='matterDetails' class="breadcrumb-item active" aria-current="page" [title]='matterDetails?.matterName'>
+        <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+          Preview Invoice - {{matterDetails?.matterName}} - {{matterDetails?.matterNumber}}
+        </ng-container>
+        <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+          Preview Invoice - {{matterDetails?.matterName?.slice(0, 25)}}... - {{matterDetails?.matterNumber}}
+        </ng-container>
+      </li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2">Preview Invoice</h2>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Invoice</h2>
+          </div>
+          <ng-container *ngIf='preBillId && billNowModel'>
+            <app-common-invoice-pdf [callback]='loaderCallback' [prebillId]='preBillId' [billNowData]='billNowModel'>
+            </app-common-invoice-pdf>
+          </ng-container>
+        </div>
+        <app-loader [active]='loader'></app-loader>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)='goToReadyToBill()' id="go-to-ready-bill">
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+
+<div>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Edit Contact Information</h3>
+    <button type="button" class="close" (click)="dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <form [formGroup]="employeeForm">
+      <div [class.has-error]="(f['email'].errors && formSubmitted) || emailExists"
+           [ngClass]="(f['email'].invalid && f['email'].touched) ? 'form-group has-error':'form-group'">
+        <label>Email Address <sup>*</sup></label>
+        <input type="email" name="email" formControlName="email"
+               (blur)="checkEmailExistence()" (ngModelChange)="emailExists = false"
+               class="form-control"
+               placeholder="Email Address" value="Email Address" id="email-address">
+        <span class="field-message text-danger"
+              *ngIf="f['email'].errors && formSubmitted ? !!f['email'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+          {{errorData.email_required}}
+      </span>
+        <span class="field-message text-danger" *ngIf="f['email'].invalid && !f['email'].errors.required">
+        <em class="icon icon-error mr-4"></em>
+        Invalid email address
+      </span>
+        <span class="field-message text-danger" *ngIf="emailExists">
+        <em class="icon icon-error mr-4"></em>
+        This email address is already in use by a potential client, client, employee, or corporate contact.
+      </span>
+      </div>
+      <div [class.has-error]="f['primaryPhoneNumber'].errors && formSubmitted"
+           [ngClass]="(employeeForm.controls.primaryPhoneNumber.invalid && primaryPhoneNumberBlur)?'form-group has-error':'form-group'">
+        <label>Primary Phone<sup>*</sup></label>
+        <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+               placeHolderCharacter=" " formControlName="primaryPhoneNumber"
+               (blur)="onBlurMethod(employeeForm.controls.primaryPhoneNumber.value,'primaryPhoneNumber')" id="primary-phone" />
+      <span class="field-message text-danger" *ngIf="employeeForm.controls.primaryPhoneNumber.invalid && primaryPhoneNumberBlur" ><em
+        class="icon icon-error mr-4"></em>
+        Invalid phone number
+      </span>
+        <span class="field-message text-danger"
+              *ngIf="f['primaryPhoneNumber'].errors && formSubmitted ? !!f['primaryPhoneNumber'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+          {{errorData.phone_required}}
+      </span>
+      </div>
+      <div
+        [ngClass]="(employeeForm.controls.cellPhoneNumber.invalid && cellPhoneNumberBlur)?'form-group has-error':'form-group'">
+        <label>Cell Phone</label>
+        <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+               placeHolderCharacter=" " formControlName="cellPhoneNumber"
+               (blur)="onBlurMethod(employeeForm.controls.cellPhoneNumber.value,'cellPhoneNumber')" id="cell-phone" />
+      <span class="field-message text-danger" *ngIf="employeeForm.controls.cellPhoneNumber.invalid && cellPhoneNumberBlur" ><em
+          class="icon icon-error mr-4"></em>
+        Invalid phone number
+      </span>
+      </div>
+      <div [ngClass]="(employeeForm.controls.fax.invalid && faxBlur)?'form-group has-error':'form-group'">
+        <label>Fax</label>
+        <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+               placeHolderCharacter=" " formControlName="fax"
+               (blur)="onBlurMethod(employeeForm.controls.fax.value,'fax')" id="fax" />
+      <span class="field-message text-danger" *ngIf="employeeForm.controls.fax.invalid && faxBlur" ><em
+          class="icon icon-error mr-4"></em>
+          Invalid fax number
+        </span>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="dismiss('Cross click')" id="cancelempc-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='save()' id='save-btn'>Save</button>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>

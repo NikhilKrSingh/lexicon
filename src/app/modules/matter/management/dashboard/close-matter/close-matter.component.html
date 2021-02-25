@@ -1,0 +1,37 @@
+
+<div *ngIf='!isPaid'>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title m-0">Close Matter</h3>
+    <button type="button" class="close" (click)="dismiss()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="d-flex mb-24 lh-20">
+      <em class="icon icon-error close-matt-icon text-danger text-large mr-12"></em>
+      You cannot close this matter because the full balance has not been billed or written down.
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)='dismiss()'>Ok</button>
+  </div>
+</div>
+
+
+<div *ngIf='isPaid'>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title m-0">Close Matter</h3>
+    <button type="button" class="close" (click)="dismiss()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="d-flex mb-24 lh-20">
+      Are you sure you want to close this matter?
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)='dismiss()'>No</button>
+    <button type="button" class="btn btn-primary" (click)='close()'>Yes</button>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Admin Settings</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Rate Tables</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Rate Table Audit History - Senior Attorney</li>
+        </ol>
+        <div class="heading">
+            <h1>Rate Table Audit History - Senior Attorney</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="text-center m-0">  DATA-Table space</h4>
+                <a href="javascript:void(0);" class="font-weight-medium" (click)="open(ViewRevision,'xl')">View Revision</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #ViewRevision let-modal>
+    <div class="modal-header d-block pb-32">
+      <h3 class="modal-title mb-0">View Revision - 86730</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="row gutter-16">
+        <div class="col-6">
+            <div class="row gutter-16">
+                <div class="col-5">
+                    <div class="form-group">
+                        <label class="d-block mb-8">Revision Date/Time</label>
+                        09/21/2019, 2:32pm
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label class="d-block mb-8">Name</label>
+                        Senior Attorney
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        <label class="d-block mb-8">Initial Rate</label>
+                        $200.00
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <h4 class="text-center m-0">  DATA-Table space</h4>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Close</button>
+    </div>
+  </ng-template>

@@ -1,0 +1,46 @@
+<div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Edit Transaction Reversal Code - {{writeDownCode?.code}}</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="alert alert-warning d-flex justify-content-between no-shadow">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-warning"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h4 class="mr-24 mt-0 mb-4">Warning</h4>
+          <span>
+            Changes made to the code name will be applied to all historical entries of this code.
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <ng-select id="editBillingCodesWriteDownType" [items]="typeList" placeholder="Select Type" [(ngModel)]="selectedType" [bindValue]="'id'"
+        [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [readonly]="true">
+      </ng-select>
+    </div>
+    <ng-container [formGroup]='reversedCheckForm'>
+      <div class="form-group">
+        <label>Code <sup>*</sup></label>
+        <input id="editBillingCodesWriteDownCode" type="text" class="form-control" formControlName='code'>
+      </div>
+      <div class="position-relative"
+        [ngClass]="(reversedCheckForm.controls.name.invalid && pressedSave)?'form-group has-error':'form-group'">
+        <label>Name <sup>*</sup></label>
+        <span class="count-char">{{reversedCheckForm?.controls['name']?.value?.length || 0}}/50</span>
+        <input id="editBillingCodesWriteDownName" type="text" class="form-control" placeholder="Enter a name" formControlName='name' maxlength="50">
+        <span class="field-message text-danger" *ngIf="(reversedCheckForm.controls.name.invalid && pressedSave)"><em
+            class="icon icon-error mr-4"></em>
+          Please enter a name
+        </span>
+      </div>
+    </ng-container>
+
+  </div>
+  <div class="modal-footer">
+    <button id="editBillingCodesWriteDownCancelBtn" type="button" class="btn btn-light" (click)="close()">Cancel</button>
+    <button id="editBillingCodesWriteDownSaveBtn" type="button" class="btn btn-primary" (click)='save()'>Save</button>
+  </div>

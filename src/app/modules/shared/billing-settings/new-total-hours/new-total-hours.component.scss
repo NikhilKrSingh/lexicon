@@ -1,0 +1,43 @@
+.previous-positive {
+  height: 10px;
+  width: 10px;
+  border-radius: 10px;
+  margin-top: 4px;
+  margin-left: 10px;
+  background-color: #4756CE;
+}
+
+.previous-negative {
+  height: 10px;
+  width: 10px;
+  border-radius: 10px;
+  margin-top: 4px;
+  margin-left: 10px;
+  background-color: #D23025;
+}
+
+.current-positive {
+  height: 10px;
+  width: 10px;
+  border-radius: 10px;
+  margin-top: 4px;
+  background-color: #63BFCD;
+}
+
+.current-negative {
+  height: 10px;
+  width: 10px;
+  border-radius: 10px;
+  margin-top: 4px;
+  background-color: #F44236;
+}
+
+.legend-title {
+  font-size: 14px;
+  color: #5D6A86;
+}
+
+.doughnut-chart {
+  height: 190px !important;
+  width: 395px !important;
+}

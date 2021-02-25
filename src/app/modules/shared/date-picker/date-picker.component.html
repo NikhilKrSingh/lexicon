@@ -1,0 +1,16 @@
+<div class="date-field position-relative">
+
+  <input type="text" autocomplete="off" class="form-control cust-readonlyinput" name="date" [(ngModel)]='localdata'
+    [placeholder]="placeholderText" mask="0*/0*/0000" [dropSpecialCharacters]="false" (blur)='onDateBlur()'
+    [disabled]='isDisabled || disableInput' id="{{id}}-first">
+
+  <input [min]='minDate' type='text' class="form-control hidden-dp-input" [(ngModel)]='localDate' (ngModelChange)='changeDate()'
+    [owlDateTime]="dt2" [owlDateTimeFilter]="dateTimeFilter" [max]="maxDate" [disabled]='isDisabled'
+    id="{{id}}"/>
+  <em class="icon icon-calendar-invitation" [owlDateTimeTrigger]="dt2"></em>
+  <owl-date-time [pickerType]="'calendar'" #dt2>
+  </owl-date-time>
+</div>
+
+
+

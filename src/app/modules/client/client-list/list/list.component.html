@@ -1,0 +1,466 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Clients</li>
+    </ol>
+    <div class="heading">
+      <h1>Clients</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input"
+              placeholder="Search client number, name, email, phone number, office or attorney"
+              (keyup)="applyFilterForList()" [(ngModel)]="searchString" [ngModelOptions]="{standalone: true}" id="search-text">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+          </div>
+        </form>
+        <div class="btn-group ml-md-24 ml-0" *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin">
+          <button class="btn btn-outline-primary export btn-icon " type="button"
+            (click)="openPersonalinfo(mymodal,'lg','','')" id="export-to-csv">
+            <i class="icon icon-upload"></i> Export to CSV
+          </button>
+          <button class="btn btn-primary btn-icon" type="button" (click)='createNewClient()'
+            *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" id="create-new-client">
+            <i class="icon icon-plus"></i> Create New Client
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-9">
+            <div class="row gutter-16">
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label for="exampl1">Primary Office</label>
+                  <app-multiselect-dropdown [title]="title" backgroundColor="#fff" [selections]="selectedOffice"
+                    [displaySubItem]="officeList" [filterName]="filterName"
+                    (onSelectionChanged)="selectDropdwnPo($event)"
+                    (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                    (clearFilter)="clearFilterPrimaryOffice()" (applyFilter)="applyFilterForList()" id="primary-office-multi">
+                  </app-multiselect-dropdown>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label for="exampl2">Responsible Attorney</label>
+                  <app-multiselect-dropdown [title]="titlereasatt" backgroundColor="#fff" [selections]="responattorn"
+                    [displaySubItem]="resattrList1" [filterName]="filterName"
+                    (onSelectionChanged)="selectDropdwnRa($event)"
+                    (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                    (clearFilter)="clearFilterResponsibleAttorney()" (applyFilter)="applyFilterForList()" id="responsible-attorney-multi">
+                  </app-multiselect-dropdown>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label for="exampl3">Type</label>
+                  <app-multiselect-dropdown [title]="titletype" [selections]="typeselect" [displaySubItem]="dropdownList2"
+                    [filterName]="filterName" (onSelectionChanged)="selecttype($event)"
+                    (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clearFilter2()"
+                    (applyFilter)="applyFilterForList()" id="client-type-multi">
+                  </app-multiselect-dropdown>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label for="exampl4">Status</label>
+                  <app-multiselect-dropdown [title]="titlestatus" [selections]="selections1"
+                    [displaySubItem]="dropdownList1" [filterName]="filterName"
+                    (onSelectionChanged)="selectStatus($event)"
+                    (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clearFilter1()"
+                    (applyFilter)="applyFilterForList()" id="status-multi">
+                  </app-multiselect-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="position-relative">
+          <div class="custom-table">
+              <ngx-datatable #table class="material common-table client-table fix-col-right" [rows]="rows"
+                [columnMode]="ColumnMode.force" [headerHeight]="50" [class.matter-no-data]="rows?.length === 0"
+                [footerHeight]="footerHeight" [selected]="selected" [messages]="messages" rowHeight="auto"
+                [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" (select)="onSelect($event)"
+                [selectionType]="'checkbox'" [scrollbarH]="true" (sort)="updateDatatableFooterPage()"
+                [sorts]="[{prop: 'uniqueNumber', dir: 'desc'}]" id="client-listing">
+
+                <ngx-datatable-column [resizeable]="false" prop="uniqueNumber" name="Client Number" [width]="140">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="name" name="Name" [width]="160">
+                </ngx-datatable-column>
+
+                <ngx-datatable-column [resizeable]="false" prop="primaryContactName" name="Primary Contact" [width]="160">
+
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="preferredContactMethod" name="Preferred Contact" [width]="260">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    {{ checkNaN(row.preferredContactMethod) ? row.preferredContactMethod : (row.preferredContactMethod | phoneFormatter) }}
+
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="primaryOffice" name="Primary Office" [width]="160">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="responsibleAttorney" name="Responsible Attorney" [width]="180">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <span>{{value}}</span>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="type" name="Type" [width]="160">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="100">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <div class="d-flex justify-content-between">
+                    {{value}}
+                    <div class="info-hover position-relative" *ngIf="!row.isVisible && row.isArchived">
+                      <em class="icon icon-info mr-12"></em>
+                      <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner">
+                          <h6>Archived</h6>
+                          <p> {{row.archiveReason}} </p>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [frozenRight]='true' [headerClass]="'text-right'" [sortable]="false" name="Action"
+                  [width]="147">
+                  <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                      <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+                        (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                        (outsideClick)="onClickedOutside($event, rowIndex)">
+                        <em class="icon icon-dot-verti"></em>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" *ngIf="row.isCompany" [routerLink]="['/client-view/corporate']"
+                            [queryParams]="{clientId: row.id}" href="javascript:void(0)" id="view-profile-{{rowIndex}}">View Profile</a>
+                          <a class="dropdown-item" *ngIf="!row.isCompany" [routerLink]="['/client-view/individual']"
+                            [queryParams]="{clientId: row.id}" href="javascript:void(0)" id="view-profile-{{rowIndex}}">View Profile</a>
+
+                          <a class="dropdown-item"
+                            *ngIf="row.isVisible && !permissionList.MATTER_MANAGEMENTisNoVisibility && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                            [routerLink]="['/matter/create']" [queryParams]="{clientId: row.id}"
+                            href="javascript:void(0)" id="create-matter-{{rowIndex}}">Create Matter</a>
+
+                          <a class="dropdown-item"
+                            *ngIf="row.isVisible && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                            (click)="openPersonalinfo(deactivateClient,'lg','modal-has-alert', row)"
+                            href="javascript:void(0)" id="deactivate-client-{{rowIndex}}">Deactivate Client</a>
+                          <a class="dropdown-item"
+                            *ngIf="!row.isVisible && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                            (click)="openPersonalinfo(reactivateClient,'lg','', row)"
+                            href="javascript:void(0)" id="reactivate-client-{{rowIndex}}">Reactivate Client</a>
+                          <a class="dropdown-item"
+                            *ngIf="!row.isVisible && !row.isArchived && permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin"
+                            (click)="openPersonalinfo(archiveClient,'lg','modal-has-alert', row)"
+                            href="javascript:void(0)" id="archive-client-{{rowIndex}}">Archive Client</a>
+                        </div>
+                      </div>
+                      <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                    </div>
+
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                  let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                  let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                            (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                        {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                        {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                          of {{page.totalPages}}</option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage" [size]="pageSize" [count]="rowCount"
+                          [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+
+<ng-template #deactivateClient let-modal>
+  <div class="card mb-0">
+    <div class="card-body">
+      <div class="modal-header d-block pb-8">
+        <h3 class="modal-title mb-0">Deactivate Client</h3>
+        <button type="button" class="close" id="close-deactivate-md" (click)="modal.dismiss('Cross click')"
+          aria-label="Close">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning d-flex justify-content-between my-20 no-shadow" *ngIf="deactivateClientWarn">
+          <div class="d-flex">
+            <em class="alert-icon icon icon-warning"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <h4 class="mr-24 mt-0 mb-4">Warning</h4>
+              <span *ngIf='selectedRow?.isCompany'>
+                {{deactiv_client_war_row}}
+              </span>
+              <span *ngIf='!selectedRow?.isCompany'>
+                {{deactiv_client_warn}}
+              </span>
+            </div>
+          </div>
+
+        </div>
+        <div class="form-group change-notes">
+          <label>Change Notes</label>
+          <textarea class="form-control" [(ngModel)]="changeStatusNotes" placeholder="Enter change notes (optional)" rows="4" id="change-note"></textarea>
+        </div>
+        <p class="pt-8">{{dis_client_assoc}}
+        </p>
+        <h4 class="mb-8 text-xlarge">Client Associations</h4>
+        <div class="custom-table">
+          <ngx-datatable #table class="material common-table" [rows]="clientAssociatList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" [selected]="selectedAssociatClient"
+            [messages]="messages" [rowHeight]="50" (select)="onSelectClientAssociat($event)"
+            [selectionType]="'checkbox'" id="client-associations-listing">
+            <ngx-datatable-column [resizeable]="false" prop="person" name="Name" [width]="100"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="associationType" name="Type" [width]="100"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="100"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Deactivate" [canAutoResize]="false" [draggable]="false"
+              [width]="100">
+              <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+                let-onCheckboxChangeFn="onCheckboxChangeFn">
+                <label class="cust-check">
+                  <input type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+                  <span class="check-style"></span>
+                </label>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancle-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="clientStatusChange('isDeactivating')" id="deactivate-client">
+          Deactivate client
+        </button>
+      </div>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+</ng-template>
+
+
+<ng-template #deactivateClient2 let-modal>
+  <div class="card mb-0 deactivate-card">
+    <div class="card-body">
+      <div class="modal-header d-block pb-8">
+        <h3 class="modal-title mb-0">Deactivate Client</h3>
+        <button type="button" class="close" id="close-archive-md" (click)="modal.dismiss('Cross click')"
+          aria-label="Close">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="lh-20 mb-0">{{deact_client_fail}}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="okay-btn">Okay</button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #reactivateClient let-modal>
+  <div class="modal-header d-block">
+    <h3 class="modal-title mb-0">Reactivate Client</h3>
+    <button type="button" class="close" id="close-reactivate-md" (click)="modal.dismiss('Cross click')"
+      aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group" *ngIf='selectedRow?.isCompany'>
+      <p class="mb-16">{{react_client}}</p>
+      <div class="custom-control custom-radio">
+        <input type="radio" id="customRadio1" name="isReactivateCorporateContacts" [value]='true'
+          class="custom-control-input" [(ngModel)]='isReactivateCorporateContacts'>
+        <label class="custom-control-label" for="customRadio1">Yes</label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input type="radio" id="customRadio2" name="isReactivateCorporateContacts" [value]='false'
+          class="custom-control-input" [(ngModel)]='isReactivateCorporateContacts'>
+        <label class="custom-control-label" for="customRadio2">No</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Change Notes</label>
+      <textarea class="form-control" [(ngModel)]="changeStatusNotes" placeholder="Enter change notes (optional)" rows="4" id="change-note"></textarea>
+    </div>
+    <p class="pt-8">{{rect_client_assoc}}
+    </p>
+    <h4 class="mb-8 text-xlarge">Client Associations</h4>
+    <ngx-datatable #table class="material common-table" [rows]="clientAssociatList" [columnMode]="ColumnMode.force"
+      [headerHeight]="50" [footerHeight]="0" [selected]="selectedAssociatClient" [messages]="messages" rowHeight="auto"
+      (select)="onSelectClientAssociat($event)" [selectionType]="'checkbox'">
+      <ngx-datatable-column [resizeable]="false" prop="lastName" name="Name" [width]="100" id="client-associations-listing">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          {{(row.firstName) ? row.lastName + ', ' + row.firstName : row.lastName}} </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="associationType" name="Type" [width]="100"></ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="100"></ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Reactivate" [canAutoResize]="false" [draggable]="false"
+        [width]="100">
+        <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+          let-onCheckboxChangeFn="onCheckboxChangeFn">
+          <label class="cust-check">
+            <input type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+            <span class="check-style"></span>
+          </label>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="clientStatusChange('isReactivating')" id="reactivate-client-btn">
+      Reactivate client
+    </button>
+  </div>
+</ng-template>
+
+
+<ng-template #archiveClient let-modal>
+  <div class="alert alert-warning d-flex justify-content-between mb-16" *ngIf="archiveClientWarn">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-warning"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="mr-36 mt-0 mb-4">Warning</h4>
+        {{arch_client_warn}}
+      </div>
+    </div>
+    <span class="alert-close" (click)="archiveClientWarn = false"><em class="icon icon-close"></em></span>
+  </div>
+  <div class="card mb-0">
+    <div class="card-body">
+      <div class="modal-header d-block pb-8">
+        <h3 class="modal-title mb-0">Archive Client</h3>
+        <button type="button" class="close" id="close-archive-md" (click)="modal.dismiss('Cross click')"
+          aria-label="Close">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Reason <sup>*</sup></label>
+          <input type="text" [(ngModel)]="archiveReason" class="form-control" placeholder="Enter a reason" id="reason">
+        </div>
+        <div class="form-group">
+          <label>Change Notes</label>
+          <textarea class="form-control" [(ngModel)]="changeStatusNotes" placeholder="Enter change notes (optional)"
+            rows="4" id="change-note"></textarea>
+        </div>
+        <p class="pt-8">{{dis_client_assoc}}
+        </p>
+        <h4 class="mb-8 text-xlarge">Client Associations</h4>
+        <div class="custom-table">
+          <ngx-datatable #table class="material common-table" [rows]="clientAssociatList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" [selected]="selectedAssociatClient"
+            [messages]="messages" rowHeight="auto" (select)="onSelectClientAssociat($event)"
+            [selectionType]="'checkbox'" id="client-associations-listing">
+            <ngx-datatable-column [resizeable]="false" prop="lastName" name="Name" [width]="100">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                {{(row.firstName) ? row.lastName + ', ' + row.firstName : row.lastName}} </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="associationType" name="Type" [width]="100"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="100"></ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" [width]="100" [sortable]="false" [canAutoResize]="false" [draggable]="false"
+              [headerCheckboxable]="false" name="Archive">
+              <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+                let-onCheckboxChangeFn="onCheckboxChangeFn">
+                <label class="cust-check">
+                  <input type="checkbox" [checked]="true" (change)="onCheckboxChangeFn($event)" />
+                  <span class="check-style"></span>
+                </label>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancle-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="archiveReason == ''"
+          (click)="clientStatusChange('isArchiving')" id="archive-client">Archive client</button>
+      </div>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+</ng-template>
+
+
+
+<ng-template #mymodal let-modal>
+  <div class="modal-header d-block">
+    <h3 class="modal-title">Export to CSV</h3>
+    <p>Select which data you want to export</p>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row no-gutters">
+      <div class="col-3" *ngFor="let item of columnList;trackBy: trackByFn; let i = index">
+        <div class="custom-control custom-checkbox pr-0">
+          <input class="custom-control-input" id="{{item.Name}}-{{i}}" [checked]="item.isChecked"
+            type="checkbox" (change)="changedExportValidation(item.isChecked = !item.isChecked)">
+          <label class="custom-control-label" for="{{item.Name}}-{{i}}">{{item.Name}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" data-dismiss="modal"
+      (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="getExportToCSVData()" [disabled]="exportDisable" id="export-to-csv">Export to CSV</button>
+  </div>
+  <app-loader [active]="isLoadingCSV"></app-loader>
+</ng-template>

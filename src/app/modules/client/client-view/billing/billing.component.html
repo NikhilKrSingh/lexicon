@@ -1,0 +1,248 @@
+<div>
+  <div class="billing-area">
+    <div class="row gutter-16">
+      <div class="col-12">
+        <div class="row gutter-16">
+          <div class="col-3 pr-24" *ngIf="billingSettings?.invoiceDelivery?.code !== 'ELECTRONIC'">
+            <div class="form-group">
+              <label class="d-flex justify-content-between align-items-center">
+                Invoice Address
+                <em class="icon icon-edit icon-color text-small cursor-pointer"
+                    *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin"
+                    (click)='editInvoiceAddress()' [class.disabled]="afterLoadstateList || afterUpdate"
+                    id="edit-invoice-address"></em>
+              </label>
+              <p class="m-0 lh-20" *ngIf='invoiceAddress'>
+                <span id="billing-invoice-address-one">{{invoiceAddress?.address1}} </span> <span id="billing-invoice-address-two">{{invoiceAddress?.address2}}</span> <br>
+                <span id="billing-invoice-city">{{invoiceAddress?.city}}<br></span>
+                <span id="billing-invoice-state">{{invoiceAddress?.state}}, </span> <span id="billing-invoice-zipcode">{{invoiceAddress?.zipCode}}</span>
+              </p>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label class="d-flex justify-content-between align-items-center">
+                Invoice Preferences
+                <em class="icon icon-edit icon-color text-small cursor-pointer"
+                    *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin"
+                    (click)='editInvoicePreferences()' id="edit-invoice-preferences"></em>
+              </label>
+              <p class="m-0 lh-20" id="billing-preferences-detail">{{billingSettings?.invoiceDelivery?.name}}</p>
+            </div>
+          </div>
+          <div class="col-4 pr-24 pl-24" *ngIf="!matterDetails?.isFixedFee">
+            <div class="form-group">
+              <label class="d-flex justify-content-between align-items-center">
+                Bill Issuance Frequency
+                <em class="icon icon-edit icon-color text-small cursor-pointer"
+                    *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin"
+                    (click)='editIssuanceFrequency()'
+                    id="edit-issuance-frequency"></em>
+              </label>
+              <p class="m-0 lh-20">{{billingSettings?.isWorkComplete ? 'Work Complete' : ''}}</p>
+              <p class="m-0 lh-20">{{billingSettings?.billFrequencyQuantity}} {{billFrequencyDurationName}}</p>
+              <p class="m-0 lh-20" *ngIf="billingSettings?.billFrequencyDuration?.code === 'WEEKS'">
+                Repeats on {{billFrequencyDayObj?.name}}</p>
+              <p class="m-0 lh-20" *ngIf="billingSettings?.billFrequencyDuration?.code === 'MONTHS'">
+                Repeats on
+                <ng-container *ngIf="billingSettings?.repeatType === 2; else viewAsMonthWeek">
+                  <span id="billing-repeat-on-monthrepet">
+                    {{billingSettings?.billFrequencyRecursOn}}{{(billingSettings?.billFrequencyRecursOn === 1) ? 'st' :
+                    (billingSettings?.billFrequencyRecursOn === 2) ? 'nd' :
+                      (billingSettings?.billFrequencyRecursOn === 3) ? 'rd' : 'th'}}
+                  </span>
+                </ng-container>
+                <ng-template #viewAsMonthWeek>
+                  <span id="billing-repeat-on-month">{{recurringName[billingSettings.billFrequencyRecursOn - 1]}} {{billFrequencyDayObj?.name}} of the month</span>
+                </ng-template>
+              </p>
+              <div class="upcoming-change" *ngIf="billingSettings?.effectiveBillFrequencyQuantity">
+                <div class="upcome-accordian open icon-color">
+                  <div class="d-flex align-items-center upcome-head">
+                <span class="cursor-pointer upcome-drop mr-4" (click)="showUpcoming = !showUpcoming">
+                  <em class="icon icon-angle-down icon-color"
+                      [ngClass]="showUpcoming ? 'icon-angle-down':'icon-angle-up'"></em>
+                </span>
+                    <p class="m-0 lh-20"><i>Upcoming changes
+                      {{billingSettings?.effectiveBillFrequencyStartingDate | date : 'MM/dd/yyyy'}}</i></p>
+                  </div>
+                  <div class="upcome-body pl-20" *ngIf="showUpcoming">
+                    <p class="m-0 lh-20">
+                      <i>
+                        {{billingSettings?.effectiveBillFrequencyQuantity}}&nbsp;{{effectiveBillFrequencyDurationName}}
+                        <br>
+                        <ng-container *ngIf="billingSettings?.effectiveBillFrequencyDuration?.code === 'WEEKS'">
+                          Repeats on {{effectiveBillFrequencyDayObj?.name}}
+                        </ng-container>
+                        <ng-container *ngIf="billingSettings?.effectiveBillFrequencyDuration?.code === 'MONTHS'">
+                          Repeats on
+                          <ng-container *ngIf="billingSettings?.effectiveRepeatType === 2; else viewAsMonthWeek">
+                            <span id="billing-repeat-on-monthrepet">
+                              {{billingSettings?.effectiveBillFrequencyRecursOn}}{{(billingSettings?.effectiveBillFrequencyRecursOn === 1) ? 'st' :
+                              (billingSettings?.effectiveBillFrequencyRecursOn === 2) ? 'nd' :
+                                (billingSettings?.effectiveBillFrequencyRecursOn === 3) ? 'rd' : 'th'}} of the month
+                            </span>
+                          </ng-container>
+                          <ng-template #viewAsMonthWeek>
+                            <span id="billing-repeat-on-month">{{recurringName[billingSettings.effectiveBillFrequencyRecursOn - 1]}} {{effectiveBillFrequencyDayObj?.name}} of the month</span>
+                          </ng-template>
+                        </ng-container>
+                      </i></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-loader [active]="billingLoading"></app-loader>
+  </div>
+</div>
+
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-24">
+    <h2 class="m-0">Rate Table</h2>
+    <button type="button" class="btn btn-primary"
+            *ngIf="(permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit) && !isRateTableEdit"
+            (click)='editRateTable()' id="customize-rate">
+      Edit Rate Table
+    </button>
+    <button type="button" class="btn btn-primary"
+            *ngIf="(permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit) && isRateTableEdit"
+            (click)='saveRateTable()' id="save-rate">
+      Save Rate Table
+    </button>
+  </div>
+  <div class="alert alert-danger d-flex justify-content-between mt-24 mb-24 max-width-fit"
+       [class.has-error]="rateTableFormSubmitted && isCustomBillingRate && !rateTables.length"
+       role="alert" *ngIf="rateTableFormSubmitted && isCustomBillingRate && !rateTables.length">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-error text-large"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="mr-16 mt-0 mb-0">Error</h4>
+        <span id="error-set-rate-table">You must set a rate table before saving.</span>
+      </div>
+    </div>
+  </div>
+  <div class="position-relative">
+    <div class="custom-control custom-radio pr-0 mb-12">
+      <input type="radio" id="billing-rate-radio-employee" name="billing-rate-radio-employee"
+             class="custom-control-input" [disabled]="!isRateTableEdit"
+             (ngModelChange)="customBillingChange($event)"
+             [(ngModel)]="isCustomBillingRate" [value]="false">
+      <label class="custom-control-label" for="billing-rate-radio-employee">
+        Billing rates are charged at the employee's base rates
+      </label>
+    </div>
+    <div class="custom-control custom-radio pr-0 mb-16">
+      <input type="radio" id="billing-rate-radio-custom" name="billing-rate-radio-employee"
+             class="custom-control-input" [disabled]="!isRateTableEdit"
+             (ngModelChange)="customBillingChange($event)"
+             [(ngModel)]="isCustomBillingRate" [value]="true">
+      <label class="custom-control-label" for="billing-rate-radio-custom">Custom rates</label>
+    </div>
+    <button type="button" class="btn btn-outline-primary" *ngIf="isCustomBillingRate"
+            (click)="openRateTableModal()"
+            [disabled]="!isRateTableEdit" id="open-ratetable-modal">
+      Set Rate Table
+    </button>
+    <div *ngIf="rateTables.length && isCustomBillingRate">
+      <div class="custom-table pt-16">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+            <tr>
+              <th class="time-mat-td">Rate Table Name</th>
+              <th class="time-client-td">Description</th>
+              <th class="text-right time-ent-td"
+                  *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit">
+                Action
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let rateTable of rateTables;trackBy: trackByFn ;let templateIndex = index;">
+              <td colspan="4" class="p-0">
+                <table class="table vert-algn-top">
+                  <tbody>
+                  <tr>
+                    <td class="time-mat-td">
+                      <div class="d-flex align-items-center">
+                          <span class="table-arrow mr-8" (click)="rateTable.showGrid = !rateTable.showGrid">
+                            <em [ngClass]="(!rateTable.showGrid) ? 'icon icon-angle-down' : 'icon icon-angle-up'"></em>
+                          </span>
+                        <span class="ml-2">{{rateTable.name}}</span>
+                      </div>
+                    </td>
+                    <td class="time-client-td">
+                      <span>{{rateTable.description}}</span>
+                    </td>
+                    <td class="time-ent-td" *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit">
+                      <div class="d-flex justify-content-end">
+                        <em class="icon icon-remove icon-color cursor-pointer" [class.text-disabled]="!isEditRateTable"
+                            (click)='deleteRateTable()'
+                            id="delete-rate-table-{{templateIndex}}"></em>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="table-detail" [ngClass]="(!rateTable.showGrid) ? 'd-none' : ''">
+                    <td colspan="4" class="py-0 pr-0">
+                      <table class="table table-borderless table-striped job-detail-table">
+                        <thead>
+                        <tr>
+                          <th class="jfn-width">Job Family Name</th>
+                          <th class="br-width">Base Rate</th>
+                          <th class="tr-width">Table Rate</th>
+                          <th class="er-width">Exception Rate</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let jobFamilyDetail of rateTable.jobFamily; trackBy: trackByFn ;let typeIndex = index"
+                            id="type-{{typeIndex}}">
+                          <td class="jfn-width">{{jobFamilyDetail.name}}</td>
+                          <td class="br-width">{{jobFamilyDetail.baseRate | currency}}</td>
+                          <td class="tr-width pl-16"
+                              [class.text-danger]="jobFamilyDetail.tableRate !== jobFamilyDetail.baseRate">{{jobFamilyDetail.tableRate | currency}}</td>
+                          <td class="er-width pl-16" [class.text-danger]="jobFamilyDetail.exceptionRate != null && jobFamilyDetail.exceptionRate !== jobFamilyDetail.baseRate">
+                            {{jobFamilyDetail.exceptionRate != null ? (jobFamilyDetail.exceptionRate | currency) : '-'}}
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<div class="pt-32">
+  <app-disbursement-rates
+    [pageType]="'clientdetals'"
+    [clientId]="clientId"
+    [isEditRateTable]="isRateTableEdit"
+    (isEditRateTableChange)="getRateTable()"
+    [(isCustomBillingRate)]="isCustomBillingRate"
+    [(rateTables)]="rateTables"
+    (getDisburs)="getDisburs($event)">
+  </app-disbursement-rates>
+</div>
+<div class="payment-method pt-32" *ngIf='matterDetails'>
+  <app-billing-payment-method
+    type='client' [matterDetails]='matterDetails'
+    [isEditRateTable]="isRateTableEdit"
+    (isEditRateTableChange)="getRateTable()"
+    [(isCustomBillingRate)]="isCustomBillingRate"
+    [(rateTables)]="rateTables"
+    [hasPermissionToAdd]="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin">
+  </app-billing-payment-method>
+</div>

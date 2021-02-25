@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Groups</li>
+    </ol>
+    <div class="heading">
+      <h1>Groups</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" name="q1" id="q1" [(ngModel)]="searchGroup"
+              placeholder="Search group names" required="" (keyup)="searchGroupName()">
+            <button class="btn" type="submit" (click)="searchGroupName()">Search</button>
+          </div>
+        </form>
+      </div>
+      <div class="btn-group ml-md-24 ml-0">
+        <button class="btn btn-primary btn-icon"  type="button" (click)="createNewGroup()" id="create-new-group">
+          <i class="icon icon-plus"></i>
+          Create New Group
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+
+          <div class="custom-table">
+            <ngx-datatable #table class="material common-table accessmanagement-table"
+                            [rows]="tableData" [columnMode]="ColumnMode.force" [headerHeight]="50"
+                            [footerHeight]="footerHeight"
+                            [sorts]="[{prop: 'name', dir: 'asc'}]"
+                            [messages]="messages" rowHeight="auto"
+                            [count]="page.totalElements" [offset]="page.pageNumber"
+                            [limit]="page.size" [scrollbarH]="true" (sort)="calcTotalPages()" id="tabledata-tbl">
+              <ngx-datatable-column [resizeable]="false" prop="name" name="Group Name" [width]="337"></ngx-datatable-column>
+
+              <ngx-datatable-column [resizeable]="false" prop="isVisible" name="Status" [width]="135">
+                  <ng-template let-value="value" ngx-datatable-cell-template>{{value ? 'Active' : 'Inactive'}} </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='true' [width]="100">
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div class="d-flex justify-content-end">
+                    <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)">
+                      <em class="icon icon-dot-verti"></em>
+                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                        <a  class="dropdown-item" href="javascript:void(0)" (click)="EditGroup(row.id)" id="edit-group-index-{{rowIndex}}">
+                          Edit Group
+                        </a>
+
+                        <a  class="dropdown-item" href="javascript:void(0)" (click)="CopyGroup(row.id)" id="copy-group-index-{{rowIndex}}">
+                          Copy Group
+                        </a>
+                        <a *ngIf="row.isVisible" class="dropdown-item" href="javascript:void(0)" (click)="DeactivateGroup(row.id)" id="deactive-group-index-{{rowIndex}}">
+                          Deactivate Group
+                        </a>
+                        <a *ngIf="!row.isVisible" class="dropdown-item" href="javascript:void(0)" (click)="ReactivateGroup(row.id)" id="reactive-group-index-{{rowIndex}}">
+                          Reactivate Group
+                        </a>
+                      </div>
+                    </div>
+                    </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                  let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                  let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                            (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray; trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                          {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                          {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                          Page {{ i+1 }} of {{page.totalPages}}
+                        </option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage" [size]="pageSize" [count]="rowCount"
+                          [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+          </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>

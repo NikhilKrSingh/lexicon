@@ -1,0 +1,198 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a id="ratetblsbrddash" [routerLink]="['/dashboard']" href="javascript:void(0)">Admin Settings</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Rate Tables</li>
+    </ol>
+    <div class="heading">
+      <h1>Rate Tables</h1>
+    </div>
+    <div class="alert d-flex d-none justify-content-between align-items-start absolute-alert"
+      [class.alert-success]='true' role="alert" *ngIf='message'>
+      <div class="d-flex">
+        <em class="alert-icon icon icon-check-circle text-large"></em>
+        <div class="" id="ratetblssuccessmsg">
+          <h5 class="mr-36 mt-0 mb-4">Success</h5>
+          <span>{{message}}</span>
+        </div>
+      </div>
+      <span class="alert-close" id="ratetblsclosesucmsg" (click)='reoveMsg()'><em class="icon icon-close"></em></span>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" placeholder="Search rate table name and description"
+              (keyup)="searchFilter()" id="ratetblssearchinput" name="rateTableSearch" [(ngModel)]="rateTableSearch">
+            <button class="btn" type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+      <div class="btn-group ml-md-24 ml-0">
+        <button class="btn btn-primary btn-icon" id="ratetblscnrtbls" type="button" [routerLink]="['/firm/create-rate-table']">
+          <i class="icon icon-plus"></i> Create New Rate Table
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row gutter-16">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Status</label>
+              <div class="dropdown-matter">
+                <ng-select
+                  [items]="statusList"
+                  placeholder="Select status"
+                  (change)='searchFilter()'
+                  [(ngModel)]="status"
+                  [selectOnTab]="true"
+                  [bindValue]="'id'"
+                  [bindLabel]="'name'"
+                  [notFoundText]="'No record found'">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="custom-table">
+              <ngx-datatable #ratetablelist class="material common-table"
+                id="ratetableslisttabls"
+                [class.matter-no-data]="rateTables?.length === 0"
+                [rows]="rateTables"
+                [columnMode]="ColumnMode.force"
+                [headerHeight]="50"
+                [footerHeight]="footerHeight"
+                [messages]="messages"
+                rowHeight="auto"
+                [count]="page.totalElements"
+                [offset]="page.pageNumber"
+                [limit]="page.size"
+                [scrollbarH]="false"
+                [sorts]="[{prop: 'name', dir: 'asc'}]"
+                (sort)="updateDatatableFooterPage()"
+                [selectionType]="SelectionType.single">
+
+                <ngx-datatable-column [resizeable]="false" prop="name" name="Rate Table Name" [sortable]="true" [width]="200">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [width]="250">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <ng-container *ngIf='value?.length < 33'>
+                      <span> {{value}} </span>
+                    </ng-container>
+                    <div class="d-inline-flex justify-content-between" *ngIf='value?.length >= 33'>
+                      <div class="info-hover position-relative">
+                        <a href="javascript:void(0)" class="text-decoration">
+                          <span> {{value?.slice(0, 32)}}... </span>
+                        </a>
+                        <div class="tooltip bs-tooltip-top center" role="tooltip">
+                          <div class="arrow"></div>
+                          <div class="tooltip-inner tooltip-lg">
+                            <p>{{value}} </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="clientAssigned" name="Clients Assigned" [sortable]="true" [width]="150">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="matterAssigned" name="Matters Assigned" [sortable]="true" [width]="150">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [sortable]="true" [width]="100">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center justify-content-start">
+                      {{(value) ? 'Active' : 'Inactive'}}
+                      <div class="info-hover position-relative ml-12" *ngIf="row.effectiveDate">
+                        <em class="icon icon-info text-large"></em>
+                        <div class="tooltip bs-tooltip-top center" role="tooltip">
+                          <div class="arrow"></div>
+                          <div class="tooltip-inner">
+                            <h6>Pending Changes</h6>
+                            <p>Changes will effect <br> on {{row.effectiveDate | date: 'MM/dd/yyyy' }} </p>
+                          </div>
+                        </div>
+                      </div>
+                      </div>
+                    </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action"
+                  [width]="100" prop='id'>
+                  <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                      <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+                        (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                        (outsideClick)="onClickedOutside($event, rowIndex)">
+                        <span class="icon-area">
+                          <em class="icon icon-dot-verti"></em>
+                        </span>
+                        <div class="dropdown-menu dropdown-menu-right document-matter"
+                          aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" href="javascript:void(0)"
+                          [routerLink]="['/firm/view-rate-table']" [queryParams] ="{ rateTableId: row.id}">View</a>
+                          <a class="dropdown-item" *ngIf="row.status" href="javascript:void(0)"
+                            (click)="editRateTbl(row)">Edit</a>
+                          <a class="dropdown-item" href="javascript:void(0)" (click)="disableRate(row)"
+                            *ngIf="row.status">Disable</a>
+                          <a class="dropdown-item" href="javascript:void(0)" (click)="disableRate(row)"
+                            *ngIf="!row.status">Enable</a>
+
+                        </div>
+                      </div>
+                      <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-footer>
+                  <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                            <select class="custom-select border-less" [formControl]="pageSelector"
+                              (change)="changePageSize()">
+                              <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <span>
+                          {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                          {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                          {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                        </span>
+                      </div>
+
+                      <div class="d-flex align-items-center">
+                        <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                          <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                            of {{page.totalPages}}</option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                            [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                            [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                            (change)="ratetablelist.onFooterPage($event);pageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+            <app-loader [active]="isLoading"></app-loader>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

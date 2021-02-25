@@ -1,0 +1,207 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Corporate Contacts</li>
+    </ol>
+    <div class="heading">
+      <h1>Corporate Contacts</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" [(ngModel)]="searchInput" name="searchInput"
+              placeholder="Search by contact number, contact name, email address, phone number, company" (keyup)="updateFilter($event)" id="search-text">
+            <button class="btn" type="submit" id="search-btn-text">Search</button>
+          </div>
+        </form>
+      </div>
+      <div  class="btn-group ml-md-24 ml-0">
+
+        <button *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" class="btn btn-primary btn-icon" type="button" [routerLink]="['/contact/create-corporate-contact']" id="add-new-corporate-contact">
+          <i class="icon icon-plus"></i> Add New Corporate Contact
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-warning d-flex justify-content-between mb-32 no-shadow" *ngIf="blocks>0">
+          <div class="d-flex">
+            <em class="alert-icon icon icon-warning ml-12"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <h4 class="mr-16 mt-0 mb-0">Warning</h4>
+              {{block_warn}}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label>Company</label>
+              <app-multiselect-dropdown [title]="title" [selections]="selectedCompany" [displaySubItem]="companyList"
+                [filterName]="filterName" (onSelectionChanged)="getSelectedCompany($event)"
+                (clearFilter)="clearFilter('company')" (applyFilter)="applyFilter()" id="company-multi-select"></app-multiselect-dropdown>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label>Contact Type</label>
+              <app-multiselect-dropdown [title]="title2" [selections]="selectedcontactType"
+                [displaySubItem]="contactTypeList" [filterName]="filterName"
+                (onSelectionChanged)="getselectedcontactType($event)" (clearFilter)="clearFilter('type')"
+                (applyFilter)="applyFilter()" id="contact-type-multi-select"></app-multiselect-dropdown>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label>Status</label>
+              <app-multiselect-dropdown [title]="title1" [selections]="selectedStatus" [displaySubItem]="statusList"
+                [filterName]="filterName" (onSelectionChanged)="getSelectedStatus($event)"
+                (clearFilter)="clearFilter('status')" (applyFilter)="applyFilter()" id="status-multi-select"></app-multiselect-dropdown>
+            </div>
+          </div>
+        </div>
+          <div class="position-relative">
+            <div class="custom-table">
+              <ngx-datatable #table class="material common-table corporatecontcat-table" [class.fix-col-right]="tables?.frozenRightArr[0]"
+                [class.matter-no-data]="corporateContactListNew?.length === 0" [scrollbarH]="true"
+                [rows]="corporateContactListNew" [columnMode]="ColumnMode.force" [headerHeight]="50"
+                [sorts]="[{prop: 'uniqueNumber', dir: 'desc'}]"
+                [footerHeight]="footerHeight" [selected]="selected" [messages]="messages" rowHeight="auto"
+                [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" (sort)="getTotalPages()"
+                id="corporate-contact-listing-tbl">
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="uniqueNumber" name="Contact Number" [width]="150">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="name" name="Name" [width]="150">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="contactInformation" name="Contact Information"
+                  [width]="250">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <ng-container *ngIf='row?.contactInformation?.length <= 20'>
+                      <span [ngClass]="{donotcontact: row?.doNotContact}">{{row?.contactInformation}}</span>
+                    </ng-container>
+                    <div class="d-inline-flex justify-content-between" *ngIf='row?.contactInformation?.length > 20'>
+                      <div class="info-hover position-relative">
+                        <span class="text-ellipsis" [ngClass]="{donotcontact: row?.doNotContact}">{{row?.contactInformation?.slice(0, 20)}}...</span>
+                        <div class="tooltip bs-tooltip-top left" role="tooltip">
+                          <div class="arrow"></div>
+                          <div class="tooltip-inner tooltip-lg">
+                            <p>Contact Information</p>
+                            <p>{{row?.contactInformation}} </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="companyName" name="Company" [width]="200">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="corporateContactTypes" name="Contact Type" [width]="350">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="jobTitle" name="Job Title" [width]="190">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="status" name="Status" [width]="120">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Actions"
+                [frozenRight]='tables?.frozenRightArr[0]' [width]="100" prop='id'>
+                  <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                      <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+                        (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                        (outsideClick)="onClickedOutside($event, rowIndex)">
+                        <em class="icon icon-dot-verti"></em>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" [routerLink]="['/contact/create-corporate-contact']"
+                             *ngIf="!permissionList.CLIENT_CONTACT_MANAGEMENTisEdit && !permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin"
+                            [queryParams]="{contactId: value,state:'view'}" href="javascript:void(0)" id="view-corporate-contact-index-{{rowIndex}}">View </a>
+                          <a class="dropdown-item"
+                             *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin"
+                            [routerLink]="['/contact/create-corporate-contact']" [queryParams]="{contactId: value, state:'edit'}" id="view-corporate-contact-index-{{rowIndex}}">View
+                          </a>
+                          <a class="dropdown-item" (click)="UpdateStatus($event, corporateContactAction,'Deactivate', row)" *ngIf="row.status=='Active' && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" id="deactivate-corporate-contact-index-{{rowIndex}}">Deactivate Corporate Contact </a>
+                          <a class="dropdown-item" (click)="UpdateStatus($event, corporateContactAction,'Reactivate', row)" *ngIf="row.status=='Inactive' && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" id="reactivate-corporate-contact-index-{{rowIndex}}">Reactivate Corporate Contact </a>
+                          <a class="dropdown-item" (click)="UpdateStatus($event, corporateContactAction,'Archive', row)" *ngIf="row.status=='Inactive' && permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" id="archive-corporate-contact-index-{{rowIndex}}">Archive Corporate Contact </a>
+                        </div>
+                      </div>
+                      <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-footer>
+                  <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                    let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                            <select class="custom-select border-less" [formControl]="pageSelector"
+                              (change)="changePageSize()">
+                              <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <span>
+                          {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                          {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                          {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                        </span>
+                      </div>
+
+                      <div class="d-flex align-items-center" *ngIf="page.totalPages > 0">
+                        <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                          <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                            of {{page.totalPages}}</option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                            [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                            [page]="curPage" [size]="pageSize" [count]="rowCount"
+                            [hidden]="!((rowCount / pageSize) > 1)"
+                            (change)="table.onFooterPage($event);pageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+            <app-loader [active]="loading"></app-loader>
+          </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #corporateContactAction let-modal>
+  <div class="modal-header d-block pb-8">
+    <h3 class="modal-title mb-0">{{updateStatusContact}} Corporate Contact</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');changeStatusNotes=''; updateStatusContact='';" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-8">
+    <div class="row">
+      <div class="col-12">
+          <p>Are you sure you want to {{updateStatusContact | lowercase}} this Corporate Contact?</p>
+      </div>
+      <div class="col-12">
+        <div class="form-group">
+          <label>Change Notes</label>
+          <textarea class="form-control"  [(ngModel)]="changeStatusNotes" rows="4" placeholder="Enter change notes (optional)" id="change-note"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');changeStatusNotes=''; updateStatusContact='';" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Save click'); UpdateStatusCorporateContact();" id="update-status-btn">{{updateStatusContact}} Corporate Contact</button>
+  </div>
+</ng-template>

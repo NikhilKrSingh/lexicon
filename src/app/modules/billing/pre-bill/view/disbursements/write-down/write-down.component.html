@@ -1,0 +1,119 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">{{ title }}</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <p class="mb-24" *ngIf="!isView">Enter either the write-down amount or the actual disbursement to be billed. The
+    system will calculate the other value.</p>
+  <form [formGroup]="form">
+    <div class="row">
+      <div class="col-4" *ngIf="!isView">
+        <div class="form-group pb-20" [class.has-error]="f['writeDownCodeId'].errors && formSubmitted">
+          <label>Type <sup>*</sup></label>
+          <ng-select [items]="writeDownList" placeholder="Select write-down type" formControlName="writeDownCodeId"
+            [bindValue]="'id'" [bindLabel]="'codeName'" [selectOnTab]="true" [clearable]="false"
+            [notFoundText]="'No record found'" id="write-down-type">
+          </ng-select>
+          <span class="field-message text-danger" *ngIf="f['writeDownCodeId'].errors && formSubmitted">
+            <span *ngIf="f.writeDownCodeId.errors?.required">
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.writedown_type_error}}
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="col-4" *ngIf="isView">
+        <div class="form-group pb-15">
+          <label>Type</label>
+          <div>{{writeDownDetails?.writeDownCode?.code}} - {{writeDownDetails?.writeDownCode?.name}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped table-even-striped table-borderless mb-24">
+        <tbody>
+          <tr class="bg-white bdr-btm">
+            <th>Date of Disbursement</th>
+            <th>Entered By</th>
+            <th>Disbursement Code</th>
+            <th>Description</th>
+            <th width="115">Amount</th>
+          </tr>
+          <tr class="bg-light">
+            <td>{{ rowDetails?.date | date : 'MM/dd/yy' }}</td>
+            <td>{{ (rowDetails?.createdBy && rowDetails?.createdBy.name) ? rowDetails?.createdBy.name : '--' }}</td>
+            <td>
+              {{ (rowDetails?.disbursementType && rowDetails?.disbursementType.code) ? rowDetails?.disbursementType.code : '--' }}
+            </td>
+            <td>
+              {{ (rowDetails?.disbursementType && rowDetails?.disbursementType.description) ? rowDetails?.disbursementType.description : '--' }}
+            </td>
+            <td class="small-padding">
+              <ng-container *ngIf="isView">
+                <span class="view-model">
+                  {{ rowDetails?.oriAmount | currency : 'USD': 'symbol': '1.2-2'}}
+                </span>
+              </ng-container>
+              <ng-container *ngIf="!isView">{{ rowDetails?.amount | currency : 'USD': 'symbol': '1.2-2'}}</ng-container>
+            </td>
+          </tr>
+          <tr class="bg-white bdr-btm">
+            <td><strong>Write-Down Amount</strong></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="small-padding">
+              <div *ngIf="!isView">
+                <input class="form-control bordred gray-form-control" type="text" formControlName="writeDownAmount"
+                  prefix="$" mask="separator.2" thousandSeparator=","
+                  (focusout)="onWriteDownValueChange($event.target.value, 'writedown', true)" id="write-down-amount">
+              </div>
+              <ng-container *ngIf="isView">{{writeDownAmount | currency : 'USD': 'symbol': '1.2-2'}}</ng-container>
+            </td>
+          </tr>
+          <tr class="bg-white">
+            <td><strong>Disbursement to be Billed</strong></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="small-padding">
+              <input *ngIf="!isView" class="form-control bordred gray-form-control" type="text" placeholder=""
+                [readonly]="!isEdit" (input)="onWriteDownValueChange($event.target.value, 'amounttobilled')" prefix="$"
+                mask="separator.2" thousandSeparator="," name="billedAmount" [(ngModel)]="billedAmount"
+                [ngModelOptions]="{standalone: true}" id="billed-amount">
+              <ng-container *ngIf="isView">
+                {{(rowDetails?.oriAmount - writeDownAmount) | currency : 'USD': 'symbol': '1.2-2'}}</ng-container>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="form-group mb-0" [class.has-error]="f['writeDownNarrative'].errors && formSubmitted">
+          <label>Reason <sup *ngIf="!isView">*</sup></label>
+          <p *ngIf="isView" class="mt-8">{{ form.value.writeDownNarrative}}</p>
+          <textarea *ngIf="!isView" class="form-control" formControlName="writeDownNarrative"
+            placeholder="Enter reason for write down" id="writedown-narrative"></textarea>
+          <span class="field-message text-danger" *ngIf="f['writeDownNarrative'].errors && formSubmitted">
+            <span *ngIf="f.writeDownNarrative.errors.required">
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.writedown_narrative_error}}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" data-dismiss="modal"
+    (click)="close()" id="close-cancel-btn">{{isView ? 'Close' : 'Cancel'}}</button>
+  <button type="button" *ngIf="!isView" class="btn btn-primary" (click)="save()" id="save-btn">Save</button>
+</div>
+
+
+<app-loader [active]='loading'></app-loader>

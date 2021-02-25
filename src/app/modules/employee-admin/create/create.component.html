@@ -1,0 +1,31 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/employee/list']"><a href="javascript:void(0)">Employee Management</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Create New Employee</li>
+    </ol>
+    <div class="heading">
+      <h1>Create New Employee</h1>
+    </div>
+    <ul class="list-unstyled steps d-flex mb-48 justify-content-between">
+      <li class="d-flex align-items-center cursor-pointer" [class.completed]='completedArr.generalinfo' [class.current]='!completedArr.generalinfo' (click)="changeTab('generalinfo')" id="general-information">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>1</span>
+        </span>
+        General Information
+      </li>
+      <li class="d-flex align-items-center cursor-pointer" [class.current]='completedArr.generalinfo && !completedArr.settings' (click)="changeTab('settings')" id="settings">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>2</span>
+        </span>
+        Settings
+      </li>
+    </ul>
+    <app-generalinfo *ngIf="step==='generalinfo'" (nextStep)='nextStep($event)'></app-generalinfo>
+    <app-settings *ngIf="step==='settings'" (prevStep)='prevStep($event)'></app-settings>
+  </div>
+</div>

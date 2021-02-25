@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="18px" viewBox="0 0 16 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>UI/Icon/side nav/05 client</title>
+    <defs>
+        <path d="M10.0750871,5 C10.3365038,5 10.5537954,5.20137477 10.5736438,5.46203686 L10.9590362,10.5232614 C10.9800027,10.7986066 10.7737879,11.0388147 10.4984426,11.0597812 L10.4604795,11.0612245 L10.4604795,11.0612245 L9.84615385,11.0612245 L9.63765715,15.5233375 C9.6251917,15.7901151 9.40527073,16 9.13820208,16 L6.86179792,16 C6.59472927,16 6.3748083,15.7901151 6.36234285,15.5233375 L6.15384615,11.0612245 L5.5395205,11.0612245 C5.26337812,11.0612245 5.0395205,10.8373669 5.0395205,10.5612245 C5.0395205,10.5485564 5.04000194,10.5358929 5.04096378,10.5232614 L5.42635617,5.46203686 C5.44620456,5.20137477 5.6634962,5 5.92491288,5 L10.0750871,5 Z M8,1.5 C8.82842712,1.5 9.5,2.17157288 9.5,3 C9.5,3.82842712 8.82842712,4.5 8,4.5 C7.17157288,4.5 6.5,3.82842712 6.5,3 C6.5,2.17157288 7.17157288,1.5 8,1.5 Z" id="path-1"></path>
+    </defs>
+    <g id="Create-Matter---Existing-Client" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="1.21.3.Create-New-Matter.Create-Calendar-Event.Existing-Client.Personal.Event-Added.Hover-State,-Description" transform="translate(-1275.000000, -535.000000)">
+            <g id="Content" transform="translate(276.000000, 100.000000)">
+                <g id="Group-38" transform="translate(16.000000, 198.000000)">
+                    <g id="Group-44" transform="translate(16.000000, 164.000000)">
+                        <g id="Group-50" transform="translate(16.000000, 16.000000)">
+                            <g id="Group-46-Copy" transform="translate(951.000000, 36.000000)">
+                                <g id="UI/Icon/side-nav/05-client" transform="translate(0.000000, 21.000000)">
+                                    <g id="Rectangle" transform="translate(0.000000, 0.500000)">
+                                        <rect x="0" y="0.5" width="16" height="16"></rect>
+                                        <mask id="mask-2" fill="white">
+                                            <use xlink:href="#path-1"></use>
+                                        </mask>
+                                        <use id="Mask" fill="#4E5F7B" xlink:href="#path-1"></use>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

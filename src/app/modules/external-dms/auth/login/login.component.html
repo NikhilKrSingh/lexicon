@@ -1,0 +1,27 @@
+<div id="content-area" class="d-flex justify-content-between flex-column login-row redirecting">
+  <div class="login-wraps flex-grow-1 d-flex align-items-center justify-content-center pt-0 mb-0">
+    <div class="container">
+      <div class="d-flex justify-content-center">
+        <div class="text-left py-16">
+          <span class="error-txt text-danger small mb-16 d-block" *ngIf="invalidCredential">
+            <em class="icon icon-error mr-4"></em>{{errorData.invalid_credential}}
+          </span>
+          <span class="error-txt text-danger small mb-16 d-block" *ngIf="invalidPortal">
+            <em class="icon icon-error mr-4"></em>{{errorData.invalid_portal_error}}
+          </span>
+          <h1 *ngIf="!invalidPortal" class="mb-32 pb-8 mt-0">Redirecting</h1>
+          <p *ngIf="!invalidPortal" class="mb-0">You are being redirected to the DMS landing page. </p>
+          <p *ngIf="!invalidPortal" class="mb-0">Please, do not close the browser.</p>
+          <a *ngIf="invalidPortal" href="javascript:void(0)" (click)="login()" id="login-in">Log in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="login-ftr">
+    <div class="container">
+      <a href="#">
+        <img src="assets/images/lexicon-logo.svg" alt="">
+      </a>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,460 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/contact/client-associations']"><a
+        href="javascript:void(0)">Contacts</a></li>
+      <li class="breadcrumb-item active" aria-current="page"
+          *ngIf='!isEditMode'>{{ (isViewMode) ? 'View Association' : 'Create Association' }}</li>
+      <li class="breadcrumb-item active" aria-current="page" *ngIf='isEditMode'>Edit Association</li>
+    </ol>
+    <div class="heading">
+      <h1 *ngIf='!isEditMode'>{{ (isViewMode) ? 'View Matter Association' : 'New Association' }} </h1>
+      <h1 *ngIf='isEditMode'>Edit Association</h1>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div>
+          <h2 class="mb-24">Contact Type</h2>
+          <div class="section-area">
+            <div class="custom-control custom-radio">
+              <input type="radio" id="ct-1" name="ct" value="Vendor" class="custom-control-input"
+                     [(ngModel)]="clientAssociationtype" [disabled]='isEditMode || isViewMode'
+                     (change)="changeContactType()">
+              <label class="custom-control-label" for="ct-1">Vendor</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="ct-2" name="ct" value="Subsidiary" class="custom-control-input"
+                     [(ngModel)]="clientAssociationtype" [disabled]='isEditMode || isViewMode'
+                     (change)="changeContactType()">
+              <label class="custom-control-label" for="ct-2">Subsidiary</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="ct-3" name="ct" value="Opposing Counsel" class="custom-control-input"
+                     [(ngModel)]="clientAssociationtype" [disabled]='isEditMode || isViewMode'
+                     (change)="changeContactType()">
+              <label class="custom-control-label" for="ct-3">Opposing Counsel</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="ct-4" name="ct" value="Expert Witness" class="custom-control-input"
+                     [(ngModel)]="clientAssociationtype" [disabled]='isEditMode || isViewMode'
+                     (change)="changeContactType()">
+              <label class="custom-control-label" for="ct-4">Expert Witness</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="ct-5" name="ct" value="Opposing Party" class="custom-control-input"
+                     [(ngModel)]="clientAssociationtype" [disabled]='isEditMode || isViewMode'
+                     (change)="changeContactType()">
+              <label class="custom-control-label" for="ct-5">Opposing Party</label>
+            </div>
+            <app-loader [active]="contactLoading"></app-loader>
+          </div>
+        </div>
+        <div class="mt-48">
+          <form [formGroup]="vendorForm" *ngIf="clientAssociationtype!='Opposing Party'">
+            <h2 class="mb-24">Basic Details</h2>
+            <div class="row gutter-16 section-area">
+              <div class="col-3">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-control" [readonly]="true" formControlName="uniqueNumber" id="contact-number">
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group" [class.has-error]='associationVendorError.firstName'>
+                  <label>First Name <sup>*</sup></label>
+                  <input type="text" class="form-control" (keyup)='changeFirstName()' (blur)='changeFirstName()'
+                         [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly"
+                         placeholder="Enter First Name" formControlName="FirstName" id="first-name">
+                  <app-validation-message [errorMessage]='associationVendorError.firstNameMessage'
+                                          *ngIf='associationVendorError.firstName'>
+                  </app-validation-message>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group" [class.has-error]='associationVendorError.lastName'>
+                  <label>Last Name <sup>*</sup></label>
+                  <input type="text" class="form-control" placeholder="Enter Last Name" formControlName="LastName"
+                  (keyup)='changeLastName()' (blur)='changeLastName()'
+                         [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly" id="last-name">
+                  <app-validation-message [errorMessage]='associationVendorError.lastNameMessage'
+                                          *ngIf='associationVendorError.lastName'>
+                  </app-validation-message>
+                </div>
+              </div>
+              <div class="col-3"></div>
+              <div class="col-3">
+                <div class="form-group" [class.has-error]='associationVendorError.companyName'>
+                  <label>Company</label>
+                  <input type="text" class="form-control" placeholder="Enter Company Name" formControlName="CompanyName"
+                  (keyup)='changeCompanyName()' (blur)='changeCompanyName()'
+                         [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly" id="company-name">
+                  <app-validation-message [errorMessage]='associationVendorError.companyNameMessage'
+                                          *ngIf='associationVendorError.companyName'>
+                  </app-validation-message>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group" [class.has-error]='associationVendorError.email'>
+                  <label>Email Address </label>
+                  <input type="email" name="email" formControlName="Email" class="form-control"
+                         placeholder="Email Address"
+                         value="Email Address" (keyup)='changeEmail()' (blur)='changeEmail()'
+                         [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly" id="email-address">
+                  <app-validation-message [errorMessage]='associationVendorError.emailMessage'
+                                          *ngIf='associationVendorError.email'>
+                  </app-validation-message>
+                </div>
+              </div>
+              <div class="col-3">
+                <div
+                  [ngClass]="(vendorForm.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                  <label>Phone Number</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                         [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly"
+                         placeHolderCharacter=" " formControlName="PrimaryPhone"
+                         (blur)="onBlurMethod(vendorForm.controls.PrimaryPhone.value,'PrimaryPhone')" id="phone-number"/>
+                  <span class="field-message text-danger"
+                        *ngIf="vendorForm.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                    class="icon icon-error mr-4"></em>
+                  Invalid phone number
+                </span>
+                </div>
+              </div>
+              <app-loader [active]="detailsLoading"></app-loader>
+            </div>
+          </form>
+          <form [formGroup]="opposingPartyForm" *ngIf="clientAssociationtype=='Opposing Party'">
+            <h2 class="mb-24">Basic Details</h2>
+            <div class="section-area">
+              <div class="mb-24">
+                <div class="custom-control custom-radio">
+                  <input type="radio" id="bd-1" name="bd" class="custom-control-input" value="Individual"
+                         [disabled]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly || isEditMode "
+                         [(ngModel)]="opposingPartyType" [ngModelOptions]="{standalone: true}" (change)="onChange()" [checked]="opposingPartyType == 'Individual'">
+                  <label class="custom-control-label" for="bd-1">Individual</label>
+                </div>
+                <div class="custom-control custom-radio">
+                  <input type="radio" id="bd-2" name="bd" class="custom-control-input" value="Corporate"
+                         [disabled]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly || isEditMode"
+                         [(ngModel)]="opposingPartyType" [ngModelOptions]="{standalone: true}" [checked]="opposingPartyType =='Corporate'" (change)="onChange()">
+                  <label class="custom-control-label" for="bd-2">Corporate</label>
+                </div>
+              </div>
+              <div class="row" *ngIf="opposingPartyType!=''">
+                <div class="col-10">
+                  <div class="row gutter-16">
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>Contact Number</label>
+                        <input type="text" class="form-control"
+                               formControlName="uniqueNumber" [readonly]="true" id="contact-number">
+                      </div>
+                    </div>
+                    <div class="col-3" *ngIf="opposingPartyType=='Corporate'">
+                      <div class="form-group" [class.has-error]='associationVendorError.companyName'>
+                        <label>Company Name <sup>*</sup></label>
+                        <input type="text" class="form-control" placeholder="Enter Company Name"
+                               formControlName="CompanyName" (keyup)='changeCompanyName()' (blur)='changeCompanyName()'
+                               [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly" id="company-name">
+                        <app-validation-message [errorMessage]='associationVendorError.companyNameMessage'
+                                                *ngIf='associationVendorError.companyName'>
+                        </app-validation-message>
+                      </div>
+                    </div>
+                    <div class="col-3" *ngIf="opposingPartyType!='Corporate'">
+                      <div class="form-group" [class.has-error]='associationVendorError.firstName'>
+                        <label>First Name <sup>*</sup></label>
+                        <input type="text" class="form-control" (keyup)='changeFirstName()' (blur)='changeFirstName()'
+                               [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly"
+                               placeholder="Enter First Name" formControlName="FirstName" id="first-name">
+                        <app-validation-message [errorMessage]='associationVendorError.firstNameMessage'
+                                                *ngIf='associationVendorError.firstName'>
+                        </app-validation-message>
+                      </div>
+                    </div>
+                    <div class="col-3" *ngIf="opposingPartyType!='Corporate'">
+                      <div class="form-group" [class.has-error]='associationVendorError.lastName'>
+                        <label>Last Name <sup>*</sup></label>
+                        <input type="text" class="form-control"
+                               [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly"
+                                (keyup)='changeLastName()' (blur)='changeLastName()'
+                               placeholder="Enter Last Name" formControlName="LastName" id="last-name">
+                        <app-validation-message [errorMessage]='associationVendorError.lastNameMessage'
+                                                *ngIf='associationVendorError.lastName'>
+                        </app-validation-message>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group" [class.has-error]='associationVendorError.email'>
+                        <label>Email Address </label>
+                        <input type="email" name="email" formControlName="Email" class="form-control"
+                               placeholder="Email Address" value="Email Address"
+                               (keyup)='changeEmail()' (blur)='changeEmail()'
+                               [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly" id="email-address">
+                        <app-validation-message [errorMessage]='associationVendorError.emailMessage'
+                                                *ngIf='associationVendorError.email'>
+                        </app-validation-message>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div
+                        [ngClass]="(opposingPartyForm.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                        <label>Phone Number</label>
+                        <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                               [readonly]="isViewMode || permissionList.CLIENT_CONTACT_MANAGEMENTisViewOnly"
+                               placeHolderCharacter=" " formControlName="PrimaryPhone"
+                               (blur)="onBlurMethod(opposingPartyForm.controls.PrimaryPhone.value,'PrimaryPhone')" id="phone-number"/>
+                        <span class="field-message text-danger"
+                              *ngIf="opposingPartyForm.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                          class="icon icon-error mr-4"></em>
+                        Invalid phone number
+                      </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <app-loader [active]="detailsLoading"></app-loader>
+            </div>
+          </form>
+        </div>
+        <div class="pt-24" *ngIf="isEditMode">
+          <div>
+            <h2 class="mb-24">Associated Contacts & Clients</h2>
+            <div class="custom-table section-area">
+              <div class="table-responsive">
+                <table class="table table-striped table-borderless" id="association-contact-client-tbl">
+                  <thead>
+                  <tr>
+                    <th>Contact Number</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>Client Flag</th>
+                    <th>Status</th>
+                  </tr>
+                  </thead>
+                  <tbody *ngIf="associatedContacts.length > 0">
+                  <tr *ngFor="let associatedContact of associatedContacts;trackBy:trackByFn ;let i=index;" id="associatedcontact-row-index-{{i}}">
+                    <td>{{associatedContact.uniqueNumber}}</td>
+                    <td>{{associatedContact.name}}</td>
+                    <td>{{associatedContact.email}}</td>
+                    <td>{{associatedContact.type}}</td>
+                    <td>{{associatedContact.clientFlag}}</td>
+                    <td>{{associatedContact.status}}</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+              <app-loader [active]="contactLoading"></app-loader>
+            </div>
+          </div>
+        </div>
+        <div class="pt-24">
+          <div>
+            <h2 class="mb-24">Notes</h2>
+            <div *ngIf="originalNotes.length || notePresent">
+              <div class="d-flex align-items-center mb-24 w-100 justify-content-between">
+                <div class="header-search flex-fill mr-20">
+                  <form class="table-data-search">
+                    <div class="header-search-wrapper">
+                      <input type="text" class="form-control search-input" placeholder="Search by author or note text"
+                             (keyup)='searchFilter($event)' id="note-text">
+                      <button class="btn" type="submit">Search</button>
+                    </div>
+                  </form>
+                </div>
+                <button
+                  class="btn btn-primary btn-icon d-flex align-items-center mt-16" type="button"
+                  (click)="openModal(notesModal, '', 'modal-slg')" id="create-new-note">
+                  <i class="icon icon-plus"></i>
+                  Create New Note
+                </button>
+              </div>
+              <div class="row gutter-16" [formGroup]='searchForm'>
+                <div class="col-3">
+                  <div class="form-group">
+                    <label>Author</label>
+                    <ng-select [items]="authorList" placeholder="Select an Author"
+                               formControlName='author' [bindValue]="'id'"
+                               [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'" id="author">
+                    </ng-select>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="form-group">
+                    <label>Date Created Range</label>
+                    <app-date-picker
+                      [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select start date'"
+                      controlName='createdStartDate' id="date-created-range"></app-date-picker>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <app-date-picker
+                      [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select end date'"
+                      controlName='createdEndDate' id="end-date"></app-date-picker>
+                  </div>
+                </div>
+                <div class="col-2">
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox mt-24 pr-0">
+                      <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                             formControlName="isVisibleToClient">
+                      <label class="custom-control-label" for="dropcheck-1">Visible To Client</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="custom-table section-area">
+                <div class="table-responsive">
+                  <ngx-datatable
+                    #table class="material common-table holiday-table" [rows]="noteList"
+                    [columnMode]="ColumnMode.force" [headerHeight]="50"
+                    [messages]="messages"
+                    rowHeight="auto" id="note-listing-tbl">
+                    <ngx-datatable-column [resizeable]="false" prop="content" name="Note Text" [width]="334">
+                      <ng-template let-value="value" ngx-datatable-cell-template>
+                        <div class="note-table-text user-prof-note">
+                          <app-read-more [text]='value' [maxLines]='2'> </app-read-more>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="applicableDate" name="Applicable Date" [width]="220">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        <strong>{{row.applicableDate | date}}</strong>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Written Date" [width]="220">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        <div><strong>{{row.lastUpdated | date}}</strong></div>
+                        <span class="small helper-text d-block">{{row.lastUpdated | date: 'hh:mm a'}}</span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="createdBy.name" name="Author" [width]="240">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        <div><strong>{{row.createdBy.name}}</strong></div>
+                        <span class="small helper-text d-block">{{row.createdBy.email}}</span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="isVisibleToClient" name=" " [width]="240" [sortable]="false">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        <span *ngIf="row.isVisibleToClient"
+                              class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Visible To Client</span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="" name="Action" [width]="180"
+                                          [headerClass]="'text-right'" [sortable]="false">
+                      <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                        <div class="icon-group d-flex justify-content-end">
+                          <span (click)='editNote($event, row, rowIndex, notesModal)' id="edit-note-index-{{rowIndex}}">
+                            <em class="icon icon-edit icon-color"></em>
+                          </span>
+                          <span (click)="deleteNote($event, row.id, row.id ? null : rowIndex)" id="delete-note-index-{{rowIndex}}">
+                            <em class="icon icon-remove icon-color"></em>
+                          </span>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                  </ngx-datatable>
+                </div>
+                <app-loader [active]="notesLoading"></app-loader>
+              </div>
+            </div>
+            <button
+              *ngIf="!originalNotes.length && !notePresent"
+              class="btn btn-primary btn-icon d-flex align-items-center mt-24" type="button"
+              (click)="noteEditMode = false; openModal(notesModal, '', 'modal-slg')" id="create-newnote-button">
+              <i class="icon icon-plus"></i>
+              Create New Note
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+    <div class="d-flex justify-content-end" *ngIf="!isViewMode">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="checkAndSave(!clientId)"
+                *ngIf="clientAssociationtype!='Opposing Party' && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" id="save-btn" [disabled]="callFlag">
+          Save
+        </button>
+        <button type="button" class="btn btn-primary" (click)="checkAndSave(!clientId)"
+                *ngIf="clientAssociationtype=='Opposing Party' && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" id="save-btn" [disabled]="callFlag">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #notesModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!noteEditMode">Create New Note</h3>
+    <h3 class="modal-title mb-0" *ngIf="noteEditMode">Edit Note</h3>
+    <button type="button" class="close" (click)="cancelNote()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="noteForm">
+      <div class="row gutter-16">
+        <div class="col-12">
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group"
+                   [class.has-error]="noteForm.controls.applicableDate.errors && noteForm.controls.applicableDate.errors.required && (noteFormSubmitted || noteForm.controls.applicableDate.touched)">
+                <label>Applicable Date <sup>*</sup></label>
+                <app-date-picker [isForm]='true' [dateform]='noteForm' controlName='applicableDate' id="application-date"></app-date-picker>
+                <input type="hidden" class="form-control" formControlName="id" id="id-hidden">
+                <span class="field-message text-danger" *ngIf="noteForm.controls.applicableDate.errors && noteForm.controls.applicableDate.errors.required && (noteFormSubmitted || noteForm.controls.applicableDate.touched)">
+                  Please select applicable date.
+                </span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group position-relative"
+                   [class.has-error]="noteForm.controls.content.errors && noteForm.controls.content.errors.required && (noteFormSubmitted || noteForm.controls.content.touched)">
+                <label>Note Text <sup>*</sup></label>
+                <span class="count-char">{{noteForm?.controls['content']?.value?.length || 0}}/1000</span>
+                <textarea class="form-control height-2" rows="4" placeholder="Enter Note Text"
+                          formControlName="content" id="enter-note"></textarea>
+                <span class="field-message text-danger" *ngIf="noteForm.controls.content.errors && noteForm.controls.content.errors.required && (noteFormSubmitted || noteForm.controls.content.touched)">
+                  Please enter note text.
+                </span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group mb-0">
+                <label class="mb-12">Visible to Client</label>
+                <div class="custom-control custom-radio pr-0">
+                  <input type="radio" id="invoiceAddress1" name="isVisibleToClient" class="custom-control-input"
+                         formControlName="isVisibleToClient" [value]='true'>
+                  <label class="custom-control-label" for="invoiceAddress1">Yes</label>
+                </div>
+                <div class="custom-control custom-radio pr-0 mb-0">
+                  <input type="radio" id="invoiceAddress2" name="isVisibleToClient" class="custom-control-input"
+                         formControlName="isVisibleToClient" [value]='false'>
+                  <label class="custom-control-label" for="invoiceAddress2">No</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="cancelNote()" id="cancel-btn">Cancel</button>
+    <button type="button" *ngIf="!noteEditMode" class="btn btn-primary" (click)='saveNotes()' [disabled]="callFlag" id="save-note-btn">
+      Save
+    </button>
+    <button type="button" *ngIf="noteEditMode" class="btn btn-primary edit-mode" (click)='UpdateNotes()' id="save-note-btn">
+      Save
+    </button>
+  </div>
+</ng-template>

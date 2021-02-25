@@ -1,0 +1,280 @@
+<app-loader [active]="loading"></app-loader>
+<div class="d-flex justify-content-start align-items-center mb-24">
+  <h2 class="mb-0">Office Trust Account Settings</h2>
+  <a *ngIf="!isEdit  && isEditPermission" class="ml-16 lh-20" href="javascript:void(0);" (click)="editBankAccounts()" id="edit-operating-btn" ><em class="icon icon-edit icon-color small"></em></a>
+  <div class="d-flex justify-content-end">
+  </div>
+</div>
+
+<app-office-trust-bank-account
+  [bankType]="'trustBankAccount'"
+  [trustAccountError]="trustAccountError"
+  [bankType]="'trustBankAccount'"
+  (selectedTrustAccount)="selectedTrustAccount_($event)"
+  [mode]="'view'"
+  [officeId]="officeId">
+</app-office-trust-bank-account>
+<div>
+
+
+  
+  <div class="row">
+    <div class="col-6">
+      <div class="info-block pt-8">
+        <div class="d-flex align-items-center mb-8">
+          <h5 class="m-0 font-weight-bold">Enable Credit Card Trust Account</h5>
+          <div class="toggle-switch custom-toggle ml-28">
+            <label>
+              <input type="checkbox"
+                    class="form-control"
+                    placeholder="Select credit card trust bank account"
+                    [formControl]="enableCreditCardTrustAccount"
+                    (change)="enableCreditCard()"
+                    id="enable-credit-trust">
+              <span class="switch-style"></span>
+            </label>
+          </div>
+        </div>
+        <p class="mb-16 lh-20">
+          Enable or disable for the office. <br>
+          Required for firms in some states – credit card payments into trust accounts must be routed first through a
+          Credit Card Trust bank account.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+
+  
+  <div *ngIf="enableCreditCardTrustAccount?.value"  class="row">
+    <div class="col-12">
+        <div class="info-block pt-8">
+            <div class="align-items-center mb-8">
+                <h5 class="m-0 font-weight-bold">Select Credit Card Trust Bank Accounts</h5>
+                <p class="mb-16 lh-20">
+                    Select one credit card trust bank account for each trust bank account applied to the office.
+                </p>
+                <div *ngIf="errorCreditListBank && isSubmitted" class="alert alert-danger d-flex justify-content-between my-24 no-shadow" id="warning-trust-selection">
+                    <div class="d-flex has-error">
+                        <em class="alert-icon icon icon-info ml-12"></em>
+                        <div class="d-flex align-items-center flex-wrap">
+                        <h4 class="mr-16 mt-0 mb-0">Error</h4>
+                        <span>Please select credit card trust accounts before proceeding.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="custom-table section-area">
+                    <ngx-datatable #table class="material common-table matter-table datatable-auto-height"
+                        [class.matter-no-data]="selectedTrustAccountList?.length === 0"
+                        [rows]="selectedTrustAccountList"
+                        [columnMode]="ColumnMode.force"
+                        [headerHeight]="50"
+                        [footerHeight]="footerHeight"
+                        rowHeight="auto"
+                        [count]="page.totalElements"
+                        [offset]="page.pageNumber"
+                        [limit]="page.size"
+                        [sorts]="[{prop: 'name', dir: 'asc'}]"
+                        id="selected-trust-ac-tbl">
+
+                        <ngx-datatable-column [resizeable]="false"
+                            name="Name"
+                            prop="name"
+                            [width]="150">
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column [resizeable]="false"
+                            prop="creditCardAccountName"
+                            name="Credit Card Trust Bank Account"
+                            [width]="250">
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column [resizeable]="false"
+                            *ngIf="isEdit"
+                            name="Action"
+                            [width]="100"
+                            [headerClass]="'text-right'"
+                            [sortable]="false">
+                            <ng-template ngx-datatable-cell-template let-row="row" let-rowIndex="rowIndex">
+                                <div *ngIf="!(row?.creditCardAccountName) && isEdit; else edit" class="d-flex justify-content-end">
+                                    <span (click)="openCreditCardBankListModal(row, rowIndex, selectCreditCardAccount, null, false)" class="text-primary pr-12 font-weight-medium" id="select-ac-index-{{rowIndex}}">Select Account</span>
+                                </div>
+                                <ng-template #edit>
+                                    <div *ngIf="isEdit" class="d-flex justify-content-end">
+                                        <a href="javascript:void(0);"
+                                        class="mr-20"
+                                        (click)="openCreditCardBankListModal(row, rowIndex, selectCreditCardAccount, row?.creditCardBankAccountId, true)" id="edit-ac-index-{{rowIndex}}"><em class="icon icon-edit small"></em></a>
+                                    </div>
+                                </ng-template>
+                            </ng-template>
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-footer>
+                            <ng-template let-rowCount="rowCount" ngx-datatable-footer-template let-pageSize="pageSize"
+                                let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                                <div class="d-flex justify-content-between flex-fill">
+                                <div class="d-flex align-items-center">
+                                    <div class="table-items d-flex align-items-center mr-36">
+                                    Items per page:
+                                    <div class=" ml-8">
+                                        <select class="custom-select border-less" [formControl]="selectPageSize"
+                                        (change)="pageSizeChange()">
+                                        <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">
+                                            {{ limit }}
+                                        </option>
+                                        </select>
+                                    </div>
+                                    </div>
+                                    <span>
+                                    {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                                    {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                                    {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                                    <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                                        Page {{ i+1 }} of {{page.totalPages}}
+                                    </option>
+                                    </select>
+                                    <div class="ml-8">
+                                    <datatable-pager
+                                        [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                        [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                        [pagerPreviousIcon]="'datatable-icon-prev'"
+                                        [pagerNextIcon]="'datatable-icon-skip'"
+                                        [page]="curPage"
+                                        [size]="pageSize"
+                                        [count]="rowCount"
+                                        [hidden]="!((rowCount / pageSize) > 1)"
+                                        (change)="table.onFooterPage($event);changePageDropDown($event)">
+                                    </datatable-pager>
+                                    </div>
+                                </div>
+                                </div>
+                            </ng-template>
+                        </ngx-datatable-footer>
+                    </ngx-datatable>
+                </div>
+            </div>
+        </div>
+    </div>
+    <app-loader [active]="creditLoading"></app-loader>
+  </div>
+  <div class="row">
+    <div class="col-6">
+      <div class="info-block pt-8">
+        <h5 class="mb-8 mt-0 font-weight-bold">Outbound Trust Transfers</h5>
+        <p class="mb-16 lh-20">
+          Select whether a paper check is required for outbound transfers from the trust’s bank account to other bank
+          accounts. This does not apply for inbound transfers to the trust bank account (for example, ACH payments to
+          trust accounts).
+        </p>
+        <div class="custom-control custom-checkbox pr-0 mb-0">
+          <input type="checkbox" class="custom-control-input" id="paper-1"
+          [formControl]="enablePaperCheck"
+          (change)="enableCreditCard()">
+          <label class="custom-control-label" for="paper-1">Paper Check Required</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-6">
+      <div class="info-block pt-28">
+        <h5 class="mb-8 mt-0 font-weight-bold">Trust Payment Grace Period</h5>
+        <p class="mb-16 lh-20">
+          Specifies number of days after an invoice is due before client’s bill is automatically paid from their primary
+          trust account.
+        </p>
+        <div class="alert alert-primary d-flex justify-content-between" role="alert">
+          <div class="d-flex">
+            <em class="alert-icon icon icon-info"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              This will override the firm-level grace period.
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="position-relative cust-spinner">
+              <input type="number"
+                 [formControl]="gracePeriod"
+                 onkeypress="return (event.charCode == 8 || event.charCode == 0 || event.charCode == 13) ? null : event.charCode >= 48 && event.charCode <= 57"
+                 min="0" class="form-control number-control" [attr.disabled]="!isPermission ? '' : null"
+                 (change)="changeDetect($event)" placeholder="0" [readOnly]="!isEdit" id="trust-grace-period">
+            </div>
+          <span class="ml-8">days</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<ng-template #ChangeOfficeTrustBankAccount let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Change Office Trust Bank Account</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to change the Office Trust bank account?
+          This will change the trust account to which all active matters assigned to this office are linked. No funds
+          will be automatically transferred as part of this process.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');cancelBankSelection()" id="cancel-btn">Cancel
+    </button>
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="yes-change-trust">Yes, change Trust</button>
+  </div>
+</ng-template>
+
+<ng-template #UnsavedChanges let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Unsaved Changes</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to continue without saving these changes?
+          This will remove any edits you’ve made.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click');continueWithoutSaving();" id="yes-continue-btn">Yes,
+      continue without saving
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #selectCreditCardAccount let-modal>
+  <div class="modal-body pb-0">
+      <app-office-trust-bank-account
+          [bankType]="'creditCardTrustBank'"
+          (selectedTrustAccount)="selectedCreditTrustAccount($event)"
+          [bankAccountName]="bankAccountName"
+          [mode]="'view'"
+          [editCreditCard]="editCreditCard"
+          [creditCardBankId]="creditCardBankId">
+      </app-office-trust-bank-account>
+  </div>
+  <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveCreditCard()" id="save-btn">Save</button>
+  </div>
+</ng-template>

@@ -1,0 +1,350 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Calendar Settings</li>
+    </ol>
+    <div class="heading">
+      <h1>Calendar Settings</h1>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-body ">
+          <h2 class="mb-24">External Calendar Connections</h2>
+          <div class="row">
+            <div class="col-6">
+              <div class="calsett-row">
+                <div class="calsett-item d-flex align-items-center justify-content-between"
+                  *ngFor="let cal of calendarPlatform; trackBy: trackByFn;let i = index;">
+                  <div class="calsett-cap d-flex align-items-center justify-content-start">
+                    <figure>
+                      <img src="/assets/images/{{cal.icon}}" alt="">
+                    </figure>
+                    <p>{{cal.name}}</p>
+                  </div>
+                  <div class="calsett-btn">
+                    <div class="toggle-switch" [class.toggleOn]="cal.connect">
+                      <div class="off-text">
+                        <span class="mr-12 offPosition" *ngIf="!cal.connect">Off</span>
+                      </div>
+                      <label>
+                        <input type="checkbox" name="calendarSwitch"
+                               [(ngModel)]="cal.connect" (ngModelChange)="addCalendar(cal)" id="off-on-index-{{i}}">
+                        <span class="switch-style"></span>
+                      </label>
+                      <div class="on-text">
+                        <span class="ml-12 onPosition" *ngIf="cal.connect">On</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <app-loader [active]="extLoading"></app-loader>
+            </div>
+          </div>
+          <div class="info-block pt-24 ">
+            <h2 class="mb-24">Working Hours</h2>
+            <div class="row gutter-16 emp-cerate">
+              <div class="col-6 section-area">
+                <div class="hours-list" [formGroup]='calendarHoursForm'>
+                  <div class="row gutter-16 align-items-center">
+                    <div class="col-9 ml-auto">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <label class="text-small">Open</label>
+                        </div>
+                        <div class="col-6">
+                          <label class="text-small">Close</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 align-items-center mb-20">
+                    <div class="col-3 text-right">
+                      <span class="label mb-0 mr-0 mr-md-16">Monday</span>
+                    </div>
+                    <div class="col-9">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                            formControlName="mondayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' (change)="hourChange('mondayOpenHours', 'mondayCloseHours')" id="monday-open">
+                          </ng-select>
+                        </div>
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                            formControlName="mondayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' id="monday-close">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 align-items-center mb-20">
+                    <div class="col-3 text-right">
+                      <span class="label mb-0 mr-0 mr-md-16">Tuesday</span>
+                    </div>
+                    <div class="col-9">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                            formControlName="tuesdayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' (change)="hourChange('tuesdayOpenHours', 'tuesdayCloseHours')" id="tuesday-open">
+                          </ng-select>
+                        </div>
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                            formControlName="tuesdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' id="tuesday-close">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 align-items-center mb-20">
+                    <div class="col-3 text-right">
+                      <span class="label mb-0 mr-0 mr-md-16">Wednesday</span>
+                    </div>
+                    <div class="col-9">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                            formControlName="wednesdayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' (change)="hourChange('wednesdayOpenHours', 'wednesdayCloseHours')" id="wednesday-open">
+                          </ng-select>
+                        </div>
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                            formControlName="wednesdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' id="wednesday-close">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 align-items-center mb-20">
+                    <div class="col-3 text-right">
+                      <span class="label mb-0 mr-0 mr-md-16">Thursday</span>
+                    </div>
+                    <div class="col-9">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                            formControlName="thursdayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' (change)="hourChange('thursdayOpenHours', 'thursdayCloseHours')" id="thursday-open">
+                          </ng-select>
+                        </div>
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                            formControlName="thursdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' id="thursday-close">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 align-items-center mb-20">
+                    <div class="col-3 text-right">
+                      <span class="label mb-0 mr-0 mr-md-16">Friday</span>
+                    </div>
+                    <div class="col-9">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                            formControlName="fridayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' (change)="hourChange('fridayOpenHours', 'fridayCloseHours')" id="friday-open">
+                          </ng-select>
+                        </div>
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                            formControlName="fridayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' id="friday-close">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 align-items-center mb-20">
+                    <div class="col-3 text-right">
+                      <span class="label mb-0 mr-0 mr-md-16">Saturday</span>
+                    </div>
+                    <div class="col-9">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                            formControlName="saturdayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' (change)="hourChange('saturdayOpenHours', 'saturdayCloseHours')" id="saturday-open">
+                          </ng-select>
+                        </div>
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                            formControlName="saturdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' id="saturday-close">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 align-items-center mb-0">
+                    <div class="col-3 text-right">
+                      <span class="label mb-0 mr-0 mr-md-16">Sunday</span>
+                    </div>
+                    <div class="col-9">
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                            formControlName="sundayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' (change)="hourChange('sundayOpenHours', 'sundayCloseHours')" id="sunday-open">
+                          </ng-select>
+                        </div>
+                        <div class="col-6">
+                          <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                            formControlName="sundayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                            [clearable]='false' id="sunday-close">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <app-loader [active]="hoursLoading"></app-loader>
+              </div>
+            </div>
+          </div>
+          <div class="info-block pt-48 ">
+            <h2 class="mb-24">Holidays</h2>
+            <div class="row">
+              <div class="col-6 section-area">
+                <div class="small d-flex justify-content-between align-items-center mb-8"><span
+                    class="helper-text">{{displayYear}} Holidays</span>
+                  <div class="d-flex align-items-center">
+                    <span class="year-arrow" *ngIf="currentYear < displayYear" (click)="changeDisplayYear('back')" id="pre-holiday">
+                      <em class="icon icon-angle-left"></em>
+                    </span>
+                    <span class="change-year font-weight-medium">{{displayYear}}</span>
+                    <span class="year-arrow" (click)="changeDisplayYear('forward')" id="next-holiday">
+                      <em class="icon icon-angle-right"></em>
+                    </span>
+                  </div>
+                </div>
+                <div class="custom-table">
+                  <ngx-datatable #table class="material common-table"
+                    [rows]="rows" [columnMode]="ColumnMode.force"
+                    [headerHeight]="50" rowHeight="auto" id="officeholidaylisting-tbl">
+                    <ngx-datatable-column [resizeable]="false" prop="name" name="Holiday" [width]="200">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="date" name="Date" [width]="150">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        {{row.date | date:'MMMM dd'}} </ng-template>
+                    </ngx-datatable-column>
+
+                    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Actions" [width]="100">
+                      <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+                        <div class="icon-group d-flex justify-content-end">
+                          <span>
+                            <button class="btn btn-sm" type="button"
+                              (click)="EditOfficeHoliday(AddOfficeHoliday,row)" id="edit-officeholiday-index-{{rowIndex}}"><em
+                                class='icon icon-edit icon-color'></em>
+                            </button>
+                          </span>
+                          <span>
+                            <button class="btn btn-sm" type="button" (click)="deleteOfficeHoliday(row.id)" id="delete-officeholiday-index-{{rowIndex}}"><em
+                                class='icon icon-remove icon-color'></em> </button>
+                          </span>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                  </ngx-datatable>
+                  <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4" type="button"
+                    (click)="EditOfficeHoliday(AddOfficeHoliday)" id="add-holiday">
+                    <i class="icon icon-add-circle"></i>Add Holiday
+                  </button>
+                </div>
+                <app-loader [active]="holidayLoading"></app-loader>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end">
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" (click)="saveChanges()" id="save-changes">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #AddOfficeHoliday let-modal>
+  <div class="modal-header d-block">
+    <h2 class="modal-title">{{holidayForm.controls?.id?.value==null?'Add':'Edit'}} Holidays</h2>
+    <button type="button" class="close" (click)="modal.close()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-8">
+    <form [formGroup]="holidayForm">
+      
+        <div class="form-group" [class.has-error]="f.date.errors && holidayFormSubmitted && f.date.invalid">
+          <label>Date<sup>*</sup></label>
+          <app-date-picker [isForm]='true' [placeholderText]="'MM/DD/YYYY'" [dateform]='holidayForm' controlName='date' id="date"></app-date-picker>
+
+          <span class="field-message text-danger"
+            *ngIf="f.date.errors && holidayFormSubmitted || (f.date.invalid && (f.date.dirty || f.date.touched))">
+            <span *ngIf="f.date.errors.required">
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.holiday_date_error}}
+            </span>
+          </span>
+
+          <input type="hidden" class="form-control" formControlName="id">
+        </div>
+      
+        <div class="form-group" [class.has-error]="f.name.errors && holidayFormSubmitted && f.name.invalid">
+          <label>Name<sup>*</sup></label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter a name" id="name">
+          <span class="field-message text-danger"
+            *ngIf="f.name.errors && holidayFormSubmitted || (f.name.invalid && (f.name.dirty || f.name.touched))">
+            <span *ngIf="f.name.errors.required && holidayFormSubmitted">
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.name_error}}
+            </span>
+          </span>
+        </div>
+      
+    </form>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close()" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveHoliday()" id="save-btn">Save
+    </button>
+  </div>
+</ng-template>
+
+
+<ng-template #calendarDisconnectWarning let-modal>
+  <div class="modal-header d-block">
+    <h2 class="modal-title">Warning</h2>
+    <button type="button" class="close" (click)="modal.dismiss()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-1">
+        <em class="icon icon-warning text-warning text-xlarge mr-16"></em>
+      </div>
+      <div class="col-11">
+        <span>Are you sure you want to disable this calendar connection?</span>
+        <div>
+          <span>This will disconnect all employee calendars using this service.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close()" id="yes-disable">Yes, disable calendar connection</button>
+  </div>
+</ng-template>

@@ -1,0 +1,39 @@
+<form [formGroup]="trustarReportForm">
+  <div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+        <li class="breadcrumb-item active" aria-current="page"> Trust Replenishment Report</li>
+      </ol>
+      <div class="heading">
+        <h1> Trust Replenishment Report</h1>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="mb-8">Generate Report</h2>
+          <p class="lh-20">Generate your report by selecting the options below.</p>
+
+          <div class="row gutter-16">
+            <div class="col-3">
+              <div class="form-group">
+                <label>As of Date <sup>*</sup></label>
+                <app-date-picker [isForm]='true' [dateform]='trustarReportForm' controlName='asOfDate'
+                  [reset]="dateReset" id="as-of-date"></app-date-picker>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <app-loader [active]='loading'></app-loader>
+      <div class="d-flex justify-content-end pt-8">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="!asOfDate.value" (click)="submitTrustReplenishmentReport()" id="export-to-csv">
+            Export to CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

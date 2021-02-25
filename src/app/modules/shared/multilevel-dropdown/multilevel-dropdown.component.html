@@ -1,0 +1,182 @@
+<div class="multiselect-dropdown dropdown" [ngClass]="{'open':showDropdown}">
+  <button class="multiselect-dropdown-toggle custom-select select text-left" type="button">
+    <span *ngIf="displayFlag">{{ title }}</span>
+    <div class="multiselect-text position-relative" *ngIf="!displayFlag">
+      <span class="badge badge-primary mr-8" (click)="clear()">
+        <span>{{ title }}</span>
+        <em class="icon icon-close"></em>
+      </span>
+      filters are selected
+    </div>
+    <span (click)="show()" class="caret"><em class="icon icon-arrow-down"></em></span>
+  </button>
+  <div class="multiselect-dropdown-menu" id="main-class" *ngIf="showDropdown">
+    <div class="multiselect-dropdown-scroll">
+      <ul class="list-unstyled m-0 multiselect-dropdown-list main-list">
+        <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center" [class.open]="item.childDisplay" [class.has-dropdown]="item.childArray?.length > 0"
+          *ngFor="let item of displaySubItem;trackBy :trackByFn;let i=index;">
+          <div class="custom-control custom-checkbox m-0 pr-0">
+            <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item.id}}"
+              (change)="changeSelection($event, item.id, i)" [checked]="item.checked">
+            <label class="custom-control-label" for="{{i}}-dropcheck-{{item.id}}">{{ item.name }}</label>
+          </div>
+          <span class="filt-arrow ml-40" (click)="item.childDisplay=!item.childDisplay;next('forward', i);">
+            <em class="icon icon-angle-right"></em>
+          </span>
+          <div class="sub-list d-flex justify-content-start flex-column">
+            <div>
+              <div class="multiselect-dropdown-item">
+                <span class="back-arrow" (click)="item.childDisplay=!item.childDisplay;next('back', i);">
+                  <em class="icon icon-angle-left mr-8"></em> Back
+                </span>
+              </div>
+              <div class="multiselect-dropdown-item search">
+                <div class="dropdown-search position-relative">
+                  <em class="icon icon-search"></em>
+                  <input class="form-control" type="text" placeholder="Search" [(ngModel)]="searchValue"
+                    (keyup)="onSearchKeyup($event, i)" />
+                </div>
+              </div>
+            </div>
+            <ul class="list-unstyled mb-0 check-sub-list">
+              <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center" [class.open]="item1.childDisplay" [class.has-dropdown]="item1.childArray?.length > 0"
+                *ngFor="let item1 of item.childArray;trackBy :trackByFn;let j=index;">
+                <div class="custom-control custom-checkbox m-0 pr-0">
+                  <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item1.id}}-{{j}}"
+                    (change)="changeSelection($event, item1.id, i, j)" [checked]="item1.checked">
+                  <label class="custom-control-label" for="{{i}}-dropcheck-{{item1.id}}-{{j}}">{{ item1.name }}</label>
+                </div>
+                <span class="filt-arrow ml-40"
+                  (click)="item1.childDisplay=!item1.childDisplay;next('forward',i, j);">
+                  <em class="icon icon-angle-right"></em>
+                </span>
+                <div class="sub-list d-flex justify-content-start flex-column">
+                  <div>
+                    <div class="multiselect-dropdown-item">
+                      <span class="back-arrow"
+                        (click)="item1.childDisplay=!item1.childDisplay;next('back', i, j);">
+                        <em class="icon icon-angle-left mr-8"></em> Back
+                      </span>
+                    </div>
+                    <div class="multiselect-dropdown-item search">
+                      <div class="dropdown-search position-relative">
+                        <em class="icon icon-search"></em>
+                        <input class="form-control" type="text" placeholder="Search" [(ngModel)]="searchValue"
+                          (keyup)="onSearchKeyup($event, i, j)" />
+                      </div>
+                    </div>
+                  </div>
+                  <ul class="list-unstyled mb-0 check-sub-list">
+                    <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center" [class.open]="item2.childDisplay" [class.has-dropdown]="item2.childArray?.length > 0"
+                      *ngFor="let item2 of item1.childArray;trackBy :trackByFn;let k=index;">
+                      <div class="custom-control custom-checkbox m-0 pr-0">
+                        <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item2.id}}-{{k}}-{{j}}"
+                          (change)="changeSelection($event, item2.id, i, j, k)" [checked]="item2.checked">
+                        <label class="custom-control-label" for="{{i}}-dropcheck-{{item2.id}}-{{k}}-{{j}}">{{ item2.name }}</label>
+                      </div>
+                      <span class="filt-arrow ml-40"
+                        (click)="item2.childDisplay=!item2.childDisplay;next('forward',i, j, k);">
+                        <em class="icon icon-angle-right"></em>
+                      </span>
+                      <div class="sub-list d-flex justify-content-start flex-column">
+                        <div>
+                          <div class="multiselect-dropdown-item">
+                            <span class="back-arrow"
+                              (click)="item2.childDisplay=!item2.childDisplay;next('back', i, j, k);">
+                              <em class="icon icon-angle-left mr-8"></em> Back
+                            </span>
+                          </div>
+                          <div class="multiselect-dropdown-item search">
+                            <div class="dropdown-search position-relative">
+                              <em class="icon icon-search"></em>
+                              <input class="form-control" type="text" placeholder="Search" [(ngModel)]="searchValue"
+                                (keyup)="onSearchKeyup($event, i, j, k)" />
+                            </div>
+                          </div>
+                        </div>
+                        <ul class="list-unstyled mb-0 check-sub-list">
+                          <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center" [class.open]="item3.childDisplay" [class.has-dropdown]="item3.childArray?.length > 0"
+                            *ngFor="let item3 of item2.childArray;trackBy :trackByFn;let l=index;">
+                            <div class="custom-control custom-checkbox m-0 pr-0">
+                              <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item3.id}}-{{k}}-{{j}}-{{l}}"
+                                (change)="changeSelection($event, item3.id, i, j, k, l)" [checked]="item3.checked">
+                              <label class="custom-control-label" for="{{i}}-dropcheck-{{item3.id}}-{{k}}-{{j}}-{{l}}">{{ item3.name }}</label>
+                            </div>
+                            <span class="filt-arrow ml-40"
+                              (click)="item3.childDisplay=!item3.childDisplay;next('forward',i, j, k, l);">
+                              <em class="icon icon-angle-right"></em>
+                            </span>
+                            <div class="sub-list d-flex justify-content-start flex-column">
+                              <div>
+                                <div class="multiselect-dropdown-item">
+                                  <span class="back-arrow"
+                                    (click)="item3.childDisplay=!item3.childDisplay;next('back', i, j, k, l);">
+                                    <em class="icon icon-angle-left mr-8"></em> Back
+                                  </span>
+                                </div>
+                                <div class="multiselect-dropdown-item search">
+                                  <div class="dropdown-search position-relative">
+                                    <em class="icon icon-search"></em>
+                                    <input class="form-control" type="text" placeholder="Search" [(ngModel)]="searchValue"
+                                      (keyup)="onSearchKeyup($event, i, j, k, l)" />
+                                  </div>
+                                </div>
+                              </div>
+                              <ul class="list-unstyled mb-0 check-sub-list">
+                                <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center" [class.open]="item4.childDisplay" [class.has-dropdown]="item4.childArray?.length > 0"
+                                  *ngFor="let item4 of item3.childArray;trackBy :trackByFn;let m=index;">
+                                  <div class="custom-control custom-checkbox m-0 pr-0">
+                                    <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item4.id}}-{{k}}-{{j}}-{{l}}-{{m}}"
+                                      (change)="changeSelection($event, item4.id, i, j, k, l, m)" [checked]="item4.checked">
+                                    <label class="custom-control-label" for="{{i}}-dropcheck-{{item4.id}}-{{k}}-{{j}}-{{l}}-{{m}}">{{ item4.name }}</label>
+                                  </div>
+                                  <span class="filt-arrow ml-40"
+                                    (click)="item4.childDisplay=!item4.childDisplay;next('forward',i, j, k, l,m);">
+                                    <em class="icon icon-angle-right"></em>
+                                  </span>
+                                  <div class="sub-list d-flex justify-content-start flex-column">
+                                    <div>
+                                      <div class="multiselect-dropdown-item">
+                                        <span class="back-arrow"
+                                          (click)="item4.childDisplay=!item4.childDisplay;next('back', i, j, k, l,m);">
+                                          <em class="icon icon-angle-left mr-8"></em> Back
+                                        </span>
+                                      </div>
+                                      <div class="multiselect-dropdown-item search">
+                                        <div class="dropdown-search position-relative">
+                                          <em class="icon icon-search"></em>
+                                          <input class="form-control" type="text" placeholder="Search" [(ngModel)]="searchValue"
+                                            (keyup)="onSearchKeyup($event, i, j, k, l, m)" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <ul class="list-unstyled mb-0 check-sub-list">
+                                      <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center" [class.open]="item5.childDisplay" [class.has-dropdown]="item5.childArray?.length > 0"
+                                        *ngFor="let item5 of item4.childArray;trackBy :trackByFn;let n=index;">
+                                        <div class="custom-control custom-checkbox m-0 pr-0">
+                                          <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item5.id}}-{{k}}-{{j}}-{{l}}-{{m}}-{{n}}"
+                                            (change)="changeSelection($event, item5.id, i, j, k, l, m, n)" [checked]="item5.checked">
+                                          <label class="custom-control-label" for="{{i}}-dropcheck-{{item5.id}}-{{k}}-{{j}}-{{l}}-{{m}}-{{n}}">{{ item5.name }}</label>
+                                        </div>
+                                      </li>
+                                    </ul>
+                                  </div> 
+                                  
+                                </li>
+                              </ul>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <button class="btn btn-primary btn-block" type="button" (click)="apply()" id="apply-btn">{{filterName}}</button>
+  </div>
+</div>

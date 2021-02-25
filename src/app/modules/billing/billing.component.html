@@ -1,0 +1,76 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Billing</li>
+    </ol>
+    <div class="heading">
+      <h1>Billing</h1>
+    </div>
+    <div class="fix-message" [class.d-none]="!message">
+      <div class="alert d-flex justify-content-between align-items-start"
+        [class.alert-success]='message.type == "Success"' [class.alert-danger]='message.type == "Error"' role="alert" id="message-display-div" *ngIf='message'>
+        <div class="d-flex">
+          <em class="alert-icon icon icon-check-circle text-large"></em>
+          <div class="">
+            <h5 class="mr-36 mt-0 mb-4">{{message.type}}</h5>
+            <span *ngFor='let msg of message.errors; trackBy: trackByFn ;let isLast = last'>
+              {{msg}} <br *ngIf='!isLast'>
+            </span>
+          </div>
+        </div>
+        <span class="alert-close" (click)='clearMessage()' id="message-blank"><em class="icon icon-close"></em></span>
+      </div>
+    </div>
+
+    <div class="row justify-content-between">
+      <div class="col-8" *ngIf="selectedTab === 'Pre-Bills'">
+        <div class="header-search-wrapper mb-24">
+          <input type="text" class="form-control search-input"
+            placeholder="Search by matter number, matter name or client name" [(ngModel)]='description'
+            (ngModelChange)='applyFilter()' id="billing-search-input">
+          <button class="btn" type="submit">Search</button>
+        </div>
+      </div>
+      <div class="col-8" *ngIf="selectedTab != 'Pre-Bills'">
+        <div class="header-search-wrapper mb-24">
+          <input type="text" class="form-control search-input"
+            placeholder="Search by invoice number, sent by, client name or matter name" [(ngModel)]='description'
+            (ngModelChange)='applyFilter()' id="description-text">
+          <button class="btn" type="submit">Search</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <a href="javascript:void(0);" (click)="selectTab(mytabs)" *ngFor="let mytabs of mytab; trackBy: trackByFn" role="tab"
+          class="nav-link flex-fill" [class.active]="selectedTab === mytabs" id="billing-tab-{{mytabs}}">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32">
+            <div *ngIf="selectedTab === 'Pre-Bills'" class="tab-pane fade show active" role="tabpanel">
+              <app-pre-bill-list [default_logo_url]='default_logo_url' [invoiceTemplateDetails]='invoiceTemplateDetails'
+                [tenantDetails]='tenantDetails' [loginUser]='loginUser' [trustAccountStatus]='trustAccountEnabled'>
+              </app-pre-bill-list>
+            </div>
+            <div
+              *ngIf="selectedTab === 'Ready to Bill' && (tenantTierName === 'Ascending' || tenantTierName === 'Emerging')"
+              class="tab-pane fade show active" role="tabpanel">
+              <app-ready-to-bill [tenantTierName]="tenantTierName" [default_logo_url]='default_logo_url'
+                [invoiceTemplateDetails]='invoiceTemplateDetails' [tenantDetails]='tenantDetails'
+                [loginUser]='loginUser' [trustAccountStatus]='trustAccountEnabled'>
+              </app-ready-to-bill>
+            </div>
+            <div *ngIf="selectedTab === 'Invoices'" class="tab-pane fade show active" role="tabpanel">
+              <app-billing-invoices [tenantTierName]="tenantTierName" [default_logo_url]='default_logo_url'
+                [invoiceTemplateDetails]='invoiceTemplateDetails' [tenantDetails]='tenantDetails'
+                [loginUser]='loginUser' [trustAccountStatus]='trustAccountEnabled'>
+              </app-billing-invoices>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

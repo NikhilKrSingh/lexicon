@@ -1,0 +1,31 @@
+<div class="upload-board position-relative" [ngClass]="{'open': isOpen}">
+  <div class="upload-board-head d-flex align-items-center justify-content-between pt-0 pr-0 pb-0">
+    <div class="d-flex align-items-center">
+      <em class="icon mr-8"></em>
+      <h4 class="m-0 lh-20">{{(isUpoaded) ? 'Upload Complete' :'Uploading Documents'}}</h4>
+    </div>
+    <div class="d-flex align-items-center">
+      <span class="angle-arrow" (click)="isOpen = !isOpen"><em class="icon" [ngClass]=" !isOpen ? 'icon-angle-up' : 'icon-angle-down'"></em></span>
+      <span class="close-arrow" (click)="closePanel()"><em class="icon icon-close"></em></span>
+    </div>
+  </div>
+  <div class="upload-board-body">
+    <div class="uploading-wrap">
+      <ul class="uploading-list m-0 list-unstyled">
+        <ng-container *ngFor="let file of fileArray; trackBy : trackByFn;let i=index">
+        <li class="d-flex justify-content-between align-items-start">
+          <div class="d-flex align-items-start">
+            <img class="mr-12" width="18" [src]="file.documentName | commonService: 'getFileImage'" alt="">
+            <div>
+              <p class="lh-20 mb-8" [title]="file.documentName">{{ file.documentName > 15 ? (file.documentName | slice:0:15)+'...'+ (file.documentName | commonService : 'getFileExtension') : file.documentName}}</p>
+              <div class="d-flex align-items-center mb-8">
+                <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary" [class.sh-badge-primary]="!isUpoaded" [class.sh-badge-success]="isUpoaded">{{(isUpoaded) ? 'Upload Complete' : 'Upload In Progress'}}</span>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ng-container>
+      </ul>
+    </div>
+  </div>
+</div>

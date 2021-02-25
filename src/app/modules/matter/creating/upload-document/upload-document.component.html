@@ -1,0 +1,9 @@
+<app-document-management (afterLoad)="afterLoad()"  [commonComponent]="true" [pageType]="pageType" [matterId]="matterId" [clientId]="clientId" [matterFolderDetails]="matterFolderDetails" *ngIf="!loading"></app-document-management>
+<app-loader [active]="loading"></app-loader>
+<div class="d-flex justify-content-end pb-24">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="goBack()">Cancel</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType=='client'" (click)='done()' [disabled]="loading" id="next-btn">Next</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType=='matter'" (click)='next()' id="next-btn">Next</button>
+  </div>
+</div>

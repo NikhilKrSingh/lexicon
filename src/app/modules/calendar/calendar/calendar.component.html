@@ -1,0 +1,40 @@
+
+<div class="container" *ngIf="matterId">
+  <div class="main-content pb-0">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item"><a [routerLink]="['/matter/list']">Matters</a></li>
+      <li class="breadcrumb-item" *ngIf="matterName" aria-current="page" [title]='matterName'>
+        <a [routerLink]="['/matter/dashboard']" [queryParams]="{matterId: matterId}">
+          <ng-container *ngIf='matterName?.length < 30'>
+            {{matterName}}
+          </ng-container>
+          <ng-container *ngIf='matterName?.length >= 30'>
+            {{matterName?.slice(0, 25)}}...
+          </ng-container>
+        </a>
+      </li>
+      <li class="breadcrumb-item active">Calendar</li>
+    </ol>
+  </div>
+</div>
+<div class="container" *ngIf="employeeId">
+  <div class="main-content pb-0">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item"><a [routerLink]="['/employee/list']">Employees</a></li>
+      <li class="breadcrumb-item" *ngIf="employeeName" aria-current="page" [title]='employeeName'>
+        <a [routerLink]="['/employee/profile']" [queryParams]="{employeeId: employeeId}">
+          <ng-container *ngIf='employeeName?.length < 30'>
+            {{employeeName}}
+          </ng-container>
+          <ng-container *ngIf='employeeName?.length >= 30'>
+            {{employeeName?.slice(0, 25)}}...
+          </ng-container>
+        </a>
+      </li>
+      <li class="breadcrumb-item active">Calendar</li>
+    </ol>
+  </div>
+</div>
+<app-calendar-list></app-calendar-list>

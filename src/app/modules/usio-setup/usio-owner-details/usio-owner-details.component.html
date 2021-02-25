@@ -1,0 +1,203 @@
+<div *ngIf="!invalidLink && !success" class="container">
+    <div class="main-content">
+        <div class="heading">
+            <h1>Bank Account Authorization</h1>
+          </div>
+          <div class="card">
+              <form [formGroup]='form' class="card-body">
+                    <h3 class="mb-8">Owner Information</h3>
+                    <p>Enter your personal information to validate your firm’s request to connect a bank account to Lexicon. </p>
+                    <div class="row gutter-16">
+                        <div class="col-4">
+                            <div [class.has-error]="(f.firstName.errors || errors.firstName) && submitted" class="form-group" [class.ng-invalid]="(f.firstName.errors || errors.firstName) && submitted">
+                                <label>First Name <sup>*</sup></label>
+                                <input formControlName='firstName' type="text" class="form-control" placeholder="Enter first name" id="first-name">
+                                <span class="field-message text-danger" *ngIf="f.firstName.errors && submitted">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.first_name_error }}
+                                </span>
+                                <span class="field-message text-danger" *ngIf="errors.firstName">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{errors.firstName ? errors.firstName[0].errorDescription : ''}}
+                                </span>
+                                <span class="field-message pt-2 d-block">
+                                    <em class="icon icon-info text-primary mr-4"></em>
+                                    Please enter your legal name to prevent delays in processing.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div [class.has-error]="(f.lastName.errors || errors.lastName) && submitted" class="form-group" [class.ng-invalid]="(f.lastName.errors || errors.lastName) && submitted">
+                                <label>Last Name <sup>*</sup></label>
+                                <input formControlName='lastName' type="text" class="form-control" placeholder="Enter last name" id="last-name">
+                                <span class="field-message text-danger" *ngIf="f.lastName.errors && submitted">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.last_name_error }}
+                                </span>
+                                <span class="field-message text-danger" *ngIf="errors.lastName">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{errors.lastName ? errors.lastName[0].errorDescription : ''}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div [class.has-error]="f.title.errors && submitted" class="form-group">
+                                <label>Title <sup>*</sup></label>
+                                <ng-select [items]="ownerTitles" [selectOnTab]="true" formControlName="title" placeholder="Select" id="title-select"></ng-select>
+                                <span class="field-message text-danger" *ngIf="f.title.errors && submitted">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.jobtitle_required }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div [class.has-error]="f.phone.errors && submitted" class="form-group">
+                                <label>Phone Number <sup>*</sup></label>
+                                <input type="text" formControlName="phone" class="form-control" placeholder="(     )   -   "
+                                    mask="(000) 000 - 0000" autocomplete="doNotAutoComplete" id="cellPhoneNumberId">
+                                <span class="field-message text-danger" *ngIf="f.phone.errors && submitted">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.phone_error }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div [class.has-error]="(f.dob.errors || errors.dob) && submitted" class="form-group" [class.ng-invalid]="(f.dob.errors || errors.dob) && submitted">
+                                <label>Date of Birth <sup>*</sup></label>
+                                
+                                <app-date-picker [isForm]='true' [maxDate]="currentDate" [dateform]='form'
+                                   controlName='dob' id="dateOfBithId"></app-date-picker>
+                                <span class="field-message text-danger" *ngIf="f.dob.errors && submitted">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.date_of_birth_required }}
+                                </span>
+                                <span class="field-message text-danger" *ngIf="errors.dob">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{errors.dob ? errors.dob[0].errorDescription : ''}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div [class.has-error]="f.last4SSN.errors && submitted" class="form-group">
+                                <label>Last 4 of SSN <sup>*</sup></label>
+                                <input formControlName='last4SSN' maxlength="4" minlength="4" type="text" class="form-control" (keypress)="checkNumber($event)" placeholder="Enter last 4 digits of SSN" id="enter-ssn">
+                                <span class="field-message text-danger" *ngIf="f.last4SSN.errors && submitted">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.ssn_required }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div [class.has-error]="f.ownershipPercent.errors?.min || f.ownershipPercent.errors?.max || (f.ownershipPercent.errors?.required && submitted)" class="form-group">
+                                <label>Ownership Percentage <sup>*</sup></label>
+                                <input formControlName='ownershipPercent' type="number" (keypress)="checkNumber($event)" class="form-control" placeholder="Enter ownership percentage" id="ownership-percent">
+                                <span class="field-message text-danger" *ngIf="f.ownershipPercent.errors?.required && submitted">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.ownership_percent_required }}
+                                </span>
+                                <span class="field-message text-danger" *ngIf="f.ownershipPercent.errors?.min || f.ownershipPercent.errors?.max">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Must be greater than  or equal to 25%.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row gutter-16 pt-8">
+                        <div class="col-4">
+                            <div class="row gutter-16">
+                                <div class="col-12">
+                                    <div [class.has-error]="f.addressLine1.errors && submitted" class="form-group">
+                                        <label>Personal Street Address <sup>*</sup></label>
+                                        <input formControlName='addressLine1' type="text" class="form-control" placeholder="Enter your personal address" id="address-one">
+                                        <span class="field-message text-danger" *ngIf="f.addressLine1.errors && submitted">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.street_address_error }}
+                                        </span>
+                                        <span class="field-message pt-2 d-block">
+                                            <em class="icon icon-info text-primary mr-4"></em>
+                                            Please enter personal address, not a company address or PO Box.
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>Apt, Suite, Unit</label>
+                                        <input formControlName='addressLine1' type="text" class="form-control" placeholder="Enter apartment, suite, or unit number" id="address-two">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div [class.has-error]="f.city.errors && submitted" class="form-group">
+                                        <label>City <sup>*</sup></label>
+                                        <input formControlName='city' type="text" class="form-control" placeholder="Enter city" id="enter-city">
+                                        <span class="field-message text-danger" *ngIf="f.city.errors && submitted">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.city_error }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div [class.has-error]="f.state.errors && submitted" class="form-group">
+                                        <label>State <sup>*</sup></label>
+                                        <ng-select [items]="stateList" [bindValue]="'code'" [bindLabel]="'name'" 
+                                        [selectOnTab]="true" formControlName="state" placeholder="Select" id="state"></ng-select>
+                                        <span class="field-message text-danger" *ngIf="f.state.errors && submitted">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.state_error }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div [class.has-error]="f.postalCode.errors.minlength || f.postalCode.errors.maxlength || ((f.postalCode.errors.required || errors.postalCode) && submitted)" class="form-group" [class.has-error]="(f.postalCode.errors.required || errors.postalCode) && submitted">
+                                        <label>Zip Code <sup>*</sup></label>
+                                        <input type="text" maxlength="6" minlength="5" formControlName="postalCode" (keypress)="checkNumber($event)"
+                                            class="form-control" placeholder="Enter ZIP Code" autocomplete="doNotAutoComplete" id="primaryZipCodeId">
+                                        <span class="field-message text-danger" *ngIf="f.postalCode.errors?.required && submitted">
+                                            <em class="icon icon-error mr-4"></em>
+                                            Please enter zip code.
+                                        </span>
+                                        <span class="field-message text-danger" *ngIf="f.postalCode.errors?.minlength || f.postalCode.errors?.maxlength">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.zip_code_error }}
+                                        </span>
+                                        <span class="field-message text-danger" *ngIf="errors.postalCode">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{errors.postalCode ? errors.postalCode[0].errorDescription : ''}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input formControlName="agreement" type="checkbox" class="custom-control-input" id="TT-1">
+                        <label class="custom-control-label" for="TT-1">By completing this form, I certify that I am of significant corporate control at my firm or are an authorized signatory. <sup>*</sup></label>
+                    </div>
+              </form>
+          </div>
+          <div class="d-flex justify-content-end pb-24">
+              <button [disabled]="!f.agreement.value" (click)="submitDetails()" type="button" class="btn btn-primary" id="submit-btn">Submit</button>
+          </div>
+    </div>
+</div>
+
+<div *ngIf="invalidLink || success">
+    <div id="content-area" class="d-flex justify-content-between flex-column login-row redirecting">
+        <div class="login-wraps flex-grow-1 d-flex align-items-center justify-content-center pt-0 mb-0">
+          <div class="container">
+            <div class="d-flex justify-content-center">
+              <div *ngIf="invalidLink" class="text-left py-16">
+                <h1 class="mb-32 pb-8 mt-0">Invalid Link</h1>
+                <p class="mb-0">This link is no longer valid. </p>
+              </div>
+              <div *ngIf="success" class="text-left py-16">
+                <h1 class="mb-32 pb-8 mt-0">Success</h1>
+                <p class="mb-0">Your form has been submitted successfully. You can now close this window.  </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+</div>
+<app-loader [active]="loading"></app-loader>

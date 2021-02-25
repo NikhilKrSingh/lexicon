@@ -1,0 +1,36 @@
+<div id="content-area" class="d-flex justify-content-between flex-column login-row">
+  <div class="login-wraps flex-grow-1 d-flex align-items-center justify-content-center">
+    <div class="container">
+      <div class="login-card">
+        <div class="card-head text-center">
+          <a class="logo" href="javascript:void(0);"><img src="assets/images/default-logo-lexicon.png" alt=""></a>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h2>Activate Your Account</h2>
+            <h4>Authorize Your Calendar</h4>
+            <ng-container *ngFor="let cal of calendarArr; trackBy: trackByFn">
+              <a (click)="goToRoute(cal)"
+                 class="d-flex card-lbl justify-content-between align-items-center">
+                <img [src]="cal.icon" alt="">
+                <span *ngIf="cal.authorize">Authorized <em class="icon-success icon icon-check-circle"></em></span>
+              </a>
+            </ng-container>
+            <app-loader [active]="platformLoading || syncing"></app-loader>
+            <div class="d-flex justify-content-end pt-24">
+              <div class="btn-group ">
+                <button (click)="activate()" class="btn btn-primary" id="activate-btn">Activate</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="login-ftr">
+    <div class="container">
+      <p>Powered By</p>
+      <img src="assets/images/lexicon-logo.svg" alt="">
+    </div>
+  </footer>
+</div>

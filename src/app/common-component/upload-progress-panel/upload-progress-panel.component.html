@@ -1,0 +1,79 @@
+<div class="upload-board position-relative" [ngClass]="{'open': isOpen}">
+  <div class="upload-board-head d-flex align-items-center justify-content-between pt-0 pr-0 pb-0">
+    <div class="d-flex align-items-center">
+      <em class="icon mr-8" [ngClass]="getHeaderMsgTrue == 1 ? 'icon-check-circle text-success' : getHeaderMsgTrue == 2 ? 'icon-error text-danger' : ''"></em>
+      <h4 class="m-0 lh-20">{{getHeaderMsgFalse}}</h4>
+    </div>
+    <div class="d-flex align-items-center">
+      <span class="angle-arrow" (click)="isOpen = !isOpen"><em class="icon" [ngClass]=" !isOpen ? 'icon-angle-up' : 'icon-angle-down'"></em></span>
+      <span class="close-arrow" (click)="crossClickPenal()"><em class="icon icon-close"></em></span>
+    </div>
+  </div>
+  <div class="d-flex align-items-center justify-content-between upload-board-title" *ngIf="isOpen && getFailedFilesStatus">
+    <div class="d-flex align-items-center">
+      <a href="javascript:void(0);" class="font-weight-medium ml-16" *ngIf="getFailedFilesStatus" (click)="remove_retryFailedFiles('retry')" id="retry-all-failed">Retry All Failed</a>
+      <a href="javascript:void(0);" class="font-weight-medium ml-16" *ngIf="getFailedFilesStatus" (click)="remove_retryFailedFiles('remove')" id="remove-all-failed">Remove All Failed</a>
+      
+    </div>
+  </div>
+  <div class="upload-board-body">
+    <div class="uploading-wrap">
+      <ul class="uploading-list m-0 list-unstyled">
+        <ng-container *ngFor="let file of fileArray; trackBy : trackByFn;let i=index">
+        <li class="d-flex justify-content-between align-items-start" *ngIf="!file.isHidden"  [ngClass]="{'failed-upload': file.isScanFailed}">
+          <div class="d-flex align-items-start">
+            <img class="mr-12" width="18" [src]="file.name | commonService: 'getFileImage'" alt="">
+            <div>
+              <p class="lh-20 mb-8" [title]="file.nameOfFile">{{ file.nameOfFile > 15 ? (file.nameOfFile.substr | slice:0:15)+'...'+ (file.name | commonService : 'getFileExtension') : file.nameOfFile}}</p>
+              <div class="d-flex align-items-center mb-8">
+                <span class="sh-badge text-nowrap font-weight-medium" [class.sh-badge-primary]="!file.isScanFailed && !file.isUploaded" [class.sh-badge-danger]="file.isScanFailed" [class.sh-badge-success]="file.isUploaded" *ngIf="!isOffline">{{file.isScanFailed ? 'Security Scan Failed' :  file.isUploaded && file.isScanPassed ? 'Upload Complete' : file.isScanPassed && !file.isUploaded ? 'Upload In Progress' : 'Security Scan In Progress'}}</span>
+                <span class="sh-badge text-nowrap font-weight-medium" [class.sh-badge-danger]="file.isScanFailed" [class.sh-badge-success]="file.isUploaded" *ngIf="isOffline">{{file.isUploaded ? 'Upload Complete' : file.isScanPassed ? 'Upload Failed' : 'Security Scan Failed' }}</span>
+
+              </div>
+              <span class="small text-danger" *ngIf="file.isScanFailed && !isOffline">{{file.virusDetails ? file.virusDetails + ' ' : 'Unknown ' }} virus detected</span>
+              <span class="small text-danger" *ngIf="file.isScanFailed && isOffline">The file could not be uploaded. Connection was lost during the {{file.isScanPassed ? 'upload' : 'scanning'}} process.</span>
+            </div>
+          </div>
+          <div class="d-flex align-items-start">
+            <div class="d-flex">
+              <span *ngIf="!file.isFromDmsPortal && !file.isClientDoc && !file.isAdminSettingsFile && !file.isAdminSettingRelpaceFile" class="folder-bg info-hover position-relative ml-8" (click)="goToDMS(file)" id="go-to-dms-index-{{i}}">
+                <em class="icon icon-folder icon-color"></em>
+                <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                  <div class="arrow"></div>
+                  <div class="tooltip-inner">
+                    Open Parent Folder
+                  </div>
+                </div>
+              </span>
+              <span class="folder-bg info-hover position-relative" (click)="(file.isClientDoc) ? removeClientFile(i) : (file.isReplaceFile) ? delete_retryReplaceFile(true, i) : removeImage(i)" *ngIf="!file.isScanFailed" id="remove-img-index-{{i}}">
+                <em class="icon icon-close-fill icon-color"></em>
+                <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                  <div class="arrow"></div>
+                  <div class="tooltip-inner">
+                    {{file.isUploaded ? 'Clear' : 'Cancel Upload'}}
+                  </div>
+                </div>
+              </span>
+              <div class="dropdown dropdown-hover-table folder-bg" *ngIf="file.isScanFailed" [class.active]="currentActive == i"
+              (click)="openMenu(i)" appAutoCloseOutsideClick
+              (outsideClick)="onClickedOutside(i)">
+                <span class="icon-dot-area d-block">
+                  <em class="icon icon-dot-verti"></em>
+                </span>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="javascript:void(0)" (click)="(file.isClientDoc) ? retryClientDoc(i) : (file.isReplaceFile) ? delete_retryReplaceFile(false, i) :removeImage(i, true)" id="retry-failed-file-index-{{i}}">
+                    Retry Failed File
+                  </a>
+                  <a class="dropdown-item" href="javascript:void(0)" (click)="(file.isClientDoc) ? removeClientFile(i) : (file.isReplaceFile) ? delete_retryReplaceFile(true, i) :  removeImage(i)" id="remove-failed-file-index-{{i}}">
+                    Remove Failed File
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ng-container>
+      </ul>
+    </div>
+  </div>
+</div>

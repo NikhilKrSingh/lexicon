@@ -1,0 +1,114 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">Add Users</h3>
+  <button type="button" class="close" (click)="cancel()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="row">
+    <div class="col-3">
+      <div class="form-group">
+        <label>Primary Office</label>
+        <ng-select [items]="Offices" placeholder="Select Office" [(ngModel)]="primaryOfficeId" [bindValue]="'id'"
+          [bindLabel]="'name'" (change)="applyFilter()" [searchable]="true" [selectOnTab]="true"
+          [notFoundText]="'No record found'" id="primary-office-select">
+        </ng-select>
+      </div>
+    </div>
+    <div class="col-9 d-flex align-items-center">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" name="q" id="q-add-group-user" placeholder="Search Users" required=""
+              [(ngModel)]="searchOfficeEmployee" (ngModelChange)="applyFilter()">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="custom-table">
+    <div class="table-responsive">
+      <ngx-datatable #employeeTable class="material common-table no-min-height" [rows]="OfficeEmployees"
+        [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" [selected]="selected"
+        [messages]="messages" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+        [limit]="page.size" [sorts]="[{prop: 'lastName', dir: 'asc'}]" [selectionType]="'checkbox'"
+        id="office-employee-tbl">
+        <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false"
+          [draggable]="false">
+          <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+            let-onCheckboxChangeFn="onCheckboxChangeFn">
+            <label class="cust-check">
+              <input type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+              <span class="check-style"></span>
+            </label>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="lastName" name="Name" [canAutoResize]="false" [width]="245">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <app-custom-tooltip [text]="row.lastName + ', ' + row.firstName" [maxLength]='30'></app-custom-tooltip>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="355">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <app-custom-tooltip [text]='row.email' [maxLength]='40'></app-custom-tooltip>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="primaryOffice.name" name="Primary Office" [width]="190">
+          <ng-template let-row="row" let-value='value' ngx-datatable-cell-template>
+            <app-custom-tooltip [text]='value' [maxLength]='25'></app-custom-tooltip>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Title" [width]="190">
+          <ng-template let-row="row" let-value='value' ngx-datatable-cell-template>
+            <app-custom-tooltip [text]='value' [maxLength]='20'></app-custom-tooltip>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" name="Status" prop="status" [width]="120"></ngx-datatable-column>
+        <ngx-datatable-footer>
+          <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+            let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+            <div class="d-flex justify-content-between flex-fill"  *ngIf="page.totalPages > 0">
+              <div class="d-flex align-items-center">
+                <div class="table-items d-flex align-items-center mr-36">
+                  Items per page:
+                  <div class=" ml-8">
+                    <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                      <option *ngFor="let limit of limitArray;trackBy : trackByFn" [value]="limit">{{ limit }}</option>
+                    </select>
+                  </div>
+                </div>
+                <span>
+                  {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                  {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                  {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}} </span>
+              </div>
+              <div class="d-flex align-items-center">
+                <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                  <option *ngFor='let num of page.totalPages | counterPipe ;trackBy : trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                    of
+                    {{page.totalPages}}</option>
+                </select>
+                <div class="ml-8">
+                  <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                    [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                    [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                    (change)="employeeTable.onFooterPage($event);pageChange($event)">
+                  </datatable-pager>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-footer>
+      </ngx-datatable>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="saveAddUsers()"
+    id="save-btn">Save</button>
+</div>
+
+<app-loader [active]="addLoading"></app-loader>

@@ -1,0 +1,13 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">Warning</h3>
+</div>
+<div class="modal-body pb-24">
+  <div class="d-flex">
+    <em class="icon icon-warning text-warning text-xlarge mr-16"></em>
+    <p class="m-0 lh-20">Your changes have not been saved. Are you sure you want to leave this page?</p>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="close-btn">Stay On This Page</button>
+  <button type="button" class="btn btn-primary" (click)="save()" id="save-btn">Leave This Page</button>
+</div>

@@ -1,0 +1,53 @@
+<div class="multiselect-dropdown dropdown" [ngClass]="{'open':showDropdown, 'disabled': isDisabled}">
+  <button class="multiselect-dropdown-toggle custom-select select text-left" type="button">
+    <span *ngIf="displayFlag">{{ title }}</span>
+    <div class="multiselect-text position-relative" *ngIf="!displayFlag" (click)="show()" id="show-div">
+      <span class="badge badge-primary mr-8" (click)="clear()" id="clear-span">
+        <span>{{ title }}</span>
+        <em class="icon icon-close"></em>
+      </span>
+      {{selectedMessage}}
+    </div>
+    <span (click)="!isDisabled && show()" class="caret"><em class="icon icon-arrow-down"></em></span>
+  </button>
+  <div class="multiselect-dropdown-menu" id="main-class" *ngIf="showDropdown && !isDisabled">
+    <div class="multiselect-dropdown-item search" *ngIf="showSearch">
+      <div class="dropdown-search position-relative">
+        <em class="icon icon-search"></em>
+        <input #searchInput class="form-control" type="text" [placeholder]="placeholder" [(ngModel)]="searchValue"
+          (keyup)="onSearchKeyup($event)" id="search-val"/>
+      </div>
+    </div>
+    <ul class="list-unstyled m-0 multiselect-dropdown-list" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+      <li class="multiselect-dropdown-item" *ngIf="displaySubItem?.length && showAll">
+        <div class="custom-control custom-checkbox m-0 pr-0">
+          <input type="checkbox" class="custom-control-input" id="dropcheck-all" (change)="selectDeselectAll($event)"
+            [(ngModel)]="parentChecked" [checked]="parentChecked">
+          <label class="custom-control-label cursor-pointer full-width" for="dropcheck-all">
+            <h4 class="m-0">All</h4>
+          </label>
+        </div>
+      </li>
+      <li class="multiselect-dropdown-item"
+        *ngFor="let item of ((showAll || unsort) ? displaySubItem : displaySubItem | orderBy);trackBy :trackByFn;"
+        [ngClass]="{'email-not-provide': !item.accountName}">
+        <div class="custom-control custom-checkbox m-0 pr-0">
+          <input type="checkbox" class="custom-control-input" id="dropcheck-{{item.id}}"
+            (change)="changeSelection($event, item.id)" [checked]="item.checked" [disabled]="item.disabled">
+          <label class="custom-control-label cursor-pointer full-width" for="dropcheck-{{item.id}}">
+            <h4 class="m-0">{{ item.accountName }}</h4>
+            <span class="d-block small helper-text lh-16">
+              {{ item.accountNumber}}</span>
+          </label>
+        </div>
+      </li>
+      <li class="multiselect-dropdown-item" *ngIf="loading && (!searchValue)">
+        <div style="text-align: center">
+          Loading
+        </div>
+      </li>
+    </ul>
+    <button class="btn btn-primary btn-block" type="button" [disabled]="!displaySubItem?.length"
+      (click)="apply()" id="apply-btn">{{filterName}}</button>
+  </div>
+</div>

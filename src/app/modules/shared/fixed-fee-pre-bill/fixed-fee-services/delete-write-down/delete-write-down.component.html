@@ -1,0 +1,19 @@
+<div class="modal-header d-block">
+  <h3 class="modal-title">Delete Fixed Fee Services Write-Down</h3>
+  <button type="button" class="close" (click)='dismiss()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="d-flex align-items-start missing-data">
+    <em class="icon icon-warning text-warning"></em>
+    <div class="lh-20 ml-16">
+      <p class="m-0">You are about to delete a fixed fee services write-down from this pre-bill. Do you want to continue?
+      </p>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='ok()' id="yes-delete-write-down-btn">Yes, delete write-down</button>
+</div>

@@ -1,0 +1,6 @@
+<router-outlet></router-outlet>
+<div class="footer-bars d-flex align-items-end" *ngIf='!hidePanel'>
+  <app-client-retention-upload-doc-section *ngIf="isClientRetentionDocUpload" (hideSection)="hideClientRetentionDocSection()"></app-client-retention-upload-doc-section>
+  <app-upload-progress-panel *ngIf="hasUpload" (closePenal)="closeWidgets()"></app-upload-progress-panel>
+  <app-timers *ngIf="showTimer"></app-timers>
+</div>

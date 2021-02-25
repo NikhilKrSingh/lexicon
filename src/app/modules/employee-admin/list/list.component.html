@@ -1,0 +1,275 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Employees</li>
+    </ol>
+    <div class="heading">
+      <h1>Employees</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <div class="header-search-wrapper">
+          <input type="text" class="form-control search-input" placeholder="Search Employees" [(ngModel)]="searchText" (keyup)="applyFilterPrimaryOffice()" id="search-text">
+          <button class="btn" type="button" id="search-btn">Search</button>
+        </div>
+      </div>
+      <div class="btn-group ml-md-24 ml-0" *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin'>
+        <button class="btn btn-outline-primary export btn-icon " type="button" (click)="open(mymodal)" id="export-to-csv">
+          <i class="icon icon-upload"></i> Export to CSV
+        </button>
+        <button [routerLink]="['/employee/create']"  class="btn btn-primary btn-icon" type="button" id="add-new-employee">
+          <i class="icon icon-plus"></i> Add New Employee
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="exampl1">Primary Office</label>
+              <app-multiselect-dropdown
+                [title]="title"
+                [placeholder]="'Search offices'"
+                backgroundColor="#fff"
+                [selections]="selectedOffice"
+                [displaySubItem]="officeList"
+                [filterName]="filterName"
+                (onSelectionChanged)="selectDropdwnPo($event)"
+                (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                (clearFilter)="clearFilterPrimaryOffice()"
+                (applyFilter)="applyFilterPrimaryOffice()"
+                id="primary-office-multi">
+              </app-multiselect-dropdown>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="exampl2">Status</label>
+              <app-multiselect-dropdown
+                [title]="title1"
+                [placeholder]="'Search offices'"
+                [selections]="selectedStatus"
+                [displaySubItem]="statusList"
+                [filterName]="filterName"
+                (onSelectionChanged)="selectStatus($event)"
+                (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                (clearFilter)="clearStatusFilter()"
+                (applyFilter)="applyFilterPrimaryOffice()"
+                id="status-multi">
+              </app-multiselect-dropdown>
+            </div>
+          </div>
+
+          </div>
+        </div>
+        <div class="row m-20">
+          <div class="col-sm-12">
+            <div class="custom-table">
+              <ngx-datatable
+                #table
+                class="material common-table employee-table"
+                [class.fix-col-right]="tables?.frozenRightArr[0]"
+                [class.matter-no-data]="rows?.length === 0"
+                [rows]="rows"
+                [columnMode]="ColumnMode.force"
+                [headerHeight]="50"
+                [footerHeight]="footerHeight"
+                [selected]="selected"
+                [messages]="messages"
+                rowHeight="auto"
+                [scrollbarH]="true"
+                [scrollbarV]="false"
+                [count]="page.totalElements"
+                [offset]="page.pageNumber"
+                [limit]="page.size"
+                [selectionType]="SelectionType.checkbox"
+                [selectAllRowsOnPage]="false"
+                [sorts]="[{prop: 'lastName', dir: 'asc'}]"
+                (sort)="updateDatatableFooterPage()"
+                id="employee-tbl"
+              >
+              <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false"
+                [draggable]="false">
+                <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                  let-selectFn="selectFn">
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" [checked]="allSelected" (change)="selectDeselectRecords()" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+                <ng-template ngx-datatable-cell-template let-row="row" let-isSelected="isSelected"
+                  let-onCheckboxChangeFn="onCheckboxChangeFn">
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" [checked]="row.selected" (change)="changeChildSelection(row)" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+              </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="lastName" name="Name" [width]="200" [headerClass]="'checkbox-header'">
+                  <ng-template ngx-datatable-header-template let-value="value">
+                    <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                      <span class="datatable-header-cell-label">Name</span>
+                    </span>
+                  </ng-template>
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    {{(row.lastName) ? row.lastName + ', ' + row.firstName : row.firstName}}
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="255"> </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="primaryOffice.name" name="Primary Office" [width]="190"> </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="jobFamilyName" name="Job Family" [width]="186"> </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title"  [width]="186"> </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="status"  name="Status" [width]="100">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='tables?.frozenRightArr[0]' [width]="100" prop='id'>
+                  <ng-template let-row="row"  let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                      <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick (outsideClick)="onClickedOutside(rowIndex)">
+                        <em class="icon icon-dot-verti"></em>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" [routerLink]="['/employee/profile']" [queryParams]="{employeeId: value}" href="javascript:void(0)" id="view-profile-index-{{rowIndex}}">View Profile</a>
+
+                          <a *ngIf="row.isVisible" class="dropdown-item" (click)="empDeactivate(row,DeactivateModal)" href="javascript:void(0)" id="deactivate-user-index-{{rowIndex}}">Deactivate User</a>
+                          <a *ngIf="!row.isVisible" class="dropdown-item" (click)="open(reactivateModal); reactivateEmp(row)" href="javascript:void(0)" id="reactivate-user-index-{{rowIndex}}">Reactivate
+                            User</a>
+                          <a class="dropdown-item" *ngIf="!row.isActivated"  (click)="rsndActEml(row)" href="javascript:void(0)" id="resend-activation-email-{{rowIndex}}">Resend Activation Email</a>
+                        </div>
+                      </div>
+                      <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-footer>
+                  <ng-template
+                    ngx-datatable-footer-template
+                    let-rowCount="rowCount"
+                    let-pageSize="pageSize"
+                    let-selectedCount="selectedCount"
+                    let-curPage="curPage"
+                    let-offset="offset"
+                    let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                              <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                                <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                              </select>
+                          </div>
+                        </div>
+                        <span>
+                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                        </span>
+                        </div>
+
+                      <div class="d-flex align-items-center">
+                        <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                          <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }} of {{page.totalPages}}</option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager
+                            [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                            [pagerPreviousIcon]="'datatable-icon-prev'"
+                            [pagerNextIcon]="'datatable-icon-skip'"
+                            [page]="curPage"
+                            [size]="pageSize"
+                            [count]="rowCount"
+                            [hidden]="!((rowCount / pageSize) > 1)"
+                            (change)="table.onFooterPage($event);pageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+              </div>
+              <app-loader [active]="loading"></app-loader>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+<ng-template #mymodal let-modal>
+    <div class="modal-header d-block">
+        <h3 class="modal-title">Export to CSV</h3>
+        <p>Select which data you want to export</p>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="row no-gutters">
+            <div class="col-3" *ngFor="let item of columnList; trackBy: trackByFn;let i = index">
+                <div class="custom-control custom-checkbox pr-0" >
+                    <input class="custom-control-input" id="{{item.Name}}-{{i}}" [checked]="item.isChecked"
+                        (change)="item.isChecked = !item.isChecked" type="checkbox">
+                    <label class="custom-control-label" for="{{item.Name}}-{{i}}">{{item.Name}}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-dismiss="modal"
+            (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="!isExportValid" (click)="ExportToCSV()" id="export-btn">Export</button>
+    </div>
+</ng-template>
+
+
+
+
+<ng-template #reactivateModal let-modal>
+  <div class="modal-header d-block">
+    <h3 class="modal-title">Reactivate Employee</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to reactivate this employee?</p>
+
+    <div class="row no-gutters" [formGroup]="noteForm">
+      <div class="col-12">
+        <div class="form-group">
+          <label for="">Change Notes</label>
+          <textarea class="form-control" rows="4" placeholder="Enter change notes (optional)" formControlName="content" id="content-btn"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" data-dismiss="modal"
+      (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="empReactivate()" id="reactivate-employee">Reactivate Employee</button>
+  </div>
+</ng-template>
+
+<ng-template #DeactivateModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Deactivate User</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex">
+      <em class="icon-alert icon icon-error text-danger fs-22 mr-16"></em>
+      <p class="m-0 lh-20">{{ deactivateMsg }}</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="close-btn">Close</button>
+  </div>
+</ng-template>

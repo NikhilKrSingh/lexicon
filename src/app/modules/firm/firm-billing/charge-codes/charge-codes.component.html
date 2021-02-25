@@ -1,0 +1,246 @@
+
+
+
+<div class="d-flex align-items-center justify-content-between mb-24">
+  <div class="header-search flex-fill d-flex">
+    <form action="#">
+      <div class="header-search-wrapper">
+        <input type="text" id="billingCodesHourlySearchField" class="form-control search-input" name='description' [(ngModel)]='description'
+          (ngModelChange)='applyFilter()' placeholder="Search by code or description">
+        <button class="btn" id="billingCodesHourlySearchBtn" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+  <div class="btn-group ml-md-24 ml-0">
+    <button class="btn btn-primary btn-icon" id="billingCodesHourlyNewCodeBtn" type="button" [disabled]='!listLoaded || !firmDetails || loading'
+      (click)="createChargeCode()">
+      <i class="icon icon-plus"></i> Create New
+    </button>
+  </div>
+</div>
+<div>
+  <div class="p-0">
+    <div class="row gutter-16">
+      <div class="col-10">
+        <div class="row gutter-16">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Status</label>
+              <ng-select id="billingCodesWriteDownStatusFilter"
+                         [selectOnTab]="true" [items]="statusList" placeholder="All"
+                         (change)='applyFilter()'
+                         [(ngModel)]="status" [bindValue]="'id'" [bindLabel]="'name'"
+                         [notFoundText]="'No record found'">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row pt-8 mb-16" *ngIf="tenantTierName === 'Ascending' ||tenantTierName === 'Iconic'">
+      <div class="col-3">
+        <label  class="d-block">Selection Actions
+        </label>
+        <div class="btn-group pt-8">
+          <button class="btn btn-primary" [disabled]="selected?.length < 2 || !showDisableBulkAction"
+            (click)="open(disableHourlyCode,null,'')">
+            Disable
+          </button>
+          <button class="btn btn-primary" [disabled]="selected?.length < 2 || !showEnableBulkAction"
+            (click)="open(enableHourlyCode,null,'')">
+            Enable
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="row pt-16"
+      *ngIf="(tenantTierName === 'Ascending' ||tenantTierName === 'Iconic') && showCodeSelectionWarning">
+      <div class="col-12">
+        <div class="alert alert-primary d-flex justify-content-between mb-16" role="alert">
+          <div class="d-flex">
+            <em class="alert-icon icon icon-error mr-12"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <b class="mr-36">Code Selection</b> You've selected codes that are both Active and Disabled. Choose codes
+              of the same status to complete a bulk action.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="custom-table">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="custom-table matter-list">
+            <ngx-datatable id="billingCodesHourlyListTable" #table class="material common-table matter-table" [class.fix-col-right]='tables?.frozenRightArr[0]'
+              [class.matter-no-data]="chargeCodes?.length === 0" [rows]="chargeCodes" [columnMode]="ColumnMode.force"
+              [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="page.totalElements"
+              [offset]="page.pageNumber" [limit]="page.size" [selected]="selected" (sort)="calcTotalPages()"
+              [selectionType]="SelectionType.checkbox" [scrollbarH]="true"
+              [scrollbarV]="false" id="employee-tbl">
+              <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false"
+                [draggable]="false" *ngIf="tenantTierName == 'Iconic' || tenantTierName == 'Ascending'">
+                <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                  let-selectFn="selectFn">
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" [checked]="allSelected" (change)="selectDeselectRecords()" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+                <ng-template ngx-datatable-cell-template let-row="row" let-isSelected="isSelected"
+                  let-onCheckboxChangeFn="onCheckboxChangeFn">
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" [checked]="row.selected" (change)="changeChildSelection(row)" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [width]="100" [headerClass]="'checkbox-header'">
+                <ng-template ngx-datatable-header-template let-value="value">
+              <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                <span class="datatable-header-cell-label">Code</span>
+              </span>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="description" name="Name" [width]="150"> </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="100"></ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="billingTo.name" name="Billable To" [width]="100"> </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='tables?.frozenRightArr[0]' [width]="100" prop='id'>
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div class="d-flex justify-content-end">
+                    <div class="dropdown dropdown-hover-table" id="billingCodeHourlyActionMenu_{{row.id}}" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+                      (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                      (outsideClick)="onClickedOutside($event, rowIndex)">
+                      <em class="icon icon-dot-verti"></em>
+                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" id="billingCodeHourlyEditOption_{{row.id}}" (click)='editChargeCode(row, $event)' *ngIf="row.status == 'Active'">Edit</a>
+                        <a class="dropdown-item" id="billingCodeHourlyDisableOption_{{row.id}}" *ngIf="row.status == 'Active'"
+                          (click)="open(disableHourlyCode,row,$event)">Disable</a>
+                        <a class="dropdown-item" id="billingCodeHourlyEnableOption_{{row.id}}" *ngIf="row.status == 'Disabled'"
+                          (click)="open(enableHourlyCode,row,$event)">Enable</a>
+                      </div>
+                    </div>
+                    <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                  let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                            (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                        {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                          {{ i+1 }} of {{page.totalPages}}</option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #disableHourlyCode let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!isBulkEnableDisable">Disable Hourly Code - {{selectedCode.code}} </h3>
+    <h3 class="modal-title mb-0" *ngIf="isBulkEnableDisable">Disable Hourly Codes </h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p *ngIf="!isBulkEnableDisable" class="m-0">Are you sure you want to disable this Hourly Code? It will not be
+          available for use on future
+          matters, but existing matters will not be affected.</p>
+
+        <p *ngIf="isBulkEnableDisable" class="m-0">Are you sure you want to disable these Hourly Codes? They will not be
+          available for use on future
+          matters, but existing matters will not be affected.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="disable-hourly-codes-cancel-btn">Cancel</button>
+
+    <button type="button" class="btn btn-primary" id="disable-hourly-codes-btn"
+      (click)="onEnableDisableHourlyCode(false);modal.dismiss('Cross click');" *ngIf="!isBulkEnableDisable">
+      Yes, disable hourly code
+    </button>
+
+    <button type="button" class="btn btn-primary" id="disable-hourly-codes-bulk-btn"
+      (click)="onEnableDisableHourlyCode(false);modal.dismiss('Cross click');" *ngIf="isBulkEnableDisable">
+      Yes, disable hourly codes
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #enableHourlyCode let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!isBulkEnableDisable">Enable Hourly Code - {{selectedCode.code}}</h3>
+    <h3 class="modal-title mb-0" *ngIf="isBulkEnableDisable">Enable Hourly codes</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-12">
+        <p class="m-0" *ngIf="!isBulkEnableDisable">Are you sure you want to enable this Hourly Code?</p>
+        <p class="m-0" *ngIf="isBulkEnableDisable">Are you sure you want to enable these Hourly Codes?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="enable-hourly-codes-cancel-btn">Cancel</button>
+
+    <button type="button" class="btn btn-primary" id="enable-hourly-codes-btn"
+      (click)="onEnableDisableHourlyCode(true);modal.dismiss('Cross click');" *ngIf="!isBulkEnableDisable">
+      Yes, enable hourly code
+    </button>
+
+    <button type="button" class="btn btn-primary" id="enable-hourly-codes-bulk-btn"
+      (click)="onEnableDisableHourlyCode(true);modal.dismiss('Cross click');" *ngIf="isBulkEnableDisable">
+      Yes, enable hourly codes
+    </button>
+  </div>
+</ng-template>
+

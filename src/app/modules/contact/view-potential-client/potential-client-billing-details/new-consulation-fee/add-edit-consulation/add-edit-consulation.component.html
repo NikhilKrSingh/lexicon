@@ -1,0 +1,257 @@
+<div style="z-index: 1050" aria-hidden="true" class="modal-backdrop fade show"></div>
+<div class="modal fade show d-block">
+  <div class="modal-dialog modal-dialog-centered modal-xl margin-auto">
+    <div class="modal-content">
+      <div class="modal-header d-block">
+        <h3 class="modal-title mb-0">{{(action == 'add') ? 'Record ' : 'Edit '}} Consultation</h3>
+        <button aria-label="Close" class="close" type="button" (click)="close()" id="close-btn"><em
+            class="icon icon-close"></em>
+        </button>
+      </div>
+
+      <div class="modal-body pb-0" [formGroup]="addEditConsultationForm">
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div class="form-group"
+              [class.has-error]='formSubmitted && (addEditConsultationForm.controls.dateOfService.invalid || dateOfServiceError)'>
+              <label>Date of Service <sup>*</sup></label>
+              <app-date-picker [isForm]='true' [dateTimeFilter]='dateOfServiceFilter'
+                [dateform]='addEditConsultationForm' controlName='dateOfService' [reset]="dateReset"
+                (dataChange)='dateOfServiceChage()'
+                id="dateOfServiceId">
+              </app-date-picker>
+              <span class="field-message text-danger"
+                *ngIf="(addEditConsultationForm.controls.dateOfService.errors || dateOfServiceError) && formSubmitted">
+                <span *ngIf="addEditConsultationForm.controls.dateOfService.errors?.required && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.date_of_service_error}}
+                </span>
+                <span *ngIf="dateOfServiceError && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.service_date_cant_in_future}}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <h4 class="mt-8 text-xlarge mb-20">Consultation Codes</h4>
+        <div class="header-search flex-fill d-flex mb-24">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" name="search"
+              (keyup)="searchConsultation($event.target.value)" placeholder="Search by code number or name"
+              id="search-text">
+            <button class="btn" type="button" id="search-btn">Search</button>
+          </div>
+        </div>
+
+        <div class="custom-table mb-16">
+          <ngx-datatable #table class="material common-table  no-min-height" [rows]="consulationCode"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+            [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" [selected]="selected"
+            [selectionType]="'checkbox'" (sort)="updateFooterPage()" id="consult-codes-tbl-one" [rowClass]='getRowClass'
+            [sorts]="[{prop: 'code', dir: 'asc'}]">
+            <ngx-datatable-column [resizeable]="false" prop='code' name="Code" [canAutoResize]="false" [width]="150">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <div class="custom-control custom-radio">
+                  <input type="radio" id="select_{{row.id}}" name="Association" value="true"
+                    class="custom-control-input" (change)='onSelect(row)' [checked]="selected?.id == row.id">
+                  <label class="custom-control-label" for="select_{{row.id}}">
+                    <span class="ml-2" [class.font-weight-medium]='selected?.id == row.id'>{{row.code}}</span>
+                  </label>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop='name' name="Name" [width]="320">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row='row'>
+                {{value}}
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" name="Bill Type" prop="billTypeName" [width]="180">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" name="Rate" prop="rate" [width]="180">
+              <ng-template ngx-datatable-cell-template let-value="value" let-row='row'>
+                <span *ngIf='row.billTypeName == "Open"'> - </span>
+                <span *ngIf='row.billTypeName != "Open"'> {{(value || 0)  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-footer>
+              <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                <div class="d-flex justify-content-between flex-fill">
+                  <div class="d-flex align-items-center">
+                    <div class="table-items d-flex align-items-center mr-36">
+                      Items per page:
+                      <div class=" ml-8">
+                        <select class="custom-select border-less" [formControl]="pageSelector"
+                          (change)="changePageSize()">
+                          <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <span>
+                      {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                      {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                      {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                    </span>
+                  </div>
+
+                  <div class="d-flex align-items-center">
+                    <select class="custom-select border-less" [(ngModel)]="pageSelected" [ngModelOptions]="{standalone: true}" (change)="changePage()">
+                      <option *ngFor='let num of  page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                        [value]="i+1">Page
+                        {{ i+1 }} of
+                        {{page.totalPages}}</option>
+                    </select>
+                    <div class="ml-8">
+                      <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                        [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                        [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                        [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                        (change)="table.onFooterPage($event);pageChange($event)">
+                      </datatable-pager>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-footer>
+          </ngx-datatable>
+        </div>
+        <div class="row gutter-16 pt-24">
+          <div class="col-4">
+            <div class="form-group"
+              [class.has-error]='formSubmitted && (addEditConsultationForm.controls.consulation_duration.invalid || !validDuration)'>
+              <label>Consultation Duration<sup>*</sup></label>
+              <input placeholder="Consultation Duration" type="text" class="form-control"
+                formControlName="consulation_duration" (change)="modelChanged()" (blur)='validateDuration()'>
+              <span class="field-message text-danger"
+                *ngIf="(addEditConsultationForm.controls.consulation_duration.errors || !validDuration) && formSubmitted">
+                <span *ngIf="(addEditConsultationForm.controls.consulation_duration.errors?.required || !validDuration) && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.consulatation_duration}}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16" *ngIf="consultationSelected?.billTypeName === 'Open'">
+          <div class="col-4">
+            <div class="form-group" [class.has-error]='formSubmitted && rate == 0'>
+              <label>Amount to Bill<sup>*</sup></label>
+              <input type="text" class="form-control" name="bill" [ngModelOptions]="{standalone: true}"
+                [(ngModel)]="rate" [prefix]="chargePrefix" mask="separator.2" thousandSeparator="," id="contact-number"
+                #amtInp [maxlength]='amtInp | decimalMaxLength' (blur)='blurAmtFormat()'>
+              <span class="field-message text-danger" *ngIf="rate == 0 && formSubmitted">
+                <span *ngIf="rate == 0 && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter amount to bill.
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16" *ngIf="consultationSelected?.billTypeName != 'Open'">
+          <div class="col-4">
+            <div class="form-group" [class.has-error]='formSubmitted && rate == 0'>
+              <label>Amount to Bill<sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="Rate"
+                [value]="chargePrefix + ((rate || 0) | number: '1.2-2')" disabled id="calculatedChargeId">
+              <span class="field-message text-danger" *ngIf="rate == 0 && formSubmitted">
+                <span *ngIf="rate == 0 && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter amount to bill.
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class=" row gutter-16 ">
+          <div class="col-4">
+            <div class="form-group"
+              [class.has-error]='formSubmitted && addEditConsultationForm.controls.recordStatus.invalid'>
+              <label>Record Result<sup>*</sup></label>
+              <ng-select [items]="recordList" formControlName="recordStatus" [bindValue]="'id'" [bindLabel]="'name'"
+                [searchable]="true" [selectOnTab]="true" [notFoundText]="'No record found'" id="primary-office-select">
+              </ng-select>
+              <span class="field-message text-danger"
+                *ngIf="addEditConsultationForm.controls.recordStatus.errors && formSubmitted">
+                <span *ngIf="addEditConsultationForm.controls.recordStatus.errors.required && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.recordStatus}}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row gutter-16">
+          <div [class.col-12]="action=='edit'" [class.col-6]="action=='add'">
+            <div class="d-flex justify-content-between">
+              <h4 class="mb-16 mt-0 pt-8">Billing Narrative</h4>
+            </div>
+            <div class="form-group position-relative"
+              [class.has-error]='formSubmitted && addEditConsultationForm.controls.billingNarrative.invalid'>
+              <label>Billing Narrative <sup>*</sup></label>
+              <span class="count-char">{{addEditConsultationForm?.value?.billingNarrative?.length || 0}}/1000</span>
+              <textarea #billingNarative class="form-control non-resize" rows="4" maxlength="1000"
+                formControlName="billingNarrative" (blur)="copytoNote()" (keydown.tab)="copytoNote()"
+                placeholder="Enter billing narrative" id="billing-narrative-description"></textarea>
+              <span class="field-message text-danger"
+                *ngIf="addEditConsultationForm.controls.billingNarrative.errors && formSubmitted">
+                <span *ngIf="addEditConsultationForm.controls.billingNarrative.errors.required && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.billingNarrative}}
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6" *ngIf="action =='add'">
+            <div class="d-flex justify-content-between">
+              <h4 class="mb-16 mt-0 pt-8">Note to File</h4>
+              <div class="text-right visble-to-client pt-8">
+                <div class="custom-control custom-checkbox pr-0 ml-auto">
+                  <input #visibletoclient type="checkbox" class="custom-control-input" id="visibletoclient"
+                    formControlName="isVisibleToClient">
+                  <label class="custom-control-label text-case-none" for="visibletoclient">Visible to client</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group position-relative"
+              [class.has-error]='formSubmitted && addEditConsultationForm.controls.note.invalid'>
+              <div class="d-flex justify-content-between">
+                <label>Notes to File <sup>*</sup></label>
+                <span class="count-char">{{addEditConsultationForm?.value?.note?.length || 0}}/1000</span>
+              </div>
+              <textarea #notes class="form-control non-resize" rows="4" placeholder="Enter note to file"
+                formControlName="note" maxlength="1000" id="notes-description"></textarea>
+              <span class="field-message text-danger"
+                *ngIf="addEditConsultationForm.controls.note.errors && formSubmitted">
+                <span *ngIf="addEditConsultationForm.controls.note.errors.required && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.note_file_required}}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+        <button *ngIf="action == 'add' " [disabled]='loadder' type="submit" (click)="save(true)" class="btn btn-outline-primary" id="save-btn">
+          Save & Bill Now
+        </button>
+        <button *ngIf="action == 'add' " [disabled]='loadder' type="submit" (click)="save()" class="btn btn-primary" id="save-btn">
+          Save
+        </button>
+        <button type="submit" [disabled]='loadder' *ngIf="action == 'edit' " (click)="save()" class="btn btn-primary" id="save-btn">
+          Save Changes
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<app-loader [active]='loadder'></app-loader>

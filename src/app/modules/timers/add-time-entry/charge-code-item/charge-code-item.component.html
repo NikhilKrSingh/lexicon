@@ -1,0 +1,136 @@
+<div class="charge-code-item position-relative" *ngIf='data'>
+  <button class="btn btn-link btn-icon p-0 d-flex align-items-center dte-btn" type="button" *ngIf='id > 0'
+    (click)="deleteChargeCode()" id="discard-time-entry-{{id}}">
+    <i class="icon icon-remove mr-8 mt-4"></i>Discard Additional Time Entry
+  </button>
+  <div class="row gutter-24">
+    <div class="col-12">
+      <div class="row gutter-16">
+        <div class="col-8">
+          <div class="row gutter-16 flex-nowrap">
+            <div class="col-auto" [formGroup]='timeEntryForm'>
+              <div class="form-group" [class.has-error]='timerWorkedErrMsg'>
+                <label>Time Worked <sup>*</sup></label>
+                <input type="text" class="form-control time-work" placeholder="0h 0m" formControlName='timeWorked'
+                  (change)='timeworkedChange()' (keypress)='checkNumber($event)' (blur)='timeWorkedBlur()' id="timeWorkedId-{{id}}" />
+                <span class="field-message text-danger" *ngIf="timerWorkedErrMsg">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ timerWorkedErrMsg }}
+                </span>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-group" >
+                <label>Suggested Time Entry</label>
+                <span class="d-block lh-20 pt-12" id="suggestedTimeEntry-{{id}}">{{data.suggestedTimerEntry | suggestedTimeEntry}}</span>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group"
+                [ngClass]="{'has-error': dateOfServiceErrMsg || dateOfServiceGreaterThenTodayErrMsg}">
+                <label>Date of service <sup>*</sup></label>
+                <app-date-picker [isNgModel]='true' [(data)]='data.dateOfService' [dateTimeFilter]='dateFilter'
+                  (dataChange)='onDateBlur()' id="dateOfServiceId-{{id}}">
+                </app-date-picker>
+                <span class="field-message text-danger" *ngIf="dateOfServiceErrMsg">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ dateOfServiceErrMsg }}
+                </span>
+                <span class="field-message text-danger" *ngIf="dateOfServiceGreaterThenTodayErrMsg">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ dateOfServiceGreaterThenTodayErrMsg }}
+                </span>
+              </div>
+            </div>
+            <div class="col-auto flex-fill">
+              <div class="search-group position-relative">
+                <label>Charge Code <sup>*</sup></label>
+                <div class="search-group position-relative" [ngClass]="{'has-error': chargeCodeErrMsg}">
+
+                  <form action="#" (outsideClick)="clearDropDown()" appAutoCloseOutsideClick>
+                    <span class="search-icn"></span>
+                    <input #chargeCode type="text" class="form-control" [(ngModel)]="data.chargeCodeName"
+                      [ngModelOptions]="{standalone: true}" (focus)="onChargeCodeFocus()"
+                      placeholder="Search charge codes" (keydown.enter)="actionDropDown($event)"
+                      (keydown.tab)="actionDropDown()" (keyup)="updateFilter($event)" autocomplete="off"
+                      [disabled]='!client || !matter' id="chargeCodeId-{{id}}">
+
+                    <span class="field-message text-danger" *ngIf="chargeCodeErrMsg">
+                      <em class="icon icon-error mr-4"></em>
+                      {{ chargeCodeErrMsg }}
+                    </span>
+                    <div class="search-group-result d-block mt-4 p-0"
+                      *ngIf="filterChargeCodeListPopUP?.length > 0 && showChargeCode">
+                      <div class="search-g-result-inner">
+                        <div class="search-collapse custom-style-scroll w-5">
+                          <div class="search-panel px-16 pt-16 pb-0"
+                            [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}"
+                            *ngFor="let item of filterChargeCodeListPopUP; trackBy :trackByFn;let i = index; let first=first">
+                            <div class="search-panel-head p-0" (click)="selectChargeCode(item)">
+                              <div class="text-large font-weight-medium"> {{item.code}}
+                              </div>
+                              <span class="small helper-text font-weight-medium d-block mt-4">
+                                {{item.description}}</span>
+                            </div>
+                            <div class="top-border-search-panel pt-16"></div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label>Billable Amount</label>
+            <span class="d-block lh-20 pt-12"
+               id="billableAmountId-{{id}}">{{data.rate | currency: 'USD' : 'symbol': '1.2-2'}}</span>
+            <ng-template #noBillableAmount>
+              <span class="d-block lh-20 pt-12" id="nonBillableAmountId-{{id}}">$ - </span>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+      <div class="position-relative">
+        <div class="custom-control custom-checkbox visit-client-abs pr-0">
+          <input type="checkbox" class="custom-control-input" id="customCheck1_{{id}}" [value]='true'
+            [(ngModel)]='data.visibleToClient' [attr.disabled]="(client?.id === 0 || disbursementTypeDetail?.billingTo?.code == 'OVERHEAD') ? true : null">
+          <label class="custom-control-label" for="customCheck1_{{id}}">Visible to Client</label>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="form-group mb-0" [ngClass]="{'has-error': billingNarrativeErrMsg}">
+              <label>Billing Narrative <sup *ngIf='!isBillingNarratibeDisabled'>*</sup></label>
+              <textarea class="form-control non-resize" [(ngModel)]="data.billingNarrative"
+                placeholder="Describe the work performed" [disabled]='isBillingNarratibeDisabled' (blur)="copytoNote()"
+                (keydown.tab)="copytoNote()" id="billingNarrativeId-{{id}}"></textarea>
+              <span class="field-message text-danger" *ngIf="billingNarrativeErrMsg">
+                <em class="icon icon-error mr-4"></em>
+                {{ billingNarrativeErrMsg }}
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group mb-0" [ngClass]="{'has-error': notesErrMsg}">
+              <div class="d-flex justify-content-between align-items-end mb-4">
+                <label class="m-0">Notes <sup>*</sup></label>
+                <span class="lh-20 mt-n4">Date of Service: {{data.dateOfService  | date: 'MM/dd/yyyy'}}</span>
+              </div>
+              <textarea class="form-control non-resize" placeholder="Enter Notes" [(ngModel)]="data.notes"
+                (blur)="noteBlur()" id="notesId-{{id}}"></textarea>
+              <span class="field-message text-danger" *ngIf="notesErrMsg">
+                <em class="icon icon-error mr-4"></em>
+                {{ notesErrMsg }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

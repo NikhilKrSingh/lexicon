@@ -1,0 +1,341 @@
+<div class="container">
+  <div class="main-content p-0">
+
+
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" id="billingCodeDisbursementSearchField" class="form-control search-input"
+                   name='description' [(ngModel)]='description'
+                   (ngModelChange)='applyFilter()' placeholder="Search by disbursement description and code">
+            <button class="btn" id="billingCodeDisbursementSearchBtn" type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+      <div class="btn-group ml-md-24 ml-0">
+        <button class="btn btn-primary btn-icon" id="billingCodeDisbursementCreateNewBtn" type="button"
+                [disabled]='!firmDetails || !openBillingType || loading'
+                (click)="createDisbursementType()">
+          <i class="icon icon-plus"></i> Create New
+        </button>
+      </div>
+    </div>
+    <div>
+      <div class="row gutter-16">
+        <div class="col-4">
+          <div class="row gutter-16">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Hard/Soft</label>
+                <ng-select id="billingCodeDisbursementHardSoftFilter" [selectOnTab]="true"
+                           [items]="disbursementTypeList" placeholder="All"
+                           (change)='applyFilter()' [(ngModel)]="disbursementType" [bindValue]="'id'"
+                           [bindLabel]="'name'"
+                           [notFoundText]="'No record found'">
+                </ng-select>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Bill Type</label>
+                <ng-select id="billingCodeDisbursementBillTypeFilter" [selectOnTab]="true" [items]="disbursementBillingTypeList"
+                           placeholder="Select bill type"
+                           (change)='applyFilter()' [(ngModel)]="billType" [bindValue]="'id'" [bindLabel]="'name'"
+                           [notFoundText]="'No record found'">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-8">
+          <div class="row gutter-16">
+
+            <div class="col-4">
+              <div class="form-group">
+                <label>Status</label>
+                <ng-select id="billingCodeDisbursementStatusFilter" [selectOnTab]="true" [items]="statusList"
+                           placeholder="Select status"
+                           (change)='applyFilter()' [(ngModel)]="status" [bindValue]="'id'" [bindLabel]="'name'"
+                           [notFoundText]="'No record found'">
+                </ng-select>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label>Billable to Client</label>
+                <ng-select id="billingCodeDisbursementBillableToClientFilter" [selectOnTab]="true"
+                           [items]="billingToClientList" placeholder="Select billable To"
+                           (change)='applyFilter()' [(ngModel)]="billableTo" [bindValue]="'id'" [bindLabel]="'name'"
+                           [notFoundText]="'No record found'">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row pt-8 mb-16" *ngIf="tenantTierName === 'Ascending' ||tenantTierName === 'Iconic'">
+        <div class="col-3">
+          <label class="d-block">Selection Actions
+          </label>
+          <div class="btn-group pt-8">
+            <button class="btn btn-primary" [disabled]="selected?.length < 2 || !showDisableBulkAction"
+                    (click)="openConfirm(disableDisbursement,null,'')" id="action-disable">
+              Disable
+            </button>
+            <button class="btn btn-primary" [disabled]="selected?.length < 2 || !showEnableBulkAction"
+                    (click)="openConfirm(enableDisbursement,null,'')" id="action-enable">
+              Enable
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row pt-16"
+           *ngIf="(tenantTierName === 'Ascending' ||tenantTierName === 'Iconic') && showCodeSelectionWarning">
+        <div class="col-12">
+          <div class="alert alert-primary d-flex justify-content-between mb-16" role="alert" id="code-selection-warning">
+            <div class="d-flex">
+              <em class="alert-icon icon icon-error mr-12"></em>
+              <div class="d-flex align-items-center flex-wrap">
+                <b class="mr-36">Code Selection</b> You've selected codes that are both Active and Disabled. Choose
+                codes of the same status to complete a bulk action.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="position-relative">
+        <div class="custom-table matter-list">
+          <ngx-datatable id="billingCodeDisbursementListTable" #table
+                         class="material common-table matter-table table-header-info"
+                         [class.fix-col-right]="tables?.frozenRightArr[0]"
+                         [class.matter-no-data]="disbursementTypes?.length === 0" [rows]="disbursementTypes"
+                         [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+                         [count]="page.totalElements" [offset]="page.pageNumber" [selected]="selected"
+                         [limit]="page.size"
+                         (sort)="calcTotalPages()" (select)="onSelect($event)" [selectionType]="SelectionType.checkbox"
+                         [scrollbarH]="true">
+            <ngx-datatable-column [resizeable]="false" [frozenLeft]='true'
+                                  *ngIf="tenantTierName == 'Iconic' || tenantTierName == 'Ascending'" [width]="34"
+                                  [sortable]="false" [canAutoResize]="false" [draggable]="false">
+              <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                           let-selectFn="selectFn">
+                <label class="cust-check cursor-pointer">
+                  <input id="billingCodeDisbursementTableAllSelection" type="checkbox" [checked]="allRowsSelected"
+                         (change)="selectFn(!allRowsSelected)"/>
+                  <span class="check-style"></span>
+                </label>
+              </ng-template>
+              <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+                           let-onCheckboxChangeFn="onCheckboxChangeFn" let-row="row">
+                <label class="cust-check cursor-pointer">
+                  <input id="billingCodeDisbursementTableSingleSelection_{{row.id}}" type="checkbox"
+                         [checked]="isSelected" (change)="onCheckboxChangeFn($event)"/>
+                  <span class="check-style"></span>
+                </label>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [width]="100" [headerClass]="'checkbox-header'">
+              <ng-template ngx-datatable-header-template let-value="value">
+              <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                <span class="datatable-header-cell-label">Code</span>
+              </span>
+              </ng-template>
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span id="disbursement-types-code-{{row?.id}}">{{value}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="description" name="Name"
+                                  [width]="200"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="150">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="type.name" [width]="200">
+              <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
+                <div class="d-inline-flex hard-soft-header">
+                  <div (click)="sort()" class="cursor-pointer">Hard/Soft</div>
+                  <div class="hard-soft-info">
+                    <div class="info-hover position-relative mr-12">
+                      <em class="icon icon-info"></em>
+                      <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner tooltip-lg">
+                          Hard costs are expenses incurred on behalf of a client that require a direct payment by
+                          the firm to a vendor. For example, if a firm writes a check for a court filing fee, it
+                          is considered a hard cost. Soft costs are expenses that are charged to the client but a
+                          direct payment is not made to a vendor.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" prop="isBillableToClient" name="Billable To Client"
+                                  [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                {{value ? 'Yes' : 'No'}}
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="rate" name="Rate" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <span *ngIf='value && openBillingType?.id != row.billType?.id'>
+                        {{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="billType.name" name="Bill Type"
+                                  [width]="100"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [frozenRight]='tables?.frozenRightArr[0]' prop='id'
+                                  [headerClass]="'text-right'"
+                                  name="Action" [width]="100">
+              <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-end">
+                  <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' id="billingCodeDisbursementActionMenu_{{row.id}}"
+                       [class.active]="currentActive == rowIndex"
+                       (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                       (outsideClick)="onClickedOutside($event, rowIndex)">
+                    <em class="icon icon-dot-verti"></em>
+                    <div class="dropdown-menu dropdown-menu-right document-matter"
+                         aria-labelledby="dropdownMenuButton">
+
+                      <a class="dropdown-item" *ngIf="row.status == 'Active'"
+                         (click)='editDisbursementType(row, $event)' id="billingCodeDisbursementEditOption_{{row.id}}">Edit</a>
+                      <a class="dropdown-item" *ngIf="row.status === 'Active'"
+                         (click)="openConfirm(disableDisbursement,row,$event)"
+                         id="billingCodeDisbursementDisableOption_{{row.id}}">Disable</a>
+                      <a class="dropdown-item" *ngIf="row.status === 'Disabled'"
+                         (click)="openConfirm(enableDisbursement,row,$event)"
+                         id="billingCodeDisbursementEnableOption_{{row.id}}">Enable</a>
+                    </div>
+                  </div>
+                  <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)" id="billingCodeDisbursementActionOpenMenu_{{row?.id}}">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-footer>
+              <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                           let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                           let-isVisible="isVisible">
+                <div class="d-flex justify-content-between flex-fill">
+                  <div class="d-flex align-items-center">
+                    <div class="table-items d-flex align-items-center mr-36">
+                      Items per page:
+                      <div class=" ml-8">
+                        <select class="custom-select border-less" [formControl]="pageSelector"
+                                (change)="changePageSize()">
+                          <option *ngFor="let limit of limitArray;trackBy: trackByFn"
+                                  [value]="limit">{{ limit }}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <span>
+                            {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                      {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of {{(rowCount)}}
+                      item(s)
+                          </span>
+                  </div>
+
+                        <div class="d-flex align-items-center">
+                          <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                            <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                              {{ i+1 }} of {{page.totalPages}}</option>
+                          </select>
+                          <div class="ml-8">
+                            <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                              [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                              [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                              [page]="curPage" [size]="pageSize" [count]="rowCount"
+                              [hidden]="!((rowCount / pageSize) > 1)"
+                              (change)="table.onFooterPage($event);pageChange($event)">
+                            </datatable-pager>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-footer>
+                </ngx-datatable>
+              </div>
+              <app-loader [active]="loading"></app-loader>
+            </div>
+    </div>
+  </div>
+</div>
+<ng-template #disableDisbursement let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!isBulkEnableDisable">Disable Disbursement Type - {{selectedCode.code}} </h3>
+    <h3 class="modal-title mb-0" *ngIf="isBulkEnableDisable">Disable Disbursement Types </h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data mb-16">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-12">
+        <p *ngIf="!isBulkEnableDisable" class="m-0">Are you sure you want to disable this Disbursement Type? It will not
+          be
+          available for
+          use on future matters, but existing matters will not be affected.
+        </p>
+        <p *ngIf="isBulkEnableDisable" class="m-0">Are you sure you want to disable these Disbursement Types? They will
+          not
+          be
+          available for use on future
+          matters, but existing matters will not be affected.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');"
+            id="disable-disbursement-type-close-btn">Close
+    </button>
+    <button *ngIf="!isBulkEnableDisable" type="button" class="btn btn-primary" id="disable-disbursement-type-btn"
+            (click)="onEnableDisableDisbursement(false);modal.dismiss('Cross click');modal.dismiss('Cross click');">Yes,
+      disable disbursement type
+    </button>
+    <button *ngIf="isBulkEnableDisable" type="button" class="btn btn-primary" id="disable-disbursement-type-bulk-btn"
+            (click)="onEnableDisableDisbursement(false);modal.dismiss('Cross click');modal.dismiss('Cross click');">Yes,
+      disable disbursement types
+    </button>
+  </div>
+</ng-template>
+
+
+<ng-template #enableDisbursement let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!isBulkEnableDisable">Enable Disbursement Type - {{selectedCode.code}} </h3>
+    <h3 class="modal-title mb-0" *ngIf="isBulkEnableDisable">Enable Disbursement Types </h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data mb-16">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-12">
+        <p class="m-0" *ngIf="!isBulkEnableDisable">Are you sure you want to enable this Disbursement Type?
+        </p>
+        <p class="m-0" *ngIf="isBulkEnableDisable">Are you sure you want to enable these
+          Disbursement Types?
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');"
+            id="enable-disbursement-type-close-btn">Close
+    </button>
+    <button *ngIf="!isBulkEnableDisable" type="button" class="btn btn-primary" id="enable-disbursement-type-btn"
+            (click)="onEnableDisableDisbursement(true);modal.dismiss('Cross click');">Yes,
+      enable disbursement type
+    </button>
+    <button *ngIf="isBulkEnableDisable" type="button" class="btn btn-primary" id="enable-disbursement-type-bulk-btn"
+            (click)="onEnableDisableDisbursement(true);modal.dismiss('Cross click');">Yes,
+      enable disbursement types
+    </button>
+  </div>
+</ng-template>

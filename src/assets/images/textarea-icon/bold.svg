@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>UI/Icon/text editor/bold</title>
+    <defs>
+        <path d="M6.4,4.85 C7.12186047,4.37142857 7.62790698,3.58571429 7.62790698,2.85714286 C7.62790698,1.24285714 6.3255814,0 4.65116279,0 L0,0 L0,10 L5.23906977,10 C6.7944186,10 8,8.78571429 8,7.29285714 C8,6.20714286 7.36,5.27857143 6.4,4.85 Z M2.23255814,1.78571429 L4.46511628,1.78571429 C5.0827907,1.78571429 5.58139535,2.26428571 5.58139535,2.85714286 C5.58139535,3.45 5.0827907,3.92857143 4.46511628,3.92857143 L2.23255814,3.92857143 L2.23255814,1.78571429 Z M4.8372093,8.21428571 L2.23255814,8.21428571 L2.23255814,6.07142857 L4.8372093,6.07142857 C5.45488372,6.07142857 5.95348837,6.55 5.95348837,7.14285714 C5.95348837,7.73571429 5.45488372,8.21428571 4.8372093,8.21428571 Z" id="path-1"></path>
+    </defs>
+    <g id="UI/Icon/text-editor/bold" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Rectangle" transform="translate(4.000000, 3.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <!-- <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use> -->
+            <rect fill="#4E5F7B" mask="url(#mask-2)" x="-4" y="-3" width="16" height="16"></rect>
+        </g>
+    </g>
+</svg>

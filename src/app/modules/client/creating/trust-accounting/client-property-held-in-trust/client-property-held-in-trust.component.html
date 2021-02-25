@@ -1,0 +1,242 @@
+<div>
+  <button *ngIf="isPermission" class="btn btn-primary btn-icon" type="button"
+    (click)="openInfo(AddPropertyHeldinTrust,'xl','',true)" id="add-property-held">
+    <i class="icon icon-plus"></i>Add Property Items Held in Trust
+  </button>
+  <div class="custom-table property-held pt-16" *ngIf="propertyheldRows.length > 0">
+    <ngx-datatable #table class="material common-table datatable-auto-height" [rows]="propertyheldRows" [columnMode]="ColumnMode.force"
+      [headerHeight]="50" rowHeight="auto" [sorts]="[{prop: 'name', dir: 'asc'}]" [scrollbarH]='true'
+      id="propertyheldRowsId">
+
+      <ngx-datatable-row-detail [rowHeight]="'auto'" #myDetailRow (toggle)="onDetailToggle($event)">
+        <ng-template let-row="row" ngx-datatable-row-detail-template>
+          <div class="table-responsive subdata">
+            <table class="table table-borderless">
+              <thead>
+                <tr>
+                  <th class="space">&nbsp;</th>
+                  <th class="text-left description">Description</th>
+                  <th class="space">&nbsp;</th>
+                  <th class="text-left">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let rowData of row.propertyLineItems;trackBy: trackByFn">
+                  <td class="space">&nbsp;</td>
+                  <td class="text-left description">{{rowData.description}}</td>
+                  <td class="space">&nbsp;</td>
+                  <td class="text-left">{{rowData.value | currency : 'USD' : 'symbol': '1.2-2'}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-template>
+      </ngx-datatable-row-detail>
+      <ngx-datatable-column [resizeable]="false" prop="trustNumber" name="Trust Number" [sortable]="false" [width]="200">
+        <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+          <div class="d-flex align-items-center">
+            <a href="javascript:void(0)" class="icon font-10 expand-button" [class.icon-angle-down]="!expanded"
+              [class.icon-angle-up]="expanded" title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
+            </a>
+            <span>{{value}}</span>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="trustName" name="Description" [sortable]="false" [width]="200">
+        <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+          <div class="d-flex align-items-start">
+            <span>{{value}}</span>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" prop="totalItems" name="Total Items" [sortable]="false" [width]="200">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          {{row.propertyLineItems.length}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="totalValue" name="Value" [sortable]="false" [width]="200">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          {{row.getRowTotalTrustNumber | currency : 'USD' : 'symbol': '1.2-2'}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="200">
+        <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <div class="icon-group d-flex justify-content-end">
+            <span>
+              <em class="icon icon-edit icon-color" *ngIf="isPermission"
+                (click)="editPropertyHeldInTrust(row); openInfo(AddPropertyHeldinTrust,'xl','',false)" id="edit-property-held-index-{{rowIndex}}"></em>
+            </span>
+            <span>
+              <em class="icon icon-remove icon-color" *ngIf="isPermission"
+                (click)="deletePropertyHeldRow(row); openInfo(DeletePropertyHeldinTrust,'sm','',false)" id="delete-property-held-index-{{rowIndex}}"></em>
+            </span>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+</div>
+
+
+<ng-template #AddPropertyHeldinTrust let-modal>
+  <form [formGroup]="addPropertyHeldInTrustForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0" *ngIf="!selectedPropertyheldRows">Add Property Held in Trust</h3>
+      <h3 class="modal-title mb-0" *ngIf="selectedPropertyheldRows">Edit Property Held in Trust</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="lh-20 popup-text">Provide a name for the trust, as well a description for the property line item(s)
+        below.
+        Optionally add a value for each line item.
+        <br />
+        Trust numbers are assigned automatically.
+      </p>
+      <div class="form-group popup-form">
+        <form>
+          <label>Trust Number</label>
+          <div *ngIf="selectedPropertyheldRows">
+            {{editTrustNumber}}
+          </div>
+          <div *ngIf="!selectedPropertyheldRows">
+            {{nextTrustNumber}}
+          </div>
+        </form>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group mb-16">
+            <label>Trust Name <sup>*</sup></label>
+            <input type="text" class="form-control" value="" formControlName="propertyHeldInTrustName"
+              id="propertyHeldInTrustNameId">
+          </div>
+        </div>
+      </div>
+      <div class="custom-table">
+        <div class="table-responsive add-property-line-item-table">
+          <table class="table table-striped table-borderless" [formGroup]="editPropertyHeldInTrustLineItemForm"
+            id="editPropertyHeldInTrustLineItemFormId">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Value</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of propertyHeldInTrustItem; trackBy :trackByFn;let i = index" id="item-{{i}}">
+                <td style="width: 80%;">
+                  <input type="text" class="form-control bordred" *ngIf="item?.editable" [(ngModel)]="item.description"
+                    formControlName="editdescription" id="editdescription-{{i}}" />
+                  <span *ngIf="!item?.editable">{{item?.description}}</span>
+                  <div id="property-held-error"
+                    *ngIf="submittedIndex == i && lastSavedPropertyLineItem.id == item.id && !item.description"
+                    class="error-info text-danger">Provide a Description</div>
+                </td>
+                <td>
+                  <input type="text" class="form-control bordred" *ngIf="item?.editable" [(ngModel)]="item.value"
+                    prefix="$"  #decimalValue [maxlength]="decimalValue | decimalMaxLength" mask="separator.2" thousandSeparator="," (focusout)="modifyLineItemVal(i)" min="0"
+                    formControlName="editvalue" id="editvalue-{{i}}" />
+                  <span *ngIf="!item?.editable">{{item?.value | currency : 'USD' : 'symbol': '1.2-2'}}</span>
+                  <div id="property-held-error"
+                    *ngIf="submittedIndex == i && lastSavedPropertyLineItem.id == item.id && !item.value"
+                    class="error-info text-danger">Provide a Value</div>
+                </td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end align-items-start">
+                    <span>
+                      <em *ngIf="!item?.editable" class="icon icon-edit icon-color"
+                        (click)='editExistingLineItem(item, i)' id="edit-index-{{i}}"></em>
+                      <em *ngIf="item?.editable" class="icon icon-flopy icon-color"
+                        (click)='saveExistingLineItem(item, i)' id="save-index-{{i}}"></em>
+                    </span>
+                    <span>
+                      <em class="icon icon-remove icon-color" *ngIf="!item?.editable"
+                        (click)='deleteExistingLineItem(item, i)' id="delete-index-{{i}}"></em>
+                      <em class="icon icon-close icon-color" *ngIf="item?.editable"
+                        (click)='cancelEditExistingLineItem(item, i)' id="cancel-index-{{i}}"></em>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr class="trust-tr" *ngIf="addPropertyLineItem" [formGroup]="addPropertyHeldInTrustLineItemForm">
+                <td style="width: 80%;">
+                  <div class="form-group m-0">
+                    <input type="text" class="form-control bordred" value="" formControlName="description"
+                      placeholder="Enter item description" id="descriptionId">
+                    <div id="property-held-error" *ngIf="descriptionError" class="error-info text-danger">Provide a
+                      Description</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="form-group m-0">
+                    <input class="form-control bordred w-116" value="" (focusout)="modifyBal()" type="text" prefix="$"  #decimalValue1 [maxlength]="decimalValue1 | decimalMaxLength"
+                      mask="separator.2" thousandSeparator="," min="0" formControlName="value" placeholder="Enter value"
+                      id="valueId">
+                    <div id="property-held-error" *ngIf="valueError" class="error-info text-danger">Provide a Value
+                    </div>
+                  </div>
+                </td>
+                <td style="width: 10%;">
+                  <span class="icon-group d-flex justify-content-end">
+                    <span>
+                      <em class="icon icon-flopy icon-color" (click)="saveNewLineItem()" id="save-new-item"></em>
+                    </span>
+                    <span>
+                      <em class="icon icon-close icon-color" (click)="removeLineItem()" id="remove-item"></em>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+
+            </tbody>
+            <tfoot>
+              <tr *ngIf="propertyHeldInTrustItem.length">
+                <td class="font-weight-medium">
+                  Total Value
+                </td>
+                <td class="font-weight-medium">
+                  {{getTotal | currency : 'USD' : 'symbol': '1.2-2'}}
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <button class="btn btn-link btn-icon px-0 d-flex align-items-center" type="button" (click)="addLineItem()" id="add-property-line">
+        <i class="icon icon-add-circle"></i>Add Property Line Item
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <button *ngIf="!selectedPropertyheldRows" type="button" class="btn btn-primary"
+        [disabled]="!isAddTrustValid || disable" (click)="submitAddPropertyHeldInTrustForm()" id="add-trust">Add Trust</button>
+      <button *ngIf="selectedPropertyheldRows" type="button" class="btn btn-primary"
+        [disabled]="!isAddTrustValid || disable" (click)="submitAddPropertyHeldInTrustForm()" id="save-changes">Save Changes</button>
+    </div>
+  </form>
+</ng-template>
+<ng-template #DeletePropertyHeldinTrust let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Delete Trust</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to delete this trust?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="deletePropertyHeldInTrust()" id="yes-delete-btn">Yes, delete</button>
+  </div>
+</ng-template>

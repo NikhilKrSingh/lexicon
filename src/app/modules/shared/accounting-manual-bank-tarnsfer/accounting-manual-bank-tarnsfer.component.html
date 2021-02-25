@@ -1,0 +1,586 @@
+<div class="account-transfer">
+    <h3 class="mb-16">Bank Transfers Queue</h3>
+    <div class="row gutter-16">
+        <div class="col-9">
+            <p class="lh-20">
+                The transfer queue can be filtered by selecting a firm-level <strong>Source</strong> and
+                <strong>Target</strong> account.
+                The total amount of a filtered transfer combination will be calculated at the bottom of the table,
+                excluding transfers with a <em>Rejected</em> status.
+            </p>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-start justify-content-between mb-24 search-text-container">
+        <div class="header-search search-custom flex-fill d-flex mr-24">
+            <form class="md-search">
+                <div class="header-search-wrapper">
+                    <input type="text" class="form-control search-input" [(ngModel)]="searchValue"
+                        [ngModelOptions]="{standalone: true}"
+                        placeholder="Search by source or target account, client, matter, description or requested by"
+                        (keyup)="filterRecord2($event)" id="seach-text">
+                    <button class="btn" type="submit" id="search-btn">Search</button>
+                </div>
+            </form>
+        </div>
+        <div class="form-group m-0">
+            <label class="d-block text-nowrap">Approved Transfer Processing Time</label>
+            {{trustAccountTime ? trustAccountTime :  '-'}}
+        </div>
+    </div>
+    <div class="row gutter-16">
+        <div class="col-3">
+            <div class="form-group">
+                <label class="d-block">&nbsp;</label>
+                <ng-select class="bulk-button d-block" [items]="bulkActions" [selectOnTab]="true"
+                    placeholder="Bulk Action" [(ngModel)]="selectedBulkAction" [clearable]="true" [bindValue]="'name'"
+                    [bindLabel]="'name'" [notFoundText]="'No record found'" [disabled]="selectedRowLength < 1"
+                    (change)='selectBulkAction(TrustTransferAlertBulk,RejectTrustTrnasfer,SetPendingApproval,TrustTransferAlert)'
+                    id="bulk-action-dropdown">
+                </ng-select>
+            </div>
+        </div>
+        <div class="col-9">
+            <div class="row gutter-16">
+                <div class="col-5">
+                    <div class="form-group">
+                        <label>Source Account</label>
+                        <ng-select [items]="sourceAccountList" [selectOnTab]="true" placeholder="Select source"
+                            [(ngModel)]="selectedSourceAccount" [clearable]="false" [bindValue]="'name'"
+                            [bindLabel]="'name'" [notFoundText]="'No record found'" (change)="filterRecord2()"
+                            id="source-account">
+                            <ng-template ng-option-tmp let-item="item">
+                                <div>
+                                    <div class="font-weight-medium">
+                                        <span>
+                                            {{item?.name}}
+                                        </span>
+                                        <span *ngIf="item.name !== 'All'" class="name-text">
+                                            <span
+                                                class="d-block small account-type-text helper-text font-weight-normal">{{ item?.isCreditCardBankAccount ? 'Credit card trust bank account ending '+item?.accountNumber : 'Trust bank account ending '+item?.accountNumber }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </ng-select>
+                    </div>
+                </div>
+                <div class="col-5">
+                    <div class="form-group">
+                        <label>Target Account</label>
+                        <ng-select [items]="targetAccountList" [selectOnTab]="true" placeholder="Select target"
+                            [(ngModel)]="selectedTargetAccount" [clearable]="false" [bindValue]="'name'"
+                            [bindLabel]="'name'" [notFoundText]="'No record found'" (change)="filterRecord2()"
+                            id="target-account">
+                            <ng-template ng-option-tmp let-item="item">
+                                <div>
+                                    <div class="font-weight-medium">
+                                        <span>
+                                            {{item?.name}}
+                                        </span>
+                                        <span *ngIf="item.name !== 'All'" class="name-text">
+                                            <span
+                                                class="d-block small account-type-text helper-text font-weight-normal">{{ item?.isCreditCardBankAccount ? 'Credit card trust bank account ending '+item?.accountNumber : 'Trust bank account ending '+item?.accountNumber }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </ng-select>
+
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <ng-select [items]="statusIdList" [selectOnTab]="true" placeholder="Select status"
+                            [(ngModel)]="selectedStatus" [clearable]="false" [bindValue]="'name'" [bindLabel]="'name'"
+                            [notFoundText]="'No record found'" (change)="filterRecord2()" id='status'>
+                        </ng-select>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="queue-transfer-table position-relative">
+        <ngx-datatable #table2 class="material common-table fix-col-right"
+            [class.matter-no-data]="manualTransferQueueList?.length === 0" [rows]="manualTransferQueueList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" [messages]="messages"
+            rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+            [scrollbarH]="true" [sorts]="[{prop: 'source_account', dir: 'asc'}]" (sort)="updateDatatableFooterPage2()"
+            [selected]="selectedTablerow" [selectionType]="SelectionType.checkbox" id="bank-transfer-queue-list">
+
+            <ngx-datatable-row-detail [rowHeight]="'auto'" #myDetailRow>
+                <ng-template let-row="row" ngx-datatable-row-detail-template>
+                    <div class="table-responsive subdata">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th class="space">&nbsp;</th>
+                                    <th class="text-left description source">Source Account Details</th>
+                                    <th class="text-left target">Target Account Details</th>
+                                    <th class="spacen">&nbsp;</th>
+                                    <th class="spacen">&nbsp;</th>
+                                    <th class="spacen">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="space">&nbsp;</td>
+                                    <td class="text-left description source">
+                                        <div class="d-flex align-items-center">
+                                            <div *ngIf="row.sourceAccountInfo.matterId">
+                                                <strong>Matter: </strong>
+                                                <span>{{row.sourceAccountInfo.matterId}} -
+                                                    {{row.sourceAccountInfo.matterName}}</span>
+                                            </div>
+                                            <div *ngIf="!row.sourceAccountInfo.matterId">
+                                                <strong>NA</strong>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="row.sourceAccountInfo.trustName" class="d-flex align-items-top">
+                                            <div>
+                                                <strong>Account: </strong>
+                                                <span>{{row.sourceAccountInfo.trustName ? row.sourceAccountInfo.trustNumber + ' - ' + row.sourceAccountInfo.trustName : ""}}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-left target">
+                                        <div class="d-flex align-items-center">
+                                            <div *ngIf="row.targetAccountInfo.matterId">
+                                                <strong>Matter: </strong>
+                                                <span>{{row.targetAccountInfo.matterId}} -
+                                                    {{row.targetAccountInfo.matterName}}</span>
+                                            </div>
+                                            <div *ngIf="!row.targetAccountInfo.matterId">
+                                                <strong>NA</strong>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="row.targetAccountInfo.trustName" class="d-flex align-items-center">
+                                            <div>
+                                                <strong>Account: </strong>
+                                                <span>{{row.targetAccountInfo.trustName ? row.targetAccountInfo.trustNumber + ' - ' + row.targetAccountInfo.trustName : ""}}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="spacen">&nbsp;</td>
+                                    <td class="spacen">&nbsp;</td>
+                                    <td class="spacen">&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ng-template>
+            </ngx-datatable-row-detail>
+
+            <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false"
+                [draggable]="false">
+                <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                    let-selectFn="selectFn">
+                    <label class="cust-check cursor-pointer">
+                        <input type="checkbox" [checked]="allSelected" (change)="selectDeselectRecords()" />
+                        <span class="check-style"></span>
+                    </label>
+                </ng-template>
+                <ng-template ngx-datatable-cell-template let-row="row" let-isSelected="isSelected"
+                    let-onCheckboxChangeFn="onCheckboxChangeFn">
+                    <label class="cust-check cursor-pointer">
+                        <input type="checkbox" [checked]="row.selected" (change)="changeChildSelection(row)" />
+                        <span class="check-style"></span>
+                    </label>
+                </ng-template>
+            </ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" prop="sourceAccountInfo" name="" [sortable]="false" [width]="30">
+                <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                        <a href="javascript:void(0)"
+                            *ngIf="row.sourceAccountInfo.trustName || row.targetAccountInfo.trustName"
+                            class="icon font-10 expand-button" [class.icon-angle-down]="!expanded"
+                            [class.icon-angle-up]="expanded" title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
+                        </a>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="sourceAccountInfoName" [headerClass]="'checkbox-header'"
+                name="Source Account" [sortable]="true" [width]="300">
+                <ng-template ngx-datatable-header-template let-value="value">
+                    <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                        <span class="datatable-header-cell-label">Source Account</span>
+                    </span>
+                </ng-template>
+                <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <span class="font-weight-medium">{{row.sourceAccountInfo.title}}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span
+                            class="d-block medium account-type-text helper-text font-weight-normal">{{row.sourceAccountInfo.subTitle}}</span>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="targetAccountInfoName" name="Target Account"
+                [sortable]="true" [width]="300">
+                <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <span class="font-weight-medium">{{ row.targetAccountInfo.title }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span
+                            class="d-block medium account-type-text helper-text font-weight-normal">{{row.targetAccountInfo.subTitle}}</span>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="requestedDate" name="Requested Date" [sortable]="true"
+                [width]="150">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <span class="font-weight-medium">{{ row.requestedDate | date: 'MM/dd/yyyy' }}</span><br>
+                    <span
+                        class="d-block medium account-type-text helper-text font-weight-normal">{{ row.requestedDate | date:'h:mm'}}
+                        {{ row.requestedDate | date : 'a' | lowercase }}</span>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="amount" name="Amount" [sortable]="true" [width]="150">
+                <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                        <span>{{row.amount  | currency : 'USD' : 'symbol': '1.2-2'}}</span>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [sortable]="true" [width]="150">
+                <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center status-info"
+                        [ngClass]="(row.trustAccountStatus.name == 'Rejected')?'error-rejected':''">
+                        <span>{{row.trustAccountStatus.name == "Pending" ? "Pending Approval" : row.trustAccountStatus.name}}</span>&nbsp;&nbsp;&nbsp;
+                        <div class="info-hover position-relative" *ngIf="row.trustAccountStatus.name == 'Rejected'">
+                            <em class="icon icon-info icon-color mr-12"></em>
+                            <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                                <div class="arrow"></div>
+                                <div class="tooltip-inner">
+                                    <h6>{{row.reasonForRejection}}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="requestedBy" name="Requested By" [sortable]="true"
+                [width]="200">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [sortable]="true"
+                [width]="300">
+                <ng-template let-row="row" let-value="value" let-expanded="expanded" let-rowIndex="rowIndex"
+                    ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                        <span *ngIf="!row.showMore">
+                            {{row.description && row.description.length > 70 ? (row.description| slice:0:70) + '...' : row.description}}
+                            <span *ngIf="row.description.length > 70"><a (click)="showDescription(rowIndex)"
+                                    class="btn-link show-description">Show More</a></span>
+                        </span>
+                        <span *ngIf="row.showMore">
+                            {{row.description}}
+                        </span>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action"
+                [frozenRight]='true' [width]="100" prop='id'>
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                        <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+                            (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                            (outsideClick)="onClickedOutside($event, rowIndex)">
+                            <em class="icon icon-dot-verti"></em>
+                            <div class="dropdown-menu dropdown-menu-right document-matter"
+                                aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item"
+                                    *ngIf="(row?.trustAccountStatus.name =='Pending' || row?.trustAccountStatus.name =='Rejected')"
+                                    (click)="openPersonalinfo(TrustTransferAlertBulk, '', '', true); selectedManualAutomatic(row)"
+                                    id="approve-transaction-{{rowIndex}}">Approve
+                                    Transaction</a>
+                                <a class="dropdown-item"
+                                    *ngIf="(row?.trustAccountStatus.name =='Pending' || row?.trustAccountStatus.name =='Approved')"
+                                    (click)="openPersonalinfo(RejectTrustTrnasfer, '', '', true); selectedManualAutomatic(row)"
+                                    id="reject-transaction-{{rowIndex}}">Reject
+                                    Transaction</a>
+                                <a class="dropdown-item"
+                                    *ngIf="(row?.trustAccountStatus.name =='Rejected' || row?.trustAccountStatus.name =='Approved')"
+                                    (click)="openPersonalinfo(TrustTransferAlert, '', '', true); selectedManualAutomatic(row)"
+                                    id="process-now-{{rowIndex}}">Process
+                                    Now</a>
+                                <a class="dropdown-item"
+                                    *ngIf="(row?.trustAccountStatus.name =='Rejected' || row?.trustAccountStatus.name =='Approved')"
+                                    (click)="openPersonalinfo(SetPendingApproval, '', '', true); selectedManualAutomatic(row)"
+                                    id="set-transaction-pending-approval-{{rowIndex}}">Set
+                                    Transaction to Pending Approval</a>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                    let-isVisible="isVisible">
+                    <div class="row gutter-16 total-table-container" [class.no-border]="checkListLength">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end mb-12">
+                                <div>
+                                    <table class="total-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="total-amt"></th>
+                                                <th class="sub-total font-weight-medium text-right">Subtotal (this page)
+                                                </th>
+                                                <th class="space-data font-weight-medium text-right">Total
+                                                    ({{manualTransferQueueList.length}} items)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="font-weight-medium">Total Amount</td>
+                                                <td class="font-weight-medium text-right">
+                                                    {{ (this.selectedSourceAccount !== 'All' && this.selectedTargetAccount !== 'All') ? (getSubTotalAmount | currency : 'USD' : 'symbol': '1.2-2') : 'N/A'}}
+                                                </td>
+                                                <td class="space-data">
+                                                    <div
+                                                        class="d-flex justify-content-end align-items-center position-relative">
+                                                        <span
+                                                            class="font-weight-medium">{{ (this.selectedSourceAccount !== 'All' && this.selectedTargetAccount !== 'All') ? (getTotalAmount | currency : 'USD' : 'symbol': '1.2-2') : 'N/A'}}</span>
+                                                        <div class="posi-abs"
+                                                            *ngIf="this.selectedSourceAccount == 'All' || this.selectedTargetAccount == 'All'">
+                                                            <div class="info-hover position-relative ml-8">
+                                                                <em class="icon icon-info icon-color text-large"></em>
+                                                                <div class="tooltip bs-tooltip-top" role="tooltip">
+                                                                    <div class="arrow"></div>
+                                                                    <div class="tooltip-inner">
+                                                                        <h6 class="m-0">View Transactions Totals</h6>
+                                                                        <p class="lh-20">You must select an account to
+                                                                            view
+                                                                            totals.</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p class="m-0 pt-8 small helper-text text-right font-weight-normal pr-52">Subtotal
+                                        and
+                                        Total amounts do not include
+                                        items with a <em>Rejected</em> status.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between flex-fill" *ngIf="!checkListLength">
+                        <div class="d-flex align-items-center">
+                            <div class="table-items d-flex align-items-center mr-36">
+                                Items per page:
+                                <div class=" ml-8">
+                                    <select class="custom-select border-less" [formControl]="pageSelector"
+                                        (change)="changePageSize2()">
+                                        <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">
+                                            {{ limit }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <span>
+                                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                                {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <select class="custom-select border-less" [(ngModel)]="pangeSelected"
+                                (change)="changePage2()">
+                                <option
+                                    *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                                    [value]="i+1">Page
+                                    {{ i+1 }}
+                                    of {{page.totalPages}}</option>
+                            </select>
+                            <div class="ml-8">
+                                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                    [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                                    [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                    [hidden]="!((rowCount / pageSize) > 1)"
+                                    (change)="table2.onFooterPage($event);pageChange2($event)">
+                                </datatable-pager>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngx-datatable-footer>
+        </ngx-datatable>
+        <app-loader [active]="loading"></app-loader>
+    </div>
+
+</div>
+
+
+<ng-template #TrustTransferAlert let-modal>
+    <div class="modal-header pb-24">
+        <h3 class="modal-title mb-0">Process <span
+                *ngIf="selectedRowLength > 1 && !singleTransac">Transactions</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">Transaction</span> Now</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-16">
+        <div>
+            <div class="d-flex align-items-start mb-16">
+                <em class="icon icon-warning text-warning"></em>
+                <div class="lh-20 ml-16">
+                    <p class="m-0">Approved <span
+                            *ngIf="selectedRowLength > 1 && !singleTransac">transactions</span><span
+                            *ngIf="selectedRowLength <= 1 || singleTransac">transaction</span> will be processed now.
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-start mb-16">
+                <em class="icon icon-warning text-warning"></em>
+                <div class="lh-20 ml-16">
+                    <p class="m-0">Rejected <span
+                            *ngIf="selectedRowLength > 1 && !singleTransac">transactions</span><span
+                            *ngIf="selectedRowLength <= 1 || singleTransac">transaction</span> will be removed from the
+                        queue without processing.</p>
+                </div>
+            </div>
+            <div class="d-flex align-items-start mb-16">
+                <em class="icon icon-warning text-warning"></em>
+                <div class="lh-20 ml-16">
+                    <p class="m-0">Pending and Error status <span
+                            *ngIf="selectedRowLength > 1 && !singleTransac">transactions</span><span
+                            *ngIf="selectedRowLength <= 1 || singleTransac">transaction</span> will remain in the queue.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')"
+            id="cancel-btn">Cancel</button>
+        <button *ngIf="!selectedManualAutomaticRow" type="button" class="btn btn-primary"
+            (click)="modal.dismiss('Cross click'); processNowBulk();" id="process-transactions-now-btn">Process <span
+                *ngIf="selectedRowLength > 1 && !singleTransac">Transactions</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">Transaction</span> Now</button>
+        <button *ngIf="selectedManualAutomaticRow" type="button" class="btn btn-primary"
+            (click)="modal.dismiss('Cross click'); processNow();" id="process-transactions-now-btn">Process <span
+                *ngIf="selectedRowLength > 1 && !singleTransac">Transactions</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">Transaction</span> Now</button>
+    </div>
+</ng-template>
+<ng-template #TrustTransferAlertBulk let-modal>
+    <div class="modal-header pb-24">
+        <h3 class="modal-title mb-0">Approve Transaction</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p class="m-0 lh-20">
+            Are you sure you want to approve <span *ngIf="selectedRowLength > 1 && !singleTransac">these
+                transactions</span><span *ngIf="selectedRowLength <= 1 || singleTransac">this transaction</span>?
+            <span *ngIf="selectedRowLength > 1 && !singleTransac">Requests</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">Request</span> will be sent to the respective Source
+            <span *ngIf="selectedRowLength > 1 && !singleTransac">accounts</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">account</span>
+            to move <span *ngIf="selectedRowLength > 1 && !singleTransac">funds</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">fund</span> at the next Auto Transaction processing
+            time.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')"
+            id="cancel-btn">Cancel</button>
+        <button *ngIf="!selectedManualAutomaticRow" type="button" class="btn btn-primary"
+            (click)="modal.dismiss('Cross click');approvedTransferBulk(); " id="yes-approve-btn">Yes, Approve</button>
+        <button *ngIf="selectedManualAutomaticRow" type="button" class="btn btn-primary"
+            (click)="modal.dismiss('Cross click');approvedTransfer(); " id='yes-approve-btn'>Yes, Approve</button>
+    </div>
+</ng-template>
+<ng-template #RejectTrustTrnasfer let-modal>
+    <div class="modal-header pb-24">
+        <h3 class="modal-title mb-0">Reject Transaction</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click');cancelClick();" aria-label="Close"
+            id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <p class="lh-20">Are you sure you want to reject <span *ngIf="selectedRowLength <= 1 || singleTransac">this
+                transaction</span>
+            <span *ngIf="selectedRowLength > 1 && !singleTransac">these transactions</span>?
+            <span *ngIf="selectedRowLength <= 1 || singleTransac">This transaction</span>
+            <span *ngIf="selectedRowLength > 1 && !singleTransac">These transactions</span> will be cleared from the
+            queue without processing at the next Auto Transaction Processing
+            Time.
+            The system will reverse the <span *ngIf="selectedRowLength > 1 && !singleTransac">transactions</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">transaction</span> and revert any account balances at
+            that time.</p>
+
+        <div class="form-group mb-0 position-relative"
+            [ngClass]="{'has-error':noReasonEnteredFlag && !rejectReasonMessage}">
+            <label>Reason <sup>*</sup></label>
+            <span class="count-char">{{rejectReasonMessage.length}}/100</span>
+            <textarea class="form-control" [(ngModel)]="rejectReasonMessage" maxlength="100"
+                placeholder="Provide a reason" id="reason"></textarea>
+            <span class="field-message text-danger" *ngIf="noReasonEnteredFlag && !rejectReasonMessage"><em
+                    class="icon icon-error mr-4"></em>
+                Please provide a reason.
+            </span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');cancelClick();"
+            id="cancel-btn">Cancel</button>
+        <button *ngIf="!selectedManualAutomaticRow" type="button" class="btn btn-primary" (click)="rejectTransferBulk()"
+            id="yes-reject-btn">Yes,
+            Reject Transaction</button>
+        <button *ngIf="selectedManualAutomaticRow" type="button" class="btn btn-primary" (click)="rejectTransfer()"
+            id="yes-reject-btn">Yes,
+            Reject
+            Transaction</button>
+    </div>
+</ng-template>
+<ng-template #SetPendingApproval let-modal>
+    <div class="modal-header pb-24">
+        <h3 class="modal-title mb-0">Set to Pending Approval</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <p class="m-0 lh-20">Are you sure you want to set <span *ngIf="selectedRowLength > 1 && !singleTransac">these
+                transactions</span><span *ngIf="selectedRowLength <= 1 || singleTransac">this transaction</span> to
+            Pending Approval? <span *ngIf="selectedRowLength > 1 && !singleTransac">These transactions</span><span
+                *ngIf="selectedRowLength <= 1 || singleTransac">This transaction</span>
+            will hold in the queue until approved or rejected.</p>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')"
+            id="cancel-btn">Cancel</button>
+        <button *ngIf="!selectedManualAutomaticRow" type="button" class="btn btn-primary"
+            (click)="modal.dismiss('Cross click');pendingApprovalBulk(); " id="yes-set-to-pending-btn">Yes, Set to
+            Pending Approval</button>
+        <button *ngIf="selectedManualAutomaticRow" type="button" class="btn btn-primary"
+            (click)="modal.dismiss('Cross click');pendingApproval(); " id="yes-set-to-pending-btn">Yes, Set to Pending
+            Approval</button>
+    </div>
+</ng-template>

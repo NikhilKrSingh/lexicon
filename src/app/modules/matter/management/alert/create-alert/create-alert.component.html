@@ -1,0 +1,77 @@
+<div class="modal-header d-block">
+  <h3 class="modal-title">Create Matter Alert</h3>
+  <button type="button" class="close" (click)='dismiss()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <form [formGroup]="form">
+    <div class="row gutter-16">
+      <div class="col-12">
+        <div class="form-group" [class.has-error]="form.controls['content'].errors && formSubmitted">
+          <label class="d-flex justify-content-between char-limit"><em></em> 
+            <span> {{form?.controls['content']?.value?.length || 0}}/1000 Character limit</span></label>
+          <textarea class="form-control min-h-180" placeholder="Matter alert message*" formControlName='content' maxlength="1000" id="content"></textarea>
+          <span class="field-message text-danger" *ngIf="form.controls['content'] && formSubmitted && form.value.content">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.insecure_input}}
+          </span>
+          <span class="field-message text-danger" *ngIf=" formSubmitted && !form.value.content">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.matter_alert_error}}
+          </span>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group" [class.has-error]="form.controls['effectiveDate'].errors && formSubmitted">
+          <label>Effective Date <sup>*</sup></label>
+          <app-date-picker (dataChange)="dateChanged($event, 'effective')" [isForm]='true' [dateform]='form' controlName="effectiveDate" id="effective-date"></app-date-picker>
+          <span class="field-message text-danger" *ngIf="form.controls['effectiveDate'] && formSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.effective_date_error}}
+          </span>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group">
+          <label>Expiration Date </label>
+          <app-date-picker [dateTimeFilter]='expiryDateFilter' (dataChange)="dateChanged($event, 'expiry')" [isForm]='true' [dateform]='form' controlName="expirationDate" id="expiration-date"></app-date-picker>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group" [class.has-error]="form.controls['statusId'].errors && formSubmitted">
+          <label>Status <sup>*</sup></label>
+          <ng-select [items]="statusList" placeholder="Select Status"
+            formControlName="statusId" [bindValue]="'id'" [selectOnTab]="true"
+            [bindLabel]="'name'" [notFoundText]="'No record found'" id="status-select">
+          </ng-select>
+          <span class="field-message text-danger" *ngIf="form.controls['statusId'] && formSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.status_error}}
+          </span>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group" [class.has-error]="form.controls['priorityId'].errors && formSubmitted">
+          <label>Alert Priority <sup>*</sup></label>
+          <ng-select
+            [items]="matterPriorityArr"
+            placeholder="Set a priority level"
+            formControlName="priorityId"
+            [bindValue]="'id'"
+            [selectOnTab]="true"
+            [bindLabel]="'name'" id="alert-priority">
+          </ng-select>
+          <span class="field-message text-danger" *ngIf="form.controls['priorityId'] && formSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.alert_priority_error}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save(form.value)' id="save-btn">Save</button>
+</div>

@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-between flex-fill">
+  <div class="d-flex align-items-center">
+    <div class="table-items d-flex align-items-center mr-36">
+      Items per page:
+      <div class="ml-8 w-70">
+        <ng-select [items]='limitArray' [searchable]='false' [clearable]='false' [bindValue]="'id'" [bindLabel]="'name'"
+          [formControl]="pageSelector" (change)="changePageSize()" appendTo='body' [selectOnTab]="true">
+        </ng-select>
+      </div>
+    </div>
+    <span>
+      {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+      {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+    </span>
+  </div>
+
+  <div class="d-flex align-items-center">
+    <div *ngIf='page.totalPages > 0' style="width: 135px;">
+      <ng-select [items]='pageArray' [searchable]='false' [clearable]='false' [bindValue]="'id'" [bindLabel]="'name'"
+        [(ngModel)]="pageSelected" (change)="changePage()" appendTo='body' [selectOnTab]="true">
+      </ng-select>
+    </div>
+    <div class="ml-8">
+      <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+        [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'" [pagerPreviousIcon]="'datatable-icon-prev'"
+        [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage" [size]="pageSize" [count]="rowCount"
+        [hidden]="!((rowCount / pageSize) > 1)" (change)="pageChangeEvent($event)">
+      </datatable-pager>
+    </div>
+  </div>
+</div>

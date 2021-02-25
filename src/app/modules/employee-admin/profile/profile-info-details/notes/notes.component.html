@@ -1,0 +1,152 @@
+<h2 class="mb-32">Notes</h2>
+<div class="custom-table">
+  <ngx-datatable #table class="material common-table no-min-height" [rows]="notes" [columnMode]="ColumnMode.force"
+    [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+    [limit]="page.size" [scrollbarH]='true' id="notes-tbl">
+    <ngx-datatable-column [resizeable]="false" prop="createdBy.name" name="Created By" [sortable]="true" [width]="120" [sortable]='false'>
+      <ng-template let-value="value" ngx-datatable-cell-template let-row='row'>
+        <strong> {{row.createdBy.name}}</strong><br>
+        <span class="small helper-text d-block">{{row.createdBy.email}}</span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="content" name="Note Text" [sortable]="true" [width]="300" [sortable]='false'>
+      <ng-template let-value="value" ngx-datatable-cell-template>
+        <div class="note-table-text user-prof-note">
+          <app-read-more [text]='value' [maxLines]='2'> </app-read-more>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="applicableDate" name="Applicable Date" [width]="100">
+      <ng-template let-value="value" ngx-datatable-cell-template>
+        {{value | date: 'MM/dd/yyyy'}}
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Last Updated" [width]="100">
+      <ng-template let-value="value" ngx-datatable-cell-template>
+        {{value | date: 'MM/dd/yyyy'}} <br>
+        <span class="small helper-text d-block">{{value | date: 'hh:mm a'}}</span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="isVisibleToClient" name="Visible to Client" [width]="80" [sortable]='false'>
+      <ng-template let-value="value" ngx-datatable-cell-template let-row='row'>
+        <div class="d-flex justify-content-center">
+          <div class="custom-control custom-checkbox m-0 pr-0">
+            <input type="checkbox" class="custom-control-input" id="tbl_dropcheck-1_{{row.id}}" [checked]="value"
+              disabled>
+            <label class="custom-control-label" for="tbl_dropcheck-1_{{row.id}}"></label>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [sortable]='false'>
+      <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+        <div class="icon-group d-flex justify-content-end">
+          <span>
+            <em class="icon icon-edit icon-color" (click)='editNote(row , $event, noteModal)' id="edit-note-index-{{rowIndex}}"></em>
+          </span>
+          <span>
+            <em class="icon icon-remove icon-color" (click)='deleteNote(row, $event)' id="delete-note-index-{{rowIndex}}"></em>
+          </span>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-footer>
+      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+              {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                of {{page.totalPages}}</option>
+            </select>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                (change)="table.onFooterPage($event);pageChange($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+  <div>
+    <app-loader [active]="isLoading"></app-loader>
+  </div>
+<button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button" (click)="addNote(noteModal)" id="add-note">
+  <i class="icon icon-add-circle"></i>
+  Add Note
+</button>
+</div>
+
+<ng-template #noteModal let-modal>
+  <div class="d-flex justify-content-between mb-16">
+    <div class="d-flex">
+      <div class="d-flex align-items-center flex-wrap">
+        <h3 class="mr-36 mt-0 mb-0"  *ngIf="!noteForm?.value?.id">Add New Note</h3>
+        <h3 class="mr-36 mt-0 mb-0"  *ngIf="noteForm?.value?.id">Edit Note</h3>
+      </div>
+    </div>
+    <span class="alert-close" (click)="cancel()" id="close-span"><em class="icon icon-close"></em></span>
+  </div>
+  <div class=" mb-0" [formGroup]="noteForm">
+      <div class="modal-body">
+        <div class="row gutter-16">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Applicable Date</label>
+              <app-date-picker [isForm]='true' [dateform]='noteForm' [controlName]="'applicableDate'" id="application-date"></app-date-picker>
+              <input type="hidden" class="form-control" formControlName="id" id="hidden-note-id">
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-group">
+              <div class="custom-control custom-checkbox m-0 pr-0">
+                <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                  formControlName="isVisibleToClient">
+                <label class="custom-control-label" for="dropcheck-1">
+                  Visibile to Client
+                </label>
+              </div>
+
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-group mb-0" [class.has-error]="noteForm.controls['content'].errors && formSubmitted">
+              <label for="">Note Text <sup>*</sup></label>
+              <span class="count-char pr-8">{{noteForm?.controls['content']?.value?.length || 0}}/1000</span>
+              <textarea class="form-control" maxlength="1000" rows="4" placeholder="Enter Note Text"
+                formControlName="content" id="note-text"></textarea>
+              <span class="field-message text-danger" *ngIf="noteForm.controls['content'].errors && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data.note_required}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light"  (click)="cancel()" id='cancel-btn'>Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="disableSaveButton"
+          (click)='saveNotes()' id="save-btn">Save</button>
+      </div>
+  </div>
+</ng-template>

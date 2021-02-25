@@ -1,0 +1,56 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Code Ranges</li>
+    </ol>
+    <div class="heading">
+      <h1>Code Ranges</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-start justify-content-between">
+          <h3 class="mb-16">Code Ranges</h3>
+          <button class="btn btn-primary" id="confgure-code-range-btn" routerLink='/firm/edit-code-ranges'>Configure Code Ranges</button>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-10">
+            <p class="lh-20 mb-8">
+              To avoid user confusion or crossing of code types, do not overlap a code range with another
+              code range that is already being <br> used by existing codes.
+            </p>
+            <p class="lh-20">
+              Changes will only affect new codes, not existing codes.
+            </p>
+          </div>
+        </div>
+
+        <div class="code-range-section">
+          <ng-container *ngFor='let range of data; trackBy: trackByFn;let i = index;'>
+            <div class="info-block">
+              <h4 class="mb-16 text-xlarge">{{range.category}}</h4>
+              <div class="table-responsive">
+                <table class="table table-striped table-borderless" id="code-range-tbl-{{i}}">
+                  <thead>
+                    <tr class="bdr-btm">
+                      <th style="width: 250px;">Code</th>
+                      <th>Range(s)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor='let code of range.codes; trackBy: trackByFn;let index = index;' id="code-row-index-{{index}}">
+                      <td>{{code.billingCodeName}}</td>
+                      <td>{{code.minRange}} to {{code.maxRange}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-loader [active]='loading'></app-loader>

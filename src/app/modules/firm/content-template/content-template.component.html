@@ -1,0 +1,34 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Billing Templates</li>
+    </ol>
+    <div class="heading">
+      <h1>Billing Templates</h1>
+    </div>
+    <div>
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <a href="javascript:void(0);" (click)="selectedTab = mytabs" *ngFor="let mytabs of alltabs; trackBy: trackByFn;let i = index;" role="tab"
+          class="nav-link flex-fill" [class.active]="selectedTab === mytabs" id="tab-index-{{i}}">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32">
+            <div *ngIf="selectedTab === alltabs[0]" class="tab-pane fade show active" role="tabpanel">
+              <app-invoice-custom-content></app-invoice-custom-content>
+            </div>
+            <div *ngIf="selectedTab === alltabs[1]" class="tab-pane fade show active" role="tabpanel">
+              <app-receipt-template (previewTemplate)='previewReceiptTemplate($event)' (doneChanges)='doneChange()'></app-receipt-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end" *ngIf="selectedTab === alltabs[0]">
+      <button class="btn btn-primary" type="button" [disabled]='!isSaveEnabled' (click)='saveChanges()' id="save-changes">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>

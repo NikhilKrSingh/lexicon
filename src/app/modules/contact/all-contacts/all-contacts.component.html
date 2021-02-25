@@ -1,0 +1,181 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">All Contacts</li>
+    </ol>
+    <div class="heading">
+      <h1>All Contacts</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input"
+              placeholder="Search by contact number, contact name, email address, phone number, office, attorney name"
+              (keyup)="updateFilter($event)" id="text-search">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+          </div>
+        </form>
+      </div>
+      <div class="btn-group ml-md-24 ml-0" *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" >
+
+        <button  class="btn btn-primary btn-icon" type="button" (click)="openPersonalinfo(AddNewContact,'lg','')" id="add-new-contact">
+          <i class="icon icon-plus"></i> Add New Contact
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label>Office</label>
+              <app-multiselect-dropdown [title]="title" [selections]="selectedOffice" [displaySubItem]="officeList"
+                [filterName]="filterName" (onSelectionChanged)="getSelectedState($event)"
+                (clearFilter)="clearFilter('office')" (applyFilter)="applyFilter()" id="office-multi-select"></app-multiselect-dropdown>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label>Status</label>
+              <app-multiselect-dropdown [title]="title1" [selections]="selectedStatus" [displaySubItem]="statusList"
+                [filterName]="filterName" (onSelectionChanged)="getSelectedStatus($event)"
+                (clearFilter)="clearFilter('status')" (applyFilter)="applyFilter()" id="status-multi-select"></app-multiselect-dropdown>
+            </div>
+          </div>
+        </div>
+          <div class="position-relative">
+            <div class="custom-table">
+              <ngx-datatable
+                #table
+                class="material common-table allcontact-table"
+                [class.fix-col-right]="tables?.frozenRightArr[0]"
+                [class.matter-no-data]="contactList?.length === 0"
+                [rows]="contactList"
+                [columnMode]="ColumnMode.force"
+                [headerHeight]="50"
+                [footerHeight]="footerHeight"
+                [selected]="selected"
+                [messages]="messages"
+                rowHeight="auto"
+                [count]="page.totalElements"
+                [offset]="page.pageNumber"
+                [limit]="page.size"
+                [scrollbarH]="true"
+                [sorts]="[{prop: 'uniqueNumber', dir: 'desc'}]"
+                (sort)="getTotalPages()"
+                [selectionType]="SelectionType.checkbox"
+                [selectAllRowsOnPage]="false"
+                id="contactlist-tbl">
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="uniqueNumber" name="Contact Number" [width]="150">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="name" name="Name" [width]="150">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="preferredContact" name="Preferred Contact" [width]="150">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <span [ngClass]="{donotcontact: row.doNotContact}">{{row.preferredContact}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="officeName" name="Office" [width]="250">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="corporateContactTypes" name="Contact Type" [width]="190">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="status" name="Status" [width]="120">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Actions" [frozenRight]='tables?.frozenRightArr[0]' [width]="100"
+                  prop='id'>
+                  <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                    <div class="d-flex justify-content-end">
+                      <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)">
+                        <em class="icon icon-dot-verti"></em>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                          <a class="dropdown-item" *ngIf="!permissionList.CLIENT_CONTACT_MANAGEMENTisEdit && !permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" href="javascript:void(0)" (click)="viewEdit(row, 'view');" id="view-contact-index-{{rowIndex}}">View</a>
+                          <a class="dropdown-item" *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" href="javascript:void(0)" (click)="viewEdit(row, 'edit');" id="edit-contact-index-{{rowIndex}}">View</a>
+                        </div>
+                      </div>
+                      <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-footer>
+                  <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                    let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                            <select class="custom-select border-less" [formControl]="pageSelector"
+                              (change)="changePageSize()">
+                              <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <span>
+                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                        </span>
+                      </div>
+
+                      <div class="d-flex align-items-center">
+                        <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                          <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                            of {{page.totalPages}}</option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                            [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                            [page]="curPage" [size]="pageSize" [count]="rowCount"
+                            [hidden]="!((rowCount / pageSize) > 1)"
+                            (change)="table.onFooterPage($event);pageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+            </div>
+            <app-loader [active]="loading"></app-loader>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #AddNewContact let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Add New Contact</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="custom-control custom-radio">
+      <input type="radio" id="customRadio1" name="customRadio" value="pc" [(ngModel)]="selectedContact"
+        class="custom-control-input">
+      <label class="custom-control-label" for="customRadio1">Potential Client</label>
+    </div>
+    <div class="custom-control custom-radio">
+      <input type="radio" id="customRadio2" name="customRadio" value="cc" [(ngModel)]="selectedContact"
+        class="custom-control-input">
+      <label class="custom-control-label" for="customRadio2">Corporate Contact</label>
+    </div>
+    <div class="custom-control custom-radio">
+      <input type="radio" id="customRadio3" name="customRadio" value="ca" [(ngModel)]="selectedContact"
+        class="custom-control-input">
+      <label class="custom-control-label" for="customRadio3">Client Association</label>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="createContact()" id="continue-creating-contact">Continue Creating Contact</button>
+  </div>
+</ng-template>

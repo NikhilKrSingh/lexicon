@@ -1,0 +1,94 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a [routerLink]="['/dashboard']" href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item"><a [routerLink]="['/firm/account-settings']" href="javascript:void(0)">Accounting Settings</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Resend Owner Information Email</li>
+        </ol>
+        <div class="heading">
+            <h1>Resend Owner Information Email</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h3 class="mb-16">Owner Details <sup class="text-danger ml-4 fs-24">*</sup></h3>
+                <p class="lh-20 col-7 px-0">Specify details about person who owns at least a 25% stake in the company.</p>
+                <div class="custom-table">
+                   
+                    
+                            <div class="custom-table matter-list">
+                            <ngx-datatable #table 
+                                class="material common-table datatable-auto-height"
+                                [class.matter-no-data]="ownerEmailList?.length === 0" 
+                                [rows]="ownerEmailList"
+                                [columnMode]="ColumnMode.force" 
+                                [headerHeight]="50" 
+                                rowHeight="auto"
+                                id="owner-email-tbl">
+
+                                <ngx-datatable-column [resizeable]="false" 
+                                [sortable]="false" 
+                                prop="email" 
+                                name="Email Address" 
+                                [width]="1000">
+                                </ngx-datatable-column>
+
+                                <ngx-datatable-column [resizeable]="false" 
+                                [headerClass]="'text-right'" 
+                                [sortable]="false" 
+                                name="Action" 
+                                [width]="100">
+                                    <ng-template let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                                        <div class="icon-group d-flex justify-content-end">
+                                            <span (click)="openPersonalinfo(AddOwners,'','modal-lmd', rowIndex, 'edit')" id="edit-owner-index-{{rowIndex}}">
+                                                <em class="icon icon-edit icon-color"></em>
+                                            </span>
+                                            
+                                        </div>
+                                    </ng-template>
+                                </ngx-datatable-column>
+                            </ngx-datatable>
+                    
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+        <div class="btn-group">
+            <button type="button" class="btn btn-light"><a [routerLink]="['/firm/account-settings']" href="javascript:void(0)" id="cancel-btn">Cancel</a></button>
+            
+        </div>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+</div>
+
+<ng-template #AddOwners let-modal>
+    <div class="modal-header pb-24">
+        <h3 class="modal-title mb-0">{{ action == 'add' ? 'Add' : 'Edit' }} Owner</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group mb-0" [class.has-error]="email?.errors && formSubmitted">
+            <label>Owner Email Address <sup *ngIf="action == 'add'">*</sup></label>
+            <input type="text" class="form-control mb-8" [formControl]="email" placeholder="Enter owner email address" id="email-address">
+            <span class="text-danger"  *ngIf="email.errors?.email && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.email_not_valid }}
+            </span>
+            <span class="text-danger"  *ngIf="email.errors?.required && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.usio_email_address_required }}
+            </span>
+            <span class="text-danger"  *ngIf="email.errors?.maxlength && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.usio_length_name }}
+            </span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="resendEmailToOwners()" id="save-btn">Save</button>
+    </div>
+</ng-template>

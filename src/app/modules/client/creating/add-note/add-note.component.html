@@ -1,0 +1,66 @@
+<div class="npc-block cust-card pb-0 mb-0">
+  <div class="cust-card-head d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <h3 class="m-0">Add Notes</h3>
+      <i class="lh-20 ml-8">Optional</i>
+    </div>
+  </div>
+  <div class="cust-card-body">
+    <p class="lh-20">Enter as many notes as needed</p>
+    <div class="d-flex align-items-center mb-24 w-100 justify-content-between">
+      <button class="btn btn-primary btn-icon d-flex align-items-center" type="button" (click)="addEditNote(null)" id="add-note">
+        <i class="icon icon-plus"></i>
+        Add Note
+      </button>
+    </div>
+    <div class="custom-table pt-24" *ngIf="originalNotes?.length > 0">
+      <ngx-datatable #table class="material common-table datatable-auto-height ngtable-align-top" [rows]="notes"
+        [columnMode]="ColumnMode.force" [headerHeight]="50" [messages]="messages" rowHeight="auto" id="note-tbl">
+        <ngx-datatable-column [resizeable]="false" prop="content" name="Note Text" [width]="334">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <app-read-more [text]='row.content' [maxLines]='2'></app-read-more>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="applicableDate" name="Applicable Date" [width]="220">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span class="d-block font-weight-medium">{{row.applicableDate | date}}</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Written Date" [width]="220">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span class="d-block font-weight-medium mb-4">{{row.lastUpdated | date}}</span>
+            <span
+              class="small helper-text font-weight-regular d-block lh-20">{{row.lastUpdated | date: 'hh:mm a'}}</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="createdBy.name" name="Author" [width]="240">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span
+              class="d-block font-weight-medium mb-4">{{row.createdByName ? row.createdByName : row.createdBy.name}}</span>
+            <span
+              class="small helper-text font-weight-regular d-block lh-20">{{row.createdByEmail ? row.createdByEmail : row.createdBy?.email}}</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="isVisibleToClient" name=" " [width]="240" [sortable]="false">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span *ngIf="row.isVisibleToClient" class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Visible
+              To Client</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="" name="Action" [width]="120" [headerClass]="'text-right'" [sortable]="false">
+          <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)='addEditNote(row, $event)' id="edit-note-index-{{rowIndex}}">
+                <em class="icon icon-edit icon-color"></em>
+              </span>
+              <span (click)="deleteNote(row, $event)" id="delete-note-index-{{rowIndex}}">
+                <em class="icon icon-remove icon-color"></em>
+              </span>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </div>
+  </div>
+  
+</div>

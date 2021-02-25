@@ -1,0 +1,41 @@
+form.table-data-search {
+  max-width: 500px;
+}
+.main-content{
+  min-height: 800px;
+}
+
+.radio-style {
+  &:before {
+    content: '';
+
+    background-position: 4px 4px;
+  }
+}
+
+.custom-icon-close {
+  position: absolute !important;
+  right: 42px !important;
+  top: 17px !important;
+  font-size: 9px !important;
+  color: #999 !important;
+}
+
+.custom-checkbox.contact-checkbox {
+  margin-bottom: 20px;
+}
+
+.mb-6 {
+  margin-bottom: 6px;
+}
+.profile-client .profile-heading h2 {
+  max-width: 460px !important;
+}
+
+.bs-tooltip-bottom .arrow {
+  left: 10px;
+}
+
+.tooltip.bs-tooltip-bottom {
+  top: 80%;
+}

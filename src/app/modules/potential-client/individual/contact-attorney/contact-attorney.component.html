@@ -1,0 +1,89 @@
+<div class="card">
+  <div class="card-body">
+    <h2>Consult Attorney</h2>
+    <div class="d-flex align-items-center justify-content-between mb-16">
+      <div class="header-search w-100">
+        <form action="#" class="small-search">
+          <div class="header-search-wrapper">
+            <input type="search" class="form-control search-input" name="q" id="q" autocomplete="off"
+              placeholder="Search for attorneys" [formControl]="searchString">
+            <button class="btn" type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="custom-table">
+      <div class="table-responsive section-area">
+        <ngx-datatable #attornyTable class="material common-table" [rows]="attorneyList" [columnMode]="ColumnMode.force"
+          [headerHeight]="50" [footerHeight]="50" [messages]="messages" rowHeight="auto" [count]="page.totalElements"
+          [offset]="page.pageNumber" [limit]="page.size" [scrollbarH]="true" (sort)="updateDatatableFooterPage()">
+          <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Select" [canAutoResize]="false" [width]="80" id="attorney-listing-tbl">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <label class="cust-radio">
+                <input type="radio" name="attorneyselectfor" [(ngModel)]="selecteAttornyDefualt" [value]="row.id" (change)='onSelect(row)'>
+                <span class="radio-style"></span>
+              </label>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="consultRank" name="Ranking" [width]="60"></ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="lastName" name="Last Name" [width]="80"></ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="firstName" name="First Name" [width]="80"></ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="100"> </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [width]="100"> </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="officeAssociation" name="Office Association" [width]="100">
+          </ngx-datatable-column>
+          <ngx-datatable-footer>
+            <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+              let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+              <div class="d-flex justify-content-between flex-fill">
+                <div class="d-flex align-items-center">
+                  <div class="table-items d-flex align-items-center mr-36">
+                    Items per page:
+                    <div class=" ml-8">
+                      <select class="custom-select border-less" [formControl]="pageSelector"
+                        (change)="changePageSize()">
+                        <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <span>
+                    {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                    {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                  </span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                    <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }} of
+                      {{page.totalPages}}</option>
+                  </select>
+                  <div class="ml-8">
+                    <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                      [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                      [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                      [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                      (change)="attornyTable.onFooterPage($event);pageChange($event)">
+                    </datatable-pager>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-footer>
+        </ngx-datatable>
+        <app-loader [active]="attorneyLoading"></app-loader>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="d-flex justify-content-between pb-24">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='cancel()' id="cancel-btn">Cancel</button>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='prev()' id="previous-btn">Previous</button>
+    <button type="button" class="btn btn-primary" (click)='next()' id="next-btn">Next</button>
+    
+  </div>
+</div>
+<app-loader [active]="loading"></app-loader>

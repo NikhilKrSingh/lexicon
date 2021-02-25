@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your payment to trust has failed</title>
+
+  <style>
+    table tbody tr td {
+      padding-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          Hi [FirstName],
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Your credit card payment to <b>[TargetTrustName]</b> for the matter <b>[MatterName]</b> has failed, as the payment
+          could not be processed to the required Credit Card Trust Account.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <b>Credit Card:</b> [CardType] [CardNumber] <br>
+          <b>Amount:</b> [Amount] <br>
+          <b>Credit Card Trust Account:</b> [CreditCardTrustAccountName] <br>
+          <b>Reason Code:</b> [USIOReasonCode]<br>
+          <b>Reason:</b> [USIOReasonDescription]
+        </td>
+      </tr>
+      <tr>
+        <td>
+          To retry, access the Matter Dashboard and click <b>Retry Payment</b> from the <b>Billing tab</b>, or contact
+          your administrator for assistance.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Regards, <br />
+          The [FirmName] Team
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+
+</html>

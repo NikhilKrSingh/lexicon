@@ -1,0 +1,147 @@
+<h2 class="mb-24">Notes</h2>
+<div class="d-flex align-items-center mb-24 w-100 justify-content-between">
+  <div class="header-search flex-fill mr-20">
+    <form class="table-data-search">
+      <div class="header-search-wrapper">
+        <input type="text" class="form-control search-input" placeholder="Search by author or note text"
+          (keyup)='searchFilter($event)' id="search-text">
+        <button class="btn" type="submit" id="search-btn">Search</button>
+      </div>
+    </form>
+  </div>
+  <button *ngIf="permissionList.MATTER_MANAGEMENTisAdmin" class="btn btn-primary btn-icon d-flex align-items-center"
+    type="button" (click)='addNote()' id="create-note-btn">
+    <i class="icon icon-plus"></i>
+    Create New Note
+  </button>
+</div>
+
+
+<div class="row gutter-16" [formGroup]='searchForm'>
+  <div class="col-sm-3">
+    <div class="form-group">
+      <label>Author</label>
+      <ng-select [items]="authorList" placeholder="Select an author" formControlName='author' [bindValue]="'id'"
+        [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'" id="author-select">
+      </ng-select>
+    </div>
+  </div>
+  <div class="col-5">
+    <div class="form-group">
+      <label>Date Created Range</label>
+      <div class="row gutter-16">
+        <div class="col-6">
+          <app-date-picker [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select start date'"
+            controlName='createdStartDate' id="start-date"></app-date-picker>
+        </div>
+        <div class="col-6">
+          <app-date-picker [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select end date'"
+            controlName='createdEndDate' id="end-date"></app-date-picker>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-2">
+    <div class="form-group">
+      <div class="custom-control custom-checkbox mt-32 pr-0">
+        <input type="checkbox" class="custom-control-input" id="dropcheck-1" formControlName="isVisibleToClient">
+        <label class="custom-control-label" for="dropcheck-1">Visible To Client</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div>
+  <div class="custom-table">
+    <ngx-datatable #table class="material common-table datatable-auto-height ngtable-align-top no-min-height" [rows]="notes"
+      [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+      [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" id="notes-tbl">
+      <ngx-datatable-column [resizeable]="false" prop="content" name="Note Text" [width]="334">
+        <ng-template let-value="value" ngx-datatable-cell-template>
+          <div class="note-table-text user-prof-note" style="word-break: break-word;">
+            <app-read-more [text]='value' [maxLines]='2'> </app-read-more>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="applicableDate" name="Applicable Date" [width]="220">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span class="d-block font-weight-medium">{{row.applicableDate | date}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Written Date" [width]="220">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span class="d-block font-weight-medium mb-4">{{row.lastUpdated | date}}</span>
+          <span class="small helper-text font-weight-regular d-block lh-20">{{row.lastUpdated | date: 'hh:mm a'}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="createdBy.name" name="Author" [width]="240">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span class="d-block font-weight-medium mb-4">{{row.createdBy.name}}</span>
+          <span class="small helper-text font-weight-regular d-block lh-20">{{row.createdBy.email}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="isVisibleToClient" name=" " [width]="240" [sortable]="false">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span *ngIf="row.isVisibleToClient" class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Visible
+            To Client</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="" name="Action" [width]="120" *ngIf="permissionList.MATTER_MANAGEMENTisAdmin"
+        [headerClass]="'text-right'" [sortable]="false">
+        <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <div class="icon-group d-flex justify-content-end">
+            <span>
+              <em class="icon icon-edit icon-color" (click)='editNote(row , $event)'
+                id="edit-note-index-{{rowIndex}}"></em>
+            </span>
+            <span>
+              <em class="icon icon-remove icon-color" (click)='deleteNote(row, $event)'
+                id="delete-note-index-{{rowIndex}}"></em>
+            </span>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of
+                {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                  {{ i + 1 }}
+                  of {{page.totalPages}}</option>
+              </select>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="table.onFooterPage($event);pageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>

@@ -1,0 +1,93 @@
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-32">
+      <h2 class="mb-0">Write-Offs</h2>
+    </div>
+    <div class="custom-table" *ngIf='writeOffsList?.length > 0; else noWriteOffs'>
+      <ngx-datatable #table class="material common-table"
+        [rows]="writeOffsList"
+        [columnMode]="ColumnMode.force"
+        [headerHeight]="50"
+        [footerHeight]="0"
+        rowHeight="auto"
+        [scrollbarH]='true'
+        [summaryHeight]="50"
+        [summaryRow]='true'
+        [selected]="writeOffSelected"
+        [messages]="{emptyMessage: 'No write-offs recorded'}"
+        (select)="onSelect($event)"
+        [selectionType]="SelectionType.checkbox"
+        [summaryPosition]="'bottom'"
+        id="writeofflisting-tbl">
+        <ngx-datatable-row-detail rowHeight="auto" #myDetailRow>
+          <ng-template let-row="row" ngx-datatable-row-detail-template>
+            <div class="">
+              <table class="table table-striped table-borderless">
+                <thead>
+                  <tr>
+                    <th style="width: 120px;"></th>
+                    <th>Billing Narrative</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                      <td style="width: 120px;"></td>
+                      <td>
+                        <div class="note-table-text user-prof-note">
+                          <app-read-more [text]='row?.billingNarrative' [maxLines]='2'> </app-read-more>
+                        </div>
+                      </td>
+                    </tr>
+                </tbody>
+              </table>
+            </div>
+          </ng-template>
+        </ngx-datatable-row-detail>
+        <ngx-datatable-column [resizeable]="false" [width]="66" [sortable]="false" [canAutoResize]="false" [draggable]="false">
+          <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+            let-selectFn="selectFn">
+            <label class="cust-check ml-28 cursor-pointer">
+              <input type="checkbox" [disabled]="workComplete" [checked]="allRowsSelected" (change)="selectFn(!allRowsSelected)" />
+              <span class="check-style"></span>
+            </label>
+          </ng-template>
+          <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+            let-onCheckboxChangeFn="onCheckboxChangeFn" let-expanded="expanded" let-row="row">
+            <div class="d-flex align-items-center" *ngIf='row.id'>
+              <a href="javascript:void(0)" style="width: 12px;" class="icon font-10 mr-16" [class.icon-angle-down]="!expanded"
+                [class.icon-angle-up]="expanded" title="Expand/Collapse Row" (click)="toggleExpandRow(row, expanded, $event)">
+              </a>
+              <label class="cust-check cursor-pointer">
+                <input type="checkbox" [disabled]="workComplete" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+                <span class="check-style"></span>
+              </label>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="createdAt" name="Date/Time Entered" [headerClass]="'checkbox-header'"
+                              [width]="170" [summaryFunc]="null">
+          <ng-template ngx-datatable-header-template let-value="value">
+              <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                <span class="datatable-header-cell-label">Date/Time Entered</span>
+              </span>
+          </ng-template>
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <div class="d-flex align-items-center" *ngIf='row.id'>
+              <span>{{value | date : 'MM/dd/yyyy'}}</span>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="createdBy" name="Entered By" [width]="150" [summaryFunc]="null">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="writeOffAmount" name="Amount" [width]="90" [summaryFunc]="getSummaryOfAmount">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <span *ngIf='value'> -{{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </div>
+    <ng-template #noWriteOffs>
+      <p>No write-offs recorded</p>
+    </ng-template>
+  </div>
+</div>

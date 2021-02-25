@@ -1,0 +1,145 @@
+<div class="btn-group pb-32">
+    <button type="button" class="btn btn-primary" *ngIf="postPaymentBtn" [routerLink]="['/matter/post-payment-trust']" [queryParams]="{matterId:matterId}" id="post-payment-to-turst">Post Payment to Trust</button>
+    
+</div>
+<div class="info-block">
+    <h3 class="mb-24">Primary Retainer Trust</h3>
+    <p class="mb-16 lh-20">View the current balance of this matter’s Primary Retainer Trust. <br>
+        Replenish its funds to maintain the minimum balance.</p>
+    <div class="custom-table section-area">
+        <div class="table-responsive">
+            <table class="table table-striped table-borderless primary-retainer-trust" id="primary-retainer-trust-tbl">
+                <thead>
+                    <tr>
+                        <th>Trust Number</th>
+                        <th class="name">Trust</th>
+                        <th class="minimum">Minimum</th>
+                        <th class="balance">Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="matterTrustAccountId" id="primary-retainer-trust-details">
+                        <td>{{primaryRetainerTrustNumber}}</td>
+                        <td>Primary Retainer Trust</td>
+                        <td>{{minimumRetainerTrustBalance | currency : 'USD' : 'symbol': '1.2-2'}}</td>
+                        <td>{{currentBalance| currency : 'USD' : 'symbol': '1.2-2'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <app-loader [active]='isPrimaryLoading'></app-loader>
+        </div>
+    </div>
+</div>
+<div class="info-block pt-48">
+    <h2 class="mb-24">Trust-Only Accounts</h2>
+    <p class="mb-16">Enter as many Trust-Only accounts as needed.</p>
+    <app-trust-only-account-common [clientId]="clientId" [matterId]="matterId"
+        [matterTrustAccountId]="matterTrustAccountId" [pageType]="pageType" [matterAdmin]="matterAdmin"
+        [matterAdminEdit]="matterAdminEdit">
+    </app-trust-only-account-common>
+
+</div>
+<div class="info-block pt-48 matter-proprty-help">
+    <h2 class="mb-24">Property Held in Trust</h2>
+    <p class="mb-16">Enter as many Property Held in Trust items as needed.</p>
+    <app-property-held-in-trust [clientId]="clientId" [matterId]="matterId" [matterAdmin]="matterAdmin"
+        [matterAdminEdit]="matterAdminEdit"></app-property-held-in-trust>
+</div>
+<div class="info-block pt-48">
+  <h2 class="mb-24">Trust Transaction History</h2>
+  <app-trust-transaction-history [matterId]="matterId"></app-trust-transaction-history>
+</div>
+<div class="info-block pt-48">
+    <div class="d-flex justify-content-between align-items-center mb-24">
+        <h2 class="m-0">Trust Account Settings</h2>
+        <div class="btn-group">
+            <button type="button" class="btn btn-light" *ngIf="isEdit" (click)="cancelBtn()" id='cancel-btn'>Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="editBtn()" *ngIf="isPermission && !isEdit" id="edit-btn">Edit
+                Settings</button>
+            <button type="button" class="btn btn-primary" [disabled]="trustPaymentGracePeriodForm.invalid || minTrustBalanceForm.invalid" (click)='saveBtn()'
+                *ngIf="isEdit" id="save-changes-btn">Save Changes</button>
+        </div>
+    </div>
+
+    <app-trust-bank-accounts [officeId]="officeId" [pageType]="pageType" [matterId]="matterId" [opratingMode] = "'View'" *ngIf="officeId"></app-trust-bank-accounts>
+
+
+    
+    <div class="row">
+        <div class="col-6">
+            <div class="info-block pt-8">
+                <h5 class="mb-8 mt-5 font-weight-bold">Minimum Primary Retainer Trust Balance</h5>
+                <p class="mb-16 lh-20">
+                    Enter the minimum balance the client should maintain in their trust account at all times.
+                </p>
+                <div class="row">
+                    <div class="col-5">
+                        <div class="form-group">
+                            <form [formGroup]="minTrustBalanceForm">
+                                <input type="text" min="0" prefix="$" mask="separator.2" thousandSeparator=","
+                                    min="0" placeholder="$0.00" [attr.disabled]="!isEdit ? '' : null" (focusout)="modifyMinTrustBal()"
+                                    formControlName="minTrustBalance" class="form-control" value="$0.00" id="min-trust-balance">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <div class="info-block pt-8">
+                <h5 class="mb-8 mt-0 font-weight-bold">Trust Payment Grace Period</h5>
+                <p class="mb-16 lh-20">
+                    Specifies number of days after an invoice is due before client’s bill is automatically paid from
+                    their primary retainer trust account.
+                </p>
+                <div class="alert alert-primary d-flex justify-content-between" role="alert">
+                    <div class="d-flex">
+                        <em class="alert-icon icon icon-info"></em>
+                        <div class="d-flex align-items-center flex-wrap">
+                            This will override the firm-level grace period.
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center form-group">
+                    <form [formGroup]="trustPaymentGracePeriodForm">
+                        <div class="position-relative cust-spinner">
+                        <input type="number" formControlName="trustPaymentGracePeriod"
+                            [attr.disabled]="!isEdit || (!permissionList.BILLING_MANAGEMENTisAdmin && !permissionList.BILLING_MANAGEMENTisEdit) ? '' : null"
+                            onkeypress="return (event.charCode == 8 || event.charCode == 0 || event.charCode == 13) ? null : event.charCode >= 48 && event.charCode <= 57"
+                            min="0" class="form-control number-control" id="trust-payment-grace-period">
+                        </div>
+                    </form>
+                    <span class="ml-8">days</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <div class="info-block pt-8">
+                <h5 class="mb-8 mt-0 font-weight-bold">Target Account for Overpayments</h5>
+                <p class="mb-16 lh-20">
+                    Sets which account receives overpayment funds by default. <br>
+                    Payment into Accounts Receivable Balance will appear as a negative balance due.
+                </p>
+                <div>
+                    <div class="custom-control custom-radio pr-0 mb-12">
+                        <input type="radio" id="TAO-1" (click)="overPaymentCheck()" name="TAO"
+                            [attr.disabled]="!isEdit || (!permissionList.BILLING_MANAGEMENTisAdmin && !permissionList.BILLING_MANAGEMENTisEdit) ? '' : null" class="custom-control-input"
+                            [checked]="overPaymentOption">
+                        <label class="custom-control-label" for="TAO-1">Accounts Receivable Balance</label>
+                    </div>
+                    <div class="custom-control custom-radio pr-0 mb-0">
+                        <input type="radio" id="TAO-2" name="TAO" class="custom-control-input"
+                            [attr.disabled]="!isEdit || (!permissionList.BILLING_MANAGEMENTisAdmin && !permissionList.BILLING_MANAGEMENTisEdit) ? '' : null" (click)="overPaymentCheck()"
+                            [checked]="!overPaymentOption">
+                        <label class="custom-control-label" for="TAO-2">Primary Retainer Trust Account</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <app-loader [active]='trustSettingLoading'></app-loader>
+</div>

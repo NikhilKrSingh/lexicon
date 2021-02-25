@@ -1,0 +1,44 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Timekeeping Settings</li>
+    </ol>
+    <div class="heading">
+      <h1>Timekeeping Settings</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3 class="mb-8">Configure Time Display</h3>
+        <p class="lh-20">Set the default time appearance for your work.<br>
+          Example: One hour and fifteen minutes of work.</p>
+        <div class="radio-group">
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="Time1" name="Time" class="custom-control-input" value="1"
+              [ngModel]="TimeDisplayFormat" (ngModelChange)="onTimeChange($event)">
+            <label class="custom-control-label" for="Time1">1h 15m</label>
+          </div>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="Time2" name="Time" class="custom-control-input" value="2"
+              [ngModel]="TimeDisplayFormat" (ngModelChange)="onTimeChange($event)">
+            <label class="custom-control-label" for="Time2">1:15</label>
+          </div>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="Time3" name="Time" class="custom-control-input" value="3"
+              [ngModel]="TimeDisplayFormat" (ngModelChange)="onTimeChange($event)">
+            <label class="custom-control-label" for="Time3">1.25</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end">
+      <button type="button" class="btn btn-primary" [disabled]="!TimeDisplayFormat" *ngIf="!isCreate"
+        (click)="updateSetting()" id="save-changes-btn">Save
+        Changes</button>
+      <button type="button" class="btn btn-primary" [disabled]="!TimeDisplayFormat" *ngIf="isCreate"
+        (click)="createSettings()" id="save-changes-btn">Save
+        Changes</button>
+    </div>
+  </div>
+  <app-loader [active]='loading'></app-loader>
+</div>

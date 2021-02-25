@@ -1,0 +1,779 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Admin Settings</a></li>
+            <li class="breadcrumb-item">Charge Codes</li>
+            <li class="breadcrumb-item active" aria-current="page">Mass Update Rates - 12345</li>
+        </ol>
+        <div class="heading">
+            <h1>Mass Update Rates - 12345</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="info-blcok mb-5">
+                    <div class="heading">
+                        <h2 class="mb-3">Adjustment</h2>
+                        <p> Rates will round up or down to the nearest dollar.</p>
+                    </div>
+                    <div class="row gutter-16">
+                        <div class="col-2">
+                            <div class="form-group">
+                                <label class="mb-3" for="">Factor</label>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="radio-11" class="custom-control-input">
+                                    <label class="custom-control-label" for="radio-11">Fixed Value</label>
+                                </div>
+                                <div class="custom-control custom-radio pr-0 ">
+                                    <input type="radio" id="radio-2" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="radio-2">Percentage</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Adjustment <sup>*</sup></label>
+                                <input type="text" class="form-control cust-readonlyinput" readonly>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Effective Date <sup>*</sup></label>
+                                <div class="date-field position-relative">
+                                    <input type="text" class="form-control cust-readonlyinput" readonly>
+                                    <p class="pt-8">Any time recorded on or after this Date of Service (including
+                                        currently unbilled time) will use the new rate. </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="info-blcok">
+                    <div class="heading">
+                        <h2 class="mb-3">Affected Rates</h2>
+                        <div class="form-group mb-0">
+                            <div class="custom-control custom-checkbox pr-0">
+                                <input class="custom-control-input" id="incla" type="checkbox">
+                                <label class="custom-control-label" for="incla">Include client and matter level codes
+                                    that use exception rates. Flags indicate which rates are exceptions.</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mu-rate-wrap">
+                        <div class="mu-rate-list mu-rate-title">
+                            <div class="mu-rate-row">
+                                <div class="mu-rate-item-row">
+                                    <div class="mu-rate-item"></div>
+                                    <div class="mu-rate-item c-rate"><strong>Current</strong></div>
+                                    <div class="mu-rate-item n-rate"><strong>New</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mu-rate-list mu-rate-main">
+                            <div class="mu-rate-row">
+                                <div class="mu-rate-item-row">
+                                    <div class="mu-rate-item">
+                                        <div class="form-group mb-0">
+                                            <div class="custom-control custom-checkbox pr-0">
+                                                <input class="custom-control-input" id="incl" type="checkbox">
+                                                <label class="custom-control-label" for="incl"><strong>Master Charge
+                                                        Code</strong></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mu-rate-item n-rate">$250.00 <em class="icon icon-flag icon-color"></em></div>
+                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                </div>
+                                <div class="mu-rate-list">
+                                    <div class="mu-rate-row">
+                                        <div class="mu-rate-item-row">
+                                            <div class="mu-rate-item">
+                                                <div class="form-group mb-0">
+                                                    <div class="custom-control custom-checkbox pr-0"><input
+                                                            class="custom-control-input" id="incl"
+                                                            type="checkbox"><label class="custom-control-label"
+                                                            for="incl"> Junior
+                                                            Attorney</label></div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                        </div>
+                                        <div class="mu-rate-list">
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">
+                                                                    Carter, Sarah</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                                <div class="mu-rate-list">
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row selected">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox" checked><label
+                                                                            class="custom-control-label" for="incl">
+                                                                            Henry, Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00 <em class="icon icon-flag icon-color"></em></div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                        <div class="mu-rate-list">
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00<em class="icon icon-flag icon-color"></em></div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mu-rate-row">
+                                                            <div class="mu-rate-item-row">
+                                                                <div class="mu-rate-item">
+                                                                    <div class="form-group mb-0">
+                                                                        <div
+                                                                            class="custom-control custom-checkbox pr-0">
+                                                                            <input class="custom-control-input"
+                                                                                id="incl" type="checkbox"><label
+                                                                                class="custom-control-label"
+                                                                                for="incl">Howell,
+                                                                                Catherine</label></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="mu-rate-item n-rate">$250.00</div>
+                                                                <div class="mu-rate-item c-rate">$200.00</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mu-rate-row">
+                                        <div class="mu-rate-item-row">
+                                            <div class="mu-rate-item">
+                                                <div class="form-group mb-0">
+                                                    <div class="custom-control custom-checkbox pr-0"><input
+                                                            class="custom-control-input" id="incl"
+                                                            type="checkbox"><label class="custom-control-label"
+                                                            for="incl"> Junior
+                                                            Attorney </label></div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                        </div>
+                                    </div>
+                                    <div class="mu-rate-row">
+                                        <div class="mu-rate-item-row">
+                                            <div class="mu-rate-item">
+                                                <div class="form-group mb-0">
+                                                    <div class="custom-control custom-checkbox pr-0"><input
+                                                            class="custom-control-input" id="incl"
+                                                            type="checkbox"><label class="custom-control-label"
+                                                            for="incl"> Legal
+                                                            Assistant</label></div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                        </div>
+                                        <div class="mu-rate-list">
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">
+                                                                    Henry, Joyce</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                                <div class="mu-rate-list">
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                        <div class="mu-rate-list">
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                        <div class="mu-rate-list">
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-row">
+                                                                <div class="mu-rate-item-row">
+                                                                    <div class="mu-rate-item">
+                                                                        <div class="form-group mb-0">
+                                                                            <div
+                                                                                class="custom-control custom-checkbox pr-0">
+                                                                                <input class="custom-control-input"
+                                                                                    id="incl" type="checkbox"><label
+                                                                                    class="custom-control-label"
+                                                                                    for="incl">Joyce v. Joyce</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mu-rate-row">
+                                        <div class="mu-rate-item-row">
+                                            <div class="mu-rate-item">
+                                                <div class="form-group mb-0">
+                                                    <div class="custom-control custom-checkbox pr-0"><input
+                                                            class="custom-control-input" id="incl"
+                                                            type="checkbox"><label class="custom-control-label"
+                                                            for="incl"> Master
+                                                            Charge Code</label></div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                        </div>
+                                        <div class="mu-rate-list">
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">
+                                                                    Henry, Joyce</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                                <div class="mu-rate-list">
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-row">
+                                                        <div class="mu-rate-item-row">
+                                                            <div class="mu-rate-item">
+                                                                <div class="form-group mb-0">
+                                                                    <div class="custom-control custom-checkbox pr-0">
+                                                                        <input class="custom-control-input" id="incl"
+                                                                            type="checkbox"><label
+                                                                            class="custom-control-label"
+                                                                            for="incl">Joyce v. Joyce</label></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0">
+                                                                <input class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-row">
+                                                <div class="mu-rate-item-row">
+                                                    <div class="mu-rate-item">
+                                                        <div class="form-group mb-0">
+                                                            <div class="custom-control custom-checkbox pr-0"><input
+                                                                    class="custom-control-input" id="incl"
+                                                                    type="checkbox"><label class="custom-control-label"
+                                                                    for="incl">Howell, Catherine</label></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mu-rate-item n-rate">$250.00</div>
+                                                    <div class="mu-rate-item c-rate">$200.00</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mu-rate-row">
+                                        <div class="mu-rate-item-row">
+                                            <div class="mu-rate-item">
+                                                <div class="form-group mb-0">
+                                                    <div class="custom-control custom-checkbox pr-0"><input
+                                                            class="custom-control-input" id="incl"
+                                                            type="checkbox"><label class="custom-control-label"
+                                                            for="incl"> Legal
+                                                            Assistant</label></div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                        </div>
+                                    </div>
+                                    <div class="mu-rate-row">
+                                        <div class="mu-rate-item-row">
+                                            <div class="mu-rate-item">
+                                                <div class="form-group mb-0">
+                                                    <div class="custom-control custom-checkbox pr-0"><input
+                                                            class="custom-control-input" id="incl"
+                                                            type="checkbox"><label class="custom-control-label"
+                                                            for="incl"> Legal
+                                                            Assistant</label></div>
+                                                </div>
+                                            </div>
+                                            <div class="mu-rate-item n-rate">$250.00</div>
+                                            <div class="mu-rate-item c-rate">$200.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="info-blcok pt-5">
+                    <div class="row gutter-16">
+                        <div class="col-5">
+                            <div class="form-group position-relative mb-0">
+                              <label>Change Note (optional)</label>
+                              <span class="count-char">0/1000</span>
+                              <textarea class="form-control" maxlength="1000" rows="4" placeholder="Enter change notes"
+                                formControlName='changeNotes'></textarea>
+                            </div>
+                          </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light">cancel</button>
+                <button type="button" class="btn btn-primary" disabled>Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Disbursements Journal Report</li>
+        </ol>
+        <div class="heading">
+            <h1>Disbursements Journal Report</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-8">Generate Report</h2>
+                <p class="lh-20">Generate your report by selecting the options below.</p>
+                <div class="row gutter-16">
+                    <div class="col-4">
+                        <label>Date Range Type<sup>*</sup></label>
+                        <ng-select 
+                        [items]="rangeTypeList" 
+                        [clearable]="false" 
+                        placeholder=""
+                        [bindValue]="'id'"
+                        [(ngModel)]="selectedRangeType"
+                        [bindLabel]="'name'"
+                        [notFoundText]="'No record found'"
+                        (ngModelChange)="rangeTypeChange($event)"
+                        [searchable]="false"></ng-select>
+                    </div>
+                </div>
+
+                <div class="row gutter-16 mt-8">
+                    <div class="col-4">
+                        <app-date-range-report (startDate)="startDate($event)" (endDate)="endDate($event)"></app-date-range-report>
+                    </div>
+                </div>
+
+               
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pt-8">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light" [routerLink]="['../../reporting']">Cancel</button>
+                <button id="buttonExportToCSV" type="button" class="btn btn-primary" (click)="generateDisbursementJournalReport()" [disabled]="!exportCsvFlag">Export to CSV</button>
+            </div>
+        </div>
+        <app-loader [active]='loading'></app-loader>
+
+    </div>
+</div>

@@ -1,0 +1,22 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Pending Changes</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="d-flex align-items-start missing-data">
+    <em class="icon icon-warning text-warning mr-16"></em>
+    <div class="lh-20">
+        <p class="m-0">
+          Changes to this rate table are scheduled to take effect on {{effectiveDate}}. Do you want to edit those pending changes, or submit new changes? The changes you make will replace the pending changes
+        </p>
+    </div>
+</div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn-outline-primary" (click)="editRateTable
+    ('newchanges');">Submit new changes</button>
+  <button type="button" class="btn btn-primary" (click)="editRateTable('editpendingchanges');">Edit pending changes</button>
+</div>

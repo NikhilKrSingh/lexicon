@@ -1,0 +1,10 @@
+<div id="content-area" class="d-flex justify-content-between align-items-stretch">
+  <app-sidebar></app-sidebar>
+  <div class="right-caption-area flex-fill">
+    <app-topbar></app-topbar>
+    <div class="content-area" [ngClass]="(addBtmPng)?'mb-60':'marginbottom35'">
+      <app-timezone-message></app-timezone-message>
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

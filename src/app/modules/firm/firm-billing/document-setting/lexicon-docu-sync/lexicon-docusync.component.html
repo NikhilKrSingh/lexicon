@@ -1,0 +1,30 @@
+<div class="d-flex justify-content-between align-items-start">
+  <div>
+    <h3 class="mb-8">Lexicon DocuSync</h3>
+    <p class="mb-32 lh-20">Select whether the ability to edit documents on desktop using <br> Lexicon DocuSync desktop application is enabled or disabled.</p>
+    
+  </div>
+</div>
+<div class="form-group">
+  <label class="mb-20">Enable/Disable edit documents using Lexicon DocuSync</label>
+  <div class="custom-control custom-radio pr-0">
+    <input type="radio" id="yes" name="lexiconDocuSync" [value]="true" [(ngModel)]="lexiconDocuSync"
+      (change)="radioChange($event)" class="custom-control-input">
+    <label class="custom-control-label" for="yes">Enable</label>
+  </div>
+
+  <div class="custom-control custom-radio pr-0">
+    <input type="radio" id="no" name="lexiconDocuSync" [value]="false" [(ngModel)]="lexiconDocuSync"
+      (change)="radioChange($event)" class="custom-control-input">
+    <label class="custom-control-label" for="no">Disable</label>
+  </div>
+</div>
+<app-loader [active]="loading"></app-loader>
+
+
+<div class="d-flex">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="change()" id="cancel-btn">Cancel</button>
+    <button type=" button" class="btn btn-primary" (click)="save()" [disabled]="!visible" id="save-btn">Save</button>
+  </div>
+</div>

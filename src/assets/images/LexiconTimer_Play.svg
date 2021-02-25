@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#413A93;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#413A93;}
+</style>
+<g id="Timer-Bottom-Bar" transform="translate(946.000000, 624.000000)">
+	<g id="Time-3" transform="translate(16.000000, 230.000000)">
+		<g id="Default-Play" transform="translate(293.000000, 14.000000)">
+			<g id="Rectangle">
+				<path class="st0" d="M-1235.5-844h-15c-2.5,0-4.5-2-4.5-4.5v-15c0-2.5,2-4.5,4.5-4.5h15c2.5,0,4.5,2,4.5,4.5v15
+					C-1231-846-1233-844-1235.5-844z M-1250.5-867c-1.9,0-3.5,1.6-3.5,3.5v15c0,1.9,1.6,3.5,3.5,3.5h15c1.9,0,3.5-1.6,3.5-3.5v-15
+					c0-1.9-1.6-3.5-3.5-3.5H-1250.5z"/>
+			</g>
+		</g>
+	</g>
+</g>
+<polygon id="Mask_1_" class="st1" points="16,12 10,7 10,17 "/>
+</svg>

@@ -1,0 +1,12 @@
+<div #invoicePDF>
+  <div class="pdf">
+    <div class="invoice-scroll" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+      <ng-container *ngIf='invoiceHTML'>
+        <div [innerHTML]='invoiceHTML | safeHTML'></div>
+      </ng-container>
+      <ng-container *ngIf='!invoiceHTML'>
+      </ng-container>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+</div>

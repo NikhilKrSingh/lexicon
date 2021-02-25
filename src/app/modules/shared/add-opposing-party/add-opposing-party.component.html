@@ -1,0 +1,390 @@
+
+<div style="z-index: 1050" aria-hidden="true" class="modal-backdrop fade show"></div>
+<div class="modal fade show d-block">
+  <div class="modal-dialog modal-dialog-centered modal-xl margin-auto">
+    <div class="modal-content">
+      <div class="modal-header d-block">
+        <h3 class="modal-title mb-0" *ngIf="mode == 'create'">Add Opposing Party</h3>
+        <h3 class="modal-title mb-0" *ngIf="mode == 'edit'">Edit Opposing Party</h3>
+        <button aria-label="Close" class="close" type="button" (click)="close()" id="close-btn"><em
+            class="icon icon-close"></em></button>
+      </div>
+      <div *ngIf="mode == 'create'">
+        <div class="modal-body pb-0">
+          <div class="form-group">
+            <div class="custom-control custom-radio">
+              <input type="radio" id="cust-rdcrtnewoppoprt" [(ngModel)]="selectOppPartType" value="create"
+                name="customRadio" class="custom-control-input">
+              <label class="custom-control-label" for="cust-rdcrtnewoppoprt">Create new Opposing Party</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="cust-rdextassocias" [(ngModel)]="selectOppPartType" value="existing"
+                name="customRadio" class="custom-control-input">
+              <label class="custom-control-label" for="cust-rdextassocias">Select from existing Associations</label>
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="selectOppPartType === 'create'">
+            <h4 class="text-xlarge mb-12 pt-12 mt-0">Type of Opposing Party</h4>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="TypeOppo1" [(ngModel)]="opposingType" value="individual" name="TypeOppo"
+                class="custom-control-input">
+              <label class="custom-control-label" for="TypeOppo1">Individual</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="TypeOppo2" [(ngModel)]="opposingType" value="corporate" name="TypeOppo"
+                class="custom-control-input" checked>
+              <label class="custom-control-label" for="TypeOppo2">Corporate</label>
+            </div>
+          </div>
+
+          <form [formGroup]="corporateForm" (ngSubmit)="save()"
+            *ngIf="selectOppPartType === 'create' && opposingType === 'corporate'">
+            <div class="row gutter-16">
+              <div class="col-3">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group"
+                  [class.has-error]='corporateFormSubmitted && (cf.CompanyName.invalid ||  (!!cf.CompanyName.value && cf.CompanyName.invalid))'>
+                  <label>Company Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="CompanyName" placeholder="Enter Company Name" id="company-name">
+                  <span class="field-message text-danger" *ngIf="cf.CompanyName.errors && corporateFormSubmitted">
+                    <span *ngIf="cf.CompanyName.errors.required && corporateFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.company_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!cf.CompanyName.value && corporateFormSubmitted && cf.CompanyName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group"
+                  [class.has-error]='corporateFormSubmitted && (cf.Email.invalid || (!!cf.Email.value && (!!cf.Email.errors && cf.Email.errors.pattern)))'>
+                  <label>Email Address</label>
+                  <input type="email" name="email" formControlName="Email" class="form-control"
+                    placeholder="Enter Email Address" value="Email Address" autocomplete="off" id="email-address">
+                  <span class="field-message text-danger" *ngIf="cf.Email.errors && corporateFormSubmitted">
+                    <span *ngIf="cf.Email.errors.required && corporateFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.email_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="corporateFormSubmitted && (!!cf.Email.value && (!!cf.Email.errors && cf.Email.errors.insecure_input))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="corporateFormSubmitted && (!!cf.Email.value && (!!cf.Email.errors && cf.Email.errors.pattern))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData.email_not_valid }}
+                  </span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div
+                  [ngClass]="(corporateForm.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                  <label>Phone Number</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="false"
+                    placeHolderCharacter=" " formControlName="PrimaryPhone"
+                    (blur)="onBlurMethod(corporateForm.controls.PrimaryPhone.value,'PrimaryPhone')" placeholder="(###) ###-####" id="phone-number"/>
+                  <span class="field-message text-danger"
+                    *ngIf="corporateForm.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                      class="icon icon-error mr-4"></em>
+                    Invalid phone number
+                  </span>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <form [formGroup]="individualForm" (ngSubmit)="save()"
+            *ngIf="selectOppPartType === 'create'&& opposingType === 'individual'">
+            <div class="row gutter-16">
+              <div class="col-2">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="form-group" [class.has-error]='individualFormSubmitted && f.FirstName.invalid'>
+                  <label>First Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="FirstName" placeholder="Enter First Name" id="first-name">
+                  <span class="field-message text-danger" *ngIf="f.FirstName.errors && individualFormSubmitted">
+                    <span *ngIf="f.FirstName.errors.required && individualFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.first_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.FirstName.value && individualFormSubmitted && f.FirstName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="form-group" [class.has-error]='individualFormSubmitted && f.LastName.invalid'>
+                  <label>Last Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="LastName" placeholder="Enter Last Name" id="last-name">
+                  <span class="field-message text-danger" *ngIf="f.LastName.errors && individualFormSubmitted">
+                    <span *ngIf="f.LastName.errors.required && individualFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.last_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.LastName.value && individualFormSubmitted && f.LastName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group"
+                  [class.has-error]='individualFormSubmitted && (f.Email.invalid || ( !!f.Email  &&  f.Email.errors && !!f.Email.errors.pattern))'>
+                  <label>Email Address</label>
+                  <input type="email" name="email" formControlName="Email" class="form-control"
+                    placeholder="Enter Email Address" value="Email Address" autocomplete="off" id="email-address">
+                  <span class="field-message text-danger" *ngIf="f.Email.errors && individualFormSubmitted">
+                    <span *ngIf="f.Email.errors.required && individualFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.email_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="individualFormSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.email_not_valid}}
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="individualFormSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.insecure_input))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div
+                  [ngClass]="(individualForm.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                  <label>Phone Number</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="false"
+                    formControlName="PrimaryPhone"
+                    (blur)="onBlurMethod(individualForm.controls.PrimaryPhone.value,'PrimaryPhone')" placeholder="(###) ###-####" id="phone-number"/>
+                  <span class="field-message text-danger"
+                    *ngIf="individualForm.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                      class="icon icon-error mr-4"></em>
+                    Invalid phone number
+                  </span>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <div *ngIf="selectOppPartType === 'existing'">
+            <app-association-search [associationType]="'Opposing Party'" [opposingPartyList]="opposingPartyList"
+              (selectedAssociation)='onAssociationSelect($event)'></app-association-search>
+          </div>
+        </div>
+        <div class="modal-footer" *ngIf="selectOppPartType === 'create'&& opposingType === 'individual'">
+          <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+        </div>
+        <div class="modal-footer" *ngIf="selectOppPartType === 'create' && opposingType === 'corporate'">
+          <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+        </div>
+        <div class="modal-footer" *ngIf="selectOppPartType === 'existing'">
+          <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+          <button type="submit" (click)="savedExistingAssociations(selectedAssociation.id, selectedAssociation)"
+            class="btn btn-primary" id="save-btn">Save</button>
+        </div>
+      </div>
+      <div *ngIf="mode == 'edit'">
+        <div class="modal-body pb-0">
+
+          <div class="form-group">
+            <h4 class="text-xlarge mb-12 pt-12 mt-0">Type of Opposing Party</h4>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="TypeOppo1" [disabled]="mode == 'edit'" [(ngModel)]="opposingType"
+                value="individual" name="TypeOppo" class="custom-control-input">
+              <label class="custom-control-label" for="TypeOppo1">Individual</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="TypeOppo2" [disabled]="mode == 'edit'" [(ngModel)]="opposingType"
+                value="corporate" name="TypeOppo" class="custom-control-input" checked>
+              <label class="custom-control-label" for="TypeOppo2">Corporate</label>
+            </div>
+          </div>
+          <form [formGroup]="corporateForm" (ngSubmit)="save()" *ngIf="opposingType === 'corporate'">
+            <div class="row gutter-16">
+              <div class="col-3">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group"
+                  [class.has-error]='corporateFormSubmitted && (cf.CompanyName.invalid || (!!cf.CompanyName.value && cf.CompanyName.invalid))'>
+                  <label>Company Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="CompanyName" id="company-name">
+                  <span class="field-message text-danger" *ngIf="cf.CompanyName.errors && corporateFormSubmitted">
+                    <span *ngIf="cf.CompanyName.errors.required && corporateFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.company_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!cf.CompanyName.value && corporateFormSubmitted && cf.CompanyName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group"
+                  [class.has-error]='corporateFormSubmitted && (cf.Email.invalid || (!!cf.Email.value && (!!cf.Email.errors && cf.Email.errors.pattern)))'>
+                  <label>Email Address</label>
+                  <input type="email" name="email" formControlName="Email" class="form-control"
+                    placeholder="Email Address" value="Email Address" autocomplete="off" id="email-address">
+                  <span class="field-message text-danger" *ngIf="cf.Email.errors && corporateFormSubmitted">
+                    <span *ngIf="cf.Email.errors.required && corporateFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.email_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="corporateFormSubmitted && (!!cf.Email.value && (!!cf.Email.errors && f.Email.errors.pattern))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.email_not_valid}}
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="corporateFormSubmitted && (!!cf.Email.value && (!!cf.Email.errors && f.Email.errors.insecure_input))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div
+                  [ngClass]="(corporateForm.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                  <label>Phone Number</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="false"
+                    placeHolderCharacter=" " formControlName="PrimaryPhone" placeholder="(###) ###-####"
+                    (blur)="onBlurMethod(corporateForm.controls.PrimaryPhone.value,'PrimaryPhone')" id="phone-number" />
+                  <span class="field-message text-danger"
+                    *ngIf="corporateForm.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                      class="icon icon-error mr-4"></em>
+                    Invalid phone number
+                  </span>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <form [formGroup]="individualForm" (ngSubmit)="save()" *ngIf="opposingType === 'individual'">
+            <div class="row gutter-16">
+              <div class="col-3">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group" [class.has-error]='individualFormSubmitted && f.FirstName.invalid'>
+                  <label>First Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="FirstName" id="first-name">
+                  <span class="field-message text-danger" *ngIf="f.FirstName.errors && individualFormSubmitted">
+                    <span *ngIf="f.FirstName.errors.required && individualFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.first_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.FirstName.value && individualFormSubmitted && f.FirstName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group" [class.has-error]='individualFormSubmitted && f.LastName.invalid'>
+                  <label>Last Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="LastName" id="last-name">
+                  <span class="field-message text-danger" *ngIf="f.LastName.errors && individualFormSubmitted">
+                    <span *ngIf="f.LastName.errors.required && individualFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.last_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.LastName.value && individualFormSubmitted && f.LastName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group"
+                  [class.has-error]='individualFormSubmitted && (f.Email.invalid || (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern)))'>
+                  <label>Email Address</label>
+                  <input type="email" name="email" formControlName="Email" class="form-control"
+                    placeholder="Email Address" value="Email Address" autocomplete="off" id="email-address">
+                  <span class="field-message text-danger" *ngIf="f.Email.errors && individualFormSubmitted">
+                    <span *ngIf="f.Email.errors.required && individualFormSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.email_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="individualFormSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.email_not_valid}}
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="individualFormSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.insecure_input))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div
+                  [ngClass]="(individualForm.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                  <label>Phone Number</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="false"
+                    placeHolderCharacter=" " formControlName="PrimaryPhone" placeholder="(###) ###-####"
+                    (blur)="onBlurMethod(individualForm.controls.PrimaryPhone.value,'PrimaryPhone')" id="phone-number" />
+                  <span class="field-message text-danger"
+                    *ngIf="individualForm.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                      class="icon icon-error mr-4"></em>
+                    Invalid phone number
+                  </span>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer" *ngIf="opposingType === 'individual'">
+          <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+        </div>
+        <div class="modal-footer" *ngIf="opposingType === 'corporate'">
+          <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+        </div>
+      </div>
+      <app-loader [active]='loading'></app-loader>
+    </div>
+  </div>
+</div>

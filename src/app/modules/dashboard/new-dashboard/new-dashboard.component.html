@@ -1,0 +1,153 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">My Dashboard</li>
+    </ol>
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="heading">
+        <h1>Welcome, {{loggedinUser?.firstName}}</h1>
+      </div>
+      <button *ngIf="editPermitted" class="btn btn-primary btn-icon" type="button"
+        (click)="openPersonalinfo(EditWidgetSelections,'','modal-xlg edit-widget-dashboard')">
+        <i class="icon icon-plus"></i>
+        Edit Widget Selections
+      </button>
+    </div>
+
+    <div class="dashboard-wrapper" [style.height.px]='height'>
+      <gridster [options]="gridsterOpts">
+        <gridster-item [item]="item" *ngFor="let item of dashboard;trackBy: trackByFn">
+          <div class="card dash-card mb-0">
+            <div class="card-header d-flex align-items-center justify-content-between">
+              <div>
+                <h4 class="mb-0 text-xlarge">{{item.widgetName}}</h4>
+                <span class="mt-4 d-block small helper-text font-weight-normal lh-16">Last Updated
+                  {{item.displayTime}}</span>
+              </div>
+              <div class="d-flex card-actions pl-24">
+                <div class="dropdown dropdown-hover-table" (click)="openMenu(item)" [class.active]='item.menuOpen'
+                  appAutoCloseOutsideClick (outsideClick)="onClickedOutside(item)">
+                  <span class="icon-area">
+                    <em class="icon icon-dot-verti"></em>
+                  </span>
+                  <div class="dropdown-menu dropdown-menu-right mt-8" *ngIf='editPermitted'>
+                    <a (click)='refreshWidget(item)' href="javascript:void(0);" class="dropdown-item">
+                      Refresh
+                    </a>
+                    <a (click)='removeWidget(item)' href="javascript:void(0);" class="dropdown-item"
+                      *ngIf='item.canRemove'>
+                      Remove
+                    </a>
+                  </div>
+                </div>
+                <span *ngIf="editPermitted" class="move-btn">
+                  <em class="icon icon-move-2"></em>
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-44">
+                <p class="mb-0 lh-20">Showing <a class="font-weight-medium" href="javascript:void(0);">Last 6 months</a>
+                </p>
+                <div class="d-flex align-items-center">
+
+                  <div class="lh-20 ml-24"><span class="chart-dots chart-bg-blue mr-12"></span>Label</div>
+                  <div class="lh-20 ml-24"><span class="chart-dots chart-bg-cyan mr-12"></span>Label</div>
+                </div>
+              </div>
+              <div class="chart-image">
+                <img class="pie-chart" src="assets/images/Dashboard-Widgets/Large/{{item.imageType}}.jpg" alt="">
+              </div>
+            </div>
+            <span *ngIf="editPermitted" class="dash-card-dragger">
+              <img src="assets/images/icon/resize.svg" alt="">
+            </span>
+          </div>
+        </gridster-item>
+      </gridster>
+
+      <app-loader [active]='loading'></app-loader>
+
+
+
+      
+    </div>
+
+  </div>
+</div>
+
+<ng-template #EditWidgetSelections let-modal>
+  <div class="modal-header pb-32">
+    <h3 class="modal-title m-0">Edit Widget Selections</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row gutter-16">
+      <div class="col-3">
+        <div class="form-group">
+          <label>Widget Category</label>
+          <select class="custom-select">
+            <option>All</option>
+            <option>All 1</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-9">
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <div class="header-search flex-fill d-flex">
+            <form action="#">
+              <div class="header-search-wrapper">
+                <input type="search" class="form-control search-input" name="q1" id="q1" autocomplete="off"
+                  placeholder="Search widget name" [(ngModel)]="searchedLexWidget"
+                  (keyup)="searchLexiconWidgets(searchedLexWidget, true)">
+                <button class="btn" type="submit"
+                  (click)="searchLexiconWidgets(searchedLexWidget, true)">Search</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="widget-area">
+      <div class="row gutter-24">
+        <div *ngFor="let item of searchedLibrary;trackBy:trackByFn" class="col-4">
+          <div class="widget-card " [class.widget-selected]="item.selected">
+            <button type="button" (click)="selectWidget(item)"
+              class="select-widget d-flex justify-content-end align-items-center">
+              <em class="icon icon-check"></em>
+              <span class="w-select-text lh-16 font-weight-medium">Select</span>
+              <span class="w-selected-text lh-16 font-weight-medium">Selected</span>
+            </button>
+            <div class="widget-card-header">
+              <h4 class="m-0 text-xlarge">{{item.name}}
+                <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary" *ngIf="item.isRequired">
+                  Required
+                </span>
+              </h4>
+
+              <p class="lh-20 helper-text font-weight-normal mt-4 mb-0">{{item.description}}</p>
+            </div>
+            <div class="widget-card-body">
+              <div class="chart-image">
+                <img src="../../../../assets/images/Dashboard-Widgets/Medium/{{item.imageType}}.jpg" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <app-loader [active]='widgetLoading'></app-loader>
+  </div>
+  <div class="modal-footer">
+    <span class="helper-text font-weight-normal">{{selectedWidgets?.length}} selected</span>
+    <button type="button" class="btn btn-light" data-dismiss="modal"
+      (click)="modal.dismiss('Cross click')">Back</button>
+    <button (click)="saveWidgets(true, modal)" type="button" class="btn btn-primary" [disabled]='widgetLoading'>Save Selections</button>
+  </div>
+</ng-template>

@@ -1,0 +1,196 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Calendar</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Propose New Time</li>
+    </ol>
+    <div class="heading">
+      <h1>Propose New Time</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h2 class="mb-24">{{eventDetails?.title}}</h2>
+        <form class="row gutter-16" [formGroup]="eventProposalForm">
+          <div class="col-6">
+            <div class="pb-24">
+              <h4 class="font-weight-medium text-xlarge mb-8">Current Event Time</h4>
+              <p>
+                {{eventTimeString}}
+              </p>
+              <div class="form-group">
+                <label>RSVP</label>
+                <ng-select [items]="rsvpOptions"
+                           [clearable]="false"
+                           [bindLabel]="'label'"
+                           [bindValue]="'value'"
+                           formControlName='rsvp'
+                           [notFoundText]="'No record found'">
+                </ng-select>
+              </div>
+            </div>
+            <div class="pb-24">
+              <h4 class="font-weight-medium text-xlarge mb-24">Your Proposal</h4>
+              <div class="row gutter-16">
+                <div class="col-6">
+                  <div class="row gutter-16">
+                    <div class="col-7">
+                      <div class="form-group" [class.has-error]="f.startDate.errors && submitted">
+                        <label>Start Date <sup>*</sup></label>
+                        <app-date-picker
+                          [isForm]='true' [id]="'event-start-date'"
+                          [dateform]='eventProposalForm' controlName='startDate'
+                          (dataChange)='setEndDate($event)'></app-date-picker>
+                        <span class="field-message text-danger" *ngIf="submitted && f.startDate.errors">
+                          <span *ngIf="f.startDate.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select start date.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-5">
+                      <div class="form-group" [class.has-error]="f.startTime.errors && submitted">
+                        <label>Start Time <sup>*</sup></label>
+                        <input type="text" class="form-control cust-readonlyinput"
+                               (ngModelChange)="changeEndTime($event)" name="startTime"
+                               [(ngModel)]="startTime" formControlName="startTime" placeholder="Start time"
+                               [owlDateTimeTrigger]="dt2" [owlDateTime]="dt2"  readonly id="event-start-time">
+                        <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt2></owl-date-time>
+                        <span class="field-message text-danger" *ngIf="submitted && f.startTime.errors">
+                          <span *ngIf="f.startTime.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select start time.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="row gutter-16">
+                    <div class="col-5">
+                      <div class="form-group" [class.has-error]="f.endTime.errors && submitted">
+                        <label>End Time <sup>*</sup></label>
+                        <input type="text" class="form-control cust-readonlyinput" name="endTime"
+                               (ngModelChange)="setEndDate($event)"
+                               [(ngModel)]="endTime" formControlName="endTime" placeholder="End time"
+                               [owlDateTimeTrigger]="dt3" [owlDateTime]="dt3" readonly [min]="startTime"
+                               id="event-end-time">
+                        <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt3></owl-date-time>
+                        <span class="field-message text-danger" *ngIf="submitted && f.endTime.errors">
+                          <span *ngIf="f.endTime.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select end time.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-7">
+                      <div class="form-group" [class.has-error]="f.endDate.errors && submitted">
+                        <label>End Date <sup>*</sup></label>
+                        <app-date-picker
+                          [id]="'event-end-date'" [isForm]='true'
+                          [minDate]='eventProposalForm.value.startDate'
+                          [dateform]='eventProposalForm'
+                          controlName='endDate'></app-date-picker>
+                        <span class="field-message text-danger" *ngIf="submitted && f.endDate.errors">
+                          <span *ngIf="f.endDate.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select end date.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="icon-form-item  d-flex icon-form justify-content-start align-items-start">
+                  <div class="flex-fill">
+                    <div class="form-group">
+                      <label>Note</label>
+                      <tinymce
+                        formControlName="description"
+                        [(ngModel)]="description"
+                        #mouseenter id="event-description"
+                        [config]="config"
+                        [placeholder]="'Enter a description'">{{addCssEditor}}</tinymce>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="row gutter-50">
+              <div class="col-9">
+                <div class="nav nav-tabs nav-tabs-unerline d-inline-flex flex-nowrap justify-content-start"
+                     role="tablist">
+                  <a href="javascript:void(0);" (click)="selectedLeftTab = leftTabData" *ngFor="let leftTabData of leftTab; trackBy: trackByFn;let i=index;"
+                     role="tab" class="nav-link" [class.active]="selectedLeftTab === leftTabData" id="event-create-tab-{{i}}">{{ leftTabData }}</a>
+                </div>
+                <div class="tab-content">
+                  <div *ngIf="selectedLeftTab === leftTab[0]"
+                       class="tab-pane fade show active app-calendar-timeline-view"
+                       role="tabpanel">
+                    <app-calendar-timeline-view
+                      (calendarDate)="calendarDate($event)"
+                      [eventsArr]="calendarEvents"
+                      [resourceArr]="resourceArray">
+                    </app-calendar-timeline-view>
+                  </div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="nav nav-tabs nav-tabs-unerline d-inline-flex flex-nowrap justify-content-start"
+                     role="tablist">
+                  <a href="javascript:void(0);" (click)="selectedRightTab = rightTabData" *ngFor="let rightTabData of rightTab;trackBy: trackByFn" role="tab"
+                     class="nav-link" [class.active]="selectedRightTab === rightTabData">{{ rightTabData }}</a>
+                </div>
+                <div class="tab-content">
+                  <div *ngIf="selectedRightTab === rightTab[0]" class="tab-pane fade show active" role="tabpanel">
+                    <div class="form-group">
+                      <div class="guests-row" *ngIf="inviteeList?.length > 0">
+                        <div class="guests-heading">
+                          <h5 class="mb-0"> {{inviteeList.length}}
+                            {{(inviteeList.length === 1) ? 'guest' : 'guests'}} </h5>
+                        </div>
+                        <div class="guests-list" *ngFor="let guest of inviteeList; trackBy :trackByFn;let i = index">
+                          <div class="custom-control custom-checkbox pr-0 mb-15" *ngIf="!guest.personEmail">
+                            <input class="custom-control-input" id="chk_event_type_{{guest.id}}" type="checkbox"
+                                   (ngModelChange)="toggleTimelineData($event, guest)" [ngModelOptions]="{standalone: true}"
+                                   [(ngModel)]="guest.checked">
+                            <label class="custom-control-label lh-18 add_color_{{guest.id}}"
+                                   for="chk_event_type_{{guest.id}}">
+                              <span>{{guest.firstName}} {{guest.lastName}}</span>
+                            </label>
+                          </div>
+                          <div class="custom-control custom-checkbox pr-0 mb-15" *ngIf="guest.personEmail">
+                            <input class="custom-control-input" id="chk_event_type_{{guest.personEmail}}" type="checkbox"
+                                   [ngModelOptions]="{standalone: true}"
+                                   (ngModelChange)="mangeColorOnCheckbox(guest.personEmail, guest)"
+                                   [(ngModel)]="guest.checked">
+                            <label class="custom-control-label lh-18 add_color_{{guest.personEmail}}"
+                                   for="chk_event_type_{{guest.personEmail}}">
+                              <span>{{guest.personEmail}}</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end">
+      <div class="btn-group">
+        <button type="button" [routerLink]="['/calendar']" class="btn btn-light" id="cancel-event-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-event-btn" (click)="saveProposal()">Send Proposal</button>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>

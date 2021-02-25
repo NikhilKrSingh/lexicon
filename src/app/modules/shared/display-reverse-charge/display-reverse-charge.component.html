@@ -1,0 +1,69 @@
+<div class="modal-header pb-8">
+  <h3 class="modal-title mb-0">Display Reversed Charges</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-reverse-disp-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <p>Select how the reversed invoice will appear on the client’s next bill.</p>
+  <form [formGroup]="displayChargeForm">
+    <div class="pb-28 pt-4">
+      <div class="form-group mb-0">
+        <div class="custom-control custom-radio pr-0 mb-12">
+          <input type="radio" value="lump sum" id="rvsedispvis1" formControlName="nextInvoicePreference"
+            class="custom-control-input">
+          <label class="custom-control-label text-case-none" for="rvsedispvis1">As a lump sum</label>
+        </div>
+        <div class="custom-control custom-radio pr-0 mb-0">
+          <input type="radio" value="itemized" id="vis2" formControlName="nextInvoicePreference" class="custom-control-input">
+          <label class="custom-control-label text-case-none" for="vis2">Itemized</label>
+        </div>
+      </div>
+    </div>
+    <div class="row gutter-16">
+      <div class="col-6">
+        <h4 class="mb-16 mt-0">Billing Narrative</h4>
+        <div class="form-group mb-0"
+          [ngClass]="{'has-error': (submitted || displayChargeForm.controls.billNarrative.touched) && displayChargeForm.controls.billNarrative.errors }">
+          <label>Billing Narrative <sup>*</sup></label>
+          <textarea class="form-control height-2 non-resize" (blur)="copytoNote()"
+            placeholder="Describe the work performed" formControlName="billNarrative" cols="12" rows="2"
+            id="billing-narrative-textarea"></textarea>
+          <span class="field-message text-danger"
+            *ngIf="(submitted || displayChargeForm.controls.billNarrative.touched) && displayChargeForm.controls.billNarrative.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Please enter billing narrative.
+          </span>
+        </div>
+      </div>
+      <div class="col-6">
+        <h4 class="mb-16 mt-0">Note to File</h4>
+        <div class="form-group mb-0"
+          [ngClass]="{'has-error': (submitted || displayChargeForm.controls.noteToFile.touched) && displayChargeForm.controls.noteToFile.errors }">
+          <div class="d-flex justify-content-between align-items-end">
+            <label>Notes <sup>*</sup></label>
+            <div class="text-right visble-to-client">
+              <div class="custom-control custom-checkbox pr-0 mb-0 mt-n4">
+                <input type="checkbox" class="custom-control-input" id="visbtocltrvsdisp"
+                  formControlName="visibleToClient">
+                <label class="custom-control-label text-case-none" for="visbtocltrvsdisp">Visible to client</label>
+              </div>
+            </div>
+          </div>
+          <textarea class="form-control height-2 non-resize" placeholder="Enter note"
+            formControlName="noteToFile" cols="12" rows="2" id="notes"></textarea>
+          <span class="field-message text-danger"
+            *ngIf="(submitted || displayChargeForm.controls.noteToFile.touched) && displayChargeForm.controls.noteToFile.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Please enter note to file.
+          </span>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-reverse-disp-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" id="save-reverse-disp-btn">Save</button>
+</div>

@@ -1,0 +1,187 @@
+<div class="pb-24" [formGroup]='echeckform'>
+  <div class="row gutter-16">
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="echeckform.controls['firstName'].errors && formSubmitted">
+        <label>First Name <sup>*</sup></label>
+        <input type="text" placeholder='Enter First Name' id="echeck-firstname" class="form-control" formControlName='firstName'>
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['firstName'].errors && formSubmitted ? !!echeckform.controls['firstName'].errors.required : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.first_name_error}}
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['firstName'].errors && formSubmitted ? !!echeckform.controls['firstName'].errors.insecure_input : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="echeckform.controls['lastName'].errors && formSubmitted">
+        <label>Last Name <sup>*</sup></label>
+        <input type="text" placeholder="Enter Last Name" id="echeck-lastname" class="form-control" formControlName='lastName'>
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['lastName'].errors && formSubmitted ? !!echeckform.controls['lastName'].errors.required : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.last_name_error}}
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['lastName'].errors && formSubmitted ? !!echeckform.controls['lastName'].errors.insecure_input : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="echeckform.controls['routingNumber'].errors && formSubmitted">
+        <label>Routing Number <sup>*</sup></label>
+        <input type="text" mask="000000000" placeholder="Enter Routing Number" class="form-control"
+          formControlName='routingNumber' id="echeck-routingnumber">
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['routingNumber'].errors && formSubmitted ? !!echeckform.controls['routingNumber'].errors.required : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.routing_number_required}}
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['routingNumber'].errors && formSubmitted && !echeckform.controls['routingNumber'].errors.required">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.valid_routing_number_required}}
+        </span>
+        <span class="d-block pt-8">{{bankName}}</span>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="echeckform.controls['accountNumber'].errors && formSubmitted">
+        <label>Account Number <sup>*</sup></label>
+        <input type="text" mask="000000000000" placeholder="Enter Account Number" class="form-control"
+          formControlName='accountNumber' id="echeck-accountnumber">
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['accountNumber'].errors && formSubmitted ? !!echeckform.controls['accountNumber'].errors.required : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.account_number_required}}
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['accountNumber'].errors && formSubmitted && !echeckform.controls['accountNumber'].errors.required">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.valid_account_number_required}}
+        </span>
+      </div>
+    </div>
+  </div>
+  <h4 class="text-xlarge mt-0 mb-16">Billing Information</h4>
+  <div class="custom-control custom-checkbox mb-12">
+    <input type="checkbox" class="custom-control-input" id="echeck-customCheck1" formControlName='isSameAsPrimary'>
+    <label class="custom-control-label text-transform-none" for="echeck-customCheck1">Same as Primary Address</label>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="form-group" [class.has-error]="echeckform.controls['address'].errors && formSubmitted">
+        <label>Street Address <sup>*</sup></label>
+        <input type="text" class="form-control" id="echeck-street-address" placeholder="Enter street address" formControlName='address' [readOnly]="echeckform.value.isSameAsPrimary">
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['address'].errors && formSubmitted ? !!echeckform.controls['address'].errors.required : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.address_error}}
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['address'].errors && formSubmitted ? !!echeckform.controls['address'].errors.insecure_input : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group" [class.has-error]="echeckform.controls['address2'].errors && formSubmitted">
+        <label>Apt, Suite, Unit</label>
+        <input type="text" class="form-control" placeholder="Enter apartment, suite, or unit number"
+          formControlName='address2' id="echeck-aptsuiteunit" [readOnly]="echeckform.value.isSameAsPrimary">
+        <span class="field-message text-danger"
+          *ngIf="echeckform.controls['address2'].errors && formSubmitted ? !!echeckform.controls['address2'].errors.insecure_input : false">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-7">
+      <div class="row gutter-16">
+        <div class="col-6">
+          <div class="form-group" [class.has-error]="(echeckform.controls['zipCode'].errors && (echeckform.controls['zipCode'].touched || formSubmitted) && !validZipErr) || (formSubmitted && validZipErr)">
+            <label>ZIP <sup>*</sup></label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="echeck-zipcode" 
+              placeholder="Enter zip code" 
+              formControlName='zipCode' 
+              minlength="3" 
+              maxlength="6" 
+              [readOnly]="echeckform.value.isSameAsPrimary"
+              (keyup)="getCityState($event.target.value)" 
+              (keypress)="checkNumber($event)">
+              <span class="field-message text-danger"
+              *ngIf="(echeckform.controls['zipCode'].errors && (echeckform.controls['zipCode'].touched || formSubmitted)) && !validZipErr">
+                <em class="icon icon-error mr-4"></em>
+                    {{ error_data?.zip_code_required }}
+                </span>
+                <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr">
+                    <em class="icon icon-error mr-4"></em>
+                      {{error_data?.zip_code_error}}
+                    </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label>State <sup>*</sup></label>
+            <ng-select *ngIf="stateList?.length > 1 && !echeckform.value.isSameAsPrimary"
+              [items]="stateList" 
+              id="echeck-state" 
+              placeholder="State" 
+              formControlName='state' 
+              [bindValue]="'code'"
+              [bindLabel]="'code'" 
+              [clearable]="false" 
+              [notFoundText]="'No record found'" 
+              [selectOnTab]="true">
+            </ng-select>
+            <input *ngIf="stateList?.length <= 1 || echeckform.value.isSameAsPrimary" 
+              type="text" 
+              class="form-control" 
+              placeholder="State"
+              [(ngModel)]="singleState" 
+              [ngModelOptions]="{standalone: true}"
+              [readOnly]='true' id="state">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group">
+        <label>City <sup>*</sup></label>
+        <ng-select *ngIf="cityList?.length > 1 && !echeckform.value.isSameAsPrimary" 
+          [items]="cityList" 
+          placeholder="City" 
+          formControlName="city"
+          [clearable]="false"
+          [notFoundText]="'No record found'" 
+          [selectOnTab]="true" id="city">
+        </ng-select>
+        <input *ngIf="cityList?.length <= 1 || echeckform.value.isSameAsPrimary"
+          type="text" 
+          class="form-control" 
+          id="echeck-city" 
+          placeholder="City" 
+          formControlName='city'
+          [readOnly]='true'>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end">
+    <div class="btn-group">
+      <button type="button" class="btn btn-light" (click)='close()' id="echeck-cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="save()" id="echeck-save-btn">
+        Save E-Check
+      </button>
+    </div>
+  </div>
+</div>

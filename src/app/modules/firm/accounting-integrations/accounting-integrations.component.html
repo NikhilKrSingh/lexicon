@@ -1,0 +1,102 @@
+<div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Admin Settings</a></li>
+        <li class="breadcrumb-item active">Accounting Integrations</li>
+      </ol>
+      <div class="heading">
+        <h1>Accounting Integrations</h1>
+      </div>
+      <div class="alert alert-success d-flex justify-content-between" *ngIf='ConnectionDisabledSuccess' role="alert">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-check-circle"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h4 class="mr-36 my-0">Integration Disabled</h4>
+           Quickbooks integration successfully disabled.
+          </div>
+        </div>
+        <span class="alert-close" (click)='ConnectionDisabledSuccess = false' id="office-success-false"><em class="icon icon-close"></em></span>
+      </div>
+      <div class="card">
+        <div class="card-body section-area">
+          <h2 class="mb-12">External Account Connections</h2>
+          <p class="lh-20 mb-16">Need help authorizing your accounts? <a href=""><b><u>Invite your accountant</u></b></a></p>
+
+  
+           <div class="pt-16 pb-16 bdr-tp " >
+            <div class="row align-items-center">
+                <div class="col-1 text-right">
+                    <img _ngcontent-ash-c8="" class="prfile-img" src="assets/images/Quickbooks.png">
+                  </div>
+              <div class="col-2 text-center">
+                <h4 class="mb-4 text-xlarge">Quickbooks </h4>
+              
+              </div>
+              <div class="col-6 text-left">
+                <span *ngIf="IntegrationDetails.isEnabled==true && IntegrationDetails.isAuthorised==true">
+                  Authorized &nbsp;
+                  <em class="icon icon-check-circle text-success mr-16" ></em>
+                </span>
+                <span *ngIf="IntegrationDetails.isAuthorised==false">
+                 Failed Authorization &nbsp;
+                  <em class="icon icon-close-fill text-danger mr-16" ></em>
+                </span>
+              </div>
+
+              <div class="col-1 text-right">
+                <div class="calsett-btn">
+                    <div class="toggle-switch">
+                      <label class="cursor-pointer">
+                        <input type="checkbox" name="IntegrationSwitch" 
+                        [(ngModel)]="IntegrationDetails.isEnabled" (ngModelChange)="EnableConnection(IntegrationDetails.isEnabled)" >
+                        <span class="switch-style"></span>
+                      </label>
+                    </div>
+                  </div>
+              </div>
+              <div class="col-2 text-center">
+                        <button class="btn btn-primary"  [disabled]="!IntegrationDetails.isEnabled" [routerLink]="['/firm/accounting-integrations-mapping']" id="btn-mapping">Mapping</button>
+                </div>
+            </div>
+          </div>
+          <div class="pt-16 pb-16" >
+          <div class="alert alert-primary" role="alert"><div class="d-flex"><div class="d-flex align-items-center flex-wrap">Don't see your Accounting System? &nbsp; <a href=""><b><u> Click here</u></b></a>  </div></div></div>
+        </div>
+        <app-loader [active]="Loading"></app-loader>
+         
+        </div>
+      </div>
+      <div  class="d-flex justify-content-end pb-24">
+        <div class="btn-group">
+          <button type="button" class="btn btn-primary"  >Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #calendarDisconnectWarning let-modal>
+    <div class="modal-header d-block">
+      <h2 class="modal-title">Deactivate Integration</h2>
+      <button type="button" class="close" (click)="modal.dismiss()" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-1">
+          <em class="icon icon-warning text-warning text-xlarge mr-16"></em>
+        </div>
+        <div class="col-11">
+          <span>Are you sure you wish to deactivate your external<br></span>
+          <span>connection to Quickbooks? You will not be able to</span>
+          <div>
+            <span>manage any account through this system.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss()" id="cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="modal.close()" id="yes-disable">Deactivate</button>
+    </div>
+  </ng-template>
+  

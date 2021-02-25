@@ -1,0 +1,204 @@
+
+<div class="modal-header pb-32">
+  <h3 class="modal-title mb-0" *ngIf='!echeck?.id'>Add E-Check</h3>
+  <h3 class="modal-title mb-0" *ngIf='echeck?.id'>Edit E-Check</h3>
+
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-24" [formGroup]='echeckform'>
+  <div class="row gutter-16">
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="f['firstName'].errors?.insecure_input || (formSubmitted && f['firstName'].errors?.required)">
+        <label>First Name <sup>*</sup></label>
+        <input type="text" placeholder='Enter first name on account' class="form-control" formControlName='firstName' id="firstname">
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['firstName'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.first_name_error}}
+        </span>
+        <span class="field-message text-danger" *ngIf="f['firstName'].errors?.insecure_input">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="f['lastName'].errors?.insecure_input || (formSubmitted && f['lastName'].errors?.required)">
+        <label>Last Name <sup>*</sup></label>
+        <input type="text" placeholder="Enter last name on account" class="form-control" formControlName='lastName' id="lastname">
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['lastName'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.last_name_error}}
+        </span>
+        <span class="field-message text-danger" *ngIf="f['lastName'].errors?.insecure_input">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="f['routingNumber'].errors?.mask?.requiredMask || (formSubmitted && f['routingNumber'].errors?.required)">
+        <label>Routing Number <sup>*</sup></label>
+        <input type="text" mask="000000000" placeholder="Enter routing number" class="form-control"
+               formControlName='routingNumber' id="routing-number">
+        <span *ngIf="bankName !== null" class="d-block pt-8">{{bankName}}</span>
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['routingNumber'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          Please enter a routing number.
+        </span>
+        <span class="field-message text-danger" *ngIf="f['routingNumber'].errors?.mask?.requiredMask">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.routing_number_error}}
+        </span>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="f['accountNumber'].errors?.mask?.requiredMask || (formSubmitted && f['accountNumber'].errors?.required)">
+        <label>Account Number <sup>*</sup></label>
+        <input type="text" mask="000000000000" placeholder="Enter account number" class="form-control" formControlName='accountNumber' id="account-number">
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['accountNumber'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          Please enter an account number.
+        </span>
+        <span class="field-message text-danger" *ngIf="f['accountNumber'].errors?.mask?.requiredMask">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.accounting_number_error}}
+        </span>
+      </div>
+    </div>
+  </div>
+  <h4 class="text-xlarge mt-0 mb-16">Billing Information</h4>
+  <div class="custom-control custom-checkbox mb-12">
+    <input type="checkbox" class="custom-control-input" id="customCheck1" formControlName='isSameAsPrimary'>
+    <label class="custom-control-label text-transform-none" for="customCheck1">Same as Primary Address</label>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="form-group" [class.has-error]="f['address'].errors?.insecure_input || (formSubmitted && f['address'].errors?.required)">
+        <label>Street Address <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="Enter street address" formControlName='address' id="address-one" [readOnly]="echeckform.value.isSameAsPrimary">
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['address'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.street_address_error}}
+        </span>
+        <span class="field-message text-danger" *ngIf="f['address'].errors?.insecure_input">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group" [class.has-error]="f['address2'].errors?.insecure_input">
+        <label>Apt, Suite, Unit</label>
+        <input type="text" class="form-control" placeholder="Enter apartment, suite, or unit number" formControlName='address2' id="address-two" [readOnly]="echeckform.value.isSameAsPrimary">
+        <span class="field-message text-danger" *ngIf="f['address2'].errors?.insecure_input">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-7">
+      <div class="row gutter-16">
+        <div class="col-6">
+          <div class="form-group" [class.has-error]="(f['zipCode'].errors?.mask?.requiredMask || (formSubmitted && f['zipCode'].errors?.required)) || (formSubmitted && validZipErr) && !echeckform.value.isSameAsPrimary">
+            <label>ZIP Code<sup>*</sup></label>
+            <input type="text"
+              class="form-control"
+              placeholder="Enter zip code"
+              formControlName='zipCode'
+              minlength="3"
+              maxlength="6"
+              (keypress)="checkNumber($event)"
+              (keyup)="getCityState($event.target.value)"
+              [readOnly]="echeckform.value.isSameAsPrimary"
+              id="zip-code">
+            <span class="field-message text-danger" *ngIf="(formSubmitted && f['zipCode'].errors?.required) && !validZipErr && !echeckform.value.isSameAsPrimary">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data?.zip_code_required}}
+            </span>
+            <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr && !echeckform.value.isSameAsPrimary">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data?.zip_code_error}}
+            </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label>State <sup>*</sup></label>
+            <ng-select *ngIf="stateList?.length > 1"
+              [items]="stateList"
+              placeholder="State"
+              formControlName='state'
+              [bindValue]="'code'"
+              [bindLabel]="'name'"
+              [clearable]="false"
+              [notFoundText]="'No record found'"
+              [selectOnTab]="true"
+              id="state">
+            </ng-select>
+            <input *ngIf="stateList?.length <= 1"
+              type="text"
+              class="form-control"
+              placeholder="State"
+              [(ngModel)]="singleState"
+              [ngModelOptions]="{standalone: true}"
+              [readOnly]='true' id="state">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group">
+        <label>City <sup>*</sup></label>
+        <ng-select *ngIf="cityList?.length > 1"
+          [items]="cityList"
+          placeholder="City"
+          formControlName="city"
+          [clearable]="false"
+          [notFoundText]="'No record found'"
+          [selectOnTab]="true" id="city">
+        </ng-select>
+        <input *ngIf="cityList?.length <= 1"
+          type="text"
+          class="form-control"
+          placeholder="City"
+          formControlName='city'
+          [readOnly]='true' id="city">
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!isPotentialClient">
+    <h4 class="text-xlarge mt-8 mb-8">Auto-Pay</h4>
+
+    <p class="lh-20 mb-12">
+      The matter’s full balance due will be charged to this payment method whenever an invoice’s due date arrives. Be sure to also file a signed Auto-Pay Agreement to the Document Management System.
+    </p>
+    <div class="custom-control custom-checkbox mb-24">
+      <input type="checkbox" class="custom-control-input" id="customCheck2" formControlName='autoPay'>
+      <label class="custom-control-label" for="customCheck2">Activate Auto-Pay</label>
+    </div>
+    <div class="form-group mb-0" [class.has-error]="formSubmitted && !autoPaySelectionsValid" *ngIf="notCreateFrom && clientId">
+      <label>Apply to Matters <sup>*</sup></label>
+      <app-multiselect-dropdown [title]="autoPayMattersTitle" [placeholder]="'Search matters'" [clientDropdown]="true"
+                                [selections]="selectedMatters" [displaySubItem]="mattersList" [filterName]="'Apply Selections'"
+                                [showAll]="autoPayDisabled ? false : true" [selectedMessage]="'matters will auto-pay using this e-check'"
+                                (onSelectionChanged)="getMattersSelected($event)"
+                                (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clrMatters()"
+                                (applyFilter)="applyMatterFilter($event)" [isDisabled]="autoPayDisabled" id="selectedMattersId">
+      </app-multiselect-dropdown>
+      <span class="field-message text-danger" *ngIf="formSubmitted && !autoPaySelectionsValid">
+      <em class="icon icon-error mr-4"></em>
+        {{error_data.select_matter_auto_pay}}
+    </span>
+    </div>
+  </div>
+  <div class="custom-control custom-checkbox mt-24" *ngIf="editSuspendMode">
+    <input type="checkbox" class="custom-control-input" (change)="toggleAutoPay()" [(ngModel)]="toggleAutopay" [ngModelOptions]="{standalone: true}" id="customCheck3">
+    <label class="custom-control-label" for="customCheck3">Suspend Auto-Pay</label>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+</div>

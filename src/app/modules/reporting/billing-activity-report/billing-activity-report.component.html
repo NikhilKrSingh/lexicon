@@ -1,0 +1,107 @@
+<form [formGroup]="billingActivityReportForm">
+    <div class="container">
+        <div class="main-content">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)"
+                        [routerLink]="['../../reporting']">Reporting</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Billing Activity Report</li>
+            </ol>
+            <div class="heading">
+                <h1>Billing Activity Report</h1>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="mb-8">Generate Report</h2>
+                    <p class="lh-20">Generate your report by selecting the criteria below.</p>
+                    <div class="row gutter-16">
+                        <div class="col-5">
+                            <div class="form-group mb-0">
+                                    <label class="mb-16">Select a date range</label>
+                                    <div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="dateRange1" formControlName="dateRange"
+                                                value="allRecords" class="custom-control-input"
+                                                (change)="allRecordsChange($event)">
+                                            <label class="custom-control-label" for="dateRange1">All records</label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="dateRange2" formControlName="dateRange" #dop
+                                                value="dateOfPostRange" class="custom-control-input" checked
+                                                (change)="dateOfPostChange($event)">
+                                            <label class="custom-control-label" for="dateRange2">Date of post
+                                                range</label>
+                                        </div>
+                                        <div class="pl-28" *ngIf="dop.checked">
+                                            <div class="row gutter-16">
+                                                <div class="col-6">
+                                                    <div class="form-group mb-20">
+                                                            <app-date-picker [isForm]='true' placeholderText="Select Start Date"
+                                                                [dateform]='billingActivityReportForm'
+                                                                controlName='startDateInputPost'
+                                                                [maxDate]="billingActivityReportForm.value.endDateInputPost" [reset]="dateResetPostStart"
+                                                                (dataChange)="startDatePostChange()" id="start-date"></app-date-picker>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group mb-20">
+                                                            <app-date-picker [isForm]='true'
+                                                                [dateform]='billingActivityReportForm'
+                                                                controlName='endDateInputPost' [reset]="dateResetPostEnd"
+                                                                (dataChange)="endDatePostChange()" id="end-date"></app-date-picker>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="dateRange3" formControlName="dateRange" #dos
+                                                value="dateOfServiceRange" class="custom-control-input"
+                                                (change)="dateOfServiceChange($event)">
+                                            <label class="custom-control-label" for="dateRange3">Date of service
+                                                range</label>
+                                        </div>
+                                        <div class="pl-28" *ngIf="dos.checked">
+                                            <div class="row gutter-16">
+                                                <div class="col-6">
+                                                    <div class="form-group mb-20">
+                                                            <app-date-picker [isForm]='true' placeholderText="Select Start Date"
+                                                                [dateform]='billingActivityReportForm'
+                                                                [maxDate]="billingActivityReportForm.value.endDateInputService" 
+                                                                controlName='startDateInputService' [reset]="dateResetServiceStart"
+                                                                (dataChange)="startDateServicehange()" id="service-start-date">
+                                                            </app-date-picker>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group mb-20">
+                                                            <app-date-picker [isForm]='true'
+                                                                [dateform]='billingActivityReportForm'
+                                                                controlName='endDateInputService' [reset]="dateResetServiceEnd"
+                                                                (dataChange)="endDateServicehange()" id="service-end-date"></app-date-picker>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="d-flex justify-content-end pt-8">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+                    <button type="button" class="btn btn-primary"
+                        (click)="generateBillingActivityReport('Billing Activity Report')"
+                        [disabled]="!exportCsvFlag" id="export-to-csv">Export to CSV</button>
+                </div>
+            </div>
+            <app-loader [active]="loading"></app-loader>
+        </div>
+    </div>
+</form>

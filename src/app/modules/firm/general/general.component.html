@@ -1,0 +1,329 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="javascript:void(0);" [routerLink]="['/dashboard']">Dashboard</a>
+      </li>
+      <li class="breadcrumb-item active">
+        General Firm Settings
+      </li>
+    </ol>
+    <div class="heading">
+      <h1>General Firm Settings</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+
+        <div class="row">
+          <div class="col-4">
+            <h3 class="mb-16">Firm Name <sup class="text-danger">*</sup></h3>
+            <div class="form-group" [class.has-error]="!tenant.name && formSubmitted">
+              <input type="text" placeholder="Enter firm name" class="form-control"
+                     required [(ngModel)]='tenant.name' id="firm-name">
+              <span class="field-message text-danger">
+                <em class="icon icon-error mr-4"></em>
+                Please enter firm name.
+              </span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="isShowTimeZoneSetting" class="info-block pt-24">
+          <h3 class="mb-16">Time Zone</h3>
+          <div class="row">
+            <div class="col-4">
+              <div class="form-group">
+                <label for="">Time Zone</label>
+                <ng-select [items]="timeZones" placeholder="Select Time Zone"
+                  [(ngModel)]='selectedSystemTimeZoneId' (ngModelChange)="onChange($event)" [bindValue]="'id'" [bindLabel]="'name'"
+                  [clearable]='false' [selectOnTab]="true" (change)="selectNew()" id="time-zone-select">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="info-block pt-8">
+              <div class="gen-heading d-flex justify-content-between align-items-start">
+                <h2 class="mb-16">Practice Areas</h2>
+                <button class="btn btn-icon btn-primary add-btn" (click)='addPracticeArea()' id="add-practice-area">
+                  <i class="icon icon-plus"></i> Add Practice Area
+                </button>
+              </div>
+
+              <div class="custom-table">
+                <div class="table-responsive position-relative">
+                  <ngx-datatable class="material common-table no-min-height" [rows]="practiceAreas" [columnMode]="ColumnMode.force"
+                    [headerHeight]="50" [footerHeight]="practiceAreaFooterHeight" [messages]="messages" rowHeight="auto"
+                    [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" (sort)="updateDatatableFooterPage('Practice')"
+                    [sorts]="[{prop: 'name', dir: 'asc'}]" id="practicearea-listing-tbl">
+                    <ngx-datatable-column [resizeable]="false" prop="name" name="Practice Area" [width]="250"></ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="createdDate" name="Date Created" [width]="250">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        {{value | date: 'MM/dd/yyyy hh:mm:ss a'}}
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="createdBy" name="Created by" [width]="280"> </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false"  [headerClass]="'text-right'" [sortable]="false" name="Actions" [width]="100">
+                      <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+                        <div class="icon-group d-flex justify-content-end">
+                          <span (click)='editPracticeArea(row, $event)' id="edit-practice-area-index-{{rowIndex}}">
+                            <em class="icon icon-edit icon-color"></em>
+                          </span>
+                          <span (click)='deletePracticeArea(row, $event)' id="delete-practice-area-index-{{rowIndex}}">
+                            <em class="icon icon-remove icon-color"></em>
+                          </span>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-footer>
+                      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                        let-isVisible="isVisible">
+                        <div class="d-flex justify-content-between flex-fill">
+                          <div class="d-flex align-items-center">
+                            <div class="table-items d-flex align-items-center mr-36">
+                              Items per page:
+                              <div class=" ml-8">
+                                <select class="custom-select border-less" [formControl]="pageSelector"
+                                  (change)="changePageSize()">
+                                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                                </select>
+                              </div>
+                            </div>
+                            <span>
+                                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                            </span>
+                          </div>
+                          <div class="d-flex align-items-center">
+                            <select class="custom-select border-less" [(ngModel)]="pageSelected"
+                              (change)="changePage()">
+                              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                                [value]="i+1">
+                                Page {{ i+1 }}
+                                of {{(page.totalPages==0?1:page.totalPages)}}
+                              </option>
+                            </select>
+                            <div class="ml-8">
+                              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                                [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                [hidden]="!((rowCount / pageSize) > 1)"
+                                (change)="table.onFooterPage($event);pageChange($event)">
+                              </datatable-pager>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-footer>
+                  </ngx-datatable>
+                  <app-loader [active]="practiceLoading"></app-loader>
+                </div>
+
+              </div>
+            </div>
+            <div class="info-block pt-16">
+              <div class="gen-heading d-flex justify-content-between align-items-start">
+                <h2 class="mb-16">Matter Types</h2>
+                <button class="btn btn-icon btn-primary add-btn" (click)='addMatterType()' id="add-matter-type">
+                  <i class="icon icon-plus"></i> Add Matter Type
+                </button>
+              </div>
+              <div class="custom-table">
+                <div class="table-responsive position-relative">
+                  <ngx-datatable #tablematterTypes class="material common-table no-min-height" [rows]="matterTypes"
+                    [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="matterTypeFooterHeight"
+                    [messages]="messages" rowHeight="auto" [count]="pageMatterType.totalElements"
+                    [offset]="pageMatterType.pageNumber" [limit]="pageMatterType.size" (sort)="updateDatatableFooterPage('Matter')"
+                    id="matter-type-listing-tbl">
+                    <ngx-datatable-column [resizeable]="false" prop="name" name="Matter Type Name" [width]="250"></ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="practice" name="Associated Practice Area" [width]="280">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false"  [headerClass]="'text-right'" [sortable]="false" name="Actions" [width]="100">
+                      <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+                        <div class="icon-group d-flex justify-content-end">
+                          <span (click)='editMatterType(row, $event)' id="edit-mattertype-index-{{rowIndex}}">
+                            <em class="icon icon-edit icon-color"></em>
+                          </span>
+                          <span (click)='deleteMatterType(row, $event)' id="delete-mattertype-index-{{rowIndex}}">
+                            <em class="icon icon-remove icon-color"></em>
+                          </span>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-footer>
+                      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                        let-isVisible="isVisible">
+                        <div class="d-flex justify-content-between flex-fill">
+                          <div class="d-flex align-items-center">
+                            <div class="table-items d-flex align-items-center mr-36">
+                              Items per page:
+                              <div class=" ml-8">
+                                <select class="custom-select border-less" [formControl]="pageMatterTypeSelector"
+                                  (change)="changePageSizeMatterType()">
+                                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                                </select>
+                              </div>
+                            </div>
+                            <span>
+                                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                            </span>
+                          </div>
+                          <div class="d-flex align-items-center" *ngIf="pageMatterType.totalPages > 0">
+                            <select class="custom-select border-less" [(ngModel)]="pageMatterTypeSelected"
+                              (change)="changePageMatterType()">
+                              <option
+                                *ngFor='let num of pageMatterType.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                                [value]="i+1">
+                                Page {{ i+1 }}
+                                of {{(pageMatterType.totalPages==0?1:pageMatterType.totalPages)}}
+                              </option>
+                            </select>
+                            <div class="ml-8">
+                              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                                [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                [hidden]="!((rowCount / pageSize) > 1)"
+                                (change)="tablematterTypes.onFooterPage($event);pageChangeMatterType($event)">
+                              </datatable-pager>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-footer>
+                  </ngx-datatable>
+                  <app-loader [active]="matterLoading"></app-loader>
+                </div>
+              </div>
+            </div>
+            <div  class="info-block pt-20 mb-30">
+              <h2 class="mb-4">Logo</h2>
+              <div class="gen-heading d-flex justify-content-between align-items-start">
+                <p class="lh-20">This logo will appear to your internal teams as well as clients via the Client Portal. <br>
+                  Logo can be uploaded in <strong>.png</strong> or <strong>.jpeg</strong> formats and should be about
+                  <strong>212px x 70px.</strong>
+                </p>
+                <div class="dropdown dropdown-hover-table btn btn-icon btn-primary menu-btn" [class.active]="currentActive == logoIndex"
+                  (click)="openMenu(logoIndex, $event)" appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, logoIndex)">
+                  <em class="icon icon-dot-verti menu-icon"></em>
+                  <div class="dropdown-menu dropdown-menu-right overflow-hide custom-height" aria-labelledby="dropdownMenuButton">
+                    <div class="dropdown-slimscrol">
+
+                      <a class="dropdown-item" (click)='downloadLogoClick()' id="download-file"> Download File</a>
+                      <a class="dropdown-item" (click)='revertLogoButton()' id="revert-default"> Revert to Default</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="logo-dragger d-flex justify-content-center mb-48 logo-box" appFileDragAndDrop
+                (fileDropped)="uploadFileDragAndDrop($event)" id="file-drage">
+                <div>
+
+                  <div class="alert alert-danger d-flex justify-content-between mb-0 mt-12 fs-14" role="alert" *ngIf="uploadLogoErrorWarning || uploadLogoSizeErrorWarning">
+                    <div class="d-flex align-items-center mr-32">
+                        <em class="alert-icon icon icon-error fs-14 mt-4"></em>
+                        <div class="d-flex align-items-center flex-wrap" *ngIf="uploadLogoErrorWarning">
+                            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+                            {{error_data.file_type_error}}
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap" *ngIf="uploadLogoSizeErrorWarning">
+                          <h5 class="mr-16 mt-0 mb-0">Error</h5>
+                          {{error_data.file_size_error}}
+                      </div>
+                    </div>
+                    <span class="alert-close" (click)='dismissLogoError()'><em class="icon icon-close"></em></span>
+                  </div>
+
+                  <div class="uploadSection">
+                    <div *ngIf="!logoSrc" class="displayImage">
+                      <img class="defaultLogo" src="assets/images/default-logo-lexicon.png">
+                    </div>
+                    <div *ngIf="logoSrc" class="uploadedImage">
+                      <img [src]="logoSrc">
+                    </div>
+                    <div class="errorUploadFiles">
+                      <a class="uploadButton" (click)='uploadButtonClick()' id="upload-btn-click">Browse your file </a>
+                      <span class="dragDrop d-block mb-8"> or Drag and drop </span>
+                    </div>
+                  </div>
+                  <input type="file" accept="image/*" hidden #logoInput (change)='uploadFile(logoInput.files)' id="file-change">
+                </div>
+
+
+              </div>
+
+            </div>
+            <div  class="info-block pt-20 mb-30">
+              <h2 class="mb-4">Favicon</h2>
+              <div class="gen-heading d-flex justify-content-between align-items-start">
+                <p class="lh-20">This favicon will appear to your internal teams as well as clients via the Client Portal. <br>
+                  Favicon can only be uploaded in <strong>.png</strong> or <strong>.jpeg</strong> formats and must be
+                  <strong>32px x 32px.</strong>
+                </p>
+                <div class="dropdown dropdown-hover-table btn btn-icon btn-primary menu-btn" [class.active]="currentActive == favIndex"
+                  (click)="openMenu(favIndex, $event)" appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, favIndex)">
+                  <em class="icon icon-dot-verti menu-icon"></em>
+                  <div class="dropdown-menu dropdown-menu-right overflow-hide custom-height" aria-labelledby="dropdownMenuButton">
+                    <div class="dropdown-slimscrol">
+
+                      <a class="dropdown-item" (click)='downloadFaviconClick()' id="fav-download-file"> Download File</a>
+                      <a class="dropdown-item" (click)='revertFaviconButton()' id="fav-revert-default"> Revert to Default</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="logo-dragger d-flex justify-content-center mb-48 logo-box" appFileDragAndDrop
+                (fileDropped)="uploadFaviconDragAndDrop($event)">
+                <div>
+                  <div class="alert alert-danger d-flex justify-content-between mb-0 mt-12 fs-14" role="alert" *ngIf="uploadFaviconErrorWarning || uploadFaviconSizeErrorWarning">
+                    <div class="d-flex align-items-center mr-32">
+                        <em class="alert-icon icon icon-error fs-14 mt-4"></em>
+                        <div class="d-flex align-items-center flex-wrap" *ngIf="uploadFaviconErrorWarning">
+                            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+                            {{error_data.file_type_error}}
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap" *ngIf="uploadFaviconSizeErrorWarning">
+                          <h5 class="mr-16 mt-0 mb-0">Error</h5>
+                          {{error_data.file_size_error}}
+                      </div>
+                    </div>
+                    <span class="alert-close" (click)='dismissFaviconError()'><em class="icon icon-close"></em></span>
+                  </div>
+                  <div class="uploadSection">
+                    <div *ngIf="!faviconSrc" class="displayImageFav">
+                      <img class="defaultFavicon" src="assets/favicon/default-favicon.png">
+                    </div>
+                    <div *ngIf="faviconSrc" class="uploadedImage">
+                      <img [src]="faviconSrc">
+                    </div>
+                    <div class="errorUploadFiles">
+                      <a class="uploadButton" (click)='uploadFaviconButtonClick()' id="fav-drag-drop-click">Browse your file </a>
+                      <span class="dragDrop d-block mb-8"> or Drag and drop </span>
+                    </div>
+                  </div>
+                  <input type="file" accept="image/*" hidden #faviconInput (change)='uploadFavicon(faviconInput.files)' id="fav-change">
+                </div>
+
+              </div>
+              <div class="form-group position-relative mb-0">
+                <label>Change Note (optional)</label>
+                <textarea  class="form-control" rows="4" [(ngModel)]='tenantProfile.changeStatusNotes' id="change-note"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div  class="d-flex justify-content-end">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" [routerLink]="['/dashboard']" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

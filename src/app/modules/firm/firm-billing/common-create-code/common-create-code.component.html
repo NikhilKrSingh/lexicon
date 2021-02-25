@@ -1,0 +1,245 @@
+<ng-container *ngIf="modalType == 'hourly'">
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Create Billing Code</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <ng-select [items]="typeList" id="billingCodeHourlyType" placeholder="Select Type" [(ngModel)]="selectedType"  (change)="changeModalType()" [bindValue]="'id'"
+        [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [clearable]='false'>
+      </ng-select>
+    </div>
+    <div [formGroup]='chargeForm'>
+      <div class="form-group" [class.has-error]='chargeCodeError.code'>
+        <label>Code <sup>*</sup></label>
+        <input type="text" id="billingCodeHourlyCode" class="form-control" formControlName="code" placeholder="Enter code">
+        <span class="field-message text-danger" [style.display]="chargeCodeError.code ? 'flex': 'none'">
+          <em class="icon icon-error mr-4 mt-0"></em>
+          <span class="d-block">{{ chargeCodeError.codeMessage }}</span>
+        </span>
+      </div>
+      <div class="form-group position-relative" [class.has-error]='chargeCodeError.name'>
+        <label>Name <sup>*</sup></label>
+        <span class="count-char">{{chargeForm?.value?.description?.length || 0}}/50</span>
+        <input type="text" id="billingCodeHourlyName" class="form-control" formControlName="description" maxlength='50' placeholder="Enter a name" formControlName="description">
+        <app-validation-message [errorMessage]='chargeCodeError.nameMessage' *ngIf='chargeCodeError.name'></app-validation-message>
+      </div>
+      <div class="form-group" [class.has-error]='chargeCodeError.billableTo'>
+        <label>Billable To <sup>*</sup></label>
+        <ng-select
+          id="billingCodeHourlyBillableTo"
+          [items]="billingToList"
+          placeholder="Select billable To"
+          formControlName="billableTo"
+          [bindValue]="'id'"
+          [bindLabel]="'name'"
+          (change)="selectBillableTo($event)"
+          [notFoundText]="'No record found'"
+          [selectOnTab]="true"
+          [clearable]='false'>
+        </ng-select>
+        <app-validation-message [errorMessage]='chargeCodeError.billableToMessage' *ngIf='chargeCodeError.billableTo'></app-validation-message>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" id="billingCodeHourlyCancelBtn" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-primary" id="billingCodeHourlySaveBtn" (click)="save()" [disabled]="disable">Save</button>
+  </div>
+
+</ng-container>
+
+
+<ng-container *ngIf="modalType == 'disbursement'">
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Create Billing Code</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <ng-select [items]="typeList" id="billingCodeDisburseType" placeholder="Select Type" [(ngModel)]="selectedType"  (change)="changeModalType()" [bindValue]="'id'"
+        [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [clearable]='false'>
+      </ng-select>
+    </div>
+    <div  [formGroup]='disbursementForm'>
+      <div class="form-group" [class.has-error]='disbursementError?.code'>
+        <label>Code <sup>*</sup></label>
+        <input type="text" id="billingCodeDisburseCode" class="form-control" formControlName='code' placeholder="Enter code" maxlength='50'>
+        <span class="field-message text-danger" [style.display]="disbursementError.code ? 'flex': 'none'">
+          <em class="icon icon-error mr-4 mt-0"></em>
+          <span class="d-block">{{ disbursementError.codeMessage }}</span>
+        </span>
+      </div>
+      <div class="form-group position-relative" [class.has-error]='disbursementError?.name'>
+        <label>Name <sup>*</sup></label>
+        <span class="count-char">{{disbursementForm?.controls['description']?.value?.length || 0}}/50</span>
+        <input type="text" id="billingCodeDisburseName" class="form-control" formControlName="description" maxlength='50' placeholder="Enter a name" formControlName="description">
+        <app-validation-message [errorMessage]='disbursementError?.nameMessage' *ngIf='disbursementError?.name'></app-validation-message>
+      </div>
+      <div class="row gutter-16">
+        <div class="col-4">
+          <div class="form-group">
+            <label class="mb-12">Bill Type <sup>*</sup></label>
+            <div class="custom-control custom-radio pr-0" *ngFor="let bill of disbursementBillingTypeList;trackBy :trackByFn;">
+                <input type="radio" id="billingCodeDisburseBillType_{{bill.id}}" name="billType" class="custom-control-input" [value]='bill.id'
+                  formControlName='billType' (change)='changeBillType()'>
+              <label class="custom-control-label" for="billingCodeDisburseBillType_{{bill.id}}">{{bill.name}}</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label class="mb-12">Disbursement Type <sup>*</sup></label>
+            <div class="custom-control custom-radio pr-0" *ngFor="let dis of disbursementTypeList;trackBy :trackByFn;">
+              <input type="radio" id="disbursementType_{{dis.id}}_{{dis.code}}" name="disbursementType"
+                class="custom-control-input" [value]='dis.id' formControlName='disbursementType'
+                (change)='changeDisbursementType()'>
+              <label class="custom-control-label" for="disbursementType_{{dis.id}}_{{dis.code}}">{{dis.name}}</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label class="mb-12">Billable to Client <sup>*</sup></label>
+            <div class="custom-control custom-radio pr-0">
+              <input type="radio" id="billable1" name="billingTo" class="custom-control-input" value="1"
+                formControlName='billingTo'>
+              <label class="custom-control-label" for="billable1">Yes</label>
+            </div>
+            <div class="custom-control custom-radio pr-0">
+              <input type="radio" id="billable2" name="billingTo" class="custom-control-input" value="0"
+                formControlName='billingTo'>
+              <label class="custom-control-label" for="billable2">No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class=" form-group" *ngIf='!isBillTypeOpen' [class.has-error]='disbursementError?.rate'>
+        <label>Initial Rate <sup>*</sup></label>
+        <input type="text" id="billingCodeDisburseInitalRate" class="form-control" (blur)="formatRate()" prefix="$" mask="separator.2" thousandSeparator="," placeholder="Enter rate"
+          formControlName='rateAmount'>
+        <app-validation-message [errorMessage]='disbursementError?.rateMessage' *ngIf='disbursementError?.rate'></app-validation-message>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" id="billingCodeDisburseCancelBtn" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-primary" id="billingCodeDisburseSaveBtn" (click)='saveDisbursementForm()' [disabled]='disable'>Save</button>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="modalType == 'writeOff' || modalType == 'writeDown' || modalType ==  'reversedCheckCode'">
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Create Billing Code</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <ng-select id="billingCodeWriteType" [items]="typeList" placeholder="Select Type" [(ngModel)]="selectedType" (change)="changeModalType()"
+        [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [clearable]='false'>
+      </ng-select>
+    </div>
+    <div [formGroup]='writeOffForm'>
+      <div class="form-group" [class.has-error]='writeOffCodeError.code'>
+        <label>Code <sup>*</sup></label>
+        <input type="text" id="billingCodeWriteCode" class="form-control" formControlName='code' placeholder="Enter code" maxlength='50' (keyup)="onCodeChange()">
+        <app-validation-message [errorMessage]='writeOffCodeError.codeMessage' *ngIf="writeOffCodeError.code">
+        </app-validation-message>
+        <!-- <span class="field-message text-danger" [style.display]="writeOffCodeError.code ? 'flex': 'none'">
+          <em class="icon icon-error mr-4 mt-0"></em>
+          <span class="d-block">{{ writeOffCodeError.codeMessage }}</span>
+        </span> -->
+      </div>
+      <div class="form-group position-relative" [class.has-error]="formSubmitted &&(writeOffCodeError.name && writeOffForm?.controls['name']?.value?.length == 0) || writeOffForm.controls['name'].errors?.insecure_input">
+        <label>Name <sup>*</sup></label>
+        <span class="count-char">{{writeOffForm?.controls['name']?.value?.length || 0}}/50</span>
+        <input id="billingCodeWriteName" type="text" class="form-control" placeholder="Enter a name" maxlength="50"
+          formControlName='name' (keyup)="onNameChange()">
+        <app-validation-message [errorMessage]='error_data.name_error' *ngIf="writeOffCodeError.name && writeOffForm?.controls['name']?.value?.length == 0">
+        </app-validation-message>
+        <span class="field-message text-danger"
+        *ngIf="writeOffForm.controls['name'].errors?.insecure_input">
+        <em class="icon icon-error mr-4"></em>
+          {{ errorData?.insecure_input }}
+        </span>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" id="billingCodeWriteCancelBtn" class="btn btn-light" (click)="close()">Cancel</button>
+    <button type="button" id="billingCodeWriteSaveBtn" class="btn btn-primary" (click)='saveWriteOffForm()'>Save</button>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="modalType == 'consultation'">
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Create Billing Code</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <ng-select [items]="typeList" id="billingCodeHourlyType" placeholder="Select Type" [(ngModel)]="selectedType"  (change)="changeModalType()" [bindValue]="'id'"
+        [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [clearable]='false'>
+      </ng-select>
+    </div>
+    <div [formGroup]='consultationCodeForm'>
+      <div class="form-group" [class.has-error]='consultationCodeError.code && formSubmitted'>
+        <label>Code <sup>*</sup></label>
+        <input type="text" id="billingCodeHourlyCode" class="form-control" formControlName="code" placeholder="Enter code" maxlength='50' (blur)='validateConsultationFeeCode()'>
+        <span class="field-message text-danger" [style.display]="consultationCodeError.code && formSubmitted ? 'flex': 'none'">
+          <em class="icon icon-error mr-4 mt-0"></em>
+          <span class="d-block">{{ consultationCodeError.codeMessage }}</span>
+        </span>
+      </div>
+      <div class="form-group position-relative" [class.has-error]='consultationCodeError.name && formSubmitted'>
+        <label>Name <sup>*</sup></label>
+        <span class="count-char">{{consultationCodeForm?.value?.description?.length || 0}}/50</span>
+        <input type="text" id="billingCodeHourlyName" class="form-control" formControlName="description" maxlength='50' placeholder="Enter a name" (blur)='validateConsultationFeeCode()'>
+        <app-validation-message [errorMessage]='consultationCodeError.nameMessage' *ngIf='consultationCodeError.name && formSubmitted'></app-validation-message>
+      </div>
+      <div class="form-group" [class.has-error]='consultationCodeError.billType'>
+        <label>Bill Type <sup>*</sup></label>
+        <ng-select
+          id="consultationBillType"
+          [items]="consultationBillTypes"
+          placeholder="Select bill type"
+          formControlName="billType"
+          [bindValue]="'id'"
+          [bindLabel]="'name'"
+          (change)="selectBillType($event)"
+          [notFoundText]="'No record found'"
+          [selectOnTab]="true"
+          [clearable]='false'>
+        </ng-select>
+        <app-validation-message [errorMessage]='consultationCodeError.billTypeMessage' *ngIf='consultationCodeError.billType'></app-validation-message>
+      </div>
+      <div  class="form-group position-relative" [class.has-error]='consultationCodeError.rate && formSubmitted' *ngIf='consultationCodeForm?.value?.billType != openConsultationFeeType?.id'>
+        <label>Rate <sup>*</sup></label>
+        <input type="text" id="billingCodeRate" class="form-control" #rateInp [maxlength]='rateInp | decimalMaxLength' placeholder="Enter a rate" formControlName="rate" (blur)="validateConsultationFeeCode(); formatRate()" prefix="$" mask="separator.2" thousandSeparator=",">
+        <app-validation-message [errorMessage]='consultationCodeError.rateMessage' *ngIf='consultationCodeError.rate && formSubmitted'></app-validation-message>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" id="billingCodeHourlyCancelBtn" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-primary" id="billingCodeHourlySaveBtn" (click)="saveConsultationFeeCode()" [disabled]="disable">Save</button>
+  </div>
+
+</ng-container>
+
+<app-loader [active]="loading"> </app-loader>

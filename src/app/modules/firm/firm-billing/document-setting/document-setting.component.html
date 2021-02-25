@@ -1,0 +1,77 @@
+<div class="container">
+  <div class="main-content">
+    <div class="d-lg-flex justify-content-between align-items-start">
+      <div>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Document Management Settings</li>
+        </ol>
+        <div class="heading">
+          <h1>Document Management Settings</h1>
+        </div>
+      </div>
+      <div class="alert alert-primary dm-alert d-flex justify-content-between" role="alert"
+        *ngIf="isVisibleTostMessage" id="message-display">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-info"></em>
+          <div class="">
+            <h4 class="mr-36 mt-0 mb-4">{{visibleTostMessageTitle}}</h4>
+            The category "{{visibleTostMessageValue}}" has been {{visibleTostMessageAction}}
+          </div>
+        </div>
+        <span class="alert-close" (click)="closeTostAlert()">
+          <em class="icon icon-close"></em>
+        </span>
+      </div>
+    </div>
+    <div>
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <ng-container *ngFor="let mytabs of alltabs;trackBy: trackByFn">
+          <a href="javascript:void(0);" (click)="changeTab(mytabs)" role="tab" class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs.value"
+            *ngIf="mytabs.key != 'portal-history' &&  mytabs.key != 'portal-accounts'">
+            {{ mytabs.value }}
+          </a>
+          <a href="javascript:void(0);" (click)="changeTab(mytabs)"
+            *ngIf="(mytabs.key == 'portal-history' || mytabs.key == 'portal-accounts') && enabledTab " role="tab"
+            class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs.value">
+            {{ mytabs.value }}
+          </a>
+        </ng-container>
+
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32">
+            <div *ngIf="selecttabs1 === alltabs[0].value" class="tab-pane fade show active" role="tabpanel">
+              <app-bulk-approval>
+              </app-bulk-approval>
+            </div>
+            <div *ngIf="alltabs[0] && selecttabs1 === alltabs[1].value" class="tab-pane fade show active" role="tabpanel">
+              <app-matter-folder-structure></app-matter-folder-structure>
+            </div>
+            <div *ngIf="alltabs[2] && selecttabs1 === alltabs[2].value" class="tab-pane fade show active" role="tabpanel">
+              <app-document-categories (messageEvent)="getEvent($event)"></app-document-categories>
+            </div>
+            <div *ngIf="alltabs[3] && selecttabs1 === alltabs[3].value" class="tab-pane fade show active" role="tabpanel">
+              <app-portal-access-history></app-portal-access-history>
+            </div>
+            <div *ngIf="alltabs[4] && selecttabs1 === alltabs[4].value" class="tab-pane fade show active" role="tabpanel">
+              <app-portal-accounts></app-portal-accounts>
+            </div>
+            <div *ngIf="alltabs[5] && selecttabs1 === alltabs[5].value" class="tab-pane fade show active" role="tabpanel">
+              <app-document-portal-access (changeTab)="setPrimaryTab()" [tenantSetting]="tenantSetting"
+                (accessEvent)="accessEvent($event)">
+              </app-document-portal-access>
+            </div>
+            <div *ngIf="alltabs[6] && selecttabs1 === alltabs[6].value" class="tab-pane fade show active" role="tabpanel">
+              <app-lexicon-docusync></app-lexicon-docusync>
+            </div>
+            <div *ngIf="selecttabs1 === 'E-Signature'" class="tab-pane fade show active" role="tabpanel">
+              <app-e-signature></app-e-signature>
+            </div> 
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

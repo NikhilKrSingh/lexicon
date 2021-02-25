@@ -1,0 +1,174 @@
+<div class="d-flex align-items-center justify-content-between mb-24">
+  <div class="header-search flex-fill d-flex">
+    <form action="#">
+      <div class="header-search-wrapper">
+        <input
+          type="text"
+          class="form-control search-input"
+          name='description'
+          placeholder="Search by code or description"
+          [(ngModel)]='searchText'
+          (ngModelChange)='applyFilter()'
+          [disabled]="loading"
+          id="billingCodesFixedFeeServiceSearchField">
+        <button
+          class="btn"
+          type="button"
+          (click)='applyFilter()'
+          [disabled]="loading"
+          id="billingCodesFixedFeeServiceSearchBtn"
+        >Search
+        </button>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="this.permission?.BILLING_MANAGEMENTisAdmin" class="btn-group ml-md-24 ml-0">
+    <button
+      type="button"
+      class="btn btn-primary btn-icon"
+      (click)="openFixedFeeAction(null, 'Create',isActiveFixedFeeServiceModal)"
+      [disabled]="loading"
+      id="billingCodesFixedFeeServiceCreateNewBtn"
+    ><i class="icon icon-plus"></i> Create New
+    </button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="row gutter-16">
+      <div class="col-10">
+        <div class="row gutter-16">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Status</label>
+              <ng-select
+                id="billingCodesFixedFeeServiceStatusFilter"
+                [items]="statusList"
+                placeholder="Select status"
+                (change)='applyFilter()'
+                [(ngModel)]="statusId"
+                [bindValue]="'id'"
+                [selectOnTab]="true"
+                [bindLabel]="'name'"
+                [notFoundText]="'No record found'"
+                [disabled]="loading">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="position-relative">
+      <div class="custom-table matter-list">
+        <ngx-datatable id="billingCodesFixedFeeServiceTableList" #table class="material common-table matter-table"
+                       [class.matter-no-data]="fixedFeeServiceList?.length === 0" [rows]="fixedFeeServiceList"
+                       [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+                       [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+                       (sort)="calcTotalPages()">
+          <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [width]="100"></ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="description" name="Name"
+                                [width]="200"></ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="amount" name="Amount" [width]="100">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <span> {{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="100"></ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" *ngIf="this.permission?.BILLING_MANAGEMENTisAdmin"
+                                [sortable]="false" [headerClass]="'text-right'" name="Action" [width]="100">
+            <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+              <div class="d-flex justify-content-end">
+                <div
+                  appAutoCloseOutsideClick
+                  class="dropdown dropdown-hover-table"
+                  *ngIf='currentActive == rowIndex'
+                  [class.active]="currentActive == rowIndex"
+                  (click)="openMenu(rowIndex, $event)"
+                  (outsideClick)="onClickedOutside(rowIndex)"
+                  id="billingCodesFixedFeeServiceActionMenu_{{row.id}}"
+                >
+                  <em class="icon icon-dot-verti"></em>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <a
+                      *ngIf="row.status === 'Active'"
+                      class="dropdown-item"
+                      (click)="openFixedFeeAction(row, 'Edit', isActiveFixedFeeServiceModal)"
+                      id="billingCodesFixedFeeServiceEditOption_{{row.id}}"
+                    >Edit</a>
+                    <a
+                      *ngIf="row.status === 'Disabled'"
+                      class="dropdown-item"
+                      (click)="openFixedFeeAction(row, 'Enable', isActiveFixedFeeServiceModal)"
+                      id="billingCodesFixedFeeServiceEnableOption_{{row.id}}"
+                    >Enable</a>
+                    <a
+                      *ngIf="row.status === 'Active'"
+                      class="dropdown-item"
+                      (click)="openFixedFeeAction(row, 'Disable', isActiveFixedFeeServiceModal)"
+                      id="billingCodesFixedFeeServiceDisableOption_{{row.id}}"
+                    >Disable</a>
+                  </div>
+                </div>
+                <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-footer>
+            <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                         let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                         let-isVisible="isVisible">
+              <div class="d-flex justify-content-between flex-fill">
+                <div class="d-flex align-items-center">
+                  <div class="table-items d-flex align-items-center mr-36">
+                    Items per page:
+                    <div class=" ml-8">
+                      <select class="custom-select border-less" [formControl]="pageSelector"
+                              (change)="changePageSize()">
+                        <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <span>
+                        {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                    {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of {{(rowCount)}} item(s)
+                      </span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                    <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                      Page
+                      {{ i + 1 }} of {{page.totalPages}}</option>
+                  </select>
+                  <div class="ml-8">
+                    <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                     [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                     [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                                     [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                     [hidden]="!((rowCount / pageSize) > 1)"
+                                     (change)="table.onFooterPage($event);pageChange($event)">
+                    </datatable-pager>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-footer>
+        </ngx-datatable>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>
+<ng-template #isActiveFixedFeeServiceModal let-modal>
+  <div class="p-2">
+    <app-fixed-fee-shared
+      [action]="action"
+      [modalHeader]="modalHeader"
+      [selectedTypeId]="1"
+      [loader]="loading"
+      (resultData)="performAction($event)">
+    </app-fixed-fee-shared>
+  </div>
+</ng-template>

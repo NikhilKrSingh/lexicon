@@ -1,0 +1,126 @@
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-24">
+    <h2 class="m-0">Rate Table</h2>
+    <button type="button" class="btn btn-primary"
+            *ngIf="(permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit) && !isEditRateTable"
+            (click)='editRateTable()' id="customize-rate">
+      Edit Rate Table
+    </button>
+    <button type="button" class="btn btn-primary"
+            *ngIf="(permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit) && isEditRateTable"
+            (click)='saveRateTable()' id="save-rate">
+      Save Rate Table
+    </button>
+  </div>
+  <div class="alert alert-danger d-flex justify-content-between mt-24 mb-24 max-width-fit"
+       [class.has-error]="rateTableFormSubmitted && isCustomBillingRate && !rateTables.length"
+       role="alert" *ngIf="rateTableFormSubmitted && isCustomBillingRate && !rateTables.length">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-error text-large"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="mr-16 mt-0 mb-0">Error</h4>
+        You must set a rate table before saving.
+      </div>
+    </div>
+  </div>
+  <div class="position-relative">
+    <div class="custom-control custom-radio pr-0 mb-12">
+      <input type="radio" id="billing-rate-radio-employee" name="billing-rate-radio-employee"
+             class="custom-control-input" [disabled]="!isEditRateTable"
+             (ngModelChange)="customBillingChange($event)"
+             [(ngModel)]="isCustomBillingRate" [value]="false">
+      <label class="custom-control-label" for="billing-rate-radio-employee">
+        Billing rates are charged at the employee's base rates
+      </label>
+    </div>
+    <div class="custom-control custom-radio pr-0 mb-16">
+      <input type="radio" id="billing-rate-radio-custom" name="billing-rate-radio-employee"
+             class="custom-control-input" [disabled]="!isEditRateTable"
+             (ngModelChange)="customBillingChange($event)"
+             [(ngModel)]="isCustomBillingRate" [value]="true">
+      <label class="custom-control-label" for="billing-rate-radio-custom">Custom rates</label>
+    </div>
+    <button type="button" class="btn btn-outline-primary" *ngIf="isCustomBillingRate"
+            (click)="openRateTableModal()"
+            [disabled]="!isEditRateTable">
+      Set Rate Table
+    </button>
+
+    <div *ngIf="rateTables.length">
+      <div class="custom-table pt-16">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+            <tr>
+              <th class="time-mat-td">Rate Table Name</th>
+              <th class="time-client-td">Description</th>
+              <th class="text-right time-ent-td"
+                  *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit">
+                Action
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let rateTable of rateTables; trackBy: trackByFn;let templateIndex = index;">
+              <td colspan="4" class="p-0">
+                <table class="table vert-algn-top">
+                  <tbody>
+                  <tr>
+                    <td class="time-mat-td">
+                      <div class="d-flex align-items-center">
+                          <span class="table-arrow mr-8" (click)="rateTable.showGrid = !rateTable.showGrid">
+                            <em [ngClass]="(!rateTable.showGrid) ? 'icon icon-angle-down' : 'icon icon-angle-up'"></em>
+                          </span>
+                        <span class="ml-2">{{rateTable.name}}</span>
+                      </div>
+                    </td>
+                    <td class="time-client-td">
+                      <span>{{rateTable.description}}</span>
+                    </td>
+                    <td class="time-ent-td"
+                        *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit">
+                      <div class="d-flex justify-content-end">
+                        <em class="icon icon-remove icon-color cursor-pointer" [class.text-disabled]="!isEditRateTable"
+                            (click)='deleteRateTable()'
+                            id="delete-rate-table-{{templateIndex}}"></em>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="table-detail" [ngClass]="(!rateTable.showGrid) ? 'd-none' : ''">
+                    <td colspan="4" class="py-0 pr-0">
+                      <table class="table table-borderless table-striped job-detail-table">
+                        <thead>
+                        <tr>
+                          <th class="jfn-width">Job Family Name</th>
+                          <th class="br-width">Base Rate</th>
+                          <th class="tr-width">Table Rate</th>
+                          <th class="er-width">Exception Rate</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let jobFamilyDetail of rateTable.jobFamily; trackBy: trackByFn;let typeIndex = index"
+                            id="type-{{typeIndex}}">
+                          <td class="jfn-width">{{jobFamilyDetail.name}}</td>
+                          <td class="br-width">{{jobFamilyDetail.baseRate | currency}}</td>
+                          <td class="tr-width pl-16"
+                              [class.text-danger]="jobFamilyDetail.tableRate !== jobFamilyDetail.baseRate">{{jobFamilyDetail.tableRate | currency}}</td>
+                          <td class="er-width pl-16" [class.text-danger]="jobFamilyDetail.exceptionRate != null && jobFamilyDetail.exceptionRate !== jobFamilyDetail.baseRate">
+                            {{jobFamilyDetail.exceptionRate != null ? (jobFamilyDetail.exceptionRate | currency) : '-'}}
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>

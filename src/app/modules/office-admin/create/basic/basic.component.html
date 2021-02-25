@@ -1,0 +1,327 @@
+<div class="card">
+  <div class="card-body">
+    <form [formGroup]="officeAdminForm" (ngSubmit)="next()">
+      <div class="info-block">
+        <h2>Office Information</h2>
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="row gutter-16">
+              <div class="col-6">
+                <div class="form-group" [class.has-error]="f['name'].errors && formSubmitted">
+                  <label>Enter Office Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="name" autocomplete="doNotAutoComplete" id="enter-office-name" placeholder="Office Name">
+                  <span class="field-message text-danger"
+                        *ngIf="f['name'].errors && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    Please enter Office Name
+                </span>
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="form-group date-picker">
+                  <label>Opening Date</label>
+                  <app-date-picker [isForm]='true' [dateform]='officeAdminForm' controlName='openingDate' id="opening-date">
+                  </app-date-picker>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="row gutter-16">
+              <div class="col-6">
+                <div class="form-group"
+                     [class.has-error]="f['statusId'].errors && formSubmitted">
+                  <label>Status <sup>*</sup></label>
+                  <ng-select [items]="officeStatus" placeholder="Status" formControlName="statusId"
+                             [(ngModel)]="statusselected" [bindValue]="'id'" [bindLabel]="'status'"
+                             [notFoundText]="'No record found'" [selectOnTab]="true" id="status-select">
+                  </ng-select>
+                  <span class="field-message text-danger"
+                        *ngIf="f['statusId'].errors && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    Please select Status
+                </span>
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="form-group">
+                  <label>Accepts Initial Consultations</label>
+                  <div class="custom-control custom-radio mt-8">
+                    <input type="radio" id="customRadio1" name="acceptsInitialConsultation" class="custom-control-input"
+                           formControlName="acceptsInitialConsultation" [value]="true">
+                    <label class="custom-control-label" for="customRadio1">Yes</label>
+                  </div>
+                  <div class="custom-control custom-radio">
+                    <input type="radio" id="customRadio2" name="acceptsInitialConsultation" class="custom-control-input"
+                           [value]="false" formControlName="acceptsInitialConsultation">
+                    <label class="custom-control-label" for="customRadio2">No</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-3">
+            <div class="form-group" [class.has-error]="!retainerPracticeArea.length && formSubmitted">
+              <label>Practice Areas <sup>*</sup></label>
+              <app-multiselect-dropdown [title]="titlePracticeArea" [selections]="retainerPracticeArea"
+                                    [displaySubItem]="practiceList" [filterName]="filterName"
+                                    (onSelectionChanged)="retainerSelected($event)"
+                                    (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions()"
+                                    (clearFilter)="clearFilterRetainer()" (applyFilter)="applyFilter()" id="preactice-area-multiselect">
+              </app-multiselect-dropdown>
+              <span class="field-message text-danger"
+                    *ngIf="!retainerPracticeArea.length && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Please select Practice Areas
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-block">
+        <h2>Contact Information</h2>
+        <div class="row gutter-16">
+          <div class="col-3">
+            <div class="row gutter-16">
+              <div class="col-12">
+                <div class="form-group" [class.has-error]="f['street'].errors && formSubmitted">
+                  <label>Address 1 <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="street" autocomplete="doNotAutoComplete" id="address1" placeholder="Enter Street Address">
+                  <span class="field-message text-danger"
+                        *ngIf="f['street'].errors && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    Please enter Address 1
+                  </span>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-group">
+                  <label>Address 2</label>
+                  <input type="text" class="form-control" formControlName="address2" autocomplete="doNotAutoComplete" id="address2" placeholder="Enter  Unit or Suite #">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-9">
+            <div class="row gutter-16">
+              <div class="col-2">
+                <div class="form-group"
+                     [class.has-error]="
+                     (f['zipCode'].errors && (f['zipCode'].touched || formSubmitted) && !validZipErr) || (formSubmitted && validZipErr)">
+                  <label>Zip Code <sup>*</sup></label>
+                  <input type="text" 
+                    class="form-control" 
+                    maxlength="6" 
+                    minlength="3" 
+                    formControlName="zipCode"
+                    placeholder="Enter Zip Code"
+                    (keypress)="checkNumber($event)"
+                    (blur)="onBlurMethod(f.zipCode.value, 'zipCode'); zipCodeBlur = true;"
+                    (keyup)="getCityState($event.target.value)"
+                    autocomplete="doNotAutoComplete" id="zipcode">
+                  <small class="helper-text d-block pt-4 font-weight-normal"
+                         *ngIf="timeZoneDetails.timeZoneDisplayName">
+                    {{timeZoneDetails.timeZoneDisplayName}}
+                  </small>
+                  <span class="field-message text-danger"
+                  *ngIf="(f['zipCode'].errors && (f['zipCode'].touched || formSubmitted)) && !validZipErr">
+                  <em class="icon icon-error mr-4"></em>
+                      {{ errorData?.zip_code_required }}
+                  </span>
+                  <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr">
+                      <em class="icon icon-error mr-4"></em>
+                        {{errorData?.zip_code_error}}
+                      </span>
+                </div>
+              </div>
+              <!-- <div class="col-4">
+                <div class="form-group" [class.has-error]="f['city'].errors && formSubmitted">
+                  <label>City <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName="city" autocomplete="doNotAutoComplete" id="enter-city">
+                  <span class="field-message text-danger"
+                        *ngIf="f['city'].errors && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    Please enter City
+                </span>
+                </div>
+              </div> -->
+              <div class="col-5">
+                <div class="row gutter-16">
+                  <div class="col-5">
+                    <div class="form-group"
+                         >
+                      <label>State <sup>*</sup></label>
+                      <input *ngIf="stateList?.length <= 1" 
+                        type="text" 
+                        class="form-control" 
+                        placeholder="State"
+                        [(ngModel)]="singleState" 
+                        [ngModelOptions]="{standalone: true}"
+                        [readOnly]='true' id="state">
+                      <ng-select *ngIf="stateList?.length > 1"
+                        [items]="stateList" 
+                        placeholder="State" 
+                        formControlName="state"
+                        [(ngModel)]="stateselected" [bindValue]="'code'" [selectOnTab]="true"
+                        [clearable]="false"
+                        [bindLabel]="'name'" (change)="stateSelected()"
+                        [notFoundText]="'No record found'" class="state-select" id="state-select">
+                      </ng-select>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="form-group">
+                      <label>City <sup>*</sup></label>
+                      <input *ngIf="cityList?.length <= 1"
+                        type="text" 
+                        class="form-control" 
+                        formControlName="city" 
+                        placeholder="City"
+                        autocomplete="doNotAutoComplete" 
+                        [readOnly]='true' id="enter-city">
+                      <ng-select *ngIf="cityList?.length > 1" 
+                        [items]="cityList" 
+                        placeholder="City" 
+                        formControlName="city"
+                        [clearable]="false"
+                        [notFoundText]="'No record found'" 
+                        [selectOnTab]="true" id="city">
+                      </ng-select>
+                    </div>
+                  </div>
+                  <!-- <div class="col-7">
+                    <div class="form-group"
+                         [class.has-error]="f['zipCode'].errors && f['zipCode'].errors.required && formSubmitted ||
+                         (f.zipCode.invalid && (f['zipCode'].errors && !f['zipCode'].errors.required) && zipCodeBlur)">
+                      <label>Zip Code <sup>*</sup></label>
+                      <input type="text" class="form-control" maxlength="6" minlength="5" formControlName="zipCode"
+                             (keypress)="checkNumber($event)"
+                             (blur)="onBlurMethod(f.zipCode.value, 'zipCode'); getTimeZone(); zipCodeBlur = true;"
+                             autocomplete="doNotAutoComplete" id="zipcode">
+                      <small class="helper-text d-block pt-4 font-weight-normal"
+                             *ngIf="timeZoneDetails.timeZoneDisplayName">
+                        {{timeZoneDetails.timeZoneDisplayName}}
+                      </small>
+                      <span class="field-message text-danger"
+                            *ngIf="f.zipCode.invalid && (f['zipCode'].errors && !f['zipCode'].errors.required) && zipCodeBlur">
+                        <em class="icon icon-error mr-4"></em>
+                        Invalid zip code
+                      </span>
+                      <span class="field-message text-danger" *ngIf="f['zipCode'].errors && f['zipCode'].errors.required && formSubmitted">
+                        <em class="icon icon-error mr-4"></em>
+                        Please enter Zip Code
+                      </span>
+                    </div>
+                  </div> -->
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="form-group" [class.has-error]="f['timeZone'].errors && formSubmitted">
+                  <label for="">Time Zone <sup>*</sup></label>
+                  <ng-select [items]="timeZones" placeholder="Select" formControlName="timeZone"
+                             [bindValue]="'id'" [bindLabel]="'name'"
+                             [clearable]='false' [selectOnTab]="true" [(ngModel)]="timeZoneselected"
+                             id="timezone-select" [notFoundText]="'No record found'">
+                  </ng-select>
+                  <span class="field-message text-danger" *ngIf="f['timeZone'].errors && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.select_timezone_office}}
+                  </span>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-12">
+            <div class="row gutter-16">
+              <div class="col-3">
+                <div class="form-group"
+                     [class.has-error]="f['phone1'].errors && f['phone1'].errors.required && formSubmitted ||
+                     (f.phone1.invalid && (f['phone1'].errors && !f['phone1'].errors.required) && phone1Blur)">
+                  <label>Phone 1 <sup>*</sup></label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                         placeHolderCharacter=" " formControlName="phone1"
+                         (blur)="onBlurMethod(f.phone1.value,'phone1'); phone1Blur = true"
+                         autocomplete="doNotAutoComplete" id="phone1"/>
+                  <span class="field-message text-danger"
+                        *ngIf="f.phone1.invalid && (f['phone1'].errors && !f['phone1'].errors.required) && phone1Blur"><em
+                    class="icon icon-error mr-4"></em>
+                    Invalid phone number
+                  </span>
+                  <span class="field-message text-danger" *ngIf="f['phone1'].errors && f['phone1'].errors.required && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    Please enter Phone 1
+                  </span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div [ngClass]="(f.phone2.invalid && phone2Blur)?'form-group has-error':'form-group'">
+                  <label>Phone 2 </label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                         placeHolderCharacter=" " formControlName="phone2"
+                         (blur)="onBlurMethod(f.phone2.value,'phone2')" autocomplete="doNotAutoComplete" id="phone2"/>
+                  <span class="field-message text-danger" *ngIf="f.phone2.invalid && phone2Blur"><em
+                    class="icon icon-error mr-4"></em>
+                    Invalid phone number
+                  </span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div [ngClass]="(f.fax.invalid && faxBlur)?'form-group has-error':'form-group'">
+                  <label>Fax</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                         placeHolderCharacter=" " formControlName="fax" (blur)="onBlurMethod(f.fax.value,'fax')"
+                         autocomplete="doNotAutoComplete" id="fax"/>
+                  <span class="field-message text-danger" *ngIf="f.fax.invalid && faxBlur"><em
+                    class="icon icon-error mr-4"></em>
+                    Invalid fax number
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row gutter-16">
+          <div class="col-12">
+            <div class="mb-16">
+              <h3 class='m-0'>Designated Contact <label><sup class="text-danger ml-4 fs-24">*</sup></label></h3>
+            </div>
+            <p class="mb-24">
+              Specify a designated contact for the office that can address general questions and concerns from clients.
+            </p>
+            <div class="row gutter-16">
+              <div class="col-6">
+                <app-office-designated-contact [isDesignatedContactother]='isDesignatedContactOther'
+                                               [(designatedContact)]='designatedContact'>
+                </app-office-designated-contact>
+              </div>
+            </div>
+            <div class="form-group mb-0" [class.has-error]="!designatedContact && formSubmitted">
+              <span class="field-message text-danger"
+                    *ngIf="!designatedContact && formSubmitted" id="designated-contact-error">
+                <em class="icon icon-error mr-4"></em>
+                Please specify Designated Contact
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="d-flex justify-content-end">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" [routerLink]="['/office/list']" id="cancel-basic-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='next()' id="next-basic-btn">Next</button>
+  </div>
+</div>

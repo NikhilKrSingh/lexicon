@@ -1,0 +1,64 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Admin Settings</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Charge Codes</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Charge Code Audit History - 23456</li>
+    </ol>
+    <div class="heading">
+      <h1>Charge Code Audit History - 23456</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h4 class="text-center m-0"> DATA-Table space</h4>
+        <a href="javascript:void(0);" class="font-weight-medium" (click)="open(ViewRevision,'')">View Revision</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #ViewRevision let-modal>
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">View Revision - 86730</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="form-group">
+      <label class="d-block mb-4">Revision Date/Time</label>
+      <div class="lh-20">09/21/2019, 2:32pm</div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Code</label>
+      <div class="lh-20">12345</div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Description</label>
+      <div class="lh-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua.</div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Bill Type</label>
+      <div class="lh-20">Hourly</div>
+    </div>
+    <div class="form-group selected-row">
+      <label class="d-block mb-4">Billable To</label>
+      <div class="lh-20">Potential Client</div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Initial Rate</label>
+      <div class="lh-20">$100.00</div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Change Note</label>
+      <div class="lh-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+        aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+        fugiat nulla pariatur.</div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close()">Close</button>
+  </div>
+</ng-template>

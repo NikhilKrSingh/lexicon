@@ -1,0 +1,82 @@
+<div class="d-flex justify-content-between mb-32">
+  <h2 class="m-0">Firm Trust Bank Accounts</h2>
+  <button class="btn btn-primary" type="button" (click)="openModel('firmbank', 'add')" id="create-trust-ac-btn">Create Trust Account</button>
+</div>
+<div class="custom-table">
+  <ngx-datatable #table class="material common-table" [rows]="firmAccountList" [columnMode]="ColumnMode.force"
+    [headerHeight]="50" [footerHeight]="50" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+    [limit]="page.size" [messages]="messages" [scrollbarH]='true' [sorts]="[{prop: 'accountName', dir: 'asc'}]" id="firm-ac-btn">
+
+    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="accountName" name="Account Name" [width]="500">
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="routingNumber" name="Routing Number" [width]="120">
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="accountNumber" [sortable]="true" name="Bank Account Number" [width]="120">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span *ngIf='value'>---- ---- ---- {{value?.substr(value?.length - 4)}}</span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [sortable]="true" [width]="50">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span *ngIf="row['status']">Active</span>
+        <span *ngIf="!row['status']">Inactive</span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100">
+      <ng-template let-row="row" ngx-datatable-cell-template let-rowIndex="rowIndex">
+        <div class="d-flex justify-content-end">
+          <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+            (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+            (outsideClick)="onClickedOutside($event, rowIndex)">
+            <em class="icon icon-dot-verti"></em>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="javascript: void(0)" (click)="openModel('firmbank', 'edit', row)" id="edit-index-{{rowIndex}}">Edit</a>
+              <a *ngIf="row['status']" class="dropdown-item" href="javascript: void(0)"
+                (click)="checkExistOff('firmbank', row, 'deactivate')" id="deactivate-index-{{rowIndex}}">Deactivate</a>
+              <a *ngIf="!row['status']" class="dropdown-item" href="javascript: void(0)"
+                (click)="deactivateActive('firmbank', row, 'activate')" id="activate-index-{{rowIndex}}">Activate</a>
+              <a class="dropdown-item" href="javascript: void(0)"
+                (click)="checkExistOff('firmbank', row, 'delete')" id="delete-index-{{rowIndex}}">Delete</a>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-footer>
+      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+              {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+            </span>
+          </div>
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                of {{page.totalPages}}</option>
+            </select>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                (change)="table.onFooterPage($event);pageChange($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+</div>

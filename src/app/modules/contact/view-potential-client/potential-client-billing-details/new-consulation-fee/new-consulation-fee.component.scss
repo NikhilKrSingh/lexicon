@@ -1,0 +1,15 @@
+.ngx-datatable {
+  &.consult-fee-table {
+    .datatable-body {
+      min-height: auto !important;
+    }
+  }
+  .dropdown-hover-table {
+    min-width: 24px;
+    text-align: right;
+    cursor: pointer;
+    &:after {
+      display: none;
+    }
+  }
+}

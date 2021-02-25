@@ -1,0 +1,80 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/office/list']"><a href="javascript:void(0)">Offices</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Add New Office</li>
+    </ol>
+    <div class="heading">
+      <h1>Add New Office</h1>
+    </div>
+    <ul class="list-unstyled steps d-flex mb-32 justify-content-between">
+      <li class="d-flex align-items-center cursor-pointer" [class.completed]='completedArr.basic'
+          [class.current]="step == 'basic'" (click)="changeTab('basic')" id="basic-information-tab">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>1</span>
+        </span>
+        Basic Information
+      </li>
+      <li class="d-flex align-items-center cursor-pointer" [class.completed]='completedArr.employee'
+          [class.current]="step == 'employee'" (click)="changeTab('employee')" id="employee-tab">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>2</span>
+        </span>
+        Employees
+      </li>
+      <li class="d-flex align-items-center cursor-pointer" [class.completed]='completedArr.settings'
+          [class.current]="step == 'settings'" (click)="changeTab('settings')" id="settings-tab">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>3</span>
+        </span>
+        Settings
+      </li>
+      <li *ngIf="isTrustAccountEnabled" class="d-flex align-items-center cursor-pointer"
+          [class.completed]='completedArr.trustaccount' [class.current]="step == 'trustaccount'"
+          (click)="changeTab('trustaccount')" id="trust-accounting-tab">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>4</span>
+        </span>
+        Trust Accounting
+      </li>
+
+      <li class="d-flex align-items-center cursor-pointer" [class.completed]='completedArr.lawofficenotes'
+          [class.current]="step == 'lawofficenotes'" (click)="changeTab('lawofficenotes')" id="law-office-tab">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span *ngIf="isTrustAccountEnabled">5</span>
+          <span *ngIf="!isTrustAccountEnabled">4</span>
+        </span>
+        Law Office Notes
+      </li>
+      
+    </ul>
+
+    <app-basic *ngIf="step==='basic'" (nextStep)='nextStep($event)'></app-basic>
+
+    <app-office-employee *ngIf="step==='employee'" (nextStep)='nextStep($event)'
+                         (prevStep)='prevStep($event)'></app-office-employee>
+
+    <app-settings
+      *ngIf="step==='settings'"
+      [isTrustAccountEnabled]="isTrustAccountEnabled"
+      (nextStep)='nextStep($event)'
+      (prevStep)='prevStep($event)'>
+    </app-settings>
+    <app-trust-account *ngIf="step==='trustaccount' && isTrustAccountEnabled"
+                       (nextStep)='nextStep($event)'
+                       (prevStep)='prevStep($event)'
+                       [officeId]="officeId">
+    </app-trust-account>
+    <app-law-office-notes *ngIf="step==='lawofficenotes'" [isTrustAccountEnabled]="isTrustAccountEnabled"
+                          (nextStep)='nextStep($event)' (prevStep)='prevStep($event)'
+                          [officeId]="officeId">
+    </app-law-office-notes>
+    
+  </div>
+</div>

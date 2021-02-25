@@ -1,0 +1,220 @@
+<form [formGroup]="billingSettingsForm">
+  <div class="info-block">
+    <ng-container *ngIf="pageType === 'createoffice'">
+      <h2>Billing Period</h2>
+      <h3 class="mb-8">Default Billing Frequency</h3>
+      <p>Pre-bills are generated at the end of each period and sent for approval before invoicing.</p>
+    </ng-container>
+    <div class="form-group" *ngIf="displayNextEffectiveDate && effectiveDateDisplay && !billingSettingsForm.value.isWorkComplete">
+      <label class="d-block mb-4">Effective Period</label>
+      <span id="bill-period-effectice-period">{{effectiveDateDisplay | date : 'MM/dd/yyyy'}} - {{displayNextEffectiveDate | date : 'MM/dd/yyyy'}}</span>
+    </div>
+    <div class="custom-control custom-checkbox pr-8 mb-24" *ngIf="pageType !== 'setfirmlevel'">
+      <input class="custom-control-input" id="bfo-det" formControlName="isInherited" (change)="defaultInharitChange($event)" name="isInherited" type="checkbox">
+      <label class="custom-control-label" for="bfo-det">
+        <ng-container *ngIf="pageType === 'editclient' || pageType === 'editmatter'; else elsecheckboxlbl">
+          Use the office default billing frequency
+        </ng-container>
+        <ng-template #elsecheckboxlbl>
+          Use the default firm billing frequency
+        </ng-template>
+      </label>
+    </div>
+    <div class="mb-20" *ngIf="!billingSettingsForm.value.isInherited">
+      <div class="custom-control custom-radio pr-8">
+        <input class="custom-control-input" id="bfo-det-bill-info-custom"
+               name="isWorkComplete"
+               formControlName="isWorkComplete" (change)="setInheritedFlag()"
+               [value]="false"
+               type="radio">
+        <label class="custom-control-label text-case-none" for="bfo-det-bill-info-custom">
+          Set custom frequency
+        </label>
+      </div>
+      <div class="custom-control custom-radio pr-8">
+        <input class="custom-control-input" id="bfo-det-bill-info-eof"
+               name="isWorkComplete"
+               formControlName="isWorkComplete" (change)="setInheritedFlag()"
+               [value]="true"
+               type="radio">
+        <label class="custom-control-label text-case-none" for="bfo-det-bill-info-eof">
+          Send once marked as Work Complete
+        </label>
+      </div>
+    </div>
+    <div class="row col-12 gutter-16" *ngIf="billingSettingsForm.value.isWorkComplete">
+      <p class="mb-16 max-width-fit">
+        The client will be billed when the matter is marked as <strong>Work Complete</strong>.
+      </p>
+    </div>
+    <div class="row gutter-16" *ngIf="!billingSettingsForm.value.isWorkComplete">
+      <div class="col-5">
+        <div class="form-group mb-0">
+          <label>Bill Every<sup>*</sup></label>
+          <div class="row gutter-16">
+            <div class="col-6 form-group"
+              [class.has-error]="(isFormSubmitted || billingSettingsForm.controls.billFrequencyQuantity.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyQuantity">
+              <input type="text" class="form-control" (keypress)="checkNumber($event)" maxlength="2"
+                formControlName="billFrequencyQuantity" [readonly]="billingSettingsForm.value.isInherited" id="billing-frequency-qty">
+              <span class="field-message text-danger"
+                *ngIf="(isFormSubmitted || billingSettingsForm.controls.billFrequencyQuantity.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyQuantity">
+                <em class="icon icon-error mr-4"></em>
+                Please enter how often to bill.
+              </span>
+            </div>
+            <div class="col-6 form-group"
+              [class.has-error]="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyDuration">
+              <ng-select
+                [items]="billFrequencyList"
+                placeholder="Select duration"
+                formControlName="billFrequencyDuration"
+                [bindValue]="'id'"
+                [bindLabel]="'name'"
+                (change)="onSelectDur($event)"
+                [notFoundText]="'No record found'"
+                [readonly]="billingSettingsForm.value.isInherited"
+                [clearable]="false"
+                [selectOnTab]="true"
+                id="bill-frequency-select">
+              </ng-select>
+              <span class="field-message text-danger"
+                *ngIf="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyDuration">
+                <em class="icon icon-error mr-4"></em>
+                Required
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group" *ngIf="(pageType === 'setfirmlevel' || pageType === 'editoffice' || pageType === 'createoffice' || pageType === 'editclient' || pageType === 'editmatter') && selectedDuration && selectedDuration.code === 'MONTHS' && !billingSettingsForm.value.isWorkComplete">
+      <label class="mb-20">Repeat Type <sup>*</sup></label>
+      <div class="custom-control custom-radio pr-0" [class.pointer-vent-none-f]="billingSettingsForm.value.isInherited">
+        <input type="radio" id="aday_ofthe_week_id" name="repeatType" formControlName="repeatType"
+          class="custom-control-input" [value]="1" [class.radio-disabled]="billingSettingsForm.value.isInherited">
+        <label class="custom-control-label" for="aday_ofthe_week_id">A Day of the Week Instance</label>
+      </div>
+      <div class="custom-control custom-radio pr-0" [class.pointer-vent-none-f]="billingSettingsForm.value.isInherited">
+        <input type="radio" id="aday_ofthe_month_id" name="repeatType" formControlName="repeatType"
+          class="custom-control-input" [value]="2" [class.radio-disabled]="billingSettingsForm.value.isInherited">
+        <label class="custom-control-label" for="aday_ofthe_month_id">A Day of the Month</label>
+      </div>
+    </div>
+    <div class="form-group" *ngIf="(billingSettingsForm?.value?.repeatType == 1 || selectedDuration && selectedDuration.code === 'WEEKS') && !billingSettingsForm.value.isWorkComplete">
+      <label>
+        <ng-container *ngIf="pageType === 'setfirmlevel' || pageType === 'editoffice' || pageType === 'createoffice' || pageType === 'editclient' || pageType === 'editmatter'; else oldDesign">
+          <span id="duration-on">{{(selectedDuration && selectedDuration.code === 'MONTHS') ? 'Occurs on' : 'Repeats on'}}</span>
+        </ng-container>
+        <ng-template #oldDesign>
+          <span id="duration-on">Repeats on</span>
+        </ng-template>
+        <sup>*</sup>
+      </label>
+        <ul class="list-unstyled mb-0 day-list d-flex">
+          <li (click)="selectDay(0)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[0].selected" id="sunday">S</li>
+          <li (click)="selectDay(1)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[1].selected" id="monday">M</li>
+          <li (click)="selectDay(2)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[2].selected" id="tuesday">t</li>
+          <li (click)="selectDay(3)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[3].selected" id="wednesday">w</li>
+          <li (click)="selectDay(4)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[4].selected" id="thursday">t</li>
+          <li (click)="selectDay(5)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[5].selected" id="friday">f</li>
+          <li (click)="selectDay(6)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[6].selected" id="saturday">s</li>
+        </ul>
+    </div>
+    <div class="form-group" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS' && !billingSettingsForm.value.isWorkComplete"
+      [class.has-error]="(isFormSubmitted || billingSettingsForm.controls.billingFrequencyRecursDay.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billingFrequencyRecursDay">
+    <div class="row gutter-16">
+      <div class="col-5">
+          <label>
+            Repeats on <sup>*</sup>
+          </label>
+          <ng-select
+            [items]="recursOnList"
+            [placeholder]="'Select day of the month instance'"
+            [bindValue]="'id'"
+            [bindLabel]="'name'"
+            formControlName="billingFrequencyRecursDay"
+            (change)="onSelectRecursDay($event)"
+            [notFoundText]="'No record found'"
+            [readonly]="billingSettingsForm.value.isInherited"
+            [selectOnTab]="true"
+            id="recurs-select">
+          </ng-select>
+          <span class="field-message text-danger"
+            *ngIf="(isFormSubmitted || billingSettingsForm.controls.billingFrequencyRecursDay.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billingFrequencyRecursDay">
+            <em class="icon icon-error mr-4"></em>
+            Please select when billing repeats on.
+          </span>
+        </div>
+      </div>
+      <div *ngIf="billingSettingsForm?.value?.repeatType === 2" class="alert alert-primary d-inline-flex justify-content-between mt-12 mb-0" role="alert" id="info-frequency-end">
+        <div class="d-flex align-items-center">
+          <em class="alert-icon icon icon-info text-large"></em>
+          <div>
+            If the day does not apply to a given month, the frequency will end on the last day of that month.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" *ngIf="pageType === 'createoffice' || pageType === 'matter' && !billingSettingsForm.value.isWorkComplete">
+      <ng-container *ngIf="selectedDuration?.code === 'WEEKS' && endDate && startDate">
+        <label class="d-block mb-4">First Billing Period</label>
+        <span id="select-duration-week">{{startDate}} - {{endDate}}</span>
+      </ng-container>
+      <ng-container *ngIf="selectedDuration?.code === 'MONTHS' && endDate && startDate && billingSettingsForm.value.billingFrequencyRecursDay">
+        <label class="d-block mb-4">First Billing Period</label>
+        <span id="select-duration-month">{{startDate}} - {{endDate}}</span>
+      </ng-container>
+    </div>
+    <div class="row gutter-16"  *ngIf="(pageType === 'editoffice' || pageType === 'setfirmlevel' || pageType === 'editmatter' || pageType === 'editclient') && !billingSettingsForm.value.isWorkComplete">
+      <div class="col-5">
+        <div class="form-group"
+        [class.has-error]="(isFormSubmitted || billingSettingsForm.controls.effectiveDate.touched) && !billingSettingsForm.value.isInherited && (!effectiveDateDisplay || effectiveDateDisplay == 'Invalid Date')">
+          <label>Effective date<sup>*</sup></label>
+          <div class="date-field position-relative">
+            <input type="text" class="form-control cust-readonlyinput" name="employmentStartdt"
+              formControlName="effectiveDate" [owlDateTimeFilter]="myFilter" [min]='minDate'
+              placeholder="Select effective date" [owlDateTimeTrigger]="dt1" [(ngModel)]="effectiveDateDisplay"
+              [owlDateTime]="dt1" (dateTimeChange)='selectDate()' id="effective-date">
+            <em class="icon icon-calendar-invitation" [owlDateTimeTrigger]="dt1"></em>
+            <owl-date-time [pickerType]="'calendar'" #dt1></owl-date-time>
+          </div>
+          <span class="field-message text-danger"
+            *ngIf="(isFormSubmitted || billingSettingsForm.controls.effectiveDate.touched) && !billingSettingsForm.value.isInherited && (!effectiveDateDisplay || effectiveDateDisplay == 'Invalid Date')">
+            <em class="icon icon-error mr-4"></em>
+            Please select an effective date
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="row gutter-16"  *ngIf="(pageType === 'setfirmlevel' || pageType === 'editoffice' || pageType === 'createoffice' || pageType === 'editclient' || pageType === 'editmatter') && !billingSettingsForm.value.isWorkComplete">
+      <div class="col-6">
+        <div class="form-group"
+        [class.has-error]="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billWhenHoliday">
+          <label>If BIlling Date Falls on Holiday or Non-Working Day <sup>*</sup></label>
+          <div class="date-field position-relative">
+            <ng-select
+              [items]="billWhenHolidayList"
+              placeholder="Generate pre-bills and invoices on that date"
+              [bindValue]="'id'"
+              [bindLabel]="'name'"
+              formControlName="billWhenHoliday"
+              (change)="emitValue()"
+              [notFoundText]="'No record found'"
+              [readonly]="billingSettingsForm.value.isInherited"
+              [clearable]="false"
+              [selectOnTab]="true"
+              id="billing-fall-select">
+            </ng-select>
+          </div>
+          <span class="field-message text-danger"
+            *ngIf="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billWhenHoliday">
+            <em class="icon icon-error mr-4"></em>
+            BIlling Date Falls on Holiday or Non-Working Day Required
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</form>

@@ -1,0 +1,65 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item" (click)='goToInvoices()'>
+        <a href="javascript:void(0)">Billing</a>
+      </li>
+      <li *ngIf='!invoiceDetails' class="breadcrumb-item active" aria-current="page">
+        Print to PDF
+      </li>
+      <li *ngIf='invoiceDetails && !invoiceDetails.initialConsult' class="breadcrumb-item active" aria-current="page"
+        [title]='invoiceDetails?.matter?.name'>
+        <ng-container *ngIf='invoiceDetails?.matter?.name?.length < 30'>
+          Print to PDF - {{invoiceDetails?.matter?.name}} - {{invoiceDetails?.matter?.matterNumber || 'PC'}}
+        </ng-container>
+        <ng-container *ngIf='invoiceDetails?.matter?.name?.length >= 30'>
+          Print to PDF - {{invoiceDetails?.matter?.name?.slice(0, 25)}}... - {{invoiceDetails?.matter?.matterNumber || 'PC'}}
+        </ng-container>
+      </li>
+      <li *ngIf='invoiceDetails && invoiceDetails.initialConsult' class="breadcrumb-item active" aria-current="page"
+        [title]='invoiceDetails?.client?.name'>
+        <ng-container *ngIf='invoiceDetails?.client?.name?.length < 30'>
+          Print to PDF - {{invoiceDetails?.client?.name}}
+        </ng-container>
+        <ng-container *ngIf='invoiceDetails?.client?.name?.length >= 30'>
+          Print to PDF - {{invoiceDetails?.client?.name?.slice(0, 25)}}...
+        </ng-container>
+      </li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2">Print to PDF</h2>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Invoice</h2>
+          </div>
+          <app-common-invoice-pdf [invoiceId]='invoiceId' [callback]='loaderCallback'
+            (getInvoiceDetails)='getInvoiceDetails($event)'>
+          </app-common-invoice-pdf>
+        </div>
+        <app-loader [active]='loader'></app-loader>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)='goToInvoices()' *ngIf='!matterId && !pClientId' id="return-to-invoice-list-btn">
+          Return to Invoices List
+        </button>
+        <button type="button" class="btn btn-light" (click)='gotoMatter()' *ngIf='matterId > 0' id="return-to-matter-btn">
+          Return to Matter
+        </button>
+        <button type="button" class="btn btn-light" (click)='gotoPotentialClientProfile()' *ngIf='pClientId > 0' id="return-to-potential-client-btn">
+          Return to Potential Client Profile
+        </button>
+        <button class="btn btn-primary" (click)='printInvoice()' [disabled]="loader" id="print-btn">Download</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+<div class="cust-card">
+  <div class="cust-card-head d-flex align-items-center justify-content-between" *ngIf="pageType === 'createclient' || pageType === 'creatematter' || pageType === 'client'">
+    <div class="d-flex align-items-center">
+      <h3 class="m-0">Disbursements</h3>
+      <i class="lh-20 ml-8">Optional</i>
+    </div>
+  </div>
+  <div class="d-flex align-items-center justify-content-between" *ngIf="pageType === 'matterdashboard'">
+    <h2 class="m-0">Disbursement Exception Rates</h2>
+    <button (click)='setDisbursementRate()' class="btn btn-primary btn-icon" type="button" id="SetExceptionmatterdashRateId"
+      *ngIf="permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit || permissionList?.MATTER_MANAGEMENTisAdmin">
+      Set Exception Rate
+    </button>
+  </div>
+  <div class="d-flex align-items-center justify-content-between" *ngIf="pageType === 'clientdetals'">
+    <h2 class="m-0">Disbursement Exception Rates</h2>
+    <button (click)='setDisbursementRate()' class="btn btn-primary btn-icon" type="button" id="SetExceptionmatterdashRateId"
+      *ngIf="permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit || permissionList?.CLIENT_CONTACT_MANAGEMENTisAdmin">
+      Set Exception Rate
+    </button>
+  </div>
+  <div class="cust-card-body">
+    <p class="lh-20" *ngIf="pageType === 'createclient' || pageType === 'creatematter' || pageType === 'client'">The firm’s rates are used by default. Set an exception rate for this client if needed.</p>
+    <p class="lh-20" *ngIf="pageType === 'matterdashboard'">
+      <ng-container *ngIf="permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit || permissionList?.MATTER_MANAGEMENTisAdmin; else onlyviewdisburs">
+        The firm’s rates are used by default. Set an exception rate for this matter if needed.
+      </ng-container>
+      <ng-template #onlyviewdisburs>
+        The firm’s rates are used by default.
+      </ng-template>
+    </p>
+    <p class="lh-20" *ngIf="pageType === 'clientdetals'">
+      <ng-container *ngIf="permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit || permissionList?.CLIENT_CONTACT_MANAGEMENTisAdmin; else onlyviewdisbursclient">
+        The firm’s rates are used by default. Set an exception rate for this client if needed.
+      </ng-container>
+      <ng-template #onlyviewdisbursclient>
+        The firm’s rates are used by default.
+      </ng-template>
+    </p>
+    <div class="custom-table mb-24" [ngClass]="{'d-none':disbursementList?.length === 0}" >
+      <ngx-datatable #tablecustomratetable class="material common-table datatable-auto-height tltoophover"
+        [class.matter-no-data]="disbursementList?.length === 0"
+        [rows]="disbursementList"
+        [columnMode]="ColumnMode.force"
+        [headerHeight]="50"
+        [footerHeight]="0"
+        rowHeight="auto"
+        id="disbursementListId">
+
+        <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [width]="140"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="description" name="Name" [width]="348"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="type.name" [width]="150">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            <div class="d-flex hard-soft-header align-items-center">
+              <div>Hard/Soft</div>
+                <span class="cursor-pointer ml-12" placement="bottom" container="body" tooltipClass="d-block auto-position"
+                  ngbTooltip="Hard costs are expenses incurred on behalf of a client that require a direct payment by
+                  the firm to a vendor. For example, if a firm writes a check for a court filing fee, it
+                  is considered a hard cost. Soft costs are expenses that are charged to the client but a
+                  direct payment is not made to a vendor.">
+                  <em class="icon icon-info icon-color text-large"></em>
+                </span>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="rate" name="Initial Rate" [width]="148">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <span> {{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="customRate" name="Exception Rate" [width]="148">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <span class="text-danger"> {{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </div>
+    <button *ngIf="pageType === 'createclient' || pageType === 'creatematter' || pageType === 'client'" (click)='setDisbursementRate()' class="btn btn-primary btn-icon" type="button" id="SetExceptionRateId">
+      Set Exception Rate
+    </button>
+  </div>
+</div>

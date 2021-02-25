@@ -1,0 +1,135 @@
+<div class="pb-32">
+    <h4 class="helper-text mb-8 text-xlarge">Credit Card</h4>
+    <p class="lh-20">Set up a credit card to put on file.</p>
+    <button (click)='addPaymentMethod()' class="btn btn-primary btn-icon" type="button" id="addCreditCardId">
+      <i class="icon icon-plus"></i> Add Credit Card
+    </button>
+    <div class="custom-table pt-16" [hidden]="creditCardList.length === 0">
+      <div class="table-responsive">
+        <table class="table table-striped table-borderless" id="creditCardListId">
+          <thead>
+            <tr>
+              <th style="width: 220px;">Name on Card</th>
+              <th style="width: 160px;">Card Number</th>
+              <th style="width: 160px;">Expiration Date</th>
+              <th class="text-center" style="width: 99px;">Auto Pay</th>
+              <th class="text-left" style="width: 140px;">Auto-Pay Status</th>
+              <th class="text-center" style="width: 193px;">Address Same as Primary</th>
+              <th class="text-right" style="width: 140px;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let crd of creditCardList; trackBy: trackByFn; let i=index;" id="creditCardListId-{{i}}" [class.row-green]="crd.autoPay">
+              <td class="cursor-default">
+                <span *ngIf='!crd.isCompany'> {{ crd.lastName}}, {{crd.firstName}}</span>
+                <span *ngIf='crd.isCompany'> {{ crd.companyName }}</span>
+              </td>
+              <td class="cursor-default">
+                <span>{{crd.cardNumber | appCreditCardNumber}}</span>
+              </td>
+              <td class="cursor-default">
+                <span> {{crd['expirationDateStr']}}</span>
+              </td>
+              <td>
+                <div class="text-center sh-status-success">
+                  <em *ngIf='crd.autoPay' class="alert-icon icon icon-check-circle icon-success vertical-align-sub"></em>
+                </div>
+              </td>
+              <td class="cursor-default">
+                <span *ngIf='crd.autoPay'>
+                  <span *ngIf='crd.suspendAutoPay'>Suspended</span>
+                  <span *ngIf='!crd.suspendAutoPay'>Active</span>
+                </span>
+                <span *ngIf='!crd.autoPay'>-</span>
+              </td>
+              <td>
+                <div class="text-center">
+                  <em *ngIf='crd.isSameAsPrimary' class="icon icon-check font-10"></em>
+                </div>
+              </td>
+              <td>
+                <div class="icon-group d-flex justify-content-end">
+                  <span>
+                    <em class="icon icon-edit icon-color" (click)='editCreditCard(crd, $event, i)' id="editCreditCardId-{{i}}"></em>
+                  </span>
+                  <span *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+                    <em class="icon icon-remove icon-color" (click)='deleteCreditCard(crd, $event, i)' id="deleteCreditCardId-{{i}}"></em>
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <app-loader [active]="ccLoading"></app-loader>
+      </div>
+    </div>
+</div>
+
+
+
+<div class="" *ngIf="!hideEcheck">
+  <h4 class="helper-text mb-8 text-xlarge">E-Check</h4>
+  <p class="lh-20">Set up an e-check to put on file.</p>
+  <button (click)='addPaymentMethod(2)' class="btn btn-primary btn-icon" type="button" id="addECheckId">
+    <i class="icon icon-plus"></i> Add E-Check
+  </button>
+  <div class="custom-table pt-16" [hidden]="echeckList.length ===0">
+    <div class="table-responsive" id="echeckListId">
+      <table class="table table-striped table-borderless">
+        <thead>
+          <tr>
+            <th style="width: 220px;">Name on Account</th>
+            <th style="width: 160px;">Routing Number</th>
+            <th style="width: 160px;">Account Number</th>
+            <th class="text-center" style="width: 99px;">Auto Pay</th>
+            <th class="text-left" style="width: 140px;">Auto-Pay Status</th>
+            <th class="text-center" style="width: 193px;">Address Same as Primary</th>
+            <th class="text-right" style="width: 140px;">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let check of echeckList;  trackBy: trackByFn;let i=index;" id="echeckListId-{{i}}" [class.row-green]="check.autoPay">
+            <td>
+              <span>{{(check.lastName)? check.lastName+', ':''}}{{check.firstName}}</span>
+            </td>
+            <td>
+              <span>{{check.routingNumber | appRoutingNumber}}</span>
+            </td>
+            <td>
+              <span *ngIf="check.accountNumber"> ---- ---- {{check.accountNumber  | slice:(check.accountNumber.length - 4)}}</span>
+              <span *ngIf="!check.accountNumber"> ---- ---- ----</span>
+            </td>
+            <td>
+              <div class="text-center sh-status-success">
+                <em *ngIf='check.autoPay' class="alert-icon icon icon-check-circle icon-success vertical-align-sub"></em>
+              </div>
+            </td>
+            <td>
+              <span *ngIf='check.autoPay'>
+                <span *ngIf='check.suspendAutoPay'>Suspended</span>
+                <span *ngIf='!check.suspendAutoPay'>Active</span>
+              </span>
+              <span *ngIf='!check.autoPay'>-</span>
+            </td>
+            <td>
+              <div class="text-center">
+                <em *ngIf='check.isSameAsPrimary' class="icon icon-check font-10"></em>
+              </div>
+            </td>
+            <td>
+              <div class="icon-group d-flex justify-content-end">
+                <span>
+                  <em class="icon icon-edit icon-color" (click)='editECheck(check, $event, i)' id="editECheckId-{{i}}"></em>
+                </span>
+                <span *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+                  <em class="icon icon-remove icon-color" (click)='deleteECheck(check, $event, i)' id="deleteECheckId-{{i}}"></em>
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <app-loader [active]="ecLoading"></app-loader>
+    </div>
+  </div>
+</div>

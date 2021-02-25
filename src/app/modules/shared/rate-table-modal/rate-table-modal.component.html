@@ -1,0 +1,380 @@
+<div>
+  <div class="modal-header pb-28">
+    <h3 class="modal-title mb-0">Set Rate Table</h3>
+    <button type="button" class="close" (click)="cancelRateTableModal()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body" [formGroup]="createRateTableForm">
+    <div class="form-group" *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+      <div class="custom-control custom-radio pr-0">
+        <input type="radio" id="customRadio1"
+               [value]="true"
+               formControlName="isNewRateTable"
+               class="custom-control-input">
+        <label class="custom-control-label" for="customRadio1">Create new rate table</label>
+      </div>
+      <div class="custom-control custom-radio pr-0 mb-0">
+        <input type="radio" id="customRadio2" [value]="false"
+               formControlName="isNewRateTable" class="custom-control-input">
+        <label class="custom-control-label" for="customRadio2">Select from existing rate tables</label>
+      </div>
+    </div>
+    <div *ngIf="createRateTableForm.controls.isNewRateTable.value === true">
+      <div class="info-block">
+        <div class="row">
+          <div class="col-5">
+            <h4 class="mb-12 mt-0 text-xlarge">Rate Table Details</h4>
+            <div class="form-group"
+                 [class.has-error]="(createRateTableForm.controls.name.errors || isExistingName) && createRateTableFormSubmitted">
+              <label>Name <sup>*</sup></label>
+              <input type="text" class="form-control" maxlength="50" formControlName="name" (change)="isExistingName = false;"
+                     placeholder="Enter a rate table name">
+              <span class="field-message text-danger"
+                    *ngIf="createRateTableForm.controls.name.errors && createRateTableFormSubmitted">
+              Please provide a Name.
+            </span>
+              <span class="field-message text-danger" *ngIf="isExistingName && createRateTableFormSubmitted">
+              That Name is already assigned to another rate table.
+            </span>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea rows="3" class="form-control" formControlName="description"
+                        placeholder="Enter a rate table description"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-block">
+        <div class="">
+          <div>
+            <h4 class="mb-12 mt-0 text-xlarge">Job Family Rates</h4>
+            <p class="helper-text small">All job families use their base rates unless otherwise specified.</p>
+          </div>
+          <button class="btn btn-primary" type="button" *ngIf="!showJobFamilyList"
+                  (click)="showJobFamilyRate()">Set Rates
+          </button>
+        </div>
+        <div *ngIf="showJobFamilyList">
+          <div class="d-flex align-items-center justify-content-between mb-24">
+            <div class="header-search flex-fill d-flex">
+              <form action="#" class="small-search">
+                <div class="header-search-wrapper">
+                  <input type="text" class="form-control search-input" (keyup)="searchJobFamily()"
+                         name="searchJobFamily"
+                         [ngModelOptions]="{standalone: true}" [(ngModel)]="searchStr"
+                         placeholder="Search job family name"
+                         id="job-family-search">
+                  <button class="btn" type="submit" id="job-family-search-btn">Search</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="custom-table">
+            <div class="table-responsive">
+              <ngx-datatable
+                #jobFamilyTable
+                class="material common-table no-min-height" [rows]="jobFamilyList" [columnMode]="ColumnMode.force"
+                [sorts]="[{prop: 'name', dir: 'asc'}]"
+                [selectionType]="SelectionType.checkbox" [selected]="selectedJobFamilies"
+                [headerHeight]="50" [footerHeight]="jfFooterHeight" [messages]="messages" rowHeight="auto"
+                [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+                (sort)="updateDatatableFooterPage()">
+                <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false" [draggable]="false">
+                  <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                               let-selectFn="selectFn">
+                    <label class="cust-check cursor-pointer">
+                      <input type="checkbox" [checked]="allJobFamiliesSelected" (change)="selectJobFamiliesInPage()"/>
+                      <span class="check-style"></span>
+                    </label>
+                  </ng-template>
+                  <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+                               let-onCheckboxChangeFn="onCheckboxChangeFn" let-row="row">
+                    <label class="cust-check cursor-pointer">
+                      <input type="checkbox" [checked]="row.selected" (change)="changeJobFamilySelection(row)"/>
+                      <span class="check-style"></span>
+                    </label>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="name" name="Job Family Name" [sortable]="true" [width]="400">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="baseRate" name="Base Rate" [width]="250">
+                  <ng-template ngx-datatable-cell-template let-row="row">
+                    {{row.baseRate | currency : 'USD': 'symbol': '1.2-2'}}
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="tableRate" name="Table Rate" [width]="280">
+                  <ng-template ngx-datatable-cell-template let-row="row">
+                <span [class.text-danger]="row.tableRate !== row.baseRate">
+                  {{row.tableRate | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-footer>
+                  <ng-template
+                    ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                    let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                            <select class="custom-select border-less" [formControl]="pageSelector"
+                                    (change)="changePageSize()">
+                              <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <span>
+                      {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                          {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}}
+                          of {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+                    </span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <select class="custom-select border-less" [(ngModel)]="pageSelected"
+                                [ngModelOptions]="{standalone: true}"
+                                (change)="changePage()">
+                          <option
+                            *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn; let i= index'
+                            [value]="i+1">
+                            Page {{ i + 1 }} of {{(page.totalPages == 0 ? 1 : page.totalPages)}}
+                          </option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager
+                            [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                            [pagerPreviousIcon]="'datatable-icon-prev'"
+                            [pagerNextIcon]="'datatable-icon-skip'"
+                            [page]="curPage" [size]="pageSize" [count]="rowCount"
+                            [hidden]="!((rowCount / pageSize) > 1)"
+                            (change)="pageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+              </ngx-datatable>
+              <br *ngIf="jobFamilyList.length <= 10">
+            </div>
+          </div>
+          <div class="row gutter-16" [formGroup]="tableRateForm">
+            <div class="col-8">
+              <label class="d-block">Job Families Selected</label>
+              <div class="row gutter-16">
+                <div class="col-4">
+                  <div class="pb-3 text-break" *ngFor="let selectedJobFamily of selectedJobFamilyDisplayList[0];trackBy: trackByFn">
+                    {{selectedJobFamily.name}}
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="pb-3 text-break" *ngFor="let selectedJobFamily of selectedJobFamilyDisplayList[1];trackBy: trackByFn">
+                    {{selectedJobFamily.name}}
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="pb-3 text-break" *ngFor="let selectedJobFamily of selectedJobFamilyDisplayList[2];trackBy: trackByFn">
+                    {{selectedJobFamily.name}}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-4 d-flex justify-content-end">
+              <div class="form-group m-0">
+                <label>Table Rate <sup>*</sup></label>
+                <div class="row">
+                  <div class="col-7">
+                    <div class="form-group m-0"
+                         [class.has-error]="tableRateForm.controls.tableRate.errors && (rateTableFormSubmitted || createRateTableFormSubmitted)">
+                      <input type="text" class="form-control" placeholder="Enter a table rate" formControlName="tableRate"
+                             [prefix]="tableRateForm.controls.tableRate.value ? '$' : ''" mask="separator.2"
+                             (blur)="setTableRate()"
+                             [required]="selectedJobFamilies.length > 0" name="tableRate"
+                             [readOnly]="!selectedJobFamilies.length">
+                      <span class="field-message text-danger">
+                        Please enter a Table Rate.
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-5">
+                    <div class="form-group m-0">
+                      <button class="btn btn-primary btn-icon" type="button" (click)="saveJobFamilyRate()"
+                              [disabled]="!selectedJobFamilies.length">
+                        <i class="icon icon-flopy"></i>
+                        Save Rate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="createRateTableForm.controls.isNewRateTable.value === false">
+      <div class="d-flex align-items-center justify-content-between mb-24">
+        <div class="header-search flex-fill d-flex">
+          <form action="#" class="md-search">
+            <div class="header-search-wrapper">
+              <input type="text" class="form-control search-input" (keyup)="searchRateTable()" name="searchRateTable"
+                     [ngModelOptions]="{standalone: true}" [(ngModel)]="rateTableSearchStr"
+                     placeholder="Search by rate table name"
+                     id="rate-table-search">
+              <button class="btn" type="submit" id="rate-table-search-btn">Search</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <ngx-datatable
+            #rateDataTable
+            class="material common-table custom-rate-table no-transform no-min-height" [rows]="rateTableList"
+            [columnMode]="ColumnMode.force"
+            [sorts]="[{prop: 'name', dir: 'asc'}]" [selectionType]="SelectionType.single"
+            [selected]="selectedRateTable"
+            [headerHeight]="50" [footerHeight]="rtFooterHeight" [messages]="messages" rowHeight="auto"
+            [scrollbarV]="false"
+            [count]="rateTablePage.totalElements" [offset]="rateTablePage.pageNumber"
+            [limit]="rateTablePage.size"
+            (sort)="updateRateDatatableFooterPage()">
+
+            <ngx-datatable-row-detail rowHeight="auto" #myDetailRow (toggle)="onDetailToggle($event)">
+              <ng-template let-row="row" ngx-datatable-row-detail-template>
+                <div class="table-responsive pl-100 pr-100">
+                  <table class="table table-borderless table-striped job-detail-table">
+                    <thead>
+                    <tr>
+                      <th class="jfn-width">Job Family Name</th>
+                      <th class="br-width">Base Rate</th>
+                      <th class="tr-width">Table Rate</th>
+                      <th class="er-width">Exception Rate</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let jobFamilyDetail of row.jobFamily;trackBy: trackByFn">
+                      <td class="jfn-width  d-flex align-items-center text-break"  [ngClass]="row.showExceptionRate ? 'py-4' : ''">{{jobFamilyDetail.name}}</td>
+                      <td class="br-width d-flex align-items-center" [ngClass]="row.showExceptionRate ? 'py-4' : ''">
+                        {{jobFamilyDetail?.baseRate | currency : 'USD': 'symbol': '1.2-2'}}
+                      </td>
+                      <td class="tr-width d-flex align-items-center" [ngClass]="row.showExceptionRate ? 'py-4' : ''">
+                        <span [class.text-danger]="jobFamilyDetail.baseRate !== jobFamilyDetail.tableRate">
+                          {{jobFamilyDetail?.tableRate | currency : 'USD': 'symbol': '1.2-2'}}
+                        </span>
+                      </td>
+                      <td class="er-width d-flex align-items-center" [ngClass]="row.showExceptionRate ? 'py-4' : ''">
+                        <div *ngIf="!row.showExceptionRate">
+                          {{jobFamilyDetail?.exceptionRate ? (jobFamilyDetail?.exceptionRate | currency : 'USD': 'symbol': '1.2-2') : '-'}}
+                        </div>
+                        <div *ngIf="row.showExceptionRate">
+                          <input type="text" class="form-control bordred"
+                                 (keyup)="setRate($event, jobFamilyDetail)"
+                                 (keypress)="checkNumber($event)"
+                                 name="enterAmount" (blur)="rateFormat(jobFamilyDetail)"
+                                 [ngModelOptions]="{standalone: true}"
+                                 [(ngModel)]="jobFamilyDetail.exceptionRate">
+                        </div>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                  <app-loader [active]="detailsLoading"></app-loader>
+                </div>
+              </ng-template>
+            </ngx-datatable-row-detail>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'tbl-arrow-class'" [cellClass]="'tbl-arrow-class'" [width]="30">
+              <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                <div class="d-flex align-items-center">
+                  <a href="javascript:void(0)" class="icon font-10 expand-button"
+                     [class.icon-angle-down]="!expanded" [class.icon-angle-up]="expanded"
+                     title="Expand/Collapse Row" (click)="toggleRow(row)">
+                  </a>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="name" name="Rate Table Name" [sortable]="true" [width]="150">
+              <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                <div class="custom-control custom-radio pr-0 d-inline-block">
+                  <input type="radio" id="rate-table-{{row.id}}"
+                         name="rateTableSelection" class="custom-control-input"
+                         [checked]="row.selected"
+                         (change)="onRadioSelected(row)">
+                  <label class="custom-control-label" for="rate-table-{{row.id}}">
+                    {{row.name}}
+                  </label>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [sortable]="true" [width]="300">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="" name="Action" [sortable]="false" [width]="180"
+                                  [frozenRight]='true' [headerClass]="'text-right'">
+              <ng-template let-row="row" let-rowIndex="rowIndex" let-expanded="expanded" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-end">
+                  <a href="javascript:void(0);" class="font-weight-medium" (click)="setExceptionRate(row)"
+                     id="set-exception-rate-{{rowIndex}}">Set Exception Rates</a>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-footer>
+              <ng-template
+                ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                let-isVisible="isVisible">
+                <div class="d-flex justify-content-between flex-fill">
+                  <div class="d-flex align-items-center">
+                    <div class="table-items d-flex align-items-center mr-36">
+                      Items per page:
+                      <div class=" ml-8">
+                        <select class="custom-select border-less" [formControl]="rateTablePageSelector"
+                                (change)="changeRateTablePageSize()">
+                          <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <span>
+                    {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                      {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}}
+                      of {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+                    </span>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <select class="custom-select border-less" [(ngModel)]="rateTablePageSelected"
+                            [ngModelOptions]="{standalone: true}"
+                            (change)="changeRateTablePage()">
+                      <option
+                        *ngFor='let num of rateTablePage.totalPages | counterPipe; trackBy: trackByFn;let i= index'
+                        [value]="i+1">
+                        Page {{ i + 1 }} of {{(rateTablePage.totalPages == 0 ? 1 : rateTablePage.totalPages)}}
+                      </option>
+                    </select>
+                    <div class="ml-8">
+                      <datatable-pager
+                        [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                        [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                        [pagerPreviousIcon]="'datatable-icon-prev'"
+                        [pagerNextIcon]="'datatable-icon-skip'"
+                        [page]="curPage" [size]="pageSize" [count]="rowCount"
+                        [hidden]="!((rowCount / pageSize) > 1)"
+                        (change)="rateDataTable.onFooterPage($event);rateTablePageChange($event)">
+                      </datatable-pager>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-footer>
+          </ngx-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="cancelRateTableModal()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveRateTable()">Save</button>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>

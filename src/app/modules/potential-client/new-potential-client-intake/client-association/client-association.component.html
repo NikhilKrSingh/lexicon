@@ -1,0 +1,328 @@
+<div class="npc-block client-associat-block">
+  <div class="d-flex align-items-center mb-32">
+    <h2 class="m-0">Client Associations</h2>
+    <div class="info-hover position-relative ml-12">
+      <em class="icon icon-info icon-color mt-4 d-inline-block"></em>
+      <div class="tooltip bs-tooltip-bottom left" role="tooltip">
+        <div class="arrow"></div>
+        <div class="tooltip-inner">
+          <p>Other contacts that are aligned with this Potential Client. They can include people, companies, and
+            entities notably associated with a Contact. These are primarily stored for the purposes of running conflict
+            checks.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ca-block">
+    <h4 class="mb-8">Opposing Party</h4>
+    <table class="table table-striped table-borderless" id="opposingPartyListId">
+      <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+
+      <tbody *ngIf="opposingPartyList.length > 0;else no_data_found">
+        <tr *ngFor="let opp of opposingPartyList; trackBy: trackByFn;let i = index" id="opposingPartyListId-{{i}}">
+          <td class="cursor-pointer" (click)='editOpposingPartyClick(opp, i)'>
+            {{opp.uniqueNumber}}</td>
+          <td class="cursor-pointer" (click)='editOpposingPartyClick(opp, i)'>
+            {{ (opp.isCompany) ? opp.companyName : opp.lastName + ', ' + opp.firstName }}</td>
+          <td class="cursor-pointer" (click)='editOpposingPartyClick(opp, i)'>
+            {{(opp?.isCompany) ? 'Corporate':'Individual'}}</td>
+          <td class="cursor-pointer" (click)='editOpposingPartyClick(opp, i)'>
+            {{ (opp?.email) ? opp.email : '--' }}</td>
+          <td class="cursor-pointer" (click)='editOpposingPartyClick(opp, i)'>
+            {{ opp.primaryPhone | phoneFormatter }}
+          </td>
+          <td class="cursor-pointer" (click)='editOpposingPartyClick(opp, i)'>
+            {{ (opp.isVisible) ? 'Active' : (opp.isArchived) ? 'Archived' : 'Inactive' }}</td>
+          <td class="text-right">
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)='editOpposingPartyClick(opp, i)' id="edit-opposingparty-index-{{i}}">
+                <em class="icon icon-edit icon-color"></em>
+              </span>
+              <span
+                (click)="deleteMatterAssociations(errorData.opposingparty_delete_confirm, i,'Opposing Party')" id="delete-opposingparty-index-{{i}}">
+                <em class="icon icon-remove icon-color"></em>
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+      <ng-template #no_data_found>
+        <tbody>
+          <tr>
+            <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+          </tr>
+        </tbody>
+      </ng-template>
+    </table>
+    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-16" (click)="addOpposingPartyClick()"
+      type="button" id="add-opposing-party">
+      <i class="icon icon-add-circle"></i>
+      Add Opposing Party
+    </button>
+  </div>
+  <div class="ca-block">
+    <h4 class="mb-8">Opposing Counsel</h4>
+    <div class="custom-control custom-checkbox mt-12 mb-20">
+      <input type="checkbox" class="custom-control-input" id="td-check-101" name="opposingPartyRepresentingThemselves"
+        [(ngModel)]="opposingPartyRepresentingThemselves" (ngModelChange)="sameAsOppParty()">
+      <label class="custom-control-label text-transform-none" for="td-check-101">
+        Opposing Party is Representing Themselves
+      </label>
+    </div>
+    <table class="table table-striped table-borderless" *ngIf="!opposingPartyRepresentingThemselves" id="opposingCounselListId">
+      <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="opposingCounselList.length > 0;else no_data_found">
+        <tr *ngFor="let counsel of opposingCounselList; trackBy: trackByFn;let i = index" id="opposingCounselListId-{{i}}">
+          <td class="cursor-pointer" (click)='editOpposingCounselClick(counsel, i)'>
+            {{counsel.uniqueNumber}}</td>
+          <td class="cursor-pointer" (click)='editOpposingCounselClick(counsel, i)'>
+            {{ (counsel.isCompany) ? counsel.companyName : counsel.lastName + ', ' + counsel.firstName }}</td>
+          <td class="cursor-pointer" (click)='editOpposingCounselClick(counsel, i)'>
+            {{ counsel.companyName }}</td>
+          <td class="cursor-pointer" (click)='editOpposingCounselClick(counsel, i)'>
+            {{ counsel?.email }}</td>
+          <td class="cursor-pointer" (click)='editOpposingCounselClick(counsel, i)'>
+            {{ counsel.primaryPhone | phoneFormatter }}
+          </td>
+          <td class="cursor-pointer" (click)='editOpposingCounselClick(counsel, i)'>
+            {{ (counsel.isVisible) ? 'Active' : (counsel.isArchived) ? 'Archived' : 'Inactive' }} </td>
+          <td class="text-right">
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)='editOpposingCounselClick(counsel, i)' id="edit-opposing-counsel-index-{{i}}">
+                <em class="icon icon-edit icon-color"></em>
+              </span>
+              <span
+               (click)="deleteMatterAssociations(errorData.opposingcounsel_delete_confirm, i,'Opposing Counsel')" id="delete-opposing-counsel-index-{{i}}">
+                <em class="icon icon-remove icon-color"></em>
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-16" type="button"
+      *ngIf="!opposingPartyRepresentingThemselves" (click)="addOpposingCounselClick()" id="add-opposing-counsel">
+      <i class="icon icon-add-circle"></i>
+      Add Opposing Counsel
+    </button>
+  </div>
+  <div class="ca-block">
+    <h4 class="mb-8">Expert Witness</h4>
+    <table class="table table-striped table-borderless" id="expertWitnessListId">
+      <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="expertWitnessList.length > 0;else no_data_found">
+        <tr *ngFor="let expert of expertWitnessList; trackBy: trackByFn;let i=index" id="expertWitnessListId-{{i}}">
+          <td class="cursor-pointer" (click)='editExpertWitnessClick(expert, i)'>
+            {{expert.uniqueNumber}}</td>
+          <td class="cursor-pointer" (click)='editExpertWitnessClick(expert, i)'>
+            {{ (expert.isCompany) ? expert.companyName : expert.lastName + ', ' + expert.firstName }}</td>
+          <td class="cursor-pointer" (click)='editExpertWitnessClick(expert, i)'>
+            {{ expert.companyName }}</td>
+          <td class="cursor-pointer" (click)='editExpertWitnessClick(expert, i)'>
+            {{ expert?.email }}</td>
+          <td class="cursor-pointer" (click)='editExpertWitnessClick(expert, i)'>
+            {{ expert.primaryPhone | phoneFormatter }}
+          </td>
+          <td class="cursor-pointer" (click)='editExpertWitnessClick(expert, i)'>
+            {{ (expert.isVisible) ? 'Active' : (expert.isArchived) ? 'Archived' : 'Inactive' }} </td>
+          <td class="text-right">
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)='editExpertWitnessClick(expert, i)' id="edit-expert-witness-index-{{i}}">
+                <em class="icon icon-edit icon-color"></em>
+              </span>
+              <span
+                (click)="deleteMatterAssociations(errorData.expert_witnesses_delete_confirm,i,'Expert Witnesses')" id="delete-expert-witness-index-{{i}}">
+                <em class="icon icon-remove icon-color"></em>
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-16" type="button"
+      (click)="addExpertWitnessClick()" id="add-expert-witness">
+      <i class="icon icon-add-circle"></i>
+      Add Expert Witness
+    </button>
+  </div>
+  <div class="ca-block">
+    <h4 class="mb-8">Vendor</h4>
+    <table class="table table-striped table-borderless" id="vendorListId">
+      <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="vendorList?.length > 0;else no_data_found">
+        <tr *ngFor="let row of vendorList; trackBy: trackByFn;let i=index" id="vendorListId-{{i}}">
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Vendor')">
+            {{row.uniqueNumber}}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Vendor')">
+            {{row?.lastName}} {{row?.lastName ? ', ' : ''}} {{row?.firstName}}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Vendor')">
+            {{ row.companyName }}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Vendor')">
+            {{ row?.email }}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Vendor')">
+            {{ row.primaryPhone | phoneFormatter }}
+          </td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Vendor')">
+            {{ (row.isVisible) ? 'Active' : (row.isArchived) ? 'Archived' : 'Inactive' }} </td>
+          <td class="text-right">
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)="editVendorSubsidiaryClick(row, i, 'Vendor')" id="edit-vendor-index-{{i}}">
+                <em class="icon icon-edit icon-color"></em>
+              </span>
+              <span (click)="deleteMatterAssociations(errorData.vendor_delete_confirm, i,'Vendor')" id="delete-vendor-index-{{i}}">
+                <em class="icon icon-remove icon-color"></em>
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-16" type="button"
+      (click)="addVendorSubsidiaryClick('Vendor')" id="add-vendor-btn">
+      <i class="icon icon-add-circle"></i>
+      Add Vendor
+    </button>
+  </div>
+  <div class="ca-block">
+    <h4 class="mb-8">Subsidiary</h4>
+    <table class="table table-striped table-borderless" id="subsidiaryListId">
+      <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="subsidiaryList?.length > 0;else no_data_found">
+        <tr *ngFor="let row of subsidiaryList; trackBy: trackByFn;let i=index" id="subsidiaryListId-{{i}}">
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Subsidiary')">
+            {{row.uniqueNumber}}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Subsidiary')">
+            {{row?.lastName}} {{row?.lastName ? ', ' : ''}} {{row?.firstName}}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Subsidiary')">
+            {{ row.companyName }}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Subsidiary')">
+            {{ row?.email }}</td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Subsidiary')">
+            {{ row.primaryPhone | phoneFormatter }}
+          </td>
+          <td class="cursor-pointer" (click)="editVendorSubsidiaryClick(row, i, 'Subsidiary')">
+            {{ (row.isVisible) ? 'Active' : (row.isArchived) ? 'Archived' : 'Inactive' }} </td>
+          <td class="text-right">
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)="editVendorSubsidiaryClick(row, i, 'Subsidiary')" id="edit-subsidiary-index-{{i}}">
+                <em class="icon icon-edit icon-color"></em>
+              </span>
+              <span (click)="deleteMatterAssociations(errorData.subsidiary_delete_confirm, i,'Subsidiary')" id="delete-subsidiary-index-{{i}}">
+                <em class="icon icon-remove icon-color"></em>
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-16" type="button"
+     (click)="addVendorSubsidiaryClick('Subsidiary')" id="add-subsidiary-btn">
+      <i class="icon icon-add-circle"></i>
+      Add Subsidiary
+    </button>
+  </div>
+</div>
+
+
+<ng-container *ngIf="addOpposingParty">
+  <app-add-opposing-party
+    [mode]='actionMode'
+    [uniqueNumber]="uniqueNumber"
+    [association]='selectedOpposingParty'
+    [associateOpposingParty]="associateOpposingParty"
+    [addToDb]="addToDb"
+    [opposingPartyList]="opposingPartyList"
+    (closeModel)="closeOpposingParty($event)"
+    (added)='onAddAssoc($event)'>
+  </app-add-opposing-party>
+</ng-container>
+
+
+<ng-container *ngIf='addOpposingCouncel'>
+  <app-add-opposing-counsel
+    [mode]='actionMode'
+    [uniqueNumber]="uniqueNumber"
+    [association]='selectedOpposingCounsel'
+    [associateOpposingCouncil]="associateOpposingCouncil"
+    [addToDb]="addToDb"
+    (closeModel)="closeOpposingCouncel($event)"
+    (added)='onAddAssoc($event)'>
+  </app-add-opposing-counsel>
+</ng-container>
+
+
+<ng-container *ngIf='addExpertWitness'>
+  <app-add-expert-witnesses
+    [mode]='actionMode'
+    [uniqueNumber]="uniqueNumber"
+    [association]='selectedExpertWitness'
+    [addToDb]="addToDb"
+    [associateExpertWitness]="associateExpertWitness"
+    (closeModel)="closeExpertWitness($event)"
+    (added)='onAddAssoc($event)'>
+  </app-add-expert-witnesses>
+</ng-container>
+
+<ng-container *ngIf="addVendorSubsidiary">
+  <app-add-vendor
+    [mode]="actionMode"
+    [addToDb]="addToDb"
+    [uniqueNumber]="uniqueNumber"
+    [vendorDetails]='selectedRecord'
+    (closeModel)='closeVendor($event)'
+    [associateVendor]="associateVendor"
+    [type]="type"
+    (added)='onAddAssoc($event)'>
+  </app-add-vendor>
+</ng-container>
+

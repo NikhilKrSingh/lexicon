@@ -1,0 +1,387 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/contact/all-contact']">Contacts</a></li>
+      <li class="breadcrumb-item" aria-current="page">
+        <a href="javascript:void(0)" [routerLink]="['/contact/view-potential-client']"
+          [queryParams]="{clientId: clientId, state: state}">
+          Contact Profile
+          <span *ngIf='clientDetails'>- {{ clientDetails?.isCompany ? clientDetails?.companyName : clientDetails?.firstName + ' ' +  clientDetails?.lastName }}</span>
+        </a>
+      </li>
+      <li class="breadcrumb-item active">Bill Now</li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2">Bill Now</h2>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" (click)='previewInvoice()' id="preview-invoice">Preview
+          Invoice
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h2>Payment Due Date</h2>
+        <div class="row">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Payment Due Date <sup>*</sup></label>
+              <app-date-picker [id]="'payment-due-date'" [isNgModel]="true" placeholderText="Select payment due date"
+                [(data)]="paymentDueDate">
+              </app-date-picker>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="mb-0">Consultation Fees</h2>
+          <div class="btn-group">
+            <button class="btn btn-primary btn-icon" type="button" (click)="addConsulation('add', null, $event)"
+              id="edit-reporting-relation">
+              <i class="icon icon icon-plus icon-big"></i>
+              Add Consultation Fees
+            </button>
+          </div>
+        </div>
+        <div class="custom-table mt-5" *ngIf="consultationFees; else noEntry">
+          <ngx-datatable #table
+            class="material common-table no-min-height consult-fee-table disburst-new-table prbill-tables"
+            [rows]="consultationFees" [columnMode]="ColumnMode.force" [selected]="selectedConsultationFees"
+            (select)="onSelectRow($event)" [headerHeight]="50" rowHeight="auto" [scrollbarH]='true' [summaryHeight]="50"
+            [summaryRow]='true' [summaryPosition]="'bottom'" [selectionType]="'checkbox'"
+            [sorts]="[{prop: 'consultationFeeList.dateOfService', dir: 'desc'}]" id="feeslist-tbl">
+
+            <ngx-datatable-row-detail rowHeight="auto" #myDetailRow>
+              <ng-template let-row="row" ngx-datatable-row-detail-template>
+                <div class="pl-48">
+                  <div class="static-tab-group">
+                    <ul class="static-tabs list-unstyled d-flex align-items-center mb-0">
+                      <li class="pl-0" (click)="row.writeDownDetailListFlag  = false"
+                        [ngClass]="!row.writeDownDetailListFlag   ? 'active': ''">
+                        <a href="javascript:void(0);">
+                          Entry Details
+                        </a>
+                      </li>
+                      <li (click)="row.writeDownDetailListFlag = true"
+                        [ngClass]="row.writeDownDetailListFlag  ? 'active': ''"
+                        *ngIf='row?.writeDownDetailList.length > 0 && row.consultationFeeList.originalAmount >= 0'>
+                        <a href="javascript:void(0);">
+                          Write-Down
+                        </a>
+                      </li>
+                    </ul>
+                    <div class="static-tab-content" *ngIf="!row.writeDownDetailListFlag ">
+                      <div class="static-tab">
+                        <div class="table-responsive">
+                          <table class="table table-striped table-borderless">
+                            <thead>
+                              <tr>
+                                <th style="width: 30%;">Date/Time Entered</th>
+                                <th style="width: 20%;">Entered By</th>
+                                <th style="width: 20%;">Note To File</th>
+                                <th style="min-width: 200px;"></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <ng-container>
+                                <tr>
+                                  <td>{{row?.consultationFeeList?.timeEntered | date: 'MM/dd/yyyy, h:mm a'}}</td>
+                                  <td>{{row?.consultationFeeList?.enterBy}}</td>
+                                  <td>
+                                    <app-read-more [text]='row?.consultationFeeList?.note' [maxLines]='2'>
+                                    </app-read-more>
+                                  </td>
+                                  <td></td>
+                                </tr>
+                              </ng-container>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="static-tab-content" *ngIf="row.writeDownDetailListFlag">
+                      <div class="static-tab">
+                        <div class="table-responsive">
+                          <table class="table table-striped table-borderless">
+                            <thead>
+                              <tr>
+                                <th style="width: 20%">Write Down Date/Time</th>
+                                <th style="width: 10%;">Code</th>
+                                <th style="width: 30%;">Name</th>
+                                <th style="width: 15%;">Write Down Amount</th>
+                                <th style="width: 15%;">Original Amount</th>
+                                <th class="text-right" style="width: 10%;">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <ng-container *ngIf="row.writeDownDetailList.length > 0">
+                                <tr *ngFor="let detsils of row.writeDownDetailList; trackBy :trackByFn;let i=index"
+                                  id="write-down-index-{{i}}">
+                                  <td>{{detsils.writeDownDateTime | date: 'MM/dd/yy, h:mm a'}}</td>
+
+                                  <td>{{detsils?.code}}</td>
+                                  <td>{{detsils?.name}}</td>
+                                  <td class="text-danger">
+                                    -{{detsils.writeDownAmount | currency : 'USD': 'symbol': '1.2-2'}}
+                                  </td>
+                                  <td>{{detsils.originalAmount | currency : 'USD': 'symbol': '1.2-2'}}</td>
+                                  <td class="text-right">
+                                    <div class="d-flex justify-content-end">
+                                      <div class="dropdown dropdown-hover-table"
+                                        [class.active]="currentActiveDetls == i" (click)="openMenudetls(i, $event)"
+                                        appAutoCloseOutsideClick (outsideClick)="onClickedOutsidedetls($event, i)">
+                                        <span class="icon-area">
+                                          <em class="icon icon-dot-verti"></em>
+                                        </span>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                          aria-labelledby="dropdownMenuButton">
+                                          <a class="dropdown-item" href="javascript:void(0)"
+                                            (click)="witeDown(row, 'view', detsils)" id="view-write-down-index-{{i}}">
+                                            View Write-Down
+                                          </a>
+                                          <a *ngIf="isWriteDownAdmin" class="dropdown-item" href="javascript:void(0)"
+                                            (click)="witeDown(row, 'edit', detsils)" id="edit-write-down-index-{{i}}">
+                                            Edit Write-Down
+                                          </a>
+                                          <a *ngIf="isWriteDownAdmin" class="dropdown-item" href="javascript:void(0)"
+                                            (click)="removeWriteDown(detsils)" id="delete-write-down-index-{{i}}">
+                                            Delete Write-Down
+                                          </a>
+
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </ng-container>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-row-detail>
+            <ngx-datatable-column [resizeable]="false" prop="consultationFeeList.dateOfService" name="Date of Service"
+              [width]="180">
+              <ng-template let-row="row" let-value="value" let-isSelected="isSelected"
+                let-onCheckboxChangeFn="onCheckboxChangeFn" let-expanded="expanded" ngx-datatable-cell-template>
+                <div class="d-flex align-items-center">
+                  <span class="payment-plan-table-arrow mr-3 cursor-pointer" (click)="toggleExpandRow(row)">
+                    <em [ngClass]="!expanded?'icon icon-angle-down':'icon icon-angle-up'"></em>
+                  </span>
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+                    <span class="check-style"></span>
+                  </label>
+                  <span class="ml-3">{{value | date : 'MM/dd/yyyy'}}</span>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="consultationFeeList.enterBy" name="Entered By"
+              [width]="120">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="consultationFeeList.code" name="Code" [width]="120">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="consultationFeeList.name" name="Name" [width]="150">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="consultationFeeList.displayAmount" name="Amount"
+              [width]="170">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <div class="d-flex align-items-center">
+                  <span> {{(value || 0) | currency : 'USD': 'symbol': '1.2-2'}} </span>
+                  <div class="info-hover position-relative ml-12" *ngIf="row.consultationFeeList.writeDownAmount > 0">
+                    <img src="assets/images/bullet-list.svg">
+                    <div class="tooltip bs-tooltip-top left" role="tooltip">
+                      <div class="arrow"></div>
+                      <div class="tooltip-inner">
+                        <div class="d-flex pb-4 align-items-center justify-content-between">
+                          <span class="font-weight-medium small">Original Amount</span>
+                          <span class="lh-20">{{row.consultationFeeList.originalAmount | currency : 'USD': 'symbol':
+                            '1.2-2'}}</span>
+                        </div>
+                        <div class="d-flex pb-4 align-items-center justify-content-between">
+                          <span class="font-weight-medium small">Write-Down</span>
+                          <span class="lh-20">
+                            {{(row.consultationFeeList.displayAmount - row.consultationFeeList.originalAmount) |
+                            currency :
+                            'USD': 'symbol': '1.2-2'}}
+                          </span>
+                        </div>
+                        <div class="d-flex pt-8 align-items-center border-top-white justify-content-between">
+                          <span class="font-weight-medium small">To Be Billed</span>
+                          <span class="lh-20">{{row.consultationFeeList.displayAmount | currency : 'USD': 'symbol':
+                            '1.2-2'}}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+
+            </ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-center pr-2'"
+              name="Action" [width]="100" [frozenRight]="true">
+              <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                <div ngbDropdown container="body" class="d-flex justify-content-end"
+                  *ngIf="row.consultationFeeList.status == 'Recorded' && isAdmin">
+                  <!-- set button for icon if needed -->
+                  <div class="dropdown-hover-table pr-0" ngbDropdownToggle>
+                    <span class="icon-area">
+                      <em class="icon icon-dot-verti"></em>
+                    </span>
+                  </div>
+                  <div ngbDropdownMenu class="dropdown-menu dropdown-menu-right overflow-hide custom-height">
+                    <div class="dropdown-slimscrol">
+                      <a class="dropdown-item" *ngIf="row.consultationFeeList.status == 'Recorded' && isWriteDownAdmin"
+                        (click)="witeDown(row, 'add', null)">Write-Down Consultation Fee</a>
+                      <a class="dropdown-item" *ngIf="row.consultationFeeList.status == 'Recorded' && isAdmin"
+                        (click)="addConsulation('edit',row, $event)">Edit Consultation Fee</a>
+                      <a class="dropdown-item" *ngIf="row.consultationFeeList.status == 'Recorded' && isAdmin"
+                        (click)="openModal(row,DeleteConfirmation)">Delete Consultation Fee</a>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)="cancel()" id="cancle-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="!selectedConsultationFees.length || loading"
+          (click)='billToClient(billClient)' id="bill-now-btn">
+          <span>Bill Now</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice'
+    [invoiceTemplateDetails]='invoiceTemplateDetails'
+    [matterBillingSettings]='billToClientResponse.matterBillingSettings' [tenantDetails]='tenantDetails'
+    [loggedinuserId]='loginUser.id' [default_logo_url]='default_logo_url' [trustAccountEnabled]='trustAccountEnabled'
+    [checkTrustAccountStatus]='false' (invoiceHTMLDetails)='sendEmailAndPrint($event, emilAddressNotOnFile)'>
+  </app-invoice-extended-pdf>
+</div>
+
+<ng-template #billClient let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Bill to Potential Client</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data mb-24">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">
+          Are you sure you want to bill
+          <strong>{{ clientDetails?.isCompany ? clientDetails?.companyName : clientDetails?.lastName + ', ' +
+            clientDetails?.firstName }}</strong> for
+          <strong>{{totalBillAmount | currency : 'USD' : 'symbol': '1.2-2'}}</strong>?
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="custom-control custom-checkbox mb-12 pr-0" *ngIf='isEmailPresent'>
+        <input type="checkbox" class="custom-control-input" id="customCheck1_email" [value]='true'
+          [(ngModel)]='sendEmail' >
+        <label class="custom-control-label text-case-none" for="customCheck1_email">Email invoice to potential client</label>
+      </div>
+      <div class="custom-control custom-checkbox mb-0 pr-0">
+        <input type="checkbox" class="custom-control-input" id="customCheck2_print" [value]='true' [(ngModel)]='print'>
+        <label class="custom-control-label text-case-none" for="customCheck2_print">Print invoice</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancel-bill">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="yes-bill-to-client">
+      <span>Yes, Bill to Potential Client</span>
+    </button>
+  </div>
+</ng-template>
+
+
+<ng-template #emilAddressNotOnFile let-modal>
+  <div class="card mb-0">
+    <div class="card-body">
+      <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Email Address Not on File</h3>
+        <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-model">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-start missing-data mb-32">
+          <em class="icon icon-warning text-warning"></em>
+          <div class="lh-20 ml-16">
+            <p class="m-0">
+              Client <strong> {{clientEmailInfo.client.name}} </strong> has no email address on file, so their cannot be
+              sent. Enter an email address to complete this step. <br>
+              This will be saved to the client's profile.
+            </p>
+
+            <div class="form-group">
+              <label>Email Address <sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="Enter client's email address"
+                [(ngModel)]='emailAddressToUpdate' id="enter-client-email">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancle-model">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="save-and-send-email">Save and Send
+          Email
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #noEntry>
+  <p>No consultation fees recorded</p>
+</ng-template>
+
+<ng-template #DeleteConfirmation let-modal="modal">
+  <div class="modal-header pb-24">
+    <h3 class="modal-title mb-0">Delete Consultation Fee</h3>
+    <button type="button" class="close" (click)="closeModal()" id="acttq-ttab-close-btn" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0"> Are you sure you want to delete this consultation fee from this potential client's record?
+        </p>
+
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="closeModal()" id="acttq-ttab-cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="deleteConsultation(); "
+      id="acttq-ttab-yaprvm-btn">Delete</button>
+  </div>
+</ng-template>

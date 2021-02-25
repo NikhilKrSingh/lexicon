@@ -1,0 +1,732 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0" *ngIf='!paymentPlan?.id'>Create Payment Plan</h3>
+  <h3 class="modal-title mb-0" *ngIf='paymentPlan?.id > 0'>Edit Payment Plan</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <p *ngIf='hasAutoPaymentMethod'>
+    By setting up a payment plan, any current auto-pay settings will be temporarily suspended. If you want auto-pay to
+    process for this payment plan, be sure to select Activate Auto-Pay below.
+  </p>
+  <div class="form-group">
+    <label class="d-block">Current Balance Due</label>
+    {{ balanceDue | currency : 'USD': 'symbol': '1.2-2' }}
+  </div>
+  <ng-container *ngIf='!paymentPlan?.id'>
+    <div [formGroup]='paymentPlanForm'>
+      <div class="row">
+        <div class="col-9">
+          <div class="row gutter-16">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Payment Frequency <sup>*</sup></label>
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <input type="text" class="form-control" (keypress)="checkNumber($event)"
+                      formControlName="billFrequencyQuantity" (blur)='calcEsitmatedPayofflDate()'
+                      (change)='hasFrequencyOrDayChanged = true' id="bill-frequency-text">
+                  </div>
+                  <div class="col-8">
+                    <ng-select [items]="billFrequencyList" placeholder="Select duration"
+                      formControlName='billFrequencyLookup' [bindValue]="'id'" [bindLabel]="'name'" [clearable]='false'
+                      [notFoundText]="'No record found'" [selectOnTab]="true" (change)="onSelectDur($event)" id="select-duration">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Amount to Be Paid <sup>*</sup></label>
+                <input type="text" placeholder="Enter Amount to be paid each installment" class="form-control" prefix="$"
+                  mask="separator.2" thousandSeparator="," formControlName='amountToPay' (blur)='validateAmount()' id="amount-to-be-paid">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="form-group">
+            <label class="d-block">Estimated Payoff Date</label>
+            <span *ngIf='estimatedPayoffDate' id="estimate-payoff-date">{{estimatedPayoffDate | date: 'MM/dd/yyyy'}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="row form-group" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'">
+        <div class="col-3">
+          <label class="mb-20">Repeat Type <sup>*</sup></label>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="aday_ofthe_week_id" name="repeatType" formControlName="repeatType"
+                   class="custom-control-input" [value]="1">
+            <label class="custom-control-label" for="aday_ofthe_week_id">A Day of the Week Instance</label>
+          </div>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="aday_ofthe_month_id" name="repeatType" formControlName="repeatType"
+                   class="custom-control-input" [value]="2">
+            <label class="custom-control-label" for="aday_ofthe_month_id">A Day of the Month</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" *ngIf="paymentPlanForm.value.repeatType === 1">
+        <label class="mb-3">Day of the week<sup>*</sup></label>
+        <ul class="list-unstyled mb-0 day-list d-flex">
+          <li (click)="selectDay(0)" [class.active]="repeatsOn[0].selected" id="S">S</li>
+          <li (click)="selectDay(1)" [class.active]="repeatsOn[1].selected" id="M">M</li>
+          <li (click)="selectDay(2)" [class.active]="repeatsOn[2].selected" id="t">t</li>
+          <li (click)="selectDay(3)" [class.active]="repeatsOn[3].selected" id="w">w</li>
+          <li (click)="selectDay(4)" [class.active]="repeatsOn[4].selected" id="t">t</li>
+          <li (click)="selectDay(5)" [class.active]="repeatsOn[5].selected" id="f">f</li>
+          <li (click)="selectDay(6)" [class.active]="repeatsOn[6].selected" id="s">s</li>
+        </ul>
+        <p class="pt-16"
+          *ngIf='paymentPlanForm?.value?.billFrequencyQuantity && paymentPlanForm?.value?.billFrequencyLookup && !selectedRecursDay'>
+          <span>The client will be billed <strong>every {{paymentPlanForm.value.billFrequencyQuantity}} {{selectedDuration?.name}}</strong> <span *ngIf='selectedDay'>&nbsp;at approximately midnight on&nbsp;<strong>{{selectedDay}}</strong></span>.
+          </span>
+        </p>
+      </div>
+      <div class="row gutter-16" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'">
+        <div class="col-4">
+          <div class="form-group">
+            <label>Repeats on<sup>*</sup></label>
+            <ng-select [items]="recursOnList" placeholder="Select recurring week" [bindValue]="'id'" [bindLabel]="'name'"
+              formControlName="billingFrequencyRecursDay" (change)="onSelectRecursDay($event)"
+              [notFoundText]="'No record found'" [selectOnTab]="true" id="recurs-on">
+            </ng-select>
+          </div>
+        </div>
+      </div>
+      <div class="row gutter-16"
+        *ngIf='paymentPlanForm?.value?.billFrequencyQuantity && paymentPlanForm?.value?.billFrequencyLookup && selectedRecursDay'>
+        <div class="col-12">
+          <p>
+            <span>
+              The client will be billed <strong>every {{paymentPlanForm.value.billFrequencyQuantity}} {{selectedDuration?.name}}</strong>&nbsp;at approximately midnight on&nbsp;<strong>the {{selectedRecursDay?.name}}</strong>.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div class="row gutter-16" *ngIf='!paymentPlan'>
+        <div class="col-4">
+          <div class="form-group">
+            <label>Effective date<sup>*</sup></label>
+            <app-date-picker [isForm]='true' [dateform]='paymentPlanForm' [disableInput]='true'
+              controlName="effectiveDate" [dateTimeFilter]='dateTimeFilter'
+              (dataChange)='calcEsitmatedPayofflDate()' id="effective-date">
+            </app-date-picker>
+          </div>
+        </div>
+      </div>
+      <div class="row gutter-16">
+        <div class="col-5">
+          <div class="form-group">
+            <label>If Billing Date Falls on Holiday or Non-Working Day <sup>*</sup></label>
+            <div class="date-field position-relative">
+              <ng-select
+                [items]="billWhenHolidayList"
+                placeholder="Generate pre-bills and invoices on that date"
+                [bindValue]="'id'"
+                [bindLabel]="'name'"
+                formControlName="billWhenHoliday"
+                (change)="setValue('changes')"
+                [notFoundText]="'No record found'"
+                [clearable]="false"
+                [selectOnTab]="true"
+                id="billing-fall-select">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" [formGroup]='paymentPlanForm'>
+      <div class="col-7">
+        <h4 class="text-xlarge mt-0 mb-8">Auto-Pay</h4>
+        <p class="lh-20 mb-12">The balance due will be charged to this payment method at the end of each payment plan frequency.<br>
+          Be sure to also file a signed Auto-Pay Agreement to the Document Management System.</p>
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="customCheck2" [value]='true'
+            formControlName='isAutoPay'>
+          <label class="custom-control-label" for="customCheck2">Activate Auto-Pay</label>
+        </div>
+      </div>
+    </div>
+    <div class="info-block pt-24" [hidden]='!paymentPlanForm?.value?.isAutoPay'>
+      <h4 class="mt-0">Credit Cards</h4>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <ngx-datatable #tablematterTypes class="material common-table datatable-auto-height" [rows]="creditCardList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" rowHeight="auto" id="credit-card-listing-tbl">
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Select" [canAutoResize]="false" [width]="80">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <div class="custom-control custom-radio">
+                  <input type="radio" id="select_cc_{{row.id}}" name="autoPay" value="true" class="custom-control-input"
+                    (change)='onSelect(row, "cc")' [checked]='row.id == ccId'>
+                  <label class="custom-control-label" for="select_cc_{{row.id}}"></label>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="lastName" name="Name on Card" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span *ngIf='!row.isCompany'> {{ row.lastName}}, {{row.firstName}}</span>
+                <span *ngIf='row.isCompany'> {{ row.companyName }}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="cardNumber" name="Card Number" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span>{{value | appCreditCardNumber}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="expirationDate" name="Expiration Date" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span> {{row.expiryDate}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="cardType" name="Card Type" [width]="200">
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+      </div>
+    </div>
+    <div class="info-block pt-24 pb-24" [hidden]='!paymentPlanForm?.value?.isAutoPay'>
+      <h4 class="mt-0">E-Check</h4>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <ngx-datatable #tableECheck class="material common-table datatable-auto-height" [rows]="echeckList" [columnMode]="ColumnMode.force"
+            [headerHeight]="50" [footerHeight]="0" rowHeight="auto" id="e-check-listing-tbl">
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Select" [canAutoResize]="false" [width]="80">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <div class="custom-control custom-radio">
+                  <input type="radio" id="select_echeck_{{row.id}}" name="autoPay" value="true"
+                    class="custom-control-input" (change)='onSelect(row, "echeck")' [checked]='row.id == echeckId'>
+                  <label class="custom-control-label" for="select_echeck_{{row.id}}"></label>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="routingNumber" name="Routing Number" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span>{{value | appCreditCardNumber}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="accountNumber" name="Account Number" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span> {{value | appCreditCardNumber}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="bankName" name="Bank Name" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span> {{value}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf='paymentPlan?.id > 0'>
+    <div class="edit-collapse-block edit-collapse-open">
+      <div class="d-flex justify-content-between" [ngClass]="{'edit-collapse-head':editPaymentPlan}">
+        <h4 class="text-xlarge m-0">Payment Plan</h4>
+        <button (click)="editPaymentPlan = true;editAutoPay=false;" class="btn btn-link btn-icon p-0 d-flex align-items-center" type="button" id="edit-payment-plan">
+          <i class="icon icon-edit"></i>Edit
+        </button>
+      </div>
+      <div class="edit-collapse-body py-16" *ngIf="editPaymentPlan">
+        <ng-container *ngIf="!paymentPlan?.pendingBillFrequencyQuantity else upcomingsection">
+          <div [formGroup]='paymentPlanForm' >
+            <div class="row">
+              <div class="col-8">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>Payment Frequency <sup>*</sup></label>
+                      <div class="row gutter-16">
+                        <div class="col-6">
+                          <input type="text" class="form-control" (keypress)="checkNumber($event)"
+                            formControlName="billFrequencyQuantity" (blur)='calcEsitmatedPayofflDate()'
+                            (change)='hasFrequencyOrDayChanged = true' id="bill-fre-qty">
+                        </div>
+                        <div class="col-6">
+                          <ng-select [items]="billFrequencyList" placeholder="Select duration"
+                            formControlName='billFrequencyLookup' [bindValue]="'id'" [bindLabel]="'name'" [clearable]='false'
+                            [notFoundText]="'No record found'" [selectOnTab]="true" (change)="onSelectDur($event)" id="bill-fre-qty-select">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>Amount to Be Paid <sup>*</sup></label>
+                      <input type="text" placeholder="Enter Amount to be paid each installment" class="form-control" prefix="$"
+                        mask="separator.2" thousandSeparator="," formControlName='amountToPay' (blur)='validateAmount()' id="amount-to-paid">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group">
+                  <label class="d-block">Estimated Payoff Date</label>
+                  <span *ngIf='estimatedPayoffDate' id="estimated-payoffdate">{{estimatedPayoffDate | date: 'MM/dd/yyyy'}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="row form-group" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'">
+              <div class="col-3">
+                <label class="mb-20">Repeat Type <sup>*</sup></label>
+                <div class="custom-control custom-radio pr-0">
+                  <input type="radio" id="aday_ofthe_week_id" name="repeatType" formControlName="repeatType"
+                         class="custom-control-input" [value]="1">
+                  <label class="custom-control-label" for="aday_ofthe_week_id">A Day of the Week Instance</label>
+                </div>
+                <div class="custom-control custom-radio pr-0">
+                  <input type="radio" id="aday_ofthe_month_id" name="repeatType" formControlName="repeatType"
+                         class="custom-control-input" [value]="2">
+                  <label class="custom-control-label" for="aday_ofthe_month_id">A Day of the Month</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group" *ngIf="paymentPlanForm.value.repeatType === 1">
+              <label class="mb-3">Day of the week<sup>*</sup></label>
+              <ul class="list-unstyled mb-0 day-list d-flex">
+                <li (click)="selectDay(0)" [class.active]="repeatsOn[0].selected" id="S">S</li>
+                <li (click)="selectDay(1)" [class.active]="repeatsOn[1].selected" id="M">M</li>
+                <li (click)="selectDay(2)" [class.active]="repeatsOn[2].selected" id="t">t</li>
+                <li (click)="selectDay(3)" [class.active]="repeatsOn[3].selected" id="w">w</li>
+                <li (click)="selectDay(4)" [class.active]="repeatsOn[4].selected" id="t">t</li>
+                <li (click)="selectDay(5)" [class.active]="repeatsOn[5].selected" id="f">f</li>
+                <li (click)="selectDay(6)" [class.active]="repeatsOn[6].selected" id="s">s</li>
+              </ul>
+            </div>
+            <div class="row gutter-16" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'">
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Repeats on<sup>*</sup></label>
+                  <ng-select [items]="recursOnList" placeholder="Select recurring week" [bindValue]="'id'" [bindLabel]="'name'"
+                    formControlName="billingFrequencyRecursDay" (change)="onSelectRecursDay($event)"
+                    [notFoundText]="'No record found'" [selectOnTab]="true" id="recurs-on">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16">
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Effective date<sup>*</sup></label>
+                  <app-date-picker [isForm]='true' [dateform]='paymentPlanForm' [disableInput]='true'
+                    controlName="effectiveDate" [dateTimeFilter]='dateTimeFilter'
+                    (dataChange)='calcEsitmatedPayofflDate()' id="effective-date">
+                  </app-date-picker>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16">
+              <div class="col-5">
+                <div class="form-group">
+                  <label>If Billing Date Falls on Holiday or Non-Working Day <sup>*</sup></label>
+                  <div class="date-field position-relative">
+                    <ng-select
+                      [items]="billWhenHolidayList"
+                      placeholder="Generate pre-bills and invoices on that date"
+                      [bindValue]="'id'"
+                      [bindLabel]="'name'"
+                      formControlName="billWhenHoliday"
+                      (change)="setValue('changes')"
+                      [notFoundText]="'No record found'"
+                      [clearable]="false"
+                      [selectOnTab]="true"
+                      id="billing-fall-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ng-container *ngIf='paymentPlanForm?.valid'>
+              <p *ngIf="selectedDuration?.code === 'MONTHS'">
+                <span>The client will be billed <strong>{{paymentPlanForm?.value?.amountToPay | currency : 'USD': 'symbol': '1.0-0'}} every {{paymentPlanForm.value.billFrequencyQuantity}} {{(paymentPlanForm.value.billFrequencyQuantity === 1) ? 'Month' : selectedDuration?.name}}</strong><span *ngIf='selectedDay'> at approximately midnight on
+                  <strong *ngIf="paymentPlanForm?.value.repeatType === 1">the {{recurringName[paymentPlanForm?.value?.billingFrequencyRecursDay-1]}} {{selectedDay}} of the month</strong>
+                  <strong *ngIf="paymentPlanForm?.value.repeatType === 2">the {{paymentPlanForm?.value?.billingFrequencyRecursDay}}{{(paymentPlanForm?.value.billingFrequencyRecursDay === 1) ? 'st' :
+                    (paymentPlanForm?.value.billingFrequencyRecursDay === 2) ? 'nd' :
+                      (paymentPlanForm?.value.billingFrequencyRecursDay === 3) ? 'rd' : 'th'}} of the month</strong>
+                  starting on <strong>{{paymentPlanForm?.value?.effectiveDate | date: 'MM/dd/yyyy'}}</strong></span>.
+                </span>
+              </p>
+              <p *ngIf="selectedDuration?.code === 'WEEKS'">
+                <span>The client will be billed <strong>{{paymentPlanForm?.value?.amountToPay | currency : 'USD': 'symbol': '1.0-0'}} every {{paymentPlanForm.value.billFrequencyQuantity}} {{(paymentPlanForm.value.billFrequencyQuantity === 1) ? 'Week' : selectedDuration?.name}}</strong><span *ngIf='selectedDay'> at approximately midnight on <strong>{{selectedDay}}</strong></span>.
+                </span>
+              </p>
+            </ng-container>
+          </div>
+          <div class="d-flex pt-32">
+            <div class="btn-group">
+              <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+              <button type="button" class="btn btn-primary" (click)='sendForApproval()' [disabled]="!paymentPlanForm.valid" id="save-changes-btn">Save Changes</button>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #upcomingsection>
+          <h4 class="text-xlarge m-0">Current Plan</h4>
+          <div class="upcome-body pt-24">
+            <div class="form-group">
+              <label class="d-block mb-4">Bill Every</label>
+              {{paymentPlan?.billFrequencyQuantity}} {{(paymentPlan?.billFrequencyQuantity === 1) ? (paymentPlan?.billFrequencyLookUpName | slice:0:-1) : paymentPlan?.billFrequencyLookUpName}}
+            </div>
+            <div class="form-group">
+              <label class="d-block mb-4">Amount to Be Paid</label>
+              {{paymentPlan?.amountToPay | currency : 'USD': 'symbol': '1.0-0'}}
+            </div>
+            <div class="form-group">
+              <label class="d-block mb-4">Estimated Payoff Date</label>
+              <ng-container *ngIf='paymentPlan?.estimatedPayoffDate'>{{paymentPlan?.estimatedPayoffDate | date: 'MM/dd/yyyy'}}</ng-container>
+            </div>
+            <div class="form-group">
+              <label class="d-block mb-4">Repeats on</label>
+              {{billFrequencyDayObj?.name}}
+            </div>
+            <div class="form-group" *ngIf="paymentPlan?.billFrequencyLookUpName === 'Months'">
+              <label class="d-block mb-4">Recurs on</label>
+              <div *ngIf="paymentPlan?.repeatType === 1">
+                {{recurringName[paymentPlan?.billFrequencyRecursOn-1]}} {{billFrequencyDayObj?.name}} of the month
+              </div>
+              <div *ngIf="paymentPlan?.repeatType === 2">
+                {{paymentPlan?.billFrequencyRecursOn}}{{(paymentPlan?.billFrequencyRecursOn === 1) ? 'st' : (paymentPlan?.billFrequencyRecursOn === 2) ? 'nd' : (paymentPlan?.billFrequencyRecursOn === 3) ? 'rd' : 'th'}} of the month
+              </div>
+            </div>
+            <div class="form-group">
+              <ng-container *ngIf="paymentPlan?.billFrequencyLookUpName === 'Months'">
+                The client is billed <strong>{{paymentPlan?.amountToPay | currency : 'USD': 'symbol': '1.0-0'}} every {{paymentPlan?.billFrequencyQuantity}} {{(paymentPlan?.billFrequencyQuantity === 1) ? (paymentPlan?.billFrequencyLookUpName | slice:0:-1) : paymentPlan?.billFrequencyLookUpName}}</strong> at approximately midnight on
+                <strong *ngIf="paymentPlan?.repeatType === 1"> the {{recurringName[paymentPlan?.billFrequencyRecursOn-1]}} {{billFrequencyDayObj?.name}} of the month </strong>
+                <strong *ngIf="paymentPlan?.repeatType === 2"> the {{paymentPlan?.billFrequencyRecursOn}}{{(paymentPlan?.billFrequencyRecursOn === 1) ? 'st' :
+                  (paymentPlan?.billFrequencyRecursOn === 2) ? 'nd' :
+                    (paymentPlan?.billFrequencyRecursOn === 3) ? 'rd' : 'th'}} of the month </strong>
+                until <strong>{{displayUntillDate}}</strong>.
+              </ng-container>
+              <ng-container *ngIf="paymentPlan?.billFrequencyLookUpName === 'Weeks'">
+                The client is billed <strong>{{paymentPlan?.amountToPay | currency : 'USD': 'symbol': '1.0-0'}} every {{paymentPlan?.billFrequencyQuantity}} {{(paymentPlan?.billFrequencyQuantity === 1) ? (paymentPlan?.billFrequencyLookUpName | slice:0:-1) : paymentPlan?.billFrequencyLookUpName}}</strong> at approximately midnight on <strong>{{billFrequencyDayObj?.name}} </strong> until <strong>{{displayUntillDate}}</strong>.
+              </ng-container>
+            </div>
+          </div>
+          <div class="upcoming-change">
+            <h4>Upcoming Changes</h4>
+            <div class="upcome-accordian open">
+              <div class="d-flex align-items-center upcome-head">
+                <span class="cursor-pointer upcome-drop mr-16" (click)="showUpcoming = !showUpcoming">
+                  <em class="icon icon-angle-down icon-color" [ngClass]="showUpcoming ? 'icon-angle-down':'icon-angle-up'"></em>
+                </span>
+                <p class="m-0 lh-20" *ngIf="upcomingChangesDisplay?.pendingBillFrequencyLookUpName === 'Months'">
+                  <span>
+                    The client will be billed <strong>{{upcomingChangesDisplay?.pendingAmountToPay | currency : 'USD': 'symbol': '1.0-0'}} every {{upcomingChangesDisplay?.pendingBillFrequencyQuantity}} {{(upcomingChangesDisplay?.pendingBillFrequencyQuantity === 1) ? 'Month' : upcomingChangesDisplay?.pendingBillFrequencyLookUpName}}</strong><span *ngIf='selectedDay'> at approximately midnight on
+                    <strong *ngIf="upcomingChangesDisplay?.pendingRepeatType === 1">the {{recurringName[upcomingChangesDisplay?.pendingBillFrequencyRecursOn-1]}} {{effectiveBillFrequencyDayObj?.name}} of the month </strong>
+                    <strong *ngIf="upcomingChangesDisplay?.pendingRepeatType === 2">the {{upcomingChangesDisplay?.pendingBillFrequencyRecursOn}}{{(upcomingChangesDisplay?.pendingBillFrequencyRecursOn === 1) ? 'st' :
+                      (upcomingChangesDisplay?.pendingBillFrequencyRecursOn === 2) ? 'nd' :
+                        (upcomingChangesDisplay?.pendingBillFrequencyRecursOn === 3) ? 'rd' : 'th'}} of the month </strong>
+                    starting on <strong>{{upcomingChangesDisplay?.effectiveDate | date: 'MM/dd/yyyy'}}</strong></span>.
+                  </span>
+                </p>
+                <p class="m-0 lh-20" *ngIf="upcomingChangesDisplay?.pendingBillFrequencyLookUpName === 'Weeks'">
+                  <span>
+                    The client will be billed <strong>{{upcomingChangesDisplay?.pendingAmountToPay | currency : 'USD': 'symbol': '1.0-0'}} every {{upcomingChangesDisplay?.pendingBillFrequencyQuantity}} {{(upcomingChangesDisplay?.pendingBillFrequencyQuantity === 1) ? 'Week' : upcomingChangesDisplay?.pendingBillFrequencyLookUpName}}</strong><span *ngIf='selectedDay'> at approximately midnight on <strong>{{effectiveBillFrequencyDayObj?.name}}</strong> starting on <strong>{{upcomingChangesDisplay?.effectiveDate | date: 'MM/dd/yyyy'}}</strong></span>.
+                  </span>
+                </p>
+
+                <div class="upcome-icon-action d-flex align-items-center pl-16">
+                  <span class="cursor-pointer" (click)="editUpcoming()" id="edit-upcoming">
+                    <em class="icon icon-edit icon-color"></em>
+                  </span>
+                  <span class="cursor-pointer ml-16" (click)="removeBillUpcoming = !removeBillUpcoming" id="remove-billing-upcoming">
+                    <em class="icon icon-remove icon-color"></em>
+                  </span>
+                </div>
+              </div>
+              <div class="upcome-body pt-24 pl-32" *ngIf="showUpcoming">
+                <ng-container *ngIf="editBillUpcoming else viewBillUpcoming">
+                  <div [formGroup]='paymentPlanForm'>
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="row gutter-16">
+                          <div class="col-6">
+                            <div class="form-group">
+                              <label>Payment Frequency <sup>*</sup></label>
+                              <div class="row gutter-16">
+                                <div class="col-4">
+                                  <input type="text" class="form-control" (keypress)="checkNumber($event)"
+                                    formControlName="billFrequencyQuantity" (blur)='calcEsitmatedPayofflDate()'
+                                    (change)='hasFrequencyOrDayChanged = true' id="bill-fre-qty-edit">
+                                </div>
+                                <div class="col-8">
+                                  <ng-select [items]="billFrequencyList" placeholder="Select duration"
+                                    formControlName='billFrequencyLookup' [bindValue]="'id'" [bindLabel]="'name'" [clearable]='false'
+                                    [notFoundText]="'No record found'" [selectOnTab]="true" (change)="onSelectDur($event)" id="bill-fre-select-edit">
+                                  </ng-select>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <div class="form-group">
+                              <label>Amount to Be Paid <sup>*</sup></label>
+                              <input type="text" placeholder="Enter Amount to be paid each installment" class="form-control" prefix="$"
+                                mask="separator.2" thousandSeparator="," formControlName='amountToPay' (blur)='validateAmount()' id="amount-to-be-paid">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="form-group">
+                          <label class="d-block">Estimated Payoff Date</label>
+                          <span *ngIf='estimatedPayoffDate' id="estimated-payoff-date">{{estimatedPayoffDate | date: 'MM/dd/yyyy'}}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row form-group" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'">
+                      <div class="col-3">
+                        <label class="mb-20">Repeat Type <sup>*</sup></label>
+                        <div class="custom-control custom-radio pr-0">
+                          <input type="radio" id="aday_ofthe_week_id" name="repeatType" formControlName="repeatType"
+                                 class="custom-control-input" [value]="1">
+                          <label class="custom-control-label" for="aday_ofthe_week_id">A Day of the Week Instance</label>
+                        </div>
+                        <div class="custom-control custom-radio pr-0">
+                          <input type="radio" id="aday_ofthe_month_id" name="repeatType" formControlName="repeatType"
+                                 class="custom-control-input" [value]="2">
+                          <label class="custom-control-label" for="aday_ofthe_month_id">A Day of the Month</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group" *ngIf="paymentPlanForm.value.repeatType === 1">
+                      <label class="mb-3">Day of the week<sup>*</sup></label>
+                      <ul class="list-unstyled mb-0 day-list d-flex">
+                        <li (click)="selectDay(0)" [class.active]="repeatsOn[0].selected" id="S">S</li>
+                        <li (click)="selectDay(1)" [class.active]="repeatsOn[1].selected" id="M">M</li>
+                        <li (click)="selectDay(2)" [class.active]="repeatsOn[2].selected" id="t">t</li>
+                        <li (click)="selectDay(3)" [class.active]="repeatsOn[3].selected" id="w">w</li>
+                        <li (click)="selectDay(4)" [class.active]="repeatsOn[4].selected" id="t">t</li>
+                        <li (click)="selectDay(5)" [class.active]="repeatsOn[5].selected" id="f">f</li>
+                        <li (click)="selectDay(6)" [class.active]="repeatsOn[6].selected" id="s">s</li>
+                      </ul>
+                    </div>
+                    <div class="row gutter-16" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'">
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label>Repeats on<sup>*</sup></label>
+                          <ng-select [items]="recursOnList" placeholder="Select recurring week" [bindValue]="'id'" [bindLabel]="'name'"
+                            formControlName="billingFrequencyRecursDay" (change)="onSelectRecursDay($event)"
+                            [notFoundText]="'No record found'" [selectOnTab]="true" id="recurs-on">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row gutter-16">
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label>Effective date<sup>*</sup></label>
+                          <app-date-picker [isForm]='true' [dateform]='paymentPlanForm' [disableInput]='true'
+                            controlName="effectiveDate" [dateTimeFilter]='dateTimeFilter'
+                            (dataChange)='calcEsitmatedPayofflDate()' id="effective-date">
+                          </app-date-picker>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row gutter-16">
+                      <div class="col-5">
+                        <div class="form-group">
+                          <label>If Billing Date Falls on Holiday or Non-Working Day <sup>*</sup></label>
+                          <div class="date-field position-relative">
+                            <ng-select
+                              [items]="billWhenHolidayList"
+                              placeholder="Generate pre-bills and invoices on that date"
+                              [bindValue]="'id'"
+                              [bindLabel]="'name'"
+                              formControlName="billWhenHoliday"
+                              (change)="setValue('changes')"
+                              [notFoundText]="'No record found'"
+                              [clearable]="false"
+                              [selectOnTab]="true"
+                              id="billing-fall-select">
+                            </ng-select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-template #viewBillUpcoming>
+                  <div class="form-group">
+                    <label class="d-block mb-4">Effective Date</label>
+                    {{paymentPlan?.effectiveDate | date: 'MM/dd/yyyy'}}
+                  </div>
+                  <div class="form-group">
+                    <label class="d-block mb-4">Bill Every</label>
+                    {{paymentPlan?.pendingBillFrequencyQuantity}} {{(paymentPlan?.pendingBillFrequencyQuantity === 1) ? (paymentPlan?.pendingBillFrequencyLookUpName | slice:0:-1) : paymentPlan?.pendingBillFrequencyLookUpName}}
+                  </div>
+                  <div class="form-group">
+                    <label class="d-block mb-4">Amount to Be Paid</label>
+                    {{paymentPlan?.pendingAmountToPay | currency : 'USD': 'symbol': '1.0-0'}}
+                  </div>
+                  <div class="form-group">
+                    <label class="d-block mb-4">Estimated Payoff Date</label>
+                    {{paymentPlan?.pendingEstimatedPayoffDate | date: 'MM/dd/yyyy'}}
+                  </div>
+                  <div class="form-group">
+                    <label class="d-block mb-4">Repeats on</label>
+                    {{effectiveBillFrequencyDayObj?.name}}
+                  </div>
+                  <div class="form-group" *ngIf="paymentPlan?.pendingBillFrequencyLookUpName === 'Months'">
+                    <label class="d-block mb-4">Recurs on</label>
+                    <div *ngIf="paymentPlan?.pendingRepeatType === 1">
+                      {{recurringName[paymentPlan?.pendingBillFrequencyRecursOn-1]}} {{effectiveBillFrequencyDayObj?.name}} of the month
+                    </div>
+                    <div *ngIf="paymentPlan?.pendingRepeatType === 2">
+                      {{paymentPlan?.pendingBillFrequencyRecursOn}}{{(paymentPlan?.pendingBillFrequencyRecursOn === 1) ? 'st' : (paymentPlan?.pendingBillFrequencyRecursOn === 2) ? 'nd' : (paymentPlan?.pendingBillFrequencyRecursOn === 3) ? 'rd' : 'th'}} of the month
+                    </div>
+                    <div></div>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="hasFrequencyOrDayChanged" class="alert alert-warning d-flex justify-content-between mb-24 no-shadow">
+            <div class="d-flex">
+              <em class="alert-icon icon icon-warning"></em>
+              <div class="d-flex align-items-center flex-wrap">
+                <h4 class="mr-16 mt-0 mb-0">Warning</h4>
+                Saving these changes will override the upcoming billing frequency settings.
+              </div>
+            </div>
+          </div>
+          <div *ngIf="removeBillUpcoming" class="alert alert-warning d-flex justify-content-between mb-24 mt-32 no-shadow">
+            <div class="d-flex">
+              <em class="alert-icon icon icon-warning"></em>
+              <div class="d-flex align-items-center flex-wrap">
+                  <h4 class="mr-16 mt-0 mb-4">Warning</h4>
+                  Are you sure you want to delete the upcoming billing frequency settings? This will leave the current settings active.
+              </div>
+            </div>
+            <a href="javascript:void(0)" (click)="removeUpcoming()" class="font-weight-semibold">Delete</a>
+          </div>
+          <div class="d-flex pt-32">
+            <div class="btn-group">
+              <button type="button" class="btn btn-light" (click)="cancelUpcoming()" [disabled]="!showUpcoming" id="cancel-btn">Cancel</button>
+              <button type="button" class="btn btn-primary" (click)='sendForApproval()' [disabled]="!paymentPlanForm.valid || !editBillUpcoming" id="save-changes">Save Changes</button>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <div class="edit-collapse-block edit-collapse-open">
+      <div class="d-flex justify-content-between" [ngClass]="{'edit-collapse-head':editAutoPay}">
+        <h4 class="text-xlarge m-0">Auto-Pay</h4>
+        <button (click)="editAutoPay = true;editPaymentPlan = false;" class="btn btn-link btn-icon p-0 d-flex align-items-center" type="button" id="edit-autopay">
+          <i class="icon icon-edit"></i>Edit
+        </button>
+      </div>
+      <div class="edit-collapse-body py-16" [hidden]="!editAutoPay">
+        <div class="row" [formGroup]='paymentPlanForm'>
+          <div class="col-7">
+            <p class="lh-20 mb-12">The balance due will be charged to this payment method at the end of each payment plan frequency.<br>
+              Be sure to also file a signed Auto-Pay Agreement to the Document Management System.</p>
+            <div class="custom-control custom-checkbox pr-0">
+              <input type="checkbox" class="custom-control-input" id="customCheck2" [value]='true'
+                formControlName='isAutoPay'>
+              <label class="custom-control-label" for="customCheck2">Activate Auto-Pay</label>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-24" [hidden]='!paymentPlanForm?.value?.isAutoPay'>
+          <h4 class="mt-0">Credit Cards</h4>
+          <div class="custom-table">
+            <div class="table-responsive">
+              <ngx-datatable #tablematterTypes class="material common-table" [rows]="creditCardList"
+                [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" rowHeight="auto" id="creditcard-listing-tbl">
+                <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Select" [canAutoResize]="false" [width]="80">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div class="custom-control custom-radio">
+                      <input type="radio" id="select_cc_{{row.id}}" name="autoPay" value="true" class="custom-control-input"
+                        (change)='onSelect(row, "cc")' [checked]='row.id == ccId'>
+                      <label class="custom-control-label" for="select_cc_{{row.id}}"></label>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="lastName" name="Name on Card" [width]="200">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <span *ngIf='!row.isCompany'> {{ row.lastName}}, {{row.firstName}}</span>
+                    <span *ngIf='row.isCompany'> {{ row.companyName }}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="cardNumber" name="Card Number" [width]="200">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <span>{{value | appCreditCardNumber}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="expirationDate" name="Expiration Date" [width]="200">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <span> {{row.expiryDate}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="cardType" name="Card Type" [width]="200">
+                </ngx-datatable-column>
+              </ngx-datatable>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-24 pb-24" [hidden]='!paymentPlanForm?.value?.isAutoPay'>
+          <h4 class="mt-0">E-Check</h4>
+          <div class="custom-table">
+            <div class="table-responsive">
+              <ngx-datatable #tableECheck class="material common-table" [rows]="echeckList" [columnMode]="ColumnMode.force"
+                [headerHeight]="50" [footerHeight]="0" rowHeight="auto" id="e-echeck-listing-tbl">
+                <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Select" [canAutoResize]="false" [width]="80">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div class="custom-control custom-radio">
+                      <input type="radio" id="select_echeck_{{row.id}}" name="autoPay" value="true"
+                        class="custom-control-input" (change)='onSelect(row, "echeck")' [checked]='row.id == echeckId'>
+                      <label class="custom-control-label" for="select_echeck_{{row.id}}"></label>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="routingNumber" name="Routing Number" [width]="200">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <span>{{value | appCreditCardNumber}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="accountNumber" name="Account Number" [width]="200">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <span> {{value | appCreditCardNumber}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="bankName" name="Bank Name" [width]="200">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <span> {{value}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+              </ngx-datatable>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16" *ngIf='paymentPlan?.id > 0'>
+          <div class="col-12">
+            <div class="form-group position-relative">
+              <label>Change Note (optional)</label>
+              <span class="count-char">{{changeNotes?.length || 0}}/1000</span>
+              <textarea class="form-control" rows="4" [(ngModel)]='changeNotes' maxlength='1000' id="change-note"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex">
+          <div class="btn-group">
+            <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="sendForApproval('autopay')" id="save-changes-btn">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+</div>
+<div class="modal-footer" *ngIf='!paymentPlan?.id'>
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" [disabled]='paymentPlanForm.invalid || !this.selectedDay'
+    (click)='sendForApproval()' id="save-btn">Save</button>
+</div>
+<app-loader [active]="loading"></app-loader>

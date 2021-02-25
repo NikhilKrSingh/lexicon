@@ -1,0 +1,28 @@
+
+<div class="modal-header pb-24 d-block">
+  <h3 class="modal-title mb-0">Edit States Licensed to Practice In</h3>
+  <button type="button" class="close" (click)="dismiss('Cross click')" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="form-group">
+    <div class="info-block pt-0">
+      <h6 class="helper-text mb-16 mt-0">This employee is licensed to practice in the following states:</h6>
+      <div class="state-col-4">
+        <div *ngFor="let state of stateList;trackBy :trackByFn;let i = index;">
+          <div class="custom-control custom-checkbox pr-0">
+            <input class="custom-control-input" id="emp-licensed-{{state.id}}" (change)="onCheckChange($event)"
+              [value]="state.id" [checked]="state.isSelected" type="checkbox">
+            <label class="custom-control-label" for="emp-licensed-{{state.id}}">{{state.name}}</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="dismiss('Cross click')" id='cancel-btn'>Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id='save-btn'>Save</button>
+</div>
+<app-loader [active]="loading"></app-loader>

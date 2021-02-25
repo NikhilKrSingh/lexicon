@@ -1,0 +1,36 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item" [routerLink]="['/import']"><a href="javascript:void(0)">Data Import</a></li>
+            <li class="breadcrumb-item active">Import Clients</li>
+        </ol>
+        <div class="heading">
+            <h1>Import Clients</h1>
+            <p class="">Use the checkboxes to select which data to update on import.<br>
+                    Required fields have been checked by default. The existing Primary Key should be entered when updating existing records, but should be left blank when uploading new records.<br>
+                    The upload file must be in <strong>.csv</strong> or <strong>.txt.</strong></p>
+        </div>
+        <div class="card">
+            <div class="card-body">
+               <h3 class="text-center">DATA-table show here...</h3>
+               <div class="row gutter-16">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="">You may leave change notes for the audit history (optional).</label>
+                            <textarea class="form-control non-resize height-1" placeholder="Enter Note Text"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex justify-content-end pb-24">
+                            <div class="btn-group mb-0">
+                                <button type="button" class="btn btn-light"[routerLink]="['/import']">Cancel</button>
+                                <button type="button" class="btn btn-primary" [routerLink]="['/import/run']">Save</button>
+                            </div>
+                        </div>
+                    </div>
+               </div>
+            </div>
+        </div>
+    </div>
+</div>

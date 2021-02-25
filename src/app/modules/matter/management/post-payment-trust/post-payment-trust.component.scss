@@ -1,0 +1,33 @@
+@media (min-width: 992px) {
+  .row {
+    &.gutter-lg-64 {
+      margin-left: -32px;
+      margin-right: -32px;
+      > [class*='col-'] {
+        padding-left: 32px;
+        padding-right: 32px;
+      }
+    }
+  }
+}
+
+.display-not-visible {
+  height: 0;
+  overflow: hidden;
+}
+
+@print {
+  .display-not-visible {
+    height: auto;
+    overflow: visible;
+  }
+}
+.custom-radio{
+  .tooltip-inner{
+     min-width: 246px;
+    }
+}
+.tooltip-inner{
+  min-width: 246px;
+}
+

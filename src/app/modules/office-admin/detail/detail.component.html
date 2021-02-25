@@ -1,0 +1,1742 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/office/list']"><a href="javascript:void(0)">Offices</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Office Profile</li>
+    </ol>
+    <div class="office-info position-relative">
+      <div class="d-flex align-items-end justify-content-between mb-32">
+        <div class="profile-content d-flex align-items-start profile-client">
+          <div class="profile-heading mr-16">
+            <h2 class="mt-0 mb-2" id="office-office-name">{{officeDetails?.name}}</h2>
+          </div>
+          <div class="schedule-label d-flex align-items-center mt-14 mr-16" *ngIf="officeDetails?.closingDate">
+            <span class="mr-8"><em class="icon icon-info text-primary view-bil-icon font-20"></em></span>
+            <span class="schedule-text text-large font-weight-medium" id="office-closed-office">Closed Office</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-4">
+          <div class="card card-full-h">
+            <div class="card-body office-details">
+              <h3 class="mb-24 d-flex align-items-center justify-content-between">Office Information
+                <a href="javascript:void(0);" class="ml-8 px-4 lh-20" (click)="editOfficeInfo(EditOffices)"
+                   *ngIf="!isViewOnly" id="edit-office-info"><em class="icon icon-edit icon-color small"></em></a></h3>
+              <div class="row">
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Status</span>
+                    <span id="office-status">{{officeDetails?.status?.status}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Opening Date</span>
+                    <span id="office-opening-date">
+                      {{(officeDetails?.openingDate) ? (officeDetails?.openingDate | date:'MM/dd/yyyy') : '-' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Accepts Initial Consults</span>
+                    <span
+                      id="office-ac-intial-consults">{{officeDetails?.acceptsInitialConsultation ? 'Yes' : 'No'}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8" *ngIf="officeDetails?.closingDate">Closing Date</span>
+                    <span id="office-closing-date">{{officeDetails?.closingDate | date:'MM/dd/yyyy'}}</span>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div><span class="small helper-text d-block mb-8">Practice
+                      Areas</span>
+                    <span *ngFor="let item of officeDetails?.practiceAreas; let i = index;"
+                          id="practice-area-{{i}}">{{item.name}}
+                      <br>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card card-full-h">
+            <div class="card-body office-details">
+              <h3 class="mb-24 d-flex align-items-center justify-content-between">Contact Information <a
+                href="javascript:void(0);" class="ml-8 px-4 lh-20"
+                (click)="editContactInfo(EditContact)" *ngIf="!isViewOnly" id="edit-contact-info"><em
+                class="icon icon-edit icon-color small"></em></a></h3>
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Address</span>
+                    <span id="office-address-one">{{officeDetails?.address?.street}}</span>
+                    <br>
+                    <span *ngIf="officeDetails?.address?.address2" id="office-address-two">
+                      {{officeDetails?.address?.address2}}
+                      <br>
+                    </span>
+                    <span id="office-city">{{officeDetails?.address?.city}}, </span>
+                    <span id="office-state">{{officeDetails?.address?.state}} </span>
+                    <span id="office-zipcode">{{officeDetails?.address?.zipCode}}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Time Zone</span>
+                    <span
+                      id="office-time-zone">{{(officeDetails?.timeZone ? officeDetails?.timeZone : '-' )}}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngFor="let item of officeDetails?.phones; let i = index;" id="office-contact-{{i}}">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">{{!item.type ? 'N/A' : item.type}}</span>
+                    <span id="office-contact-type-{{item.type}}">{{(item.number) ? (item.number | mask: '(000) 000-0000') : "-"}}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Designated Contact</span>
+                    <div *ngIf='officeDetails?.designatedContact?.id > 0 else NoDesignatedContact'>
+                        <span *ngIf='officeDetails?.isDesignatedContactOther' class='d-block'>
+                          {{officeDetails?.designatedContact?.lastName}}
+                          , {{officeDetails?.designatedContact?.firstName}}
+                        </span>
+                      <span *ngIf='!officeDetails?.isDesignatedContactOther' class='d-block'>
+                          <a class="text-decoration font-weight-medium" routerLink='/employee/profile'
+                             [queryParams]='{employeeId:officeDetails?.designatedContact?.id}'
+                             id="office-designed-contact">{{officeDetails?.designatedContact?.lastName}}
+                            , {{officeDetails?.designatedContact?.firstName}}</a>
+                        </span>
+                      <span class='d-block'>
+                          <span id="office-designed-email"> {{officeDetails?.designatedContact.email}}</span>
+                          <span class="copy-file" (click)='copyEmail(officeDetails?.designatedContact?.email)'> <i
+                            class="icon icon-file-copy"></i></span>
+                        </span>
+                      <span class='d-block' *ngIf='officeDetails?.designatedContact?.phone' id="office-designed-phone">
+                          {{officeDetails?.designatedContact?.phone?.number | mask: '(000) 000-0000'}}
+                        </span>
+                    </div>
+                    <ng-template #NoDesignatedContact>
+                      <span id="no-designed-contact">-</span>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card card-full-h">
+            <div class="card-body office-details">
+              <h3 class="mb-24 d-flex align-items-center justify-content-between">Hours & Holidays
+
+              </h3>
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Hours</span>
+                    <div class="row">
+                      <div class="col-6">Monday</div>
+                      <div class="col-6">
+                        <span
+                        id="office-monday">{{ officeDetails?.mondayOpen | workingHours: officeDetails?.mondayClose }}</span>
+                      </div>
+                      <div class="col-6">Tuesday</div>
+                      <div class="col-6">
+                        <span
+                        id="office-tuesday">{{officeDetails?.tuesdayOpen | workingHours: officeDetails?.tuesdayClose}}</span>
+                      </div>
+                      <div class="col-6">Wednesday</div>
+                      <div class="col-6">
+                        <span
+                        id="office-wednesday">{{officeDetails?.wednesdayOpen | workingHours: officeDetails?.wednesdayClose}}</span>
+                      </div>
+                      <div class="col-6">Thursday</div>
+                      <div class="col-6">
+                        <span
+                        id="office-thursday">{{officeDetails?.thursdayOpen | workingHours: officeDetails?.thursdayClose}}</span>
+                      </div>
+                      <div class="col-6">Friday</div>
+                      <div class="col-6">
+                        <span
+                        id="office-friday">{{officeDetails?.fridayOpen | workingHours: officeDetails?.fridayClose}}</span>
+                      </div>
+                      <div class="col-6">Saturday</div>
+                      <div class="col-6">
+                        <span
+                        id="office-saturday">{{officeDetails?.saturdayOpen | workingHours: officeDetails?.saturdayClose}}</span>
+                      </div>
+                      <div class="col-6">Sunday</div>
+                      <div class="col-6">
+                        <span
+                        id="office-sunday">{{officeDetails?.sundayOpen | workingHours: officeDetails?.sundayClose}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div>
+                    <div
+                      class="small helper-text d-flex justify-content-between align-items-center mb-8"
+                      id="display-year-holiday">{{displayYear}}
+                      Holidays
+                      <div class="d-flex align-items-center">
+                        <span class="year-arrow" *ngIf="currentYear<displayYear" (click)="displayYear=displayYear-1"
+                              id="display-year-minus">
+                          <em class="icon icon-angle-left"></em>
+                        </span>
+                        <span class="change-year font-weight-medium">{{displayYear}}</span>
+                        <span class="year-arrow" (click)="displayYear=displayYear+1" id="display-year-plus">
+                          <em class="icon icon-angle-right"></em>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-12"
+                      *ngFor="let item of officeDetails?.officeHoliday | officeHolidayList: displayYear; let i = index;"
+                           id="holiday-index-{{i}}">
+                        <div class="row">
+                          <div class="col-6"> {{item.name}}</div>
+                          <div class="col-6">{{item.date | date:'MMMM dd'}}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+      </div>
+    </div>
+
+
+    <div>
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <a href="javascript:void(0);" (click)="changeTab(mytabs)" *ngFor="let mytabs of alltabs" role="tab"
+           class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs" id="tab-{{mytabs}}">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32">
+            <div *ngIf="selecttabs1 === 'Employees'" class="tab-pane fade show active" role="tabpanel">
+              <div class="info-block">
+                <h2>Employees</h2>
+                <div class="row">
+                  <div class="header-search col-6 mb-24">
+                    <form action="#" class="small-search">
+                      <div class="header-search-wrapper">
+                        <input type="text" class="form-control search-input" name="searchString" autocomplete="off"
+                          placeholder="Search name or email" [(ngModel)]="searchString"
+                          (keyup)="emolyeeFilter();" id="employee-search">
+                        <button class="btn" type="submit" id="search-btn-employee" (click)="emolyeeFilter()">Search</button>
+                        <!-- <input type="text" class="form-control search-input" name="searchString" autocomplete="off"
+                          placeholder="Search name or email to add employee" [(ngModel)]="searchString"
+                          (keyup)="updateFilter($event)" id="employee-search"
+                          (blur)="closeSearchEmployeeList()" (focus)="showEmployeeList = true"> -->
+                        <!-- <div class="search-result-box pt-8 pb-8 pr-8" *ngIf="noEmpRec && showEmployeeList">
+                          <h4 class="d-inline-block mt-8 mb-8 pr-16 pl-16">{{ '0 results found' }}</h4>
+                          <div class="mt-6 mb-6 pr-16 pl-16">
+                            <h5><b>We couldn't find anything matching your search.</b></h5>
+                            <p>Try again with a different term.</p>
+                          </div>
+                        </div> -->
+                        <!-- <div class="search-result-box pt-8 pb-8 pr-8" *ngIf="filterEmployeeList?.length && showEmployeeList && !isSearchLoading">
+                          <div class="search-result" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+                            <h4 class="d-inline-block mt-8 mb-8 pr-16 pl-16">{{filterEmployeeList.length}} results</h4>
+
+                            <div class="result-row d-flex p-16"
+                                 *ngFor="let item of filterEmployeeList; trackBy :trackByFn;let i = index"
+                                 (click)="selectEmployee(item)" id="search-employee-index-{{i}}">
+                              <div class="result-icon pr-32">
+                                <i class="icon icon-employees"></i>
+                              </div>
+                              <div class="result-content d-flex flex-column flex-fill">
+                                <div class="result-title mb-8">
+                                  <span> {{(item.middleName) ? item.firstName + ' ' + item.middleName : item.firstName}}</span>
+                                </div>
+                                <div class="result-content-row d-flex align-items-center">
+                                  <div class="row w-100">
+                                    <div class="w-60">
+                                      <span class="small helper-text d-block mb-8">Email</span> {{item.email}}
+                                    </div>
+                                    <div class="w-25">
+                                      <span class="small helper-text d-block mb-8">Job Title</span> {{item.jobTitle}}
+                                    </div>
+                                    <div class="w-25">
+                                      <span class="small helper-text d-block mb-8">Status</span> Active
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                          </div>
+                        </div>
+                        <div class="search-result-box px-0 mt-4 " *ngIf="isSearchLoading && searchString.length">
+                          <app-search-loader [active]="isSearchLoading"
+                                             [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                        </div> -->
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <div class="row gutter-16">
+                  <div class="col-8">
+                    <div class="row gutter-16">
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label>Office Association</label>
+                          <ng-select [items]="officeAssociationList" placeholder="All"
+                                     (change)="emolyeeFilter()" [(ngModel)]="selectedType" [bindValue]="'name'"
+                                     [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true"
+                                     id="office-ass-select">
+                          </ng-select>
+                        </div>
+                      </div>
+
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label>Status</label>
+                          <ng-select [items]="employeeStatusList" placeholder="All"
+                                     (change)="emolyeeFilter()" [(ngModel)]="selectedStatus" [bindValue]="'name'"
+                                     [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true"
+                                     id="status-select">
+                          </ng-select>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="custom-table office-info">
+                  <ngx-datatable #employeeTable class="material common-table" [rows]="employeesList"
+                                 [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="employeeFooterHeight" [messages]="messages"
+                                 rowHeight="auto" [limit]="empPage.size" id="employees-tbl" [count]="empPage.totalElements"
+                                 [offset]="empPage?.pageNumber">
+                    <ngx-datatable-column [resizeable]="false" prop="lastName" name="Name" [width]="228">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        {{(row.lastName) ? row.lastName + ', ' + row.firstName : row.firstName}} </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="258">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        <span id="emp-{{value}}">{{value}}</span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title"
+                                          [width]="170"></ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="officeAssociation" name="Office Association"
+                                          [width]="176">
+                    </ngx-datatable-column>
+
+                    <ngx-datatable-column [resizeable]="false" name="Status" prop="status" [width]="118">
+                      <ng-template let-row="row" ngx-datatable-cell-template>{{row?.status}} </ng-template>
+                    </ngx-datatable-column>
+
+                    <!-- <ngx-datatable-column 
+                      [resizeable]="false" 
+                      [headerClass]="'text-right'"
+                      [sortable]="false"
+                      name="Actions" 
+                      [width]="100">
+                      <ng-template let-row="row" let-rowIndex="rowIndex" let-id="value" ngx-datatable-cell-template>
+                        <div class="d-flex justify-content-end" *ngIf="permissionList.OFFICE_MANAGEMENTisAdmin">
+                          <button class="btn btn-sm" (click)="delete(row.id,$event)" id="delete-emp-index-{{rowIndex}}">
+                            <em class='icon icon-remove icon-color'></em>
+                          </button>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column> -->
+
+                    <ngx-datatable-footer>
+                      <ng-template
+                        let-rowCount="rowCount"
+                        ngx-datatable-footer-template
+                        let-pageSize="pageSize"
+                        let-selectedCount="selectedCount"
+                        let-curPage="curPage"
+                        let-offset="offset"
+                        let-isVisible="isVisible">
+                        <div class="d-flex justify-content-between flex-fill">
+                          <div class="d-flex align-items-center">
+                            <div class="table-items d-flex align-items-center mr-36">
+                              Items per page:
+                              <div class=" ml-8">
+                                <select
+                                  class="custom-select border-less"
+                                  [formControl]="selectPageSizeEmployee"
+                                  (change)="pageSizeChangeEmployee()">
+                                  <option
+                                    *ngFor="let limit of limitArrayEmployee;"
+                                    [value]="limit">
+                                    {{ limit }}
+                                  </option>
+                                </select>
+                              </div>
+                            </div>
+                            <span>
+                                    {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                              {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of {{(rowCount)}} item(s)
+                                  </span>
+                          </div>
+              
+                          <div class="d-flex align-items-center">
+                            <select
+                              class="custom-select border-less"
+                              [(ngModel)]="pageSelectedEmp"
+                              (change)="changePageEmp()">
+                              <option
+                                *ngFor='let num of empPage?.totalPages | counterPipe;trackBy: trackByFn_;let i= index'
+                                [value]="i+1">
+                                Page {{ i + 1 }} of {{empPage?.totalPages}}
+                              </option>
+                            </select>
+                            <div class="ml-8">
+                              <datatable-pager
+                                [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                [pagerPreviousIcon]="'datatable-icon-prev'"
+                                [pagerNextIcon]="'datatable-icon-skip'"
+                                [page]="curPage"
+                                [size]="pageSize"
+                                [count]="rowCount"
+                                [hidden]="!((rowCount / pageSize) > 1)"
+                                (change)="employeeTable.onFooterPage($event);pageChange($event)">
+                              </datatable-pager>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-footer>
+                  </ngx-datatable>
+                  <app-loader [active]="employeesLoader"></app-loader>
+                </div>
+              </div>
+              <div class="info-block mt-24">
+                <h2>Responsible Attorneys</h2>
+                <div class="row">
+                  <div class="col-auto">
+                    <div class="form-group">
+                      <label>List Type</label>
+                      <div class="custom-control custom-checkbox mt-8 pr-8">
+                        <input type="checkbox" [disabled]="!permissionList.OFFICE_MANAGEMENTisAdmin"
+                               class="custom-control-input" [(ngModel)]="responsibleAttorneyType"
+                               (change)="showAttorneyRanking();" id="responsible-rank">
+                        <label class="custom-control-label" for="responsible-rank">Ranked</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group">
+                      <label>Visibility</label>
+                      <ng-select [items]="attorneyVisibilityList" [disabled]="!permissionList.OFFICE_MANAGEMENTisAdmin"
+                                 placeholder="Select Visibility"
+                                 (change)="changeVisibility($event, 'responsibleAttorney')"
+                                 [(ngModel)]="responsibleAttorneyVisibility" [bindValue]="'id'"
+                                 [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true"
+                                 id="attorney-visibility-select">
+                      </ng-select>
+                    </div>
+                  </div>
+                </div>
+                <div class="custom-table">
+                  <div class="table-responsive">
+                    <!-- <table class="table table-striped table-borderless">
+                      <thead>
+                      <tr>
+                        <th *ngIf="responsibleAttorneyType && showResponsibleattorneyRanking">Ranking</th>
+                        <th>First Name</th>
+                        <th (click)="sortLastname()">Last Name</th>
+                        <th>Email Address</th>
+                        <th>Job Title</th>
+                        <th>Office Association</th>
+                        <th class="text-right">Actions</th>
+                      </tr>
+                      </thead>
+                      <tbody id="responsible-attorneys-sortable">
+                      <tr *ngFor="let at of attorneysList;let i=index" id="at-index-{{i}}"
+                          [class.row-disable]="at?.rank == -1">
+                        <td
+                          *ngIf="responsibleAttorneyType && showResponsibleattorneyRanking">{{(at?.rank == -1) ? '-' : at?.rank}}</td>
+                        <td>{{at.firstName}}</td>
+                        <td>{{at.lastName}}</td>
+                        <td>{{at.email}}</td>
+                        <td>{{at.jobTitle}}</td>
+                        <td>{{at.officeAssociation}}</td>
+                        <td class="text-right">
+                          <div class="icon-group d-flex justify-content-end"
+                               *ngIf="permissionList.OFFICE_MANAGEMENTisAdmin">
+                              <span>
+                                <button class="btn btn-sm" type="button" (click)="removeAttorneyRank(at, i)"
+                                        id="remove-at-rank-index-{{i}}"><em
+                                  class='icon icon-eye-slash'></em>
+                                </button>
+                              </span>
+                            <span>
+                                <button class="btn btn-sm" draggable="true" (mouseover)="startStorting($event)"
+                                        (mouseout)="endSorting($event)" type="button" id="at-sorting-index-{{i}}"><em
+                                  class='icon icon-move-2'></em> </button>
+                              </span>
+                          </div>
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table> -->
+                    <ngx-datatable #responsibleAttorneyTable 
+                      class="material common-table" 
+                      [rows]="attorneysList"
+                      [columnMode]="ColumnMode.force" 
+                      [headerHeight]="50" 
+                      [footerHeight]="attorneyFooterHeight" 
+                      [messages]="messages"
+                      rowHeight="auto" 
+                      [limit]="attPage?.size" 
+                      [count]="attPage?.totalElements"
+                      [offset]="attPage?.pageNumber"
+                      id="employees-responsible-tbl">
+
+                      <ngx-datatable-column
+                        *ngIf="responsibleAttorneyType"
+                        [resizeable]="false" 
+                        prop="rank"
+                        name="Ranking"
+                        [width]="92">
+                      </ngx-datatable-column>
+                      <ngx-datatable-column 
+                        [resizeable]="false" 
+                        prop="firstName"
+                        name="First Name">
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column 
+                        [resizeable]="false" 
+                        prop="lastName"
+                        name="Last Name">
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column 
+                        [resizeable]="false" 
+                        prop="email"
+                        name="Email Address"
+                        [width]="230">
+                        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                          <span id="res-{{value}}">{{value}}</span>
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column 
+                        [resizeable]="false" 
+                        prop="jobTitle"
+                        name="Job Title">
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column 
+                        [resizeable]="false" 
+                        prop="officeAssociation"
+                        name="Office Association">
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column 
+                        [resizeable]="false"
+                        [sortable]="false" 
+                        [headerClass]="'text-right'"
+                        [width]="80"
+                        name="Actions">
+                        <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                          <div class="icon-group d-flex justify-content-end"
+                              *ngIf="permissionList.OFFICE_MANAGEMENTisAdmin">
+                            <span>
+                              <button class="btn btn-sm" type="button" (click)="removeAttorneyRank(row, rowIndex)"
+                                      id="remove-at-rank-index-{{rowIndex}}"><em
+                                class='icon icon-eye-slash'></em>
+                              </button>
+                            </span>
+                            <span>
+                              <button 
+                                class="btn btn-sm" 
+                                draggable="true"
+                                (mouseover)="startStorting($event)"
+                                (dragstart)="endSorting($event)" 
+                                type="button" 
+                                id="at-sorting-index-{{rowIndex}}">
+                                <em class='icon icon-move-2'></em>
+                              </button>
+                            </span>
+                          </div>
+                        </ng-template>
+                      </ngx-datatable-column>
+                      <ngx-datatable-footer>
+                        <ng-template
+                          let-rowCount="rowCount"
+                          ngx-datatable-footer-template
+                          let-pageSize="pageSize"
+                          let-selectedCount="selectedCount"
+                          let-curPage="curPage"
+                          let-offset="offset"
+                          let-isVisible="isVisible">
+                          <div class="d-flex justify-content-between flex-fill">
+                            <div class="d-flex align-items-center">
+                              <div class="table-items d-flex align-items-center mr-36">
+                                Items per page:
+                                <div class=" ml-8">
+                                  <select
+                                    class="custom-select border-less"
+                                    [formControl]="selectPageSizeAttorney"
+                                    (change)="pageSizeChangeAttorney()">
+                                    <option
+                                      *ngFor="let limit of limitArrayAttorney;"
+                                      [value]="limit">
+                                      {{ limit }}
+                                    </option>
+                                  </select>
+                                </div>
+                              </div>
+                              <span>
+                                      {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                                {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of {{(rowCount)}} item(s)
+                                    </span>
+                            </div>
+                
+                            <div class="d-flex align-items-center">
+                              <select
+                                class="custom-select border-less"
+                                [(ngModel)]="pageSelectedAtt"
+                                (change)="changePageAtt()">
+                                <option
+                                  *ngFor='let num of attPage?.totalPages | counterPipe;trackBy: trackByFn_;let i= index'
+                                  [value]="i+1">
+                                  Page {{ i + 1 }} of {{attPage?.totalPages}}
+                                </option>
+                              </select>
+                              <div class="ml-8">
+                                <datatable-pager
+                                  [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                  [pagerPreviousIcon]="'datatable-icon-prev'"
+                                  [pagerNextIcon]="'datatable-icon-skip'"
+                                  [page]="curPage"
+                                  [size]="pageSize"
+                                  [count]="rowCount"
+                                  [hidden]="!((rowCount / pageSize) > 1)"
+                                  (change)="responsibleAttorneyTable.onFooterPage($event);pageChangeAtt($event)">
+                                </datatable-pager>
+                              </div>
+                            </div>
+                          </div>
+                        </ng-template>
+                      </ngx-datatable-footer>
+                    </ngx-datatable>
+                    <app-loader [active]="responsiLoader"></app-loader>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-block mt-24">
+                <h2>Consult Attorneys</h2>
+                <div class="row">
+                  <div class="col-auto">
+                    <div class="form-group">
+                      <label>List Type</label>
+                      <div class="custom-control custom-checkbox mt-8 pr-8">
+                        <input type="checkbox" [disabled]="!permissionList.OFFICE_MANAGEMENTisAdmin"
+                               class="custom-control-input" [(ngModel)]="consultAttorneyType"
+                               (change)="showConsultAttorneyRanking()" id="consult-rank" checked>
+                        <label class="custom-control-label" for="consult-rank">Ranked</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group">
+                      <label>Visibility</label>
+                      <ng-select [items]="attorneyVisibilityList" [disabled]="!permissionList.OFFICE_MANAGEMENTisAdmin"
+                                 placeholder="Select Visibility"
+                                 (change)="changeVisibility($event, 'consultAttorney')"
+                                 [(ngModel)]="consultAttorneyVisibility" [bindValue]="'id'"
+                                 [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'"
+                                 id="consult-at-visibility-select">
+                      </ng-select>
+                    </div>
+                  </div>
+                </div>
+                <div class="custom-table">
+                  <div class="table-responsive">
+                    <!-- <table class="table table-striped table-borderless">
+                      <thead>
+                      <tr>
+                        <th *ngIf="consultAttorneyType && showConsultattorneyRanking">Ranking</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email Address</th>
+                        <th>Job Title</th>
+                        <th>Office Association</th>
+                        <th class="text-right">Actions</th>
+                      </tr>
+                      </thead>
+                      <tbody id="consult-attorneys-sortable">
+                      <tr *ngFor="let at of consultAttorneyList;let i=index" [class.row-disable]="at?.isDisabled"
+                          id="consult-at-index-{{i}}">
+                        <td
+                          *ngIf="consultAttorneyType && showConsultattorneyRanking">{{(at?.isDisabled) ? '-' : at.consultRank}}</td>
+                        <td>{{at.firstName}}</td>
+                        <td>{{at.lastName}}</td>
+                        <td>{{at.email}}</td>
+                        <td>{{at.jobTitle}}</td>
+                        <td>{{at.officeAssociation}}</td>
+                        <td class="text-right">
+                          <div class="icon-group d-flex justify-content-end"
+                               *ngIf="permissionList.OFFICE_MANAGEMENTisAdmin">
+                              <span>
+                                <button class="btn btn-sm" [class.text-primary]="at?.isDisabled" type="button"
+                                        (click)="removeAttorneyConRank(at, i)" id="consult-at-rm-index-{{i}}"><em
+                                  class='icon icon-eye-slash'></em>
+
+                                </button>
+                              </span>
+                            <span>
+                                <button class="btn btn-sm" [disabled]="at?.isDisabled" draggable="true"
+                                        (mouseover)="startStortingCon($event)"
+                                        (mouseout)="endSortingCon($event)" type="button"
+                                        id="consult-at-sort-index-{{i}}"><em
+                                  class='icon icon-move-2'></em> </button>
+                              </span>
+                          </div>
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table> -->
+
+                      <ngx-datatable #consultAttorneyTable 
+                        class="material common-table" 
+                        [rows]="consultAttorneyList"
+                        [columnMode]="ColumnMode.force" 
+                        [headerHeight]="50" 
+                        [footerHeight]="consultFooterHeight" 
+                        [messages]="messages"
+                        rowHeight="auto" 
+                        [limit]="cAttPage?.size" 
+                        [count]="cAttPage?.totalElements"
+                        [offset]="cAttPage?.pageNumber"
+                        id="employees-consult-tbl">
+
+                        <ngx-datatable-column
+                          *ngIf="consultAttorneyType"
+                          [resizeable]="false" 
+                          prop="consultRank"
+                          name="Ranking"
+                          [width]="92">
+                        </ngx-datatable-column>
+                        <ngx-datatable-column 
+                          [resizeable]="false" 
+                          prop="firstName"
+                          name="First Name">
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column 
+                          [resizeable]="false" 
+                          prop="lastName"
+                          name="Last Name">
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column 
+                          [resizeable]="false" 
+                          prop="email"
+                          name="Email Address"
+                          [width]="230">
+                          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                            <span id="cons-{{value}}">{{value}}</span>
+                          </ng-template>
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column 
+                          [resizeable]="false" 
+                          prop="jobTitle"
+                          name="Job Title">
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column 
+                          [resizeable]="false" 
+                          prop="officeAssociation"
+                          name="Office Association">
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column 
+                          [resizeable]="false"
+                          [sortable]="false" 
+                          [headerClass]="'text-right'"
+                          [width]="80"
+                          name="Actions">
+                          <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                            <div class="icon-group d-flex justify-content-end"
+                                *ngIf="permissionList.OFFICE_MANAGEMENTisAdmin">
+                              <span>
+                                <button class="btn btn-sm" type="button" (click)="removeAttorneyConRank(row, rowIndex)"
+                                        id="remove-at-rank-index-{{rowIndex}}"><em
+                                  class='icon icon-eye-slash'></em>
+                                </button>
+                              </span>
+                              <span>
+                                <button 
+                                  class="btn btn-sm" 
+                                  draggable="true" 
+                                  (mouseover)="startStorting($event)"
+                                  (mouseout)="endSorting($event)" 
+                                  type="button" 
+                                  id="at-sorting-index-{{rowIndex}}">
+                                  <em class='icon icon-move-2'></em>
+                                </button>
+                              </span>
+                            </div>
+                          </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-footer>
+                          <ng-template
+                            let-rowCount="rowCount"
+                            ngx-datatable-footer-template
+                            let-pageSize="pageSize"
+                            let-selectedCount="selectedCount"
+                            let-curPage="curPage"
+                            let-offset="offset"
+                            let-isVisible="isVisible">
+                            <div class="d-flex justify-content-between flex-fill">
+                              <div class="d-flex align-items-center">
+                                <div class="table-items d-flex align-items-center mr-36">
+                                  Items per page:
+                                  <div class=" ml-8">
+                                    <select
+                                      class="custom-select border-less"
+                                      [formControl]="selectPageSizeCattorney"
+                                      (change)="pageSizeChangeCAttorney()">
+                                      <option
+                                        *ngFor="let limit of limitArrayCAttorney;"
+                                        [value]="limit">
+                                        {{ limit }}
+                                      </option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <span>
+                                        {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                                  {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of {{(rowCount)}} item(s)
+                                      </span>
+                              </div>
+                  
+                              <div class="d-flex align-items-center">
+                                <select
+                                  class="custom-select border-less"
+                                  [(ngModel)]="pageSelectedCAtt"
+                                  (change)="changePageCatt()">
+                                  <option
+                                    *ngFor='let num of cAttPage?.totalPages | counterPipe;trackBy: trackByFn_;let i= index'
+                                    [value]="i+1">
+                                    Page {{ i + 1 }} of {{cAttPage?.totalPages}}
+                                  </option>
+                                </select>
+                                <div class="ml-8">
+                                  <datatable-pager
+                                    [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                    [pagerPreviousIcon]="'datatable-icon-prev'"
+                                    [pagerNextIcon]="'datatable-icon-skip'"
+                                    [page]="curPage"
+                                    [size]="pageSize"
+                                    [count]="rowCount"
+                                    [hidden]="!((rowCount / pageSize) > 1)"
+                                    (change)="consultAttorneyTable.onFooterPage($event);pageChangeCAtt($event)">
+                                  </datatable-pager>
+                                </div>
+                              </div>
+                            </div>
+                          </ng-template>
+                        </ngx-datatable-footer>
+                      </ngx-datatable>
+                    <app-loader [active]="consLoader"></app-loader>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="selecttabs1 === 'Matters'" class="tab-pane fade show active" role="tabpanel">
+              <div class="info-block">
+                <h2>Matters</h2>
+                <div class="d-flex align-items-center justify-content-between mb-24">
+                  <div class="header-search col-6 px-0">
+                    <form action="#">
+                      <div class="header-search-wrapper">
+                        <input type="text" class="form-control search-input" placeholder="Search Matters" required=""
+                               [formControl]='searchMatterText' id="search-matter-text">
+                        <button class="btn" type="submit" id="search-matter-btn">Search</button>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="btn-group ml-md-24 ml-0">
+                    <button class="btn btn-outline-primary btn-icon" type="button"
+                            (click)="open(matterExportModal,'sm')" id="export-csv-btn">
+                      <i class="icon icon-upload"></i> Export to CSV
+                    </button>
+
+                  </div>
+                </div>
+                <div class="row gutter-16">
+                  <div class="col-8">
+                    <div class="row gutter-16">
+
+                      <div class="col-4">
+                        <div class="form-group date-picker">
+                          <label>Open Date Range</label>
+                          <app-date-picker [isNgModel]='true' [(data)]='searchOption.openDate'
+                                           (dataChange)='applyFilterMatter()' id="open-date-range"></app-date-picker>
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="form-group">
+                          <label>Status</label>
+                          <ng-select [items]="matterStatusList" placeholder="Select status"
+                                     (change)='applyFilterMatter()' [(ngModel)]="searchOption.statusId"
+                                     [bindValue]="'id'"
+                                     [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'"
+                                     id="matter-status-list">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="custom-table section-area">
+                  <ngx-datatable #matterTable class="material common-table matter-table fix-col-right no-min-height"
+                                 [class.matter-no-data]="matterList?.length === 0" [rows]="matterList"
+                                 [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="matterFooterHeight"
+                                 rowHeight="auto"
+                                 [count]="pageMatter.totalElements" [offset]="pageMatter.pageNumber"
+                                 [limit]="pageMatter.size"
+                                 [selected]='selectedMatterList' (select)="onSelect($event)"
+                                 [selectionType]="'checkbox'"
+                                 [scrollbarH]="true" (sort)="calcTotalPages()"
+                                 id="matter-list-tbl">
+
+                    <ngx-datatable-column [resizeable]="false" prop="matterNumber" name="Matter Number" [width]="251">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="matterName" name="Matter Name" [width]="251">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        <ng-container *ngIf='row?.matterName?.length < 20'>
+                          <span> {{row.matterName}} </span>
+                        </ng-container>
+                        <div class="d-inline-flex justify-content-between" *ngIf='row.matterName?.length > 20'>
+                          <div class="info-hover position-relative">
+                            <a href="javascript:void(0)" class="text-decoration">
+                              <span> {{row.matterName?.slice(0, 20)}}... </span>
+                            </a>
+                            <div class="tooltip bs-tooltip-top" role="tooltip">
+                              <div class="arrow"></div>
+                              <div class="tooltip-inner tooltip-lg">
+                                <p>Matter</p>
+                                <p>{{row.matterName}} </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="cname" name="Client Name"
+                                          [width]="300">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        <span>{{value}}</span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="rname"
+                                          name="Responsible Attorney" [width]="300">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        <span>{{value}}</span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="matterType.name"
+                                          name="Matter Type" [width]="200">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="matterPrimaryOffice.name" name="Matter Office"
+                                          [width]="200">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="matterOpenDate" name="Matter Open Date"
+                                          [width]="200">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        <span>{{value | date : 'MM/dd/yyyy'}} </span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="matterCloseDate" name="Matter Close Date"
+                                          [width]="200">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        <span>{{value | date : 'MM/dd/yyyy'}} </span>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" name="Status" [width]="150">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        {{(row.matterCloseDate) ? 'Close' : (row.matterOpenDate) ? 'Open' : ''}}
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right'"
+                                          name="Action"
+                                          [frozenRight]='true'
+                                          [width]="147">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                        <div class="d-flex justify-content-end">
+                          <a [routerLink]="['/matter/dashboard']" [queryParams]="{matterId: row.id}"
+                             href="javascript:void(0)" id="matter-view-{{row?.id}}">
+                            <b>View matter</b>
+                          </a>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-footer>
+                      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                                   let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                                   let-isVisible="isVisible">
+                        <div class="d-flex justify-content-between flex-fill">
+                          <div class="d-flex align-items-center">
+                            <div class="table-items d-flex align-items-center mr-36">
+                              Items per page:
+                              <div class=" ml-8">
+                                <select class="custom-select border-less" [formControl]="pageSelectorMatter"
+                                        (change)="changePageSize()">
+                                  <option *ngFor="let limit of limitArray" [value]="limit">{{ limit }}</option>
+                                </select>
+                              </div>
+                            </div>
+                            <span>
+                              {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                              {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of
+                              {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+                            </span>
+                          </div>
+
+                          <div class="d-flex align-items-center">
+                            <select class="custom-select border-less" [(ngModel)]="matterPageSelected"
+                                    (change)="changePage()">
+                              <option *ngFor='let num of pageMatter.totalPages | counterPipe;let i= index' [value]="i+1">Page
+                                {{ i + 1 }} of {{pageMatter.totalPages}}</option>
+                            </select>
+                            <div class="ml-8">
+                              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                               [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                               [pagerPreviousIcon]="'datatable-icon-prev'"
+                                               [pagerNextIcon]="'datatable-icon-skip'"
+                                               [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                               [hidden]="!((rowCount / pageSize) > 1)"
+                                               (change)="matterTable.onFooterPage($event);pageChangeMatter($event)">
+                              </datatable-pager>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-footer>
+                  </ngx-datatable>
+                  <app-loader [active]="matterLoading"></app-loader>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="selecttabs1 === 'Clients' && officeId" class="tab-pane fade show active" role="tabpanel">
+              <app-office-client-list [officeId]='officeId'></app-office-client-list>
+            </div>
+            <div *ngIf="selecttabs1 === 'Billing' && officeId" class="tab-pane fade show active" role="tabpanel">
+              <app-office-admin-billing
+                [officeId]='officeId'
+                [isViewOnly]='!permissionList.OFFICE_MANAGEMENTisAdmin && !permissionList.BILLING_MANAGEMENTisAdmin'
+                [refresh]='refresh'
+                [editBill]="editBill"
+                [isFormSubmitted]="billingSettingsSubmitted"
+                [editBillUpcoming]="editBillUpcoming"
+                (sendValue)="getValue($event);"
+                (editBillFreq)="editBillFreq($event)"
+                (removeUpcomingFreq)="removeUpcomingFreq($event)"
+                [officeDetails]='officeDetails'
+                [loadderVisible]="loadderVisible">
+              </app-office-admin-billing>
+            </div>
+
+            <div *ngIf="selecttabs1 === 'Accounting' && officeId" class="tab-pane fade show active" role="tabpanel">
+              <app-loader [active]="loading"></app-loader>
+              <h2>Accounting</h2>
+              <app-billing-period [officeId]="officeId" [recall]="recall" (updateAccounts)="updateAccounts($event)"
+                                  [opratingaccount]="opratingaccount"
+                                  (editAccount)="editAccount($event)"></app-billing-period>
+            </div>
+
+
+            <div *ngIf="selecttabs1 === 'Trust Accounting'" class="tab-pane fade show active" role="tabpanel">
+              <app-loader [active]="loading"></app-loader>
+              <app-trust-account-setting
+                [trustAccountingAdmin]="permissionList.TRUSTACCOUNT_MANAGEMENTisAdmin"
+                [errorFlagOfficeAccount]="errorFlagOfficeAccount"
+                [errorFlagCreditCardOfficeAccount]="errorFlagCreditCardOfficeAccount"
+                [officeManagement]="permissionList.OFFICE_MANAGEMENTisAdmin || permissionList.ACCOUNTINGisAdmin"
+                [officeId]='officeId' (tabChanged)="tabChanged($event)" [parentValue]="tabChanges"
+                (formUpdate)="formUpdate($event)"
+                (formValue)="formValue($event)"
+                (visibleSaveCancelBtns)="visibleSaveCancelBtns($event)"
+                [saveTrustAccountingData]="saveTrustAccountingData"
+                [cancelTrustAccountingData]="cancelTrustAccountingData"></app-trust-account-setting>
+            </div>
+            <div *ngIf="selecttabs1 === 'Notes'" class="tab-pane fade show active" role="tabpanel">
+              <h2>Office Notes</h2>
+              <div class="form-group">
+                <label>Create Office Note</label>
+                <ejs-richtexteditor [enabled]='permissionList.OFFICE_MANAGEMENTisAdmin' #toolsRTE id='alltoolRTE'
+                                    [(ngModel)]="officeDetails.notes"
+                                    [toolbarSettings]='tools'  (keyup)="changeNote()"></ejs-richtexteditor>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end"
+      *ngIf="selecttabs1 == 'Trust Accounting'  && (permissionList.TRUSTACCOUNT_MANAGEMENTisAdmin || permissionList.ACCOUNTINGisAdmin) && visibleSaveCancelBtn">
+        <div class="btn-group">
+          <button class="btn btn-light" type="button" (click)="cancelTrustAccounting();"
+                  id="edit-ac-cancel">Cancel
+          </button>
+          <button class="btn btn-primary" type="button"  [disabled]="saveTrustAccountingData" (click)="saveTrustAccounting()" id="update-ac-cancel">
+            Save
+          </button>
+        </div>
+      </div>
+    <div class="d-flex justify-content-end"
+         *ngIf="selecttabs1 == 'Accounting'  && permissionList.ACCOUNTINGisAdmin && editAccounting">
+      <div class="btn-group">
+        <button class="btn btn-light" type="button" (click)="editAccounting=false;opratingaccount = 'View'" id="edit-ac-cancel">
+                Cancel
+        </button>
+        <button class="btn btn-primary" type="button" (click)="updateOpratingAccounting()" id="update-ac-cancel">
+          Save
+        </button>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end"
+         *ngIf='selecttabs1 == "Notes" && permissionList.OFFICE_MANAGEMENTisAdmin '>
+      <div class="btn-group">
+        <button class="btn btn-light" type="button" routerLink='/office/list' id="cancel-note-btn">Cancel</button>
+        <button class="btn btn-primary" type="button" [disabled]="!changeNotes" (click)="updateNotes()" id="update-note-btn">
+          Save
+        </button>
+      </div>
+    </div>
+    <!-- <div class="d-flex justify-content-end"
+         *ngIf='selecttabs1 == "Employees" && permissionList.OFFICE_MANAGEMENTisAdmin '>
+      <div class="btn-group">
+        <button class="btn btn-light" type="button" routerLink='/office/list' id="cancel-note-btn">Cancel</button>
+        <button class="btn btn-primary" type="button" (click)="updateEmployee()" id="update-note-btn">
+          Save
+        </button>
+      </div>
+    </div> -->
+    <div class="d-flex justify-content-end"
+         *ngIf='selecttabs1 == "Billing" && (editBill || editBillUpcoming)  && (permissionList.OFFICE_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisAdmin)'>
+      <div class="btn-group">
+        <button class="btn btn-light" type="button" (click)="cancel()" id="cancel-billing-btn">Cancel</button>
+        <button class="btn btn-primary" type="button" [disabled] = "loadderVisible" (click)="confirmSave()" id="confirm-save-btn">
+          Save
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<ng-template #EditOffices let-modal>
+  <div class="modal-header d-block">
+    <h2 class="modal-title">Edit Office Information</h2>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-8">
+    <form [formGroup]="editOfficeInfoForm">
+      <div class="form-group" [class.has-error]="editOfficeInfoForm.controls['name'].errors && editOfficeFormSubmitted">
+        <label>Office Name <sup>*</sup></label>
+        <input type="text" class="form-control" formControlName="name" id="office-name">
+        <span class="field-message text-danger"
+              *ngIf="editOfficeInfoForm.controls['name'].errors && editOfficeFormSubmitted ? !!editOfficeInfoForm.controls['name'].errors.required : false">
+            <em class="icon icon-error mr-4"></em>
+          {{errorData.echeck_office_name_error}}
+          </span>
+      </div>
+      <div class="form-group"
+           [class.has-error]="editOfficeInfoForm.controls['statusId'].errors && editOfficeFormSubmitted">
+        <label>Status <sup>*</sup></label>
+        <ng-select [items]="officeStatus" placeholder="Status" formControlName="statusId" [bindValue]="'id'"
+                   [bindLabel]="'status'" [selectOnTab]="true" [notFoundText]="'No record found'" id="office-status">
+        </ng-select>
+        <span class="field-message text-danger"
+              *ngIf="editOfficeInfoForm.controls['statusId'].errors && editOfficeFormSubmitted ? !!editOfficeInfoForm.controls['statusId'].errors.required : false">
+          <em class="icon icon-error mr-4"></em>
+          {{errorData.status_error}}
+        </span>
+      </div>
+      <div class="form-group"
+           [class.has-error]="editOfficeInfoForm.controls['openingDate'].errors && editOfficeFormSubmitted">
+        <label>Opening Date <sup>*</sup></label>
+        <app-date-picker [isForm]='true' [dateform]='editOfficeInfoForm' controlName='openingDate'
+                         id="opening-date"></app-date-picker>
+        <span class="field-message text-danger"
+              *ngIf="editOfficeInfoForm.controls['openingDate'].errors && editOfficeFormSubmitted ? !!editOfficeInfoForm.controls['openingDate'].errors.required : false">
+            <em class="icon icon-error mr-4"></em>
+            Opening Date Required
+          </span>
+      </div>
+      <div class="form-group">
+        <label>Accepts Initial Consultations </label>
+        <div class="custom-control custom-radio mt-8">
+          <input type="radio" id="customRadio1" class="custom-control-input"
+                 formControlName="acceptsInitialConsultation" value="true">
+          <label class="custom-control-label" for="customRadio1">Yes</label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input type="radio" id="customRadio2" class="custom-control-input" value="false"
+                 formControlName="acceptsInitialConsultation" checked>
+          <label class="custom-control-label" for="customRadio2">No</label>
+        </div>
+      </div>
+
+      <div class="form-group" [class.has-error]="!retainerPracticeArea.length && editOfficeFormSubmitted">
+        <label>Practice Areas <sup>*</sup></label>
+        <app-multiselect-dropdown [title]="titlePracticeArea" [selections]="retainerPracticeArea"
+                                  [filterName]="'Select Practice Areas'"
+                                  [displaySubItem]="practiceList" (onSelectionChanged)="retainerSelected($event)"
+                                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                                  (clearFilter)="clearFilterRetainer()" id="practice-areas-multi-select">
+        </app-multiselect-dropdown>
+        <span class="field-message text-danger"
+              *ngIf="!retainerPracticeArea.length && editOfficeFormSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            Practice Areas Required
+          </span>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-model">Cancel</button>
+    <button type="button" class="btn btn-primary"
+            (click)="updateOfficeInfo()" [disabled]="editOfficeLoading" id="update-office-info-btn">Save
+    </button>
+  </div>
+  <app-loader [active]="editOfficeLoading"></app-loader>
+</ng-template>
+
+<ng-template #EditContact let-modal>
+  <div class="modal-header d-block">
+    <h2 class="modal-title">Edit Contact Information</h2>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="closebtn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editContactForm">
+      <div class="row gutter-16">
+        <div class="col-6">
+          <div class="form-group"
+               [class.has-error]="editContactForm.controls['street'].errors && editContactForm.controls['street'].errors.required && editContactFormSubmitted">
+            <label>Address 1<sup>*</sup></label>
+            <input type="text" class="form-control" formControlName="street" id="address1">
+            <span class="field-message text-danger"
+                  *ngIf="editContactForm.controls['street'].errors && editContactForm.controls['street'].errors.required && editContactFormSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Address 1 Required
+              </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label>Address 2</label>
+            <input type="text" class="form-control" formControlName="address2" id="address2">
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="form-group"
+               [class.has-error]="(editContactForm.controls['zipCode'].errors && (editContactForm.controls['zipCode'].touched || editContactFormSubmitted) && !validZipErr) || (editContactFormSubmitted && validZipErr)">
+            <label>Zip Code <sup>*</sup></label>
+            <input type="text" class="form-control" maxlength="6" minlength="3" formControlName="zipCode"
+                   (keypress)="checkNumber($event)" (keyup)="getCityState($event.target.value)"  id="zip-code">
+            <!-- <small class="helper-text d-block pt-4 font-weight-normal"
+                   *ngIf="!timeZoneDetails.timeZoneDisplayName && !(editContactForm.controls['zipCode'].errors && editContactForm.controls['zipCode'].errors.required && editContactFormSubmitted)">
+              {{timeZoneDetails?.timeZoneDisplayName}}
+            </small>
+            <small class="helper-text d-block pt-4 font-weight-normal"
+                   *ngIf="!timeZoneDetails.timeZoneDisplayName && !(editContactForm.controls['zipCode'].errors && editContactForm.controls['zipCode'].errors.required && editContactFormSubmitted)">
+              -
+            </small> -->
+            <span class="field-message text-danger"
+            *ngIf="(editContactForm.controls['zipCode'].errors && (editContactForm.controls['zipCode'].touched || editContactFormSubmitted)) && !validZipErr">
+            <em class="icon icon-error mr-4"></em>
+                {{ errorData?.zip_code_required }}
+            </span>
+            <span class="field-message text-danger" *ngIf="editContactFormSubmitted && validZipErr">
+                <em class="icon icon-error mr-4"></em>
+                  {{errorData?.zip_code_error}}
+                </span>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="form-group">
+            <label>State <sup>*</sup></label>
+            <ng-select *ngIf="stateList?.length > 1" [items]="stateList" placeholder="State" [clearable]="false" formControlName="state" [bindValue]="'code'"
+              [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'" class="state-select"
+              id="state">
+            </ng-select>
+            <input *ngIf="stateList?.length <= 1" 
+              type="text" 
+              class="form-control" 
+              placeholder="State"
+              [(ngModel)]="singleState" 
+              [ngModelOptions]="{standalone: true}"
+              [readOnly]='true' id="state">
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label>City <sup>*</sup></label>
+            <input *ngIf="cityList?.length <= 1" type="text" class="form-control" formControlName="city" placeholder="City" [readOnly]='true' id="city">
+            <ng-select *ngIf="cityList?.length > 1" 
+              [items]="cityList" 
+              placeholder="City" 
+              formControlName="city"
+              [clearable]="false"
+              [notFoundText]="'No record found'" 
+              [selectOnTab]="true" id="city">
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="col-9">
+          <div class="form-group" [class.has-error]="editContactForm.controls['timezone'].errors && editContactFormSubmitted">
+            <label for="">Time Zone<sup>*</sup></label>
+            <ng-select [items]="timeZones" placeholder="Select" formControlName="timezone"
+                       [bindValue]="'id'" [bindLabel]="'name'"
+                       [clearable]='false' [selectOnTab]="true"
+                       >
+            </ng-select>
+            <span class="field-message text-danger" *ngIf="editContactForm.controls['timezone'].errors && editContactFormSubmitted">
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.select_timezone_office}}
+            </span>
+          </div>
+        </div>
+
+
+        <div class="col-6">
+          <div [ngClass]="(phone1.invalid && phone1Blur)?'form-group has-error':'form-group'"
+               [class.has-error]="editContactForm.controls['phone1'].errors && editContactForm.controls['phone1'].errors.required && editContactFormSubmitted">
+            <label>Phone 1<sup>*</sup></label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                   placeHolderCharacter=" " formControlName="phone1" (blur)="onBlurMethod(phone1.value,'phone1')"
+                   id="phone-1"/>
+            <span class="field-message text-danger" *ngIf="phone1.invalid && phone1Blur"><em
+              class="icon icon-error mr-4"></em>
+                Invalid phone number
+              </span>
+            <span class="field-message text-danger"
+                  *ngIf="editContactForm.controls['phone1'].errors && editContactForm.controls['phone1'].errors.required && editContactFormSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Phone 1 Required
+              </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div [ngClass]="(phone2.invalid && phone2Blur)?'form-group has-error':'form-group'">
+            <label>Phone 2 </label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                   placeHolderCharacter=" " formControlName="phone2" (blur)="onBlurMethod(phone2.value,'phone2')"
+                   id="phone-2"/>
+            <span class="field-message text-danger" *ngIf="phone2.invalid && phone2Blur"><em
+              class="icon icon-error mr-4"></em>
+                Invalid phone number
+              </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div [ngClass]="(fax.invalid && faxBlur)?'form-group has-error':'form-group'">
+            <label>Fax</label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                   placeHolderCharacter=" " formControlName="fax" (blur)="onBlurMethod(fax.value,'fax')" id="fax"/>
+            <span class="field-message text-danger" *ngIf="fax.invalid && faxBlur"><em
+              class="icon icon-error mr-4"></em>
+                Invalid fax number
+              </span>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="mb-16">
+            <h4 class='m-0'>Designated Contact <label><sup class="text-danger ml-4 text-xlarge">*</sup></label></h4>
+          </div>
+          <p class="mb-24">
+            Specify a designated contact for the office that can address general questions and <br/> concerns from
+            clients.
+          </p>
+          <div class="row gutter-16">
+            <div class="col-12">
+              <app-office-designated-contact [isDesignatedContactother]='isDesignatedContactother'
+                                             [(designatedContact)]='designatedContact'
+                                             [isFormSubmitted]="editContactFormSubmitted">
+              </app-office-designated-contact>
+            </div>
+          </div>
+          <div class="form-group mb-0" [class.has-error]="!designatedContact && editContactFormSubmitted">
+              <span class="field-message text-danger"
+                    *ngIf="!designatedContact && editContactFormSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Designated Contact Required
+              </span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary"
+            (click)="updateContactInfo()" id="save-btn">Save
+    </button>
+  </div>
+  <app-loader [active]="editOfficeLoading"></app-loader>
+</ng-template>
+
+<ng-template #EditHours let-modal>
+  <div class="modal-header d-block">
+    <h2 class="modal-title">Edit Hours & Holidays</h2>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row gutter-16">
+      <div class="col-6">
+        <form [formGroup]="officeHoursForm">
+          <div class="pr-52">
+            <div class="hours-list">
+              <div class="row gutter-16 align-items-center">
+                <div class="col-9 ml-auto">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <label>Open</label>
+                    </div>
+                    <div class="col-6">
+                      <label>Close</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16 align-items-center mb-20">
+                <div class="col-3">
+                  <span class="label mb-0">Monday</span>
+                </div>
+                <div class="col-9">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="mondayOpen" (change)="onHourChange('monday')"
+                              id="monday-open">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+
+                    </div>
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="mondayClose" id="monday-close">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16 align-items-center mb-20">
+                <div class="col-3">
+                  <span class="label mb-0">Tuesday</span>
+                </div>
+                <div class="col-9">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="tuesdayOpen" (change)="onHourChange('tuesday')"
+                              id="tuesday-open">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="tuesdayClose" id="tuesday-close">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16 align-items-center mb-20">
+                <div class="col-3">
+                  <span class="label mb-0">Wednesday</span>
+                </div>
+                <div class="col-9">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="wednesdayOpen"
+                              (change)="onHourChange('wednesday')" id="wednesday-open">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="wednesdayClose" id="wednesday-close">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16 align-items-center mb-20">
+                <div class="col-3">
+                  <span class="label mb-0">Thursday</span>
+                </div>
+                <div class="col-9">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="thursdayOpen" (change)="onHourChange('thursday')"
+                              id="thursday-open">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="thursdayClose" id="thursday-close">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16 align-items-center mb-20">
+                <div class="col-3">
+                  <span class="label mb-0">Friday</span>
+                </div>
+                <div class="col-9">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="fridayOpen" (change)="onHourChange('friday')"
+                              id="friday-open">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="fridayClose" id="friday-close">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16 align-items-center mb-20">
+                <div class="col-3">
+                  <span class="label mb-0">Saturday</span>
+                </div>
+                <div class="col-9">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="saturdayOpen" (change)="onHourChange('saturday')"
+                              id="saturday-open">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="saturdayClose" id="saturday-close">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16 align-items-center mb-0">
+                <div class="col-3">
+                  <span class="label mb-0">Sunday</span>
+                </div>
+                <div class="col-9">
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="sundayOpen" (change)="onHourChange('sunday')"
+                              id="sunday-open">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <select class="custom-select" formControlName="sundayClose" id="sunday-close">
+                        <option [value]="tm.value" *ngFor="let tm of workingHours">{{tm.key}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-6">
+        <div class="small d-flex justify-content-between align-items-center mb-8"><span
+          class="helper-text">{{displayYearPopUp}} Holidays</span>
+          <div class="d-flex align-items-center">
+              <span class="year-arrow" *ngIf="currentYearPopUp<displayYearPopUp"
+                    (click)="displayYearPopUp=displayYearPopUp-1" id="year-minus">
+                <em class="icon icon-angle-left"></em>
+              </span>
+            <span class="change-year text-base font-weight-medium">{{displayYearPopUp}}</span>
+            <span class="year-arrow" (click)="displayYearPopUp=displayYearPopUp+1" id="year-plus">
+                <em class="icon icon-angle-right"></em>
+              </span>
+          </div>
+        </div>
+        <div class="custom-table">
+          <ngx-datatable #table class="material common-table"
+                         [rows]=" officeHolidayList | officeHolidayList: displayYear" 
+                         [columnMode]="ColumnMode.force"
+                         [headerHeight]="50" [messages]="messages" rowHeight="auto" id="holiday-listing-tbl">
+            <ngx-datatable-column [resizeable]="false" prop="name" name="Holiday" [width]="200">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="date" name="date" [width]="150">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                {{row.date | date:'MMMM dd'}} </ng-template>
+            </ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Actions"
+                                  [width]="100">
+              <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+                <div class="icon-group d-flex justify-content-end">
+                    <span>
+                      <button class="btn btn-sm" type="button" (click)="EditOfficeHoliday(AddOfficeHoliday,row)"
+                              id="edit-holiday-index-{{rowIndex}}"><em
+                        class='icon icon-edit'></em>
+                      </button>
+                    </span>
+                  <span>
+                      <button class="btn btn-sm" type="button" (click)="deleteOfficeHoliday(row.id)"
+                              id="edit-holiday-index-{{rowIndex}}"><em
+                        class='icon icon-remove'></em> </button>
+                    </span>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+          <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button"
+                  (click)="EditOfficeHoliday(AddOfficeHoliday,'')" id="add-holiday">
+            <i class="icon icon-add-circle"></i>Add Holiday
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="updateOfficeHours()" id="save-btn">Save</button>
+  </div>
+</ng-template>
+
+<ng-template #AddOfficeHoliday let-modal>
+  <div class="modal-header d-block">
+    <h2 class="modal-title">{{officeHolidayForm.controls.id.value == null ? 'Add' : 'Edit'}} Office Holidays</h2>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+
+    <form [formGroup]="officeHolidayForm">
+      <div class="col-12">
+        <div class="form-group">
+          <label>Date<sup>*</sup></label>
+          <app-date-picker [isForm]='true' [placeholderText]="'MM/DD/YYYY'"
+                           [dateform]='officeHolidayForm' controlName='date' id="date"></app-date-picker>
+          <input type="hidden" class="form-control" formControlName="id">
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group">
+          <label>Name<sup>*</sup></label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter a name" id="name">
+        </div>
+      </div>
+    </form>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="!officeHolidayForm.valid"
+            (click)="insertOfficeHoliday()" *ngIf="officeHolidayForm.controls.id.value==null" id="save-btn">Save
+    </button>
+    <button type="button" class="btn btn-primary" [disabled]="!officeHolidayForm.valid"
+            (click)="updateOfficeHoliday()" *ngIf="officeHolidayForm.controls.id.value!==null" id="save-btn">Save
+    </button>
+  </div>
+</ng-template>
+
+
+<ng-template #matterExportModal let-modal>
+  <div class="modal-header d-block">
+    <h3 class="modal-title">Export to CSV</h3>
+    <p>Select which data you want to export</p>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="custom-control custom-checkbox" *ngFor="let item of columnList; trackBy :trackByFn;let i = index">
+      <input class="custom-control-input" id="{{item.Name}}-{{i}}" [checked]="item.isChecked"
+             (change)="item.isChecked = !item.isChecked" type="checkbox">
+      <label class="custom-control-label" for="{{item.Name}}-{{i}}">{{item.DisplayName}}</label>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="ExportToCSV()" [disabled]="!isMatterExportValid"
+            id="export-csv">Export to CSV
+    </button>
+  </div>
+</ng-template>
+
+
+<ng-template #ChangeOfficeTrustBankAccount let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Change Office Trust Bank Account</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to change the Office Trust bank account?
+          This will change the trust account to which all active matters assigned to this office are linked. No funds
+          will be automatically transferred as part of this process.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" id="yes-change-trust">Yes, change Trust</button>
+  </div>
+</ng-template>
+
+<ng-template #UnsavedChanges let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Unsaved Changes</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to continue without saving these changes?
+          This will remove any edits you’ve made.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" id="yes-continue">Yes, continue without saving</button>
+  </div>
+</ng-template>

@@ -1,0 +1,115 @@
+<button *ngIf="isPermission" class="btn btn-primary btn-icon" type="button"
+(click)="addEditTrustAccountModal(AddTrustOnlyAccount,'','modal-lmd','')" id="add-trust-only-ac">
+<i class="icon icon-plus"></i>Add Trust-Only Account
+</button>
+
+<div class="custom-table pt-16">
+    <div class="table-responsive">
+        <table class="table table-striped table-borderless trust-only-accounts" *ngIf="trustOnlyAccountList.length > 0;" id="trustOnlyAccountListId">
+            <thead>
+                <tr>
+                    <th class="trust-number">Trust Number</th>
+                    <th class="name">Name</th>
+                    <th class="balance" *ngIf="pageType != 'matterDashboard'">Amount</th>
+                    <th class="balance" *ngIf="pageType == 'matterDashboard'">Balance</th>
+                    <th class="text-right action">Action</th>
+                </tr>
+            </thead>
+            <tbody *ngIf="trustOnlyAccountList.length > 0;">
+                <tr *ngFor="let item of trustOnlyAccountList; trackBy: trackByFn;let i = index;" id="trustOnlyAccountListId-{{i}}">
+                    <td class="cursor-default"> {{item.trustNumber}}</td>
+                    <td class="cursor-default"> {{item.name}}</td>
+                    <td class="cursor-default" *ngIf="item.amount == null"> -</td>
+                    <td class="cursor-default" *ngIf="item.amount != null"> {{item.amount  | currency : 'USD' : 'symbol': '1.2-2'}}</td>
+                    <td class="text-right">
+                        <div class="icon-group d-flex justify-content-end">
+                            <span *ngIf="isPermission" (click)="addEditTrustAccountModal(EditTrustOnlyAccount,'','modal-lmd',item)" id="addEditTrustAccountModal-{{i}}">
+                                <em class="icon icon-edit icon-color"></em>
+                            </span>
+                            <span *ngIf="isPermission" (click)="deleteTrustOnlyAccount(item)" id="deleteTrustOnlyAccount-{{i}}">
+                                <em class="icon icon-remove icon-color"></em>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <ng-template #no_data_found>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+                    </tr>
+                </tbody>
+            </ng-template>
+        </table>
+    </div>
+
+</div>
+
+
+<ng-template #AddTrustOnlyAccount let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Add Trust-Only Account</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="closeId">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <p class="lh-20 popup-text">Provide a name for the Trust-Only account below. Trust numbers are assigned automatically. Funds can be paid into trusts from the
+            <em>Trust Accounting</em> tab on the matter dashboard.
+        </p>
+        <div class="form-group popup-form">
+            <form>
+                <label>Trust Number</label>
+                <div id="next-trust-number">
+                    {{nextTrustNumber}}
+                </div>
+            </form>
+        </div>
+        <div class="form-group">
+            <form [formGroup]="addTrustNameForm">
+                <label>Trust-Only Account Name <sup>*</sup></label>
+                <input type="text" class="form-control" formControlName="addTrustName" placeholder="Enter Name" id="addTrustNameId">
+            </form>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click'); clearData();" id="cancleId">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="!addTrustNameForm.valid || disable" (click)="btnAddTrust()" id="addId">Add
+            Trust</button>
+    </div>
+</ng-template>
+
+
+<ng-template #EditTrustOnlyAccount let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Edit Trust-Only Account</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="closeId">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <p class="lh-20 popup-text">Provide a name for the Trust-Only account below. Trust numbers are assigned automatically. Funds can be paid into trusts from the
+            <em>Trust Accounting</em> tab on the matter dashboard.
+        </p>
+        <div class="form-group popup-form">
+            <form>
+                <label>Trust Number</label>
+                <div id="edit-trust-number">
+                    {{editTrustNumber}}
+                </div>
+            </form>
+        </div>
+        <div class="form-group">
+            <form [formGroup]="EditTrustNameForm">
+                <label>Trust-Only Account Name <sup>*</sup></label>
+                <input type="text" class="form-control" formControlName="editTrustName"
+                    value="Savings account at Lakeside" id="editTrustNameId">
+            </form>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancleId">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="!EditTrustNameForm.valid"
+            (click)="btnEditTrust()" id="saveId">Save Changes</button>
+    </div>
+</ng-template>

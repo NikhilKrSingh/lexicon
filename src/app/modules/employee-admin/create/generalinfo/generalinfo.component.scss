@@ -1,0 +1,35 @@
+.hours-list{min-width:420px;}
+.col-w-20{
+  flex: 0 0 20%;
+    max-width: 20%;
+}
+
+.errorUploadFiles {
+  display: inline-flex;
+  padding-right: 16px;
+}
+
+.dragDrop {
+  font-size: 14px;
+  padding-top: 4px;
+}
+.uploadSection {
+  position: absolute;
+  text-align: center;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.uploadedImage {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  overflow: hidden;
+  left: 30%;
+  img {
+    min-width: 100%;
+    min-height: 100%;
+    left: 50%;
+    top: 50%;
+  }
+}

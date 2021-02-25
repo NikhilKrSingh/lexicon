@@ -1,0 +1,290 @@
+<div class="row">
+  <div class="col-3">
+    <div class="form-group">
+      <label>Service Date - Start</label>
+      <app-date-picker [isNgModel]="true" placeholderText="Select service date" [(data)]="startServiceDate"
+        (dataChange)="applyFilter()" id="service-date-start"></app-date-picker>
+    </div>
+  </div>
+
+  <div class="col-3">
+    <div class="form-group">
+      <label>Service Date - End</label>
+      <app-date-picker [isNgModel]="true" placeholderText="Select service date" [(data)]="endServiceDate"
+        (dataChange)="applyFilter()" id="service-date-end"></app-date-picker>
+    </div>
+  </div>
+
+  <div class="col-3">
+    <div class="form-group">
+      <label>Invoice Preferences</label>
+      <app-multiselect-dropdown [showSearch]="false" [title]="titleInvoicePreference" [selections]="selectedInvoice"
+        [displaySubItem]="invoicePrefList" (onSelectionChanged)="selectInvoice($event)" [filterName]="filterName"
+        (clearFilter)="clearFilter('Invoice')" (applyFilter)="applyFilter()" id="invoice-preferences">
+      </app-multiselect-dropdown>
+    </div>
+  </div>
+</div>
+<div class="row pt-8" *ngIf="tenantTierName === TenantTier.Ascending">
+  <div class="col-3">
+    <label>Selection Actions
+      <span *ngIf='selected?.length == 1'> (1 selection made)</span>
+      <span *ngIf='selected?.length > 1'> ({{selected?.length}} selections made)</span>
+    </label>
+    <div class="btn-group">
+      <button class="btn btn-primary" [disabled]="selected?.length == 0 || disableBulkAction"
+        (click)='bulkBillToClient(BulkbillClientTemplate)' id="bill-clients">
+        Bill Clients
+      </button>
+
+      <button class="btn btn-primary" [disabled]="selected?.length == 0 || disableBulkAction"
+        (click)='downloadUnbilledInvoices()' id="download-invoices">
+        Download Invoices
+      </button>
+    </div>
+  </div>
+</div>
+<div class="position-relative pt-8">
+  <ngx-datatable #table class="material common-table matter-table fix-col-right" [columnMode]="ColumnMode.force"
+    [class.matter-no-data]="readyToBillList?.length === 0" [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+    [scrollbarH]='true' [rows]="readyToBillList" [offset]="page.pageNumber" [limit]="page.size"
+    (sort)="calcTotalPages()" [count]="page.totalElements" [selected]="selected" (select)="onSelect($event)"
+    [selectionType]="SelectionType.checkbox" id="ready-to-bill-list">
+    <ngx-datatable-column [resizeable]="false" *ngIf="tenantTierName == TenantTier.Ascending" [width]="34" [sortable]="false"
+      [canAutoResize]="false" [draggable]="false">
+      <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+        let-selectFn="selectFn">
+        <label class="cust-check cursor-pointer">
+          <input type="checkbox" [checked]="allRowsSelected" (change)="selectFn(!allRowsSelected)" />
+          <span class="check-style"></span>
+        </label>
+      </ng-template>
+      <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+        let-onCheckboxChangeFn="onCheckboxChangeFn">
+        <label class="cust-check cursor-pointer">
+          <input type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+          <span class="check-style"></span>
+        </label>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column
+      [resizeable]="false" prop="person.name" name="Client Name" [headerClass]="'checkbox-header'"
+      [width]="200">
+      <ng-template ngx-datatable-header-template let-value="value">
+        <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+          <span class="datatable-header-cell-label">Client Name</span>
+        </span>
+      </ng-template>
+      <input type="checkbox" class="form-check-input" value="">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span class="d-block"> {{value}} </span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" prop="matter.name" name="Matter Name" [width]="200">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <ng-container *ngIf='value?.length <= 20'>
+          <span> {{value}} </span>
+        </ng-container>
+        <div class="d-inline-flex justify-content-between" *ngIf='value?.length > 20'>
+          <div class="info-hover position-relative">
+            <a href="javascript:void(0)" class="text-decoration">
+              <span> {{value?.slice(0, 20)}}... </span>
+            </a>
+            <div class="tooltip bs-tooltip-bottom" role="tooltip">
+              <div class="arrow"></div>
+              <div class="tooltip-inner tooltip-lg">
+                <p>{{value}} </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" prop="billedAmount" name="Total Invoiced" [width]="200">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span class="d-block"> {{value | currency : 'USD': 'symbol': '1.2-2'}}</span>
+
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" prop="createdAt" name="Service Date" [width]="200">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span>{{value | date : 'MM/dd/yyyy'}}</span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" prop="id" name="Billed Date" [width]="200">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span></span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" prop="invoicePreference.name" name="Invoice Preferences" [width]="200">
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right'" name="Action" [frozenRight]='true'
+      [width]="155">
+      <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+        <div class="d-flex justify-content-end">
+          <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+            (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+            (outsideClick)="onClickedOutside($event, rowIndex)">
+            <em class="icon icon-dot-verti"></em>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="javascript:void(0)" (click)='previewReadyToBill(row)' id="preview-invoice-{{rowIndex}}">
+                Preview Invoice
+              </a>
+              <a class="dropdown-item" href="javascript:void(0)" (click)='billToClient(row)' id="bill-to-client-{{rowIndex}}">
+                Bill To Client
+              </a>
+            </div>
+          </div>
+          <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-footer>
+      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                  <option *ngFor="let limit of limitArray; trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                {{ i+1 }} of {{page.totalPages}}</option>
+            </select>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                (change)="table.onFooterPage($event);pageChange($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice'
+    [invoiceTemplateDetails]='invoiceTemplateDetails'
+    [matterBillingSettings]='billToClientResponse.matterBillingSettings' [tenantDetails]='tenantDetails'
+    [loggedinuserId]='loginUser.id' [default_logo_url]='default_logo_url' [trustAccountEnabled]='trustAccountStatus'
+    [checkTrustAccountStatus]='false' (invoiceHTMLDetails)='sendEmailAndPrint($event)'>
+  </app-invoice-extended-pdf>
+</div>
+
+<ng-container *ngIf='bulkBillToClientResponse && invoiceTemplateDetails'>
+  <div class="d-none" *ngFor="let billResponse of bulkBillToClientResponse.succededItems; trackBy:trackByFn;">
+    <app-invoice-extended-pdf [invoicedata]='billResponse.invoice' [invoiceTemplateDetails]='invoiceTemplateDetails'
+      [matterBillingSettings]='billResponse.matterBillingSettings' [tenantDetails]='tenantDetails'
+      [loggedinuserId]='loginUser.id' [default_logo_url]='default_logo_url' [checkTrustAccountStatus]='false'
+      [trustAccountEnabled]='trustAccountStatus'
+      (invoiceHTMLDetails)='sendEmailAndPrintBulk($event, billResponse.prebillId)'>
+    </app-invoice-extended-pdf>
+  </div>
+</ng-container>
+
+<ng-container *ngIf='bulkDownloadResponse && invoiceTemplateDetails'>
+  <div class="d-none" *ngFor="let billResponse of bulkDownloadResponse.succededItems; trackBy:trackByFn;">
+    <app-invoice-extended-pdf [invoicedata]='billResponse.invoice' [invoiceTemplateDetails]='invoiceTemplateDetails'
+      [matterBillingSettings]='billResponse.matterBillingSettings' [tenantDetails]='tenantDetails'
+      [loggedinuserId]='loginUser.id' [default_logo_url]='default_logo_url' [checkTrustAccountStatus]='false'
+      [trustAccountEnabled]='trustAccountStatus'
+      (invoiceHTMLDetails)='downloadAndPrintBulk($event, billResponse.prebillId)'>
+    </app-invoice-extended-pdf>
+  </div>
+</ng-container>
+
+<ng-template #billClient let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Bill to Client</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id='close-model'>
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data mb-24">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to bill
+          <strong>{{billedToClientAmt?.name}}</strong> for
+          <strong>{{billedToClientAmt?.amount | currency : 'USD' : 'symbol': '1.2-2'}}</strong>?
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="custom-control custom-checkbox mb-0 pr-0"
+        *ngIf='billedToClientAmt.invoicePreference.id == electronicInvoice?.id || billedToClientAmt.invoicePreference.id == paperAndElectronicInvoice?.id'>
+        <input type="checkbox" class="custom-control-input" id="customCheck1_email" [(ngModel)]='sendEmail'>
+        <label class="custom-control-label" for="customCheck1_email">Email invoice to client</label>
+      </div>
+      <div class="custom-control custom-checkbox mb-0 pr-0"
+        *ngIf='billedToClientAmt.invoicePreference.id == paperInvoice?.id || billedToClientAmt.invoicePreference.id == paperAndElectronicInvoice?.id'>
+        <input type="checkbox" class="custom-control-input" id="customCheck2_print" [(ngModel)]='print'>
+        <label class="custom-control-label" for="customCheck2_print">Print invoice</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancel-model">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="yes-bill-to-client">Yes, bill to client</button>
+  </div>
+</ng-template>
+
+<ng-template #BulkbillClientTemplate let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Bill Client</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-12">
+    <div class="d-flex align-items-start missing-data mb-32">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to bill all the selected invoices to their matters?
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="custom-control custom-checkbox mb-12 pr-0" *ngIf='bulkPreference?.canEmail'>
+        <input type="checkbox" class="custom-control-input" id="customCheck1_email"
+          [(ngModel)]='bulkPreference.sendEmail'>
+        <label class="custom-control-label" for="customCheck1_email">Email invoice to client</label>
+      </div>
+      <div class="custom-control custom-checkbox mb-0 pr-0" *ngIf='bulkPreference?.canPrint'>
+        <input type="checkbox" class="custom-control-input" id="customCheck2_print" [(ngModel)]='bulkPreference.print'>
+        <label class="custom-control-label" for="customCheck2_print">Print invoice</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancle-model">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="yes-bill-to-client-bulk">Yes, bill to client</button>
+  </div>
+</ng-template>

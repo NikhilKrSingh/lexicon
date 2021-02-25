@@ -1,0 +1,23 @@
+
+  .search-result-box .search-result {
+    max-height: 338px;
+    overflow: auto;
+    min-height: 70px;
+  }
+  // .fc-toolbar.fc-header-toolbar .fc-left {
+  //   flex: none;
+  // }
+  // .fc-toolbar.fc-header-toolbar .fc-center {
+  //   flex: 1;
+  //   text-align: center;
+  //   display: flex;
+  //   justify-content: center;
+  // }
+  
+  .cust-readonlyinput:disabled {
+    background-color: #d8dde3 !important;
+  }
+  
+  .ng-select {
+    caret-color: transparent;
+  }

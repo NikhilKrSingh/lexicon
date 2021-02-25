@@ -1,0 +1,49 @@
+<h3 class="mb-24">Set Operating Account</h3>
+<div class="alert alert-success d-flex justify-content-between" role="alert" *ngIf="displayMessage">
+  <div class="d-flex">
+    <em class="alert-icon icon icon-check-circle"></em>
+    <div class="d-flex align-items-center flex-wrap">
+      <h4 class="mr-20 mt-0 mb-0">Success</h4>
+      {{success_msg}}
+    </div>
+  </div>
+</div>
+<div class="row gutter-16">
+  <div class="col-3">
+    <div class="form-group"
+      [class.has-error]="isFormSubmitted && (!billingSettings.operatingRoutingNumber|| this.billingSettings.operatingRoutingNumber?.length < 9)">
+      <label>Routing Number <sup>*</sup></label>
+      <input type="text" mask="000000000" placeholder="Enter Routing Number" class="form-control"
+        [(ngModel)]='billingSettings.operatingRoutingNumber' (keypress)="checkNumber($event)" id="routing-number">
+
+      <span class="field-message text-danger" *ngIf="isFormSubmitted  && !billingSettings.operatingRoutingNumber">
+        <em class="icon icon-error mr-4"></em>
+        Please enter an operating routing number.
+      </span>
+
+      <span class="field-message text-danger"
+        *ngIf="isFormSubmitted && billingSettings.operatingRoutingNumber && this.billingSettings.operatingRoutingNumber?.length < 9">
+        <em class="icon icon-error mr-4"></em>
+        Please enter 9-digit routing number.
+      </span>
+
+    </div>
+  </div>
+  <div class="col-3">
+    <div class="form-group"
+      [class.has-error]="isFormSubmitted && (!billingSettings.operatingAccountNumber ||  this.billingSettings.operatingAccountNumber?.length < 12)">
+      <label>Account Number <sup>*</sup></label>
+      <input type="text" mask="000000000000" placeholder="Enter Account Number" class="form-control"
+        [(ngModel)]='billingSettings.operatingAccountNumber' (keypress)="checkNumber($event)" id="account-number">
+      <span class="field-message text-danger" *ngIf="isFormSubmitted  && !billingSettings.operatingAccountNumber">
+        <em class="icon icon-error mr-4"></em>
+        Please enter an operating account number.
+      </span>
+      <span class="field-message text-danger"
+        *ngIf="isFormSubmitted  && billingSettings.operatingAccountNumber && this.billingSettings.operatingAccountNumber?.length < 12">
+        <em class="icon icon-error mr-4"></em>
+        Please enter valid 12-digit Account number.
+      </span>
+    </div>
+  </div>
+</div>

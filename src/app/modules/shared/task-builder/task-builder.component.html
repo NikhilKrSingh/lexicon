@@ -1,0 +1,328 @@
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-24">
+            <h3 class="m-0">{{(type == 'matter') ? 'Matter ' : 'Lead '}}Progress</h3>
+            <div>
+                <button type="button" class="btn btn-outline-primary " (click)="getWorkFlowEstates(ViewStepHistory)" id="view-state-history">View Step History</button>
+                <button type="button" class="btn btn-primary ml-8" [disabled]="!isAllStepCompleted || isLastStepCompleted" (click)="getNextStep(SelectNextStep, BeginNextStep, NoEvents, null, PreviewTasks)" id="step-btn">{{(isLastStepCompleted)? 'All Steps Completed' : (isInitialStep) ? 'Begin Step' : 'Begin Next Step'}}</button>
+            </div>
+        </div>
+        <div class="step-history-wrap">
+            <div [class]="mattertasksList?.length > 3 ? 'step-history-scroll custom-style-scroll' : ''">
+                <div class="step-hist-panel" [class.completed]="!('Completed'==tasks.status)" [class.sh-open]="tasks.showSubTasks" *ngFor="let tasks of mattertasksList;trackBy: trackByFn;let i=index">
+                    <span class="sh-circle"><em class="icon icon-check-circle"></em></span>
+                    <div class="d-flex justify-content-between align-items-center mb-8">
+                        <h5 class="my-0">{{tasks.workFlowTaskName}}</h5>
+                        <a href="javascript:void(0);" class="font-weight-medium" *ngIf="'Completed'!=tasks.status && tasks.status !='NotStarted'" (click)="openWarningModal(Warning, SelectNextStep, BeginNextStep, tasks.workFlowId)" id="mark-as-complete-index-{{i}}">Mark as Complete</a>
+                    </div>
+                    <div class="step-hist-head d-flex justify-content-between align-items-center p-8">
+                        <div class="d-flex align-items-center">
+                            <span class="sh-arrow-collapse d-flex justify-content-center align-items-center" (click)="tasks.showSubTasks=!tasks.showSubTasks" id="tasks-listing-index-{{i}}">
+                                <em *ngIf="tasks.showSubTasks" class="icon icon-angle-down"></em>
+
+                                <em *ngIf="!tasks.showSubTasks" class="icon icon-angle-down"></em>
+                            </span>
+                            <strong class="font-weight-medium text-nowrap">{{tasks.tasks.length}} tasks</strong>
+                            <div class="sh-status d-flex align-items-center" [class.sh-status-success]="(tasks.completedTasks==tasks.tasks.length && tasks.status !='NotStarted') || tasks.status == 'Completed'" [class.sh-status-primary]="tasks.completedTasks>0 && tasks.completedTasks < tasks.tasks.length && tasks.status !='NotStarted' && tasks.status != 'Completed'" [class.sh-status-danger]="(tasks.completedTasks==0 || tasks.status =='NotStarted') && tasks.status != 'Completed'">
+                                <span class="sh-badge mr-4 text-nowrap font-weight-medium" [class.sh-badge-success]="(tasks.completedTasks==tasks.tasks.length && tasks.status !='NotStarted') || tasks.status == 'Completed'" [class.sh-badge-primary]="tasks.completedTasks>0 && tasks.completedTasks < tasks.tasks.length && tasks.status !='NotStarted' && tasks.status != 'Completed'" [class.sh-badge-danger]="(tasks.completedTasks==0 || tasks.status =='NotStarted') && tasks.status != 'Completed'">{{(tasks.status =='NotStarted') ? 'Not Started' : tasks.completedTasks+'/'+tasks.tasks.length+' completed'}} </span>
+                                <em class="icon icon-check-circle" *ngIf="!isInitialStep && tasks.status == 'Completed'"></em>
+                            </div>
+                        </div>
+                        <ng-select [items]="taskFilterList" placeholder="Select task Filter"
+                     [bindValue]="'id'" [selectOnTab]="true" [bindLabel]="'name'" [clearable]="false" [searchable]="false" [(ngModel)]="taskFilterSelection[i]"
+                    [notFoundText]="'No record found'" (change)="filterSubtasks($event, i)" id="filter-select-index-{{i}}">
+                  </ng-select>
+                    </div>
+                    <div class="step-hist-body" *ngIf="tasks.showSubTasks">
+                        <table class="table table-borderless" id="sub-task-tbl">
+                            <tbody>
+                                <tr *ngFor="let subTask of tasks.tasks;trackBy: trackByFn; let subIndex = index" id="sub-task-index-{{subIndex}}">
+                                    <td class="task-name-td">
+                                        <div class="d-flex">
+                                            <span class="sh-check-circle mr-8" [class.text-primary]="subTask.taskStatusId==compleTaskStatusId"><em *ngIf="subTask.taskStatusId==compleTaskStatusId" class="icon icon-check-circle"></em></span>
+                                            <div>
+                                                <span class="helper-text small d-block">Task Name</span>
+                                                {{subTask.name}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="assignto-td">
+                                        <span class="helper-text small d-block text-nowrap">Assigned To</span>
+                                        {{subTask.assignee}}
+                                    </td>
+                                    <td class="text-nowrap duedate-td">
+                                        <span class="helper-text small d-block">Due Date</span>
+                                        {{subTask.dueDate | date: 'MMM. dd, yyyy'}}
+                                    </td>
+                                    <td class="text-right completed-task-td" >
+                                        <span *ngIf="subTask.taskStatusId==compleTaskStatusId" class="sh-badge sh-badge-primary text-nowrap font-weight-medium d-inline-block">Completed: {{subTask.completedDate | date: 'MMM. dd, yyyy'}}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+</div>
+
+
+<ng-template #SelectNextStep let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Select Next Step</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body pb-0">
+        <label class="step-radio cust-radio d-block mb-24 d-flex align-items-start text-base" *ngFor="let task of nextSteps;trackBy :trackByFn;">
+            <input type="radio" [(ngModel)]="selectedStep" [value]="task.id" name="step">
+            <span class="radio-style mr-8"></span>
+            <div class="pt-1">
+                <strong class="d-block font-weight-medium mb-4">{{task.displayName}}</strong>
+                <p class="m-0 helper-text font-weight-normal lh-20">{{task.description}}</p>
+            </div>
+        </label>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancle-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" [disabled]="!selectedStep" (click)="getAssigneeList(BeginNextStep, NoEvents, PreviewTasks)" id="next-btn">Next</button>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+</ng-template>
+
+
+<ng-template #BeginNextStep let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-4">Begin Next Step</h3>
+      <span class="helper-text d-block">{{selectedStepName}}</span>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn-begin">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body pb-0">
+        <ng-template [ngIf]="!isCalendarEventRequired" [ngIfElse]="EventRequired">
+            <div class="form-group" *ngIf="attorneyassigneeList && attorneyassigneeList.length">
+                <label>Attorney <sup>*</sup></label>
+                <ng-select [items]="attorneyassigneeList" placeholder="Select Attorney" [selectOnTab]="true"
+                         [bindValue]="'id'" [bindLabel]="'name'" [clearable]="false" [(ngModel)]="selectedAssigneeId"
+                        [notFoundText]="'No record found'" [searchFn]="customSearchFn" (change)="selectAssignee($event, 'Attorney')" id="attorney-select">
+                    </ng-select>
+            </div>
+            <div class="form-group" *ngIf="lawofficeadminList && lawofficeadminList.length">
+                <label>Law Office Administrator <sup>*</sup></label>
+                <ng-select [items]="lawofficeadminList" placeholder="Select Law Office Administrator" [selectOnTab]="true"
+                         [bindValue]="'id'" [bindLabel]="'name'" [clearable]="false" [(ngModel)]="selectedLawOfficeAdminId"
+                        [notFoundText]="'No record found'" [searchFn]="customSearchFn" (change)="selectAssignee($event, 'lawOfficeAdmin')" id="law-office-select">
+                    </ng-select>
+            </div>
+            <div class="form-group" *ngIf="fundingcordinatorList && fundingcordinatorList.length">
+                <label>Funding Coordinator <sup *ngIf="isFundingCordRequired">*</sup></label>
+                <ng-select [items]="fundingcordinatorList" placeholder="Select Funding Coordinator" [selectOnTab]="true"
+                         [bindValue]="'id'" [bindLabel]="'name'" [clearable]="false" [(ngModel)]="selectedFundingCordinatorId"
+                        [notFoundText]="'No record found'" [searchFn]="customSearchFn" (change)="selectAssignee($event, 'Funding_Cordinator')" id="funding-cordinator-select">
+                    </ng-select>
+            </div>
+            <div class="form-group" *ngIf="clientservicecoordinatorList && clientservicecoordinatorList.length">
+                <label>Client Service Coordinator <sup>*</sup></label>
+                <ng-select [items]="clientservicecoordinatorList" placeholder="Select Client Service Coordinator" [selectOnTab]="true"
+                         [bindValue]="'id'" [bindLabel]="'name'" [clearable]="false" [(ngModel)]="selectedClientServiceCoordinatorId"
+                        [notFoundText]="'No record found'" [searchFn]="customSearchFn" (change)="selectAssignee($event, 'Client_Service_Coordinator')" id="client-service-provider-select">
+                    </ng-select>
+            </div>
+            <div class="form-group" *ngIf="paralegalList && paralegalList.length">
+                <label>Paralegal <sup>*</sup></label>
+                <ng-select [items]="paralegalList" placeholder="Select Paralegal" [selectOnTab]="true"
+                         [bindValue]="'id'" [bindLabel]="'name'" [clearable]="false" [(ngModel)]="selectedParaLegalId"
+                        [notFoundText]="'No record found'" [searchFn]="customSearchFn" (change)="selectAssignee($event, 'Para_Legal')" id="para-legal-select">
+                    </ng-select>
+            </div>
+        </ng-template>
+        <ng-template #EventRequired>
+            <div class="custom-style-scroll nextstep-taskbuilder mb-8">
+            <div *ngFor="let events of selected_events_Details_array;let events_i=index">
+                <div class="form-group" *ngFor="let role of events.requiredAssignees;let role_i=index;">
+                    <label>{{role.displayName}} <sup *ngIf="role.isAssigneeRequired">*</sup></label>
+                    <ng-select [items]="role.assigneeList" [placeholder]="'Select '+ role.displayName" [selectOnTab]="true"
+                             [bindValue]="'id'" [(ngModel)]="role.selectedAssigneId" [bindLabel]="'name'" [clearable]="false" (change)="selectAssigneeForEvent($event, role, events_i, role_i);"
+                            [notFoundText]="'No record found'" [searchFn]="customSearchFn" id="para-legal-select-{{events_i+role_i}}">
+                        </ng-select>
+                </div>
+                <div class="form-group">
+                    <label>{{(multipleEventsForStep) ? 'Select a '+events.calendarEventSubTypeName  : 'Select an event'}} <sup>*</sup></label>
+                    <div class="select-event-wrap">
+                        <div class="select-event-scroll custom-style-scroll">
+                            <label class="event-radio cust-radio d-block p-8 d-flex align-items-start text-base" *ngFor="let event of events.eventsList;let i=index" id="check_{{events_i+'_'+i}}">
+                                <input type="radio" name="step_{{events_i+'_'+i}}" [(ngModel)]="events.selectedEventId" value="{{event.id}}">
+                                <span class="radio-style mr-16 mt-20"></span>
+                                <div class="event-block d-flex align-items-start">
+                                    <div class="event-time">
+                                      <span class="event-month d-block small">{{event.eventDueDate | date: 'MMM'}}</span>
+                                      <span class="event-date d-block text-xlarge bg-black">{{event.eventDueDate | date: 'dd'}}</span>
+                                    </div>
+                                    <div class="event-body pl-16">
+                                        <h4 class="mt-0 mb-4">{{event.eventName}}</h4>
+                                        <p class="mb-4 helper-text font-weight-normal lh-20">{{event.eventTypeName}}</p>
+                                        <p class="m-0 helper-text font-weight-normal lh-20">{{(event.eventLocation) ? event.eventLocation+ ' - ' : ''}}{{event.eventDueDate| date: 'hh:mm aa'}}</p>
+                                    </div>
+                                </div>
+                            </label>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </ng-template>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn-begin">Cancel</button>
+  
+    <button type="button" *ngIf="isCalendarEventRequired" class="btn btn-primary" [disabled]="!checkBeginNextStepValid" (click)="previewTasks(PreviewTasks)" id="preview-task-btn">Preview Tasks</button>
+    <button type="button" *ngIf="!isCalendarEventRequired" class="btn btn-primary" [disabled]="(!selectedAssigneeId && attorneyassigneeList && attorneyassigneeList.length) || (!selectedLawOfficeAdminId && lawofficeadminList && lawofficeadminList.length) || (fundingcordinatorList && fundingcordinatorList.length && isFundingCordRequired && !selectedFundingCordinatorId) || (!selectedClientServiceCoordinatorId && clientservicecoordinatorList && clientservicecoordinatorList.length) || (!selectedParaLegalId && paralegalList && paralegalList.length)" (click)="previewTasks(PreviewTasks)" id="preview-task-btn">Preview Tasks</button>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+</ng-template>
+
+
+<ng-template #Warning let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Warning</h3>
+      <button type="button" class="close mt-12 mr-16" (click)="modal.dismiss('Cross click')" aria-label="Close" id="warning-close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body pb-24">
+        <div class="d-flex align-items-start missing-data">
+            <em class="icon icon-warning text-warning"></em>
+            <div class="lh-20 ml-16">
+                <p class="m-0">There are incomplete tasks for this step. Are you sure you want to mark it as complete and move onto the next step?</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="warning-cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="markTaskAsComplete()" id="yes-mark-as-complete-btn">Yes, mark as complete</button>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+</ng-template>
+
+
+<ng-template #ViewStepHistory let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">View Step History</h3>
+      <button type="button" class="close" (click)="selectedId = null;modal.dismiss('Cross click')" aria-label="Close" id="close-btn-view-history">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body pb-0">
+        <div class="view-step-hist">
+            <div class="view-step-block">
+                <ng-container *ngTemplateOutlet="recursiveListTmpl; context:{ $implicit: linearWorkFlowArray }"></ng-container>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #recursiveListTmpl let-list>
+  <div class="step-hist-panel shv-open completed" [class.completed]="!(compleStatusId==item.workFlowStatusId)" *ngFor="let item of list;trackBy: trackByFn;let i=index">
+        <span class="sh-circle"><em class="icon icon-check-circle"></em></span>
+        <div class="step-hist-head d-flex justify-content-between align-items-center p-8">
+                        <div class="d-flex align-items-center">
+                            <span *ngIf="!item.isArrowHide" class="sh-arrow-collapse d-flex align-items-center" (click)="clickProgressStep($event, item)">
+                            <em *ngIf="item.id != selectedId" class="icon icon-angle-down"></em>
+                            <em *ngIf="item.id == selectedId" class="icon icon-angle-up"></em>
+                            </span>
+                            <strong class="font-weight-medium text-nowrap">{{item.displayName}}</strong>
+                        </div>
+                        <span *ngIf="item.isCurrentStep" class="helper-text small">Current Step</span>
+                    </div>
+
+                    <div class="step-hist-body pl-32" *ngIf="item.id==selectedId && item.showInfo && workflowAdditionalInfo">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span class="helper-text small d-block">Initiated By:</span>
+                                        <div class="helper-text font-weight-normal">
+                                            {{workflowAdditionalInfo.initiator.lastName+', '+workflowAdditionalInfo.initiator.firstName}} <br>
+                                            <span *ngIf="workFlowMonth == 4">{{workflowAdditionalInfo.initiator.date | date: 'MMM dd, yyyy hh:mm a'}}</span>
+                                            <span *ngIf="workFlowMonth != 4">{{workflowAdditionalInfo.initiator.date | date: 'MMM. dd, yyyy hh:mm a'}}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="helper-text small d-block">Marked as Complete By:</span>
+                                        <div class="helper-text font-weight-normal">
+                                            {{workflowAdditionalInfo.completer.lastName+', '+workflowAdditionalInfo.completer.firstName}} <br>
+                                            <span *ngIf="workFlowMonth == 4">{{workflowAdditionalInfo.completer.date | date: 'MMM dd, yyyy hh:mm a'}}</span>
+                                            <span *ngIf="workFlowMonth != 4">{{workflowAdditionalInfo.completer.date | date: 'MMM. dd, yyyy hh:mm a'}}</span>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+        <div class="step-hist-body p-0" *ngIf="item.id==selectedId && item.children && item.children.length > 0 && item.showChild">
+            <div class="view-step-block sub-view-step-block pt-24">
+                <ng-container *ngTemplateOutlet="recursiveListTmpl; context:{ $implicit: item.children }"></ng-container>
+            </div>
+        </div>
+    </div>
+    <app-loader [active]="AdditionalInfoLoading"></app-loader>
+</ng-template>
+
+<ng-template #PreviewTasks let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-4">Preview Tasks</h3>
+    <span class="small d-block helper-text">{{selectedStepName}}</span>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="pre-step-close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body" *ngIf="!noPreviewTasksForStep">
+      <div *ngFor="let task of previewTasksArray; trackBy: trackByFn;let i = index;" id="pre-task-index-{{i}}">
+        <span class="small d-block helper-text mb-4">{{task.name}}</span>
+        <ul class="list-unstyled mb-24 lh-20 missing-list pl-12">
+            <li>Assign To: {{ task.assignToName }}</li>
+            <li>Due Date: {{task.calculatedDueDate | date: 'MMM. dd, yyyy'}}</li>
+        </ul>
+    </div>
+  </div>
+  <div class="modal-body" *ngIf="noPreviewTasksForStep">
+      <div class="text-center">
+        <h4 class="pt-56 pb-56">There are no tasks to assign</h4>
+      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="back-cancel-btn">{{(noPreviewTasksForStep) ? 'Back' : 'Cancel'}}</button>
+    <button type="button" class="btn btn-primary" *ngIf="!noPreviewTasksForStep" (click)="assignTasks()" id="finalize-and-assign-task-btn">Finalize and Assign Tasks</button>
+    <button type="button" class="btn btn-primary" *ngIf="noPreviewTasksForStep" (click)="markTaskAsComplete(selectedStep)" id="finalize-and-assign-btn">Finalize and Assign</button>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</ng-template>
+
+
+
+
+<ng-template #NoEvents let-modal>
+  <div class="modal-header d-block pb-12">
+    <h3 class="modal-title mb-0">Warning</h3>
+    <button type="button" class="close mt-12 mr-16" (click)="modal.dismiss('Cross click')" aria-label="Close" id="no-event-close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      <p>You must create at least one <b>{{ eventType }}</b>-type event for this matter or potential client to begin this step.</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="no-event-close-btn-bottom">Close</button>
+  </div>
+</ng-template>

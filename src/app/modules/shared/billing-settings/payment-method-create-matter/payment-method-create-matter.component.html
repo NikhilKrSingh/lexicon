@@ -1,0 +1,255 @@
+<div class="d-flex justify-content-between align-items-center mb-24">
+  <div>
+    <h3 class="mb-0">Credit Cards</h3>
+    <p class="mb-0 mt-24" *ngIf="paymentMethodeText">Set up payment method to put on file.</p>
+  </div>
+</div>
+<div class="custom-table">
+  <div class="table-responsive section-area">
+    <ngx-datatable #tablematterTypes class="material common-table" [rows]="creditCardList"
+      [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="50" rowHeight="auto"
+      [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" id="creditcard-listing-tbl">
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="lastName" name="Name on Card" [width]="150">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf='!row.isCompany'> {{ row.lastName}}, {{row.firstName}}</span>
+          <span *ngIf='row.isCompany'> {{ row.companyName }}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="cardNumber" name="Card Number" [width]="150">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span>{{value | appCreditCardNumber}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="expirationDate" name="Billing Address" [width]="100"
+        *ngIf="hideEcheck">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <div class="lh-20">
+            <div class="lh-20">
+              {{primaryAddress?.address}}<br>
+              {{primaryAddress?.address2}} <br>
+              {{primaryAddress?.city}} {{primaryAddress?.state}}
+              {{primaryAddress?.zip}}
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="expirationDate" name="Expiration Date" [width]="100">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span> {{row.expiryDate}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="autoPay" name="Auto Pay" [width]="100">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <label class="cust-check" *ngIf='value'>
+            <input type="checkbox" checked disabled />
+            <span class="check-style"></span>
+          </label>
+          <label class="cust-check not-checked" *ngIf='!value'>
+            <input type="checkbox" disabled />
+            <span class="check-style"></span>
+          </label>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="accountNumber" name="Auto-Pay Status" *ngIf="!hideEcheck"
+        [width]="100">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf='row.autoPay'>
+            <span *ngIf='row.suspendAutoPay'>Suspended</span>
+            <span *ngIf='!row.suspendAutoPay'>Active</span>
+          </span>
+          <span *ngIf='!row.autoPay'>-</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="isSameAsPrimary" name="Address Same as Primary" *ngIf="!hideEcheck"
+        [width]="150">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <label class="cust-check" *ngIf='value'>
+            <input type="checkbox" checked disabled />
+            <span class="check-style"></span>
+          </label>
+          <label class="cust-check not-checked" *ngIf='!value'>
+            <input type="checkbox" disabled />
+            <span class="check-style"></span>
+          </label>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100">
+        <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <div class="icon-group d-flex justify-content-end">
+            <span>
+              <em class="icon icon-edit icon-color" (click)='editCreditCard(row, $event, rowIndex)' id="edit-creditcard-index-{{rowIndex}}"></em>
+            </span>
+            <span *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+              <em class="icon icon-remove icon-color" (click)='deleteCreditCard(row, $event, rowIndex)' id="delete-creditcard-index-{{rowIndex}}"></em>
+            </span>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+              </span>
+            </div>
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                  Page {{ i+1 }}
+                  of {{(page.totalPages==0?1:page.totalPages)}}
+                </option>
+              </select>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="tablematterTypes.onFooterPage($event);pageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+    <app-loader [active]="ccLoading"></app-loader>
+  </div>
+</div>
+<button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-8 mb-24" type="button"
+  (click)='addPaymentMethod()' id="add-credit-card-btn">
+  <i class="icon icon-add-circle"></i>
+  Add Credit Card
+</button>
+
+<div class="d-flex justify-content-between align-items-center mb-24" *ngIf="!hideEcheck">
+  <div>
+    <h3 class="mb-16">E-Check</h3>
+  </div>
+</div>
+<div class="custom-table" *ngIf="!hideEcheck">
+  <div class="table-responsive section-area">
+    <ngx-datatable #tableECheck class="material common-table" [rows]="echeckList" [columnMode]="ColumnMode.force"
+      [headerHeight]="50" [footerHeight]="50" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+      [limit]="page.size" id="echecklisting-tbl">
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="firstName" name="Name on Account" [width]="150">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span>{{(row.lastName)? row.lastName+',':''}}{{row.firstName}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="routingNumber" name="Routing Number" [width]="150">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span>{{value | appRoutingNumber}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="accountNumber" name="Account Number" [width]="100">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf="value"> ---- ---- {{value | slice:(value.length - 4)}}</span>
+          <span *ngIf="!value"> ---- ---- ----</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="autoPay" name="Auto Pay" [width]="100">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <label class="cust-check" *ngIf='value'>
+            <input type="checkbox" checked disabled />
+            <span class="check-style"></span>
+          </label>
+          <label class="cust-check not-checked" *ngIf='!value'>
+            <input type="checkbox" disabled />
+            <span class="check-style"></span>
+          </label>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="accountNumber" name="Auto-Pay Status" [width]="100">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf='row.autoPay'>
+            <span *ngIf='row.suspendAutoPay'>Suspended</span>
+            <span *ngIf='!row.suspendAutoPay'>Active</span>
+          </span>
+          <span *ngIf='!row.autoPay'>-</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [sortable]='false' prop="isSameAsPrimary" name="Address Same as Primary" [width]="150">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <label class="cust-check" *ngIf='value'>
+            <input type="checkbox" checked disabled />
+            <span class="check-style"></span>
+          </label>
+          <label class="cust-check not-checked" *ngIf='!value'>
+            <input type="checkbox" disabled />
+            <span class="check-style"></span>
+          </label>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100">
+        <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <div class="icon-group d-flex justify-content-end">
+            <span>
+              <em class="icon icon-edit icon-color" (click)='editECheck(row, $event, rowIndex)' id="edit-echeck-index-{{rowIndex}}"></em>
+            </span>
+            <span *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+              <em class="icon icon-remove icon-color" (click)='deleteECheck(row, $event, rowIndex)' id="delete-echeck-index-{{rowIndex}}"></em>
+            </span>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageECheckSelector"
+                    (change)="changeECheckPageSize()">
+                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+              </span>
+            </div>
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pageECheckSelected" (change)="changeECheckPage()">
+                <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                  [value]="i+1">
+                  Page {{ i+1 }}
+                  of {{(pageECheck.totalPages==0?1:pageECheck.totalPages)}}
+                </option>
+              </select>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="tableECheck.onFooterPage($event);echeckPageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+    <app-loader [active]="ecLoading"></app-loader>
+  </div>
+</div>
+<button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-8 mb-16" *ngIf="!hideEcheck" type="button"
+  (click)='addPaymentMethod(2)' id="add-echeck-btn">
+  <i class="icon icon-add-circle"></i>
+  Add E-Check
+</button>

@@ -1,0 +1,67 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/contact/potential-client']">Contact Directory</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/contact/view-potential-client']"
+          [queryParams]="{clientId: clientId, state: state}">Contact Profile</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Manage Initial Consultation</li>
+    </ol>
+    <div>
+      <div class="profile-content d-flex align-items-center profile-client mb-32">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2" *ngIf="!clientDetail?.isCompany">{{clientDetail?.firstName}}
+            {{clientDetail?.lastName}}
+          </h2>
+          <h2 class="mt-0 mb-2" *ngIf="clientDetail?.isCompany">{{clientDetail?.companyName}}
+          </h2>
+          <span class="text-small font-weight-medium d-flex align-items-center"
+            *ngIf="!clientDetail?.isCompany">Individual Contact</span>
+          <span class="text-small font-weight-medium d-flex align-items-center"
+            *ngIf="clientDetail?.isCompany">Corporate Contact</span>
+        </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+    
+    <div class="card">
+      <div class="card-body">
+        <h3>Manage Initial Consultation</h3>
+        <div class="form-group">
+          <label class="mb-12">Request Remaining Amount</label>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="initialConsultationRecord" name="initialConsultation" [(ngModel)]="initialConsultation" (change)="select()" value="record-initial-consultation"  class="custom-control-input">
+            <label class="custom-control-label" for="initialConsultationRecord">Record Payment</label>
+          </div>
+          <div class="coming-soon-div d-inline-block">
+              <div class="custom-control custom-radio pr-0">
+                <input type="radio" id="initialConsultationReschedule" name="initialConsultation" [(ngModel)]="initialConsultation" (change)="select()"  value="Reschedule" class="custom-control-input" disabled>
+                <label class="custom-control-label" for="initialConsultationReschedule">Reschedule</label>
+              </div>
+              <div class="custom-control custom-radio pr-0">
+                <input type="radio" id="initialConsultationCancel" name="initialConsultation" [(ngModel)]="initialConsultation" (change)="select()"  value="Cancel" class="custom-control-input" disabled>
+                <label class="custom-control-label" for="initialConsultationCancel">Cancel</label>
+              </div>
+              <div class="custom-control custom-radio pr-0">
+                <input type="radio" id="initialConsultationMarkasnoshow" name="initialConsultation" [(ngModel)]="initialConsultation" (change)="select()" value="Markasnoshow" class="custom-control-input" disabled>
+                <label class="custom-control-label" for="initialConsultationMarkasnoshow">Mark as no-show</label>
+              </div>
+            <div class="only-coming-soon-tooltip bottom">
+              <div class="coming-soon-tooltip-inner">
+                <span class="font-weight-medium small d-block">Coming Soon!</span>
+                <p class="lh-20 m-0">These features are currently not available. Please check back later.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" [routerLink]="['/contact/view-potential-client']"
+          [queryParams]="{clientId: clientId, state: state}" class="btn btn-light" id="cancel-btn">Cancel</button>
+        <button type="button" (click)="next()" [disabled]="!initialConsultation" class="btn btn-primary" id="next-btn">Next</button>
+      </div>
+    </div>
+  </div>
+</div>

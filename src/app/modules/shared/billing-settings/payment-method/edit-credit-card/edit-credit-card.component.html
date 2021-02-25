@@ -1,0 +1,295 @@
+<div class="modal-header pb-24 d-block">
+  <h3 class="modal-title mb-0">Edit Credit Card</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+
+<div class="modal-body pb-24">
+  <div [formGroup]='creditCardForm'>
+    <div class="col-12 m-0 p-0">
+      <div class="form-group">
+        <label class="mb-16">Select personal or company credit card</label>
+        <div class="custom-control custom-radio">
+          <input type="radio" id="customRadio1" name="isCompany" class="custom-control-input" [value]='false'
+            formControlName='isCompany'>
+          <label class="custom-control-label" for="customRadio1">Personal</label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input type="radio" id="customRadio2" name="isCompany" class="custom-control-input" [value]='true'
+            formControlName='isCompany'>
+          <label class="custom-control-label" for="customRadio2">Company</label>
+        </div>
+      </div>
+    </div>
+    <div class="edit-collapse-block edit-collapse-open">
+      <div class="edit-collapse-head d-flex justify-content-between">
+        <h4 class="text-xlarge m-0">Credit Card Information</h4>
+        <a href="javascript:void(0)" class="icon font-10 expand-button align-self-center" [class.icon-angle-down]="!showSection1"
+          [class.icon-angle-up]="showSection1" title="Expand/Collapse Credit Card Information" (click)="showSection1 = !showSection1">
+        </a>
+      </div>
+      <div class="edit-collapse-body py-16" [hidden]='!showSection1'>
+        <div class="row gutter-16">
+          <ng-container *ngIf='!creditCardForm?.value?.isCompany'>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="f['firstName'].errors?.insecure_input || (formSubmitted && f['firstName'].errors?.required)">
+                <label>First Name <sup>*</sup></label>
+                <input type="text" class="form-control" placeholder="Enter first name on card" formControlName='firstName' id="first-name">
+                <span class="field-message text-danger" *ngIf="formSubmitted && f['firstName'].errors?.required">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.first_name_error}}
+                </span>
+                <span class="field-message text-danger" *ngIf="f['firstName'].errors?.insecure_input">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.insecure_input}}
+                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="f['lastName'].errors?.insecure_input || (formSubmitted && f['lastName'].errors?.required)">
+                <label>Last Name <sup>*</sup></label>
+                <input type="text" class="form-control" placeholder="Enter last name on card" formControlName='lastName' id="last-name">
+                <span class="field-message text-danger" *ngIf="formSubmitted && f['lastName'].errors?.required">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.last_name_error}}
+                </span>
+                <span class="field-message text-danger" *ngIf="f['lastName'].errors?.insecure_input">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.insecure_input}}
+                </span>
+              </div>
+            </div>
+          </ng-container>
+          <div class="col-12" *ngIf='creditCardForm?.value?.isCompany'>
+            <div class="form-group" [class.has-error]="f['companyName'].errors?.insecure_input || (formSubmitted && f['companyName'].errors?.required)">
+              <label>Company Name <sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="Enter company name" formControlName='companyName' id="company-name">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f['companyName'].errors?.required">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data.company_name_error}}
+              </span>
+              <span class="field-message text-danger" *ngIf="f['companyName'].errors?.insecure_input">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-group" [class.has-error]="f['cardNumber'].errors?.mask?.requiredMask || (formSubmitted && f['cardNumber'].errors?.required) || f['cardNumber'].errors?.minlength">
+              <label>Card Number <sup>*</sup></label>
+              <input type="text" class="form-control" minlength="15" maxlength="16"
+                placeholder="Enter card number" formControlName='cardNumber' (keypress)="checkNumber($event)" id="card-number">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f['cardNumber'].errors?.required">
+                <em class="icon icon-error mr-4"></em>
+                Please enter card number.
+              </span>
+              <span class="field-message text-danger" *ngIf="f['cardNumber'].errors?.mask?.requiredMask || f['cardNumber'].errors?.minlength">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data.card_number_error}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group" [class.has-error]="f['expirationDate'].errors?.mask?.requiredMask || (formSubmitted && f['expirationDate'].errors?.required)">
+              <label>Expiration Date <sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="MM/YYYY" [dropSpecialCharacters]='false'
+                mask="00/0000" formControlName='expirationDate' id="expiration-date">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f['expirationDate'].errors?.required">
+                <em class="icon icon-error mr-4"></em>
+                Please enter expiration date.
+              </span>
+              <span class="field-message text-danger" *ngIf="f['expirationDate'].errors?.mask?.requiredMask">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data.expiry_date_error}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group" [class.has-error]="f['CVV'].errors?.mask?.requiredMask || (formSubmitted && f['CVV'].errors?.required)">
+              <label>CVV <sup>*</sup></label>
+              <input type="text" class="form-control" mask="000" placeholder="Enter CVV" formControlName='CVV' id="cvv">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f['CVV'].errors?.required">
+                <em class="icon icon-error mr-4"></em>
+                Please enter CVV.
+              </span>
+              <span class="field-message text-danger" *ngIf="f['CVV'].errors?.mask?.requiredMask">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data.CVV_error}}
+              </span>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="d-flex">
+          <div class="btn-group">
+            <button type="button" class="btn btn-light" (click)='showSection1 = false' id="cancel-btn">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)='saveCCInfo()' id="save-btn">Save
+              Changes</button>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+  <div class="edit-collapse-block edit-collapse-open mt-16">
+    <div class="edit-collapse-head d-flex justify-content-between">
+      <h4 class="text-xlarge m-0">Billing Information</h4>
+      <a href="javascript:void(0)" class="icon font-10 expand-button align-self-center"
+        [class.icon-angle-down]="!showSection2" [class.icon-angle-up]="showSection2"
+        title="Expand/Collapse Billing Information" (click)="showSection2 = !showSection2">
+      </a>
+    </div>
+    <div class="edit-collapse-body py-16" [hidden]='!showSection2' [formGroup]='addressForm'>
+      <div class="custom-control custom-checkbox mb-12">
+        <input type="checkbox" class="custom-control-input" id="customCheck1" formControlName='isSameAsPrimary'>
+        <label class="custom-control-label text-transform-none" for="customCheck1">Same as Primary Address</label>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group" [class.has-error]="a['address'].errors?.insecure_input || (formSubmitted && a['address'].errors?.required)">
+            <label>Street Address <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Enter street address" formControlName='address' id="address-one" maxlength="39" [readOnly]="addressForm.value.isSameAsPrimary">
+            <span class="field-message text-danger" *ngIf="formSubmitted && a['address'].errors?.required">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data.street_address_error}}
+            </span>
+            <span class="field-message text-danger" *ngIf="a['address'].errors?.insecure_input">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data.insecure_input}}
+            </span>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-group" [class.has-error]="formSubmitted && a['address2'].errors">
+            <label>Apt, Suite, Unit</label>
+            <input type="text" class="form-control" placeholder="Enter apartment, suite, or unit number"
+              formControlName='address2' maxlength="39" id="address-two" [readOnly]="addressForm.value.isSameAsPrimary">
+            <span class="field-message text-danger">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data.insecure_input}}
+            </span>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group" [class.has-error]="(a['zipCode'].errors?.mask?.requiredMask || (formSubmitted && a['zipCode'].errors?.required)) || (formSubmitted && validZipErr) && !addressForm.value.isSameAsPrimary">
+                <label>ZIP Code<sup>*</sup></label>
+                <input type="text"
+                  class="form-control"
+                  minlength="3"
+                  maxlength="6"
+                  placeholder="Enter zip code"
+                  formControlName='zipCode'
+                  (keypress)="checkNumber($event)"
+                  (keyup)="getCityState($event.target.value)"
+                  [readOnly]="addressForm.value.isSameAsPrimary"
+                  id="zipcode">
+                <span class="field-message text-danger" *ngIf="(formSubmitted && a['zipCode'].errors?.required) && !validZipErr && !addressForm.value.isSameAsPrimary">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data?.zip_code_required}}
+                </span>
+                <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr && !addressForm.value.isSameAsPrimary">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data?.zip_code_error}}
+                </span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label>State <sup>*</sup></label>
+                <ng-select *ngIf="stateList?.length >1 && !addressForm.value.isSameAsPrimary"
+                  [items]="stateList"
+                  placeholder="State"
+                  formControlName='state'
+                  [bindValue]="'code'"
+                  [clearable]="false"
+                  [bindLabel]="'name'"
+                  [notFoundText]="'No record found'"
+                  [selectOnTab]="true" id="state">
+                </ng-select>
+                <input *ngIf="stateList?.length <= 1 || addressForm.value.isSameAsPrimary"
+                  type="text"
+                  class="form-control"
+                  placeholder="State"
+                  [(ngModel)]="singleState"
+                  [ngModelOptions]="{standalone: true}"
+                  [readOnly]='true' id="state">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-group">
+            <label>City <sup>*</sup></label>
+            <ng-select *ngIf="cityList?.length > 1 && !addressForm.value.isSameAsPrimary"
+              [items]="cityList"
+              placeholder="City"
+              formControlName="city"
+              [clearable]="false"
+              [notFoundText]="'No record found'"
+              [selectOnTab]="true" id="city">
+            </ng-select>
+            <input *ngIf="cityList?.length <= 1 || addressForm.value.isSameAsPrimary"
+              type="text"
+              class="form-control"
+              placeholder="City"
+              formControlName='city'
+              [readOnly]='true'id="city">
+          </div>
+        </div>
+      </div>
+      <!-- <div class="d-flex">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" (click)='showSection2 = false' id="cancel-btn">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)='saveAddressInfo()' id="save-address-info">
+            Save Changes
+          </button>
+        </div>
+      </div> -->
+    </div>
+  </div>
+  <div class="edit-collapse-block edit-collapse-open" *ngIf="!isPotentialClient">
+    <div class="edit-collapse-head d-flex justify-content-between">
+      <h4 class="text-xlarge m-0">Auto-Pay</h4>
+      <a href="javascript:void(0)" class="icon font-10 expand-button align-self-center"
+        [class.icon-angle-down]="!showSection3" [class.icon-angle-up]="showSection3"
+        title="Expand/Collapse Auto Pay" (click)="showSection3 = !showSection3">
+      </a>
+    </div>
+    <div class="edit-collapse-body py-16" [hidden]='!showSection3' [formGroup]='autoPayForm'>
+      <p class="lh-20 mb-12">The matter’s full balance due will be charged to this payment method whenever an invoice’s due date arrives. Be sure to also file a signed Auto-Pay Agreement to the Document Management System.</p>
+      <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" id="customCheck2" formControlName='autoPay'>
+        <label class="custom-control-label" for="customCheck2">Activate Auto-Pay</label>
+      </div>
+      <div class="custom-control custom-checkbox" *ngIf="editSuspendMode && notCreateFrom">
+        <input type="checkbox" formControlName='toggleAutoPay' class="custom-control-input" id="customCheck3">
+        <label class="custom-control-label" for="customCheck3">Suspend Auto-Pay</label>
+      </div>
+      <div class="form-group mb-0" [class.has-error]="formSubmitted && !autoPaySelectionsValid" *ngIf="notCreateFrom && clientId">
+        <label>Apply to Matters <sup>*</sup></label>
+        <app-multiselect-dropdown [title]="autoPayMattersTitle" [placeholder]="'Search matters'" [clientDropdown]="true"
+          [selections]="selectedMatters" [displaySubItem]="mattersList" [filterName]="'Apply Selections'"
+          [showAll]="autoPayDisabled || disableAll ? false : true" [selectedMessage]="'matters will auto-pay using this credit card'"
+          (onSelectionChanged)="getMattersSelected($event)"
+          (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clrMatters()"
+          (applyFilter)="applyMatterFilter($event)" [isDisabled]="autoPayDisabled && !suspendSelected" id="selectedMattersId" [disableSelection]="disableAll">
+        </app-multiselect-dropdown>
+        <span class="field-message text-danger" *ngIf="formSubmitted && !autoPaySelectionsValid">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.select_matter_auto_pay}}
+        </span>
+      </div>
+      <!-- <div class="d-flex pt-12">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" (click)='showSection3 = false' id="cancel-btn">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)='saveAutoPay()' id="save-changes">Save Changes</button>
+        </div>
+      </div> -->
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">Save Changes</button>
+</div>

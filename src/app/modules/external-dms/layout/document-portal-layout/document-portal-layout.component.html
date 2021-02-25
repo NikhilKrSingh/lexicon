@@ -1,0 +1,9 @@
+<div id="content-area" class="d-flex justify-content-between align-items-stretch dms-portal">
+  <app-document-portal-sidebar [tenantProfile]="tenantDetails"></app-document-portal-sidebar>
+  <div class="right-caption-area flex-fill ml-0">
+    <app-document-portal-top-bar [tenantProfile]="tenantDetails"></app-document-portal-top-bar>
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

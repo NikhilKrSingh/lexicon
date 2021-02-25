@@ -1,0 +1,16 @@
+<h3 class="mb-8">Set Days To Pay Invoices</h3>
+<div class="row gutter-16">
+  <div class="col-6">
+    <p class="mb-32 lh-20">This is the number of days after an invoice is sent for payment before it is due. On
+      the due date, the system processes auto-payment and/or withdrawal from the primary trust account, if
+      set up.</p>
+  </div>
+</div>
+<div class="row gutter-16">
+  <div class="col-2">
+    <div class="form-group">
+      <label>Days <sup>*</sup></label>
+      <input type="text" class="form-control" [(ngModel)]='billingSettings.daysToPayInvoices' id="day-text">
+    </div>
+  </div>
+</div>

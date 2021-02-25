@@ -1,0 +1,253 @@
+<div class="d-flex justify-content-between align-items-start" *ngIf="!addEditAssociation">
+  <h2 class="mb-32">Matter Associations</h2>
+</div>
+<div class="info-block" *ngIf="!addEditAssociation">
+  <h3>Opposing Party</h3>
+  <div class="custom-table">
+    <div class="table-responsive">
+      <table class="table table-striped table-borderless" id="opposing-party-listing">
+        <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Matter Name</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="opposingPartyList.length > 0;else no_data_found">
+        <tr *ngFor="let opp of opposingPartyList; trackBy:trackByFn; let i = index;" id="opposing-{{i}}">
+          <td>{{opp.uniqueNumber}}</td>
+          <td> {{ (opp.isCompany) ? opp.companyName : opp.lastName + ', ' + opp.firstName }}</td>
+          <td>{{opp.isCompany ? 'Corporate' : 'Individual'}}</td>
+          <td>{{opp.matterName}}</td>
+          <td>{{ (opp?.email) ? opp.email : '--' }}</td>
+          <td>
+            {{opp?.primaryPhone | phoneFormatter}}
+          </td>
+          <td>{{ opp?.status }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="info-block pt-24" *ngIf="!addEditAssociation">
+  <h3>Opposing Counsel</h3>
+  <div class="custom-table">
+    <div class="custom-control custom-checkbox pr-8">
+      <input class="custom-control-input" id="partyThemselves" [checked]="isOppoRepreThemselves" type="checkbox" [disabled]="true">
+
+      <label class="custom-control-label text-muted" for="partyThemselves">Opposing party is representing themselves.</label>
+  </div>
+    <div class="table-responsive">
+      <table class="table table-striped table-borderless" id="opposing-consel-listing">
+        <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Matter Name</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="opposingCounselList.length > 0;else no_data_found">
+        <tr *ngFor="let counsel of opposingCounselList; trackBy: trackByFn; let i = index;" id="opposing-consel-{{i}}">
+          <td>{{counsel.uniqueNumber}}</td>
+          <td>{{counsel.lastName}}{{counsel.lastName ? ', ' : '' }} {{counsel.firstName}}</td>
+          <td>{{ counsel.companyName }}</td>
+          <td>{{ counsel.matterName }}</td>
+          <td>{{counsel.email}}</td>
+          <td>
+            {{counsel?.primaryPhone | phoneFormatter}}
+          </td>
+          <td>{{ counsel?.status }} </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="info-block pt-24" *ngIf="!addEditAssociation">
+  <h3 class="mb-16">Expert Witnesses</h3>
+  <div class="custom-table">
+    <div class="table-responsive">
+      <table class="table table-striped table-borderless" id="expert-witnesses-listing">
+        <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Matter Name</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="expertWitnessList.length > 0; else no_data_found">
+        <tr *ngFor="let expert of expertWitnessList; trackBy: trackByFn; let i = index;" id="expert-witness-{{i}}">
+          <td>{{expert.uniqueNumber}}</td>
+          <td>{{expert.lastName}}{{expert.lastName ? ', ' : '' }} {{expert.firstName}}</td>
+          <td>{{ expert.companyName }}</td>
+          <td>{{ expert.matterName }}</td>
+          <td>{{expert.email}}</td>
+          <td>
+            {{expert?.primaryPhone | phoneFormatter}}
+          </td>
+          <td>{{ expert?.status }} </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-between align-items-start" [ngClass]="{'mt-5': !addEditAssociation}">
+  <h2 class="mb-32">Client Associations</h2>
+  <button type="button" class="btn btn-primary"
+    (click)="editAssociations()" *ngIf="hasEditPermission && !addEditAssociation" id="add-edit-client-association">
+    Add/Edit Client Associations
+  </button>
+</div>
+<div class="info-block">
+  <h3 class="mb-16">Vendor</h3>
+  <div class="custom-table">
+    <div class="table-responsive">
+      <table class="table table-striped table-borderless" id="vendor-listing">
+        <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Matter Name</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th class="text-right" *ngIf="addEditAssociation">Action</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="vendorList.length > 0; else no_data_found">
+        <tr *ngFor="let vendor of vendorList; trackBy: trackByFn; let i = index;" id="vendor-{{i}}">
+          <td class="cursor-default">{{vendor.uniqueNumber}}</td>
+          <td class="cursor-default">
+            {{vendor.lastName}}{{vendor.lastName ? ', ' : '' }} {{vendor.firstName}}</td>
+          <td class="cursor-default">{{vendor.companyName}}</td>
+          <td class="cursor-default">{{vendor.matterName}}</td>
+          <td class="cursor-default">{{vendor.email}}</td>
+          <td class="cursor-default">{{vendor?.primaryPhone | phoneFormatter}}</td>
+          <td class="cursor-default">{{ vendor.status }}</td>
+          <td class="text-right" *ngIf="addEditAssociation">
+            <div class="icon-group d-flex justify-content-end">
+              <span>
+                <em class="icon icon-edit icon-color" (click)='editVendorClick(vendor)' id="edit-vendor-index-{{i}}"></em>
+              </span>
+              <span>
+                <em class="icon icon-remove icon-color" (click)='deleteVendorClick(vendor)' id="delete-vendor-index-{{i}}"></em>
+              </span>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+            (click)='addVendorClick()' *ngIf="addEditAssociation" id="add-ventor-btn">
+      <i class="icon icon-add-circle"></i>
+      Add Vendor
+    </button>
+  </div>
+</div>
+<div class="info-block pt-24">
+  <h3 class="mb-16">Subsidiary</h3>
+  <div class="custom-table">
+    <div class="table-responsive">
+      <table class="table table-striped table-borderless" id="subsidiary-listing">
+        <thead>
+        <tr>
+          <th>Contact Number</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Matter Name</th>
+          <th>Email Address</th>
+          <th>Phone Number</th>
+          <th>Status</th>
+          <th class="text-right" *ngIf="addEditAssociation">Action</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="subsidiaryList.length > 0; else no_data_found">
+        <tr *ngFor="let subsidiary of subsidiaryList; trackBy: trackByFn;let i = index;" id="subsidiary-{{i}}">
+          <td class="cursor-default">
+            {{subsidiary.uniqueNumber}}</td>
+          <td class="cursor-default">
+            {{subsidiary.lastName}}{{subsidiary.lastName ? ', ' : '' }} {{subsidiary.firstName}}
+          </td>
+          <td class="cursor-default">
+            {{subsidiary.companyName}}</td>
+          <td class="cursor-default">
+            {{subsidiary.matterName}}</td>
+          <td class="cursor-default">
+            {{subsidiary.email}}</td>
+          <td class="cursor-default">
+            {{subsidiary?.primaryPhone | phoneFormatter}}
+          </td>
+          <td class="cursor-default">
+            {{ subsidiary.status }}</td>
+          <td class="text-right" *ngIf="addEditAssociation">
+            <div class="icon-group d-flex justify-content-end">
+              <span>
+                <em class="icon icon-edit icon-color" (click)='editSubsidiaryClick(subsidiary)' id="edit-subsidiary-index-{{i}}"></em>
+              </span>
+              <span>
+                <em class="icon icon-remove icon-color"
+                    (click)='deleteSubsidiaryClick(subsidiary)' id="delete-subsidiary-index-{{i}}"></em>
+              </span>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+            (click)='addSubsidiaryClick()' *ngIf="addEditAssociation" id="add-sub-sidiary">
+      <i class="icon icon-add-circle"></i>
+      Add Subsidiary
+    </button>
+  </div>
+</div>
+<div class="info-block pt-24" *ngIf="addEditAssociation">
+  <div class="form-group">
+    <label for="">You may leave change notes for the audit history (optional).</label>
+    <textarea class="form-control" rows="4" placeholder="Enter Note Text" id="notes"></textarea>
+  </div>
+</div>
+<app-loader [active]="loading"></app-loader>
+<ng-template #no_data_found>
+  <tbody>
+  <tr>
+    <td colspan="6" class="text-center">{{ errorData.table_no_data_found }}</td>
+  </tr>
+  </tbody>
+</ng-template>
+
+
+<ng-container *ngIf="addVendor">
+  <app-add-vendor [mode]="addVendorMode" [vendorDetails]='selectedVendor'
+                  [matterId]="selectedVendor?.matterId || clientDetails?.matterId"
+                  [uniqueNumber]="uniqueNumber" [pageType]="'potentialclient'" [clientId]="clientDetails?.id"
+                  (closeModel)='closeVendor($event)' [associateVendor]="associateVendor" [associateFlag]="'add'"
+                  [type]="'Vendor'">
+  </app-add-vendor>
+</ng-container>
+
+
+<ng-container *ngIf="addSubsidiary">
+  <app-add-vendor [mode]="addSubsidiaryMode" [vendorDetails]='selectedSubsidiary'
+                  [matterId]="selectedSubsidiary?.matterId || clientDetails?.matterId" [pageType]="'potentialclient'" [clientId]="clientDetails?.id"
+                  [uniqueNumber]="uniqueNumber"
+                  (closeModel)='closeSubsidiary($event)' [associateVendor]="associateSubsidiary" [associateFlag]="'add'"
+                  [type]="'Subsidiary'">
+  </app-add-vendor>
+</ng-container>

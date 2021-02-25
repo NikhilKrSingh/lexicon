@@ -1,0 +1,90 @@
+<div class="modal-header pb-32">
+  <h3 class="modal-title m-0">Customize Hours</h3>
+  <button type="button" class="close" (click)='close()' aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="row gutter-16">
+    <div class="col-6">
+      <div class="form-group">
+        <label> Time Zone <sup>*</sup></label>
+        <ng-select [items]="timezones" [selectOnTab]="true" [bindLabel]="'name'"
+                  [bindValue]="'id'" [(ngModel)]='selectedZone'
+                  [clearable]='false' id="time-zone-select">
+        </ng-select>
+      </div>
+    </div>
+  </div>
+  <div class="info-block pb-32 position-relative z-index-1">
+    <div class="custom-table">
+      <ngx-datatable #table class="material common-table custom-hr-table no-cursor-datatable" [rows]="workingHoursList" [columnMode]="ColumnMode.force"
+        [headerHeight]="50" rowHeight="auto">
+        <ngx-datatable-column [resizeable]="false" [draggable]='false' prop="name" name="Day" [width]="150">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" [draggable]='false' prop="open" name="Open" [width]="180">
+          <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+            <div class="py-8" *ngIf='!row.isCustom'>
+              <span *ngIf='value != "Off"'> {{row.openValue | date: 'hh:mm a'}} </span>
+              <span *ngIf='value == "Off"'> Off </span>
+            </div>
+
+            <div *ngIf='row.isCustom'>
+              <ng-select [items]="workingHours" placeholder="Select open" name='{{row.index}}_open'
+                [(ngModel)]='row.open' (ngModelChange)='hourChange(row)' [bindValue]="'value'" [bindLabel]="'key'"
+                [clearable]='false' (keypress)="checkNumber($event)" [selectOnTab]="true" id="working-hour-index-{{rowIndex}}">
+              </ng-select>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" [draggable]='false' prop="close" name="Close" [width]="180">
+          <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+            <div class="py-8" *ngIf='!row.isCustom'>
+              <span *ngIf='value != "Off"'> {{row.closeValue | date: 'hh:mm a'}} </span>
+              <span *ngIf='value == "Off"'> Off </span>
+            </div>
+
+            <div *ngIf='row.isCustom'>
+              <ng-select [items]="workingHours" placeholder="Select close" name='{{row.index}}_close'
+                [(ngModel)]='row.close' [bindValue]="'value'" [bindLabel]="'key'" [clearable]='false'
+                (keypress)="checkNumber($event)" [selectOnTab]="true" id="working-h-index-{{rowIndex}}">
+              </ng-select>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" [draggable]='false' [sortable]='false' [headerClass]="'text-center'" name="Inherit" [width]="60">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <div class="d-flex justify-content-center">
+              <div class="custom-control custom-radio pr-0 ml-8 mb-0">
+                <input type="radio" (click)="clickOnInherit(row)" id="select_true_{{row.index}}"
+                  name="working_hour_{{row.index}}" [value]="false" class="custom-control-input"
+                  [(ngModel)]='row.isCustom'>
+                <label class="custom-control-label" for="select_true_{{row.index}}"></label>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" [draggable]='false' [sortable]='false' [headerClass]="'text-center'" name="Custom" [width]="60">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <div class="d-flex justify-content-center">
+              <div class="custom-control custom-radio pr-0 ml-8 mb-0">
+                <input type="radio" id="select_false_{{row.index}}" name="working_hour_{{row.index}}" [value]="true"
+                  class="custom-control-input" [(ngModel)]='row.isCustom'>
+                <label class="custom-control-label" for="select_false_{{row.index}}"></label>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </div>
+  </div>
+  <div class="form-group position-relative mb-0">
+    <label>Change Note (optional)</label>
+    <span class="count-char">{{changeNotes?.length || 0}}/1000</span>
+    <textarea class="form-control" rows="4" [(ngModel)]='changeNotes' placeholder="Enter note" maxlength='1000' id="change-note"></textarea>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='close()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-changes-btn">Save Changes</button>
+</div>

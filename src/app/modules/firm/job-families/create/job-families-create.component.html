@@ -1,0 +1,176 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" [routerLink]="['/firm/job-families']"><a href="javascript:void(0)">Job
+        Families</a></li>
+      <li class="breadcrumb-item active" aria-current="page" *ngIf="!jobFamilyId">Create Job Family</li>
+      <li class="breadcrumb-item active" aria-current="page" *ngIf="jobFamilyId">Edit Job Family - {{jobFamilyDetail?.name}}</li>
+    </ol>
+    <div class="heading">
+      <h1 *ngIf="!jobFamilyId">Create Job Family</h1>
+      <h1 *ngIf="jobFamilyId">Edit Job Family - {{jobFamilyDetail?.name}}</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h2 class="mb-24">Job Family Details</h2>
+        <div [formGroup]="jobFamilyForm">
+          <div class="row">
+            <div class="col-5">
+              <div class="form-group section-area"
+                   [class.has-error]="(jobFamilyForm.controls.name.errors && jobFamilyForm.controls.name.errors.required && formSubmitted) || (jobFamilyForm.controls.name.errors && jobFamilyForm.controls.name.errors.jobNameUsed)">
+                <label>Name <sup>*</sup></label>
+                <input type="text" class="form-control" placeholder="Enter a job family name" formControlName="name" maxlength="50" id="job-family-name">
+                <span class="field-message text-danger"
+                  *ngIf="jobFamilyForm.controls.name.errors && jobFamilyForm.controls.name.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                    Please enter name.
+                </span>
+                <span class="field-message text-danger"
+                  *ngIf="jobFamilyForm.controls.name.errors && jobFamilyForm.controls.name.errors.jobNameUsed" 
+                  id="error-already-exists-name">
+                  <em class="icon icon-error mr-4"></em>
+                  A job family with that name already exists.
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row" *ngIf="permissionList.BILLING_MANAGEMENTisAdmin || (!permissionList.BILLING_MANAGEMENTisAdmin && jobFamilyId)">
+            <div class="col-5">
+              <div class="form-group section-area"
+                   [class.has-error]="jobFamilyForm.controls.baseRate.errors && jobFamilyForm.controls.baseRate.errors.required && formSubmitted">
+                <label>Base Rate <sup>*</sup></label>
+                <input type="text" class="form-control" placeholder="Enter a base rate"
+                       (blur)="setCurrencyValue()" [readOnly]="!permissionList.BILLING_MANAGEMENTisAdmin && jobFamilyId"
+                       [prefix]="jobFamilyForm.controls.baseRate.value >= 0 ? '$' : ''" mask="separator.2"
+                       thousandSeparator="," formControlName="baseRate" id="baserate">
+                <span class="field-message text-danger">
+                  <em class="icon icon-error mr-4"></em>
+                    Please enter base rate.
+                  </span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+            <div class="info-block">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h2 class="mb-12">Rate Tables</h2>
+                  <p class="helper-text small">All rate tables will use the job family base rate unless otherwise
+                    specified.</p>
+                </div>
+                <button class="btn btn-primary" type="button"
+                        (click)="openModal( '', 'modal-xlg');" id="edit-rate-table">Edit Rate Tables
+                </button>
+              </div>
+              <div>
+                <div class="header-search flex-fill d-flex mb-24 col-9 px-0" >
+                  <form action="#" class="table-data-search">
+                    <div class="header-search-wrapper">
+                      <input type="text" class="form-control search-input"
+                             placeholder="Search by rate table name" [(ngModel)]="jobRateTableSearchText"
+                             [ngModelOptions]="{standalone: true}"
+                             (keyup)="jobRateTableSearch()" id="search-text">
+                      <button class="btn" type="submit" id="search-btn" (click)="jobRateTableSearch()">Search</button>
+                    </div>
+                  </form>
+                </div>
+                <div class="custom-table">
+                  <div class="table-responsive">
+                    <ngx-datatable
+                      #jobRateTable
+                      class="material common-table no-min-height" [rows]="jobRateTables" [columnMode]="ColumnMode.force"
+                      [sorts]="[{prop: 'rateTableName', dir: 'asc'}]"
+                      [headerHeight]="50" [footerHeight]="footerHeight" [messages]="messages" rowHeight="auto"
+                      [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+                      (sort)="updateDatatableFooterPage()">
+                      <ngx-datatable-column [resizeable]="false" prop="rateTableName" name="Rate Table Name"
+                                            [width]="250"></ngx-datatable-column>
+                      <ngx-datatable-column [resizeable]="false" prop="jobFamilyBaseRate" name="Base Rate" [width]="250">
+                        <ng-template ngx-datatable-cell-template let-row="row">
+                          {{row.jobFamilyBaseRate | currency : 'USD': 'symbol': '1.2-2'}}
+                        </ng-template>
+                      </ngx-datatable-column>
+                      <ngx-datatable-column [resizeable]="false" prop="tableRate" name="Table Rate" [width]="280">
+                        <ng-template ngx-datatable-cell-template let-row="row">
+                          <span [class.text-danger]="row.tableRate !== row.jobFamilyBaseRate">
+                            {{row.tableRate | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                        </ng-template>
+                      </ngx-datatable-column>
+                      <ngx-datatable-footer>
+                        <ng-template
+                          ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                          let-isVisible="isVisible">
+                          <div class="d-flex justify-content-between flex-fill">
+                            <div class="d-flex align-items-center">
+                              <div class="table-items d-flex align-items-center mr-36">
+                                Items per page:
+                                <div class=" ml-8">
+                                  <select class="custom-select border-less" [formControl]="pageSelector"
+                                          (change)="changePageSize()">
+                                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <span>
+                                {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                                {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}}
+                                of {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+                            </span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                              <select class="custom-select border-less" [(ngModel)]="pageSelected"
+                                      [ngModelOptions]="{standalone: true}"
+                                      (change)="changePage()">
+                                <option
+                                  *ngFor='let num of page.totalPages | counterPipe; trackBy: trackByFn;let i= index'
+                                  [value]="i+1">
+                                  Page {{ i + 1 }} of {{(page.totalPages == 0 ? 1 : page.totalPages)}}
+                                </option>
+                              </select>
+                              <div class="ml-8">
+                                <datatable-pager
+                                  [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                  [pagerPreviousIcon]="'datatable-icon-prev'"
+                                  [pagerNextIcon]="'datatable-icon-skip'"
+                                  [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                  [hidden]="!((rowCount / pageSize) > 1)"
+                                  (change)="jobRateTable.onFooterPage($event);pageChange($event)">
+                                </datatable-pager>
+                              </div>
+                            </div>
+                          </div>
+                        </ng-template>
+                      </ngx-datatable-footer>
+                    </ngx-datatable>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!permissionList.BILLING_MANAGEMENTisAdmin && !jobFamilyId" id="information-message">
+            <div class="alert alert-primary mt-8 mb-24" role="alert">
+              <div class="d-flex">
+                <em class="alert-icon icon icon-info"></em>
+                <div class="d-flex align-items-center flex-wrap">
+                  <h4 class="mr-16 mt-0 mb-0">Informational</h4>
+                  A Billing Admin will enter a base rate and rate table configuration for this Job Family.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="save()" id="save-btn">Save</button>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>
+

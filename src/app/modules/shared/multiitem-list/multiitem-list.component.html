@@ -1,0 +1,24 @@
+<div class="multi-item-list" *ngIf='items'>
+    <div *ngIf='items?.length > maxItems'>
+        <ng-container *ngIf='showMoreItemsToggle'>
+            <div class="mb-8" *ngFor='let item of items | slice:0:maxItems;trackBy: trackByFn'>{{((item | indexfinder :'null') > -1 ) ? 'N/A' : item}}</div>
+        </ng-container>
+
+        <ng-container *ngIf='!showMoreItemsToggle'>
+            <div class="mb-8" *ngFor='let item of items;trackBy: trackByFn'>{{((item | indexfinder :'null') > -1 ) ? 'N/A' : item}}</div>
+        </ng-container>
+        <div class="action-btns">
+            <button #btn type="button" class="btn btn-link p-0 text-decoration" (click)="toggle()" id="toggle-btn">
+                <span>... {{ showMoreItemsToggle ? '+' : '-' }} {{items?.length - maxItems}}
+                    {{ showMoreItemsToggle ? 'More' : 'Less' }}</span>
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf='items?.length <= maxItems'>
+        <ng-container *ngFor='let item of items;trackBy: trackByFn'>
+            <div class="mb-8">{{((item | indexfinder :'null') > -1 ) ? 'N/A' : item}}</div>
+        </ng-container>
+    </div>
+
+</div>

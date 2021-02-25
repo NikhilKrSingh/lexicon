@@ -1,0 +1,40 @@
+.display-not-visible {
+  height: 0;
+  overflow: hidden;
+}
+
+@print {
+  .display-not-visible {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.common-table{
+  &.ngx-datatable{
+    &.invoice-expand{
+      .datatable-body{
+        .datatable-row-detail{
+          overflow-y: visible;
+        }
+      }
+      &.bootstrap:not(.cell-selection){
+        datatable-body-row[ng-reflect-expanded*=true]{
+          background-color: #e2e4ef !important;
+        }
+      }
+      &.material:not(.cell-selection){
+        datatable-body-row[ng-reflect-expanded*=true]{
+          .datatable-row-group{
+            background-color: #e2e4ef !important;
+          }
+        }
+      }
+    }
+  }
+}
+.invoice-shadow{
+  box-shadow: 0 8px 6px rgba(0,0,0,0.05);
+  padding-bottom: 20px;
+  position: relative;
+}

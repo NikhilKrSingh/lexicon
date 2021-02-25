@@ -1,0 +1,721 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/contact/potential-client']">Contact
+          Directory</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/contact/view-potential-client']"
+          [queryParams]="{clientId: clientId, state: state}">Contact Profile</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <a href="javascript:void(0)" [routerLink]="['/contact/manage-initial-Consultation']"
+          [queryParams]="{clientId: clientId, state: state}">Manage Initial Consultation</a>
+      </li>
+      <li class="breadcrumb-item" [class.active]="pageMode=='record'" aria-current="page">Record Initial Consultation
+      </li>
+      <li class="breadcrumb-item" [class.active]="pageMode=='review'"
+        *ngIf="pageMode == 'review' || pageMode=='paymentsuccess'" aria-current="page">Review Payment</li>
+      <li class="breadcrumb-item active" *ngIf="pageMode == 'paymentsuccess'" aria-current="page">Payment Confirmation
+      </li>
+    </ol>
+    <div class="profile-content d-flex align-items-center profile-client mb-32">
+      <div class="profile-heading mr-16">
+        <h2 class="mt-0 mb-2" *ngIf="!clientDetail?.isCompany">{{clientDetail?.firstName}}
+          {{clientDetail?.lastName}}
+        </h2>
+        <h2 class="mt-0 mb-2" *ngIf="clientDetail?.isCompany">{{clientDetail?.companyName}}
+        </h2>
+        <span class="text-small font-weight-medium d-flex align-items-center"
+          *ngIf="!clientDetail?.isCompany">Individual Contact</span>
+        <span class="text-small font-weight-medium d-flex align-items-center" *ngIf="clientDetail?.isCompany">Corporate
+          Contact</span>
+      </div>
+    </div>
+
+    <div class="card" *ngIf="pageMode=='record'">
+      <div class="card-body">
+        <h2 class="mb-24">Record Initial Consultation</h2>
+        <div class="row">
+          <div class="col-2">
+            <div class="form-group">
+              <label for="">Initial Consultation Date <sup>*</sup></label>
+              <app-date-picker [(data)]='initialConsultationDate' [isNgModel]='true' id="initial-consultation-date"></app-date-picker>
+            </div>
+          </div>
+        </div>
+        <h3 class="mb-8 mt-0">Rate Table</h3>
+        <div class="custom-table">
+          <div class="table-responsive section-area">
+            <ngx-datatable #table class="material common-table" [class.matter-no-data]="rateList?.length === 0"
+                  [rows]="rateList"  [headerHeight]="50" [footerHeight]="footerHeight"
+                  [messages]="messages" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+                  [scrollbarH]="true"  (sort)="updateDatatableFooterPage()" id="rate-listing-tbl">
+                  <ngx-datatable-column [resizeable]="false" prop="" name="Select" [sortable]="false" [width]="100">
+                    <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                      <div class="custom-control custom-radio pr-0 d-inline-block">
+                        <input type="radio" id="permission-radio-rate-{{row.id}}" (click)="selectRate(row)"
+                          name="permission-radio-1" class="custom-control-input" [value]="row.id"
+                          [(ngModel)]="selectedRateId">
+                        <label class="custom-control-label" for="permission-radio-rate-{{row.id}}"></label>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="code" name="Hourly Code" [sortable]="false" [width]="150">
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [sortable]="false" [width]="200">
+                    <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                      <ng-container *ngIf='row.description?.length <= 30'>
+                        <span> {{row.description}} </span>
+                      </ng-container>
+                      <div class="d-inline-flex justify-content-between" *ngIf='row.description?.length > 30'>
+                        <div class="info-hover position-relative">
+                          <a href="javascript:void(0)" class="text-decoration">
+                            <span> {{row.description?.slice(0, 30)}}... </span>
+                          </a>
+                          <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner tooltip-lg">
+                              <p>{{row.description}} </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="billingTo.name" name="Billable To" [sortable]="false" [width]="200">
+                    <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                      {{row?.billingTo?.name}}
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="rateAmount" name="Rate" [sortable]="false" [width]="170">
+                    <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                      ${{row?.rateAmount}}
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="billingType?.name" name="Billing Type" [sortable]="false" [width]="180">
+                    <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                      {{row?.billingType?.name}}
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-footer>
+                    <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                      let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                      <div class="d-flex justify-content-between flex-fill">
+                        <div class="d-flex align-items-center">
+                          <div class="table-items d-flex align-items-center mr-36">
+                            Items per page:
+                            <div class=" ml-8">
+                              <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                                <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                              </select>
+                            </div>
+                          </div>
+                          <span>
+                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                            {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                          </span>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                          <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                            <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                              of {{page.totalPages}}</option>
+                          </select>
+                          <div class="ml-8">
+                            <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                              [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                              [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                              [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                              (change)="table.onFooterPage($event);pageChange($event)">
+                            </datatable-pager>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-footer>
+                </ngx-datatable>
+            
+            <app-loader [active]="loading"></app-loader>
+          </div>
+        </div>
+        <div class="info-block pt-24">
+          <div class="row">
+            <div class="col-12">
+              <div class="row">
+                <div class="col-4">
+                  <div class="form-group" *ngIf="selectedRate?.billingType?.code === 'HOURLY'">
+                    <label>Duration of Consultation <sup>*</sup></label>
+                    <input type="text" placeholder="Duration of Consultation" [(ngModel)]='durationOfConsultation'
+                      (ngModelChange)="enterHours()" (blur)="formatTime()" class="form-control" id="duration-of-consultation">
+                  </div>
+                  <div class="form-group" *ngIf="selectedRate">
+                    <label>Amount Due <sup>*</sup></label>
+                    <input type="text" class="form-control" prefix="$" mask="separator.2" thousandSeparator=","
+                      placeholder="Amount Due" [(ngModel)]='amountDue' disabled id="amount-due">
+                  </div>
+                  <div class="form-group">
+                    <label>Decision <sup>*</sup></label>
+                    <ng-select [selectOnTab]="true" [items]="decisionArr" placeholder="Select the decision made"
+                      [(ngModel)]="decision" [bindValue]="'key'" (change)="decisionChange()" [bindLabel]="'value'"
+                      [searchable]="false" [notFoundText]="'No record found'" id="dicision-select">
+                    </ng-select>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <h3 class="mb-116">Payment</h3>
+                  <div class="form-group mb-0">
+                    <label class="mb-8" for="">Amount to pay</label>
+                    <div class="custom-control custom-radio">
+                      <input type="radio" id="noShow-1" name="noShow" class="custom-control-input" value="fullamount"
+                        [(ngModel)]="payment" (change)="changePaymentAmount()"
+                        (click)="enterAmount = '0.00'; amountRemaining = getNumber(amountDue); waiveRemainingAmount = 'No';dueDateForRemainingBalance = null;">
+                      <label class="custom-control-label" for="noShow-1">Full Amount(${{amountDue}})</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                      <input type="radio" id="noShow-2" name="noShow" class="custom-control-input" value="otheramount"
+                        [(ngModel)]="payment" (change)="changePaymentAmount()">
+                      <label class="custom-control-label" for="noShow-2">Other Amount</label>
+                    </div>
+                  </div>
+                  <div class="row gutter-16" *ngIf="payment === 'fullamount'">
+                    <div class="col-4">
+                      <div class="form-group">
+                        <input disabled type="text"  [(ngModel)]="amountDue" prefix="$" mask="separator.2" thousandSeparator="," name="amountDue"
+                          [value]="amountDue" class="form-control" placeholder="Enter Amount" id="amount-text">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row gutter-16" *ngIf="payment === 'otheramount'">
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <input type="text" mask="separator.2" prefix="$" thousandSeparator="," name="enterAmount"
+                          [(ngModel)]="enterAmount" (ngModelChange)="enterAmountFn()" class="form-control"
+                          placeholder="Enter Amount" id="amount-text" (blur)="onBlurEnterAmount()">
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>Amount Remaining</label>
+                        <input type="text" class="form-control" mask="separator.2" prefix="$" thousandSeparator=","
+                               name="enterAmount"
+                               [(ngModel)]="amountRemaining" placeholder="Amount due at later date" disabled id="amount-remaining">
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>Waive Remaining Amount?</label>
+                        <div class="custom-control custom-radio">
+                          <input type="radio" id="waive-remaining-amount-1" name="waiveRemainingAmount" value="Yes"
+                            (click)="dueDateForRemainingBalance = null" [(ngModel)]="waiveRemainingAmount"
+                            class="custom-control-input">
+                          <label class="custom-control-label" for="waive-remaining-amount-1">Yes</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                          <input type="radio" id="waive-remaining-amount-2" value="No" name="waiveRemainingAmount"
+                            [(ngModel)]="waiveRemainingAmount" class="custom-control-input">
+                          <label class="custom-control-label" for="waive-remaining-amount-2">No</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-3" *ngIf="waiveRemainingAmount === 'No'">
+                      <div class="form-group">
+                        <label>Due Date for Remaining Balance<sup>*</sup></label>
+                        <app-date-picker [isNgModel]='true' [(data)]='dueDateForRemainingBalance' id="due-date-remaining-bal"></app-date-picker>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group pt-8">
+                    <label class="mb-8" for="">Payment method</label>
+                    <div class="section-area">
+                      <div class="custom-control custom-radio d-flex pr-0" *ngFor="let paymentType of paymentMethodTypesList;trackBy :trackByFn;">
+                        <input type="radio" id="PayMethod1_{{paymentType.id}}" name="PayMethod"
+                          [(ngModel)]="paymentMethod" [value]="paymentType.code" (change)="selectPaymentMethod()"
+                          class="custom-control-input"[disabled]="(((!selectedOperatingAccount?.isMerchantAccount
+                          && (paymentType?.code == 'CREDIT_CARD' || paymentType?.code == 'E-CHECK'))
+                          || (selectedOperatingAccount?.isMerchantAccount && paymentType?.code == 'CREDIT_CARD' && !selectedOperatingAccount?.isCreditCardAccount)
+                          || (selectedOperatingAccount?.isMerchantAccount && paymentType?.code == 'E-CHECK' && !selectedOperatingAccount?.isAchAccount)) && selectedOperatingAccount)
+                          || ((paymentType?.code == 'E-CHECK') && (!isAchDisabled)) || ((paymentType?.code == 'CREDIT_CARD') && (!isCreditCardDisabled))">
+                        <label class="custom-control-label" for="PayMethod1_{{paymentType.id}}">{{paymentType.name}}</label>
+                        <div class="info-hover position-relative mt-2 ml-8"
+                            *ngIf="(((!selectedOperatingAccount?.isMerchantAccount
+                            && (paymentType?.code == 'CREDIT_CARD' || paymentType?.code == 'E-CHECK'))
+                            || (selectedOperatingAccount?.isMerchantAccount && paymentType?.code == 'CREDIT_CARD' && !selectedOperatingAccount?.isCreditCardAccount)
+                            || (selectedOperatingAccount?.isMerchantAccount && paymentType?.code == 'E-CHECK' && !selectedOperatingAccount?.isAchAccount)) && selectedOperatingAccount)
+                            || ((paymentType?.code == 'E-CHECK') && (!isAchDisabled)) || ((paymentType?.code == 'CREDIT_CARD') && (!isCreditCardDisabled))">
+                          <em class="icon icon-info icon-color text-large"></em>
+                          <div class="tooltip bs-tooltip-top center" role="tooltip">
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner">
+                              <p class="m-0">No accounts are set up to process this payment type for this office.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <app-loader [active]="loading"></app-loader>
+                    </div>
+
+                  </div>
+                  <div *ngIf="sameDayACHStatus && this.paymentMethod == 'E-CHECK' && this.selectedPaymentMethod['name'] === 'E-Check' && (!this.selectedOperatingAccount || (this.selectedOperatingAccount && this.selectedOperatingAccount['isMerchantAccount']))" class="row gutter-16">
+                    <div class="col-9">
+                      <div class="pl-32">
+                        <div class="custom-control custom-checkbox pr-0">
+                          <input [disabled]="!isTimeBefore12PmCt" [checked]="isCheckedSameDayACH" type="checkbox" [(ngModel)]="isCheckedSameDayACH" class="custom-control-input" id="customCheck1">
+                          <label class="custom-control-label" for="customCheck1">Process using Same-Day ACH</label>
+                        </div>
+                        <div class="alert alert-primary d-flex justify-content-between" role="alert">
+                          <div class="d-flex">
+                              <em class="alert-icon icon icon-info text-large"></em>
+                              <div class="lh-20">
+                                  <h4 class="mr-0 mt-0 mb-4">Same-Day ACH Transaction</h4>
+                                  <div *ngIf="isTimeBefore12PmCt">
+                                    <div>
+                                      The transaction will process at the end of the business day, rather than overnight, if submitted before 12pm CT.
+                                    </div>
+                                    <div>
+                                      The firm will incur a fee for each Same-Day ACH transaction.
+                                    </div>
+                                  </div>
+                                  <div *ngIf="!isTimeBefore12PmCt">
+                                    Only transactions submitted before 12pm CT can be processed using Same-Day ACH.
+                                  </div>
+                              </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <ng-container *ngIf="paymentMethod === 'CHECK'">
+                  <div class="col-12">
+                    <div class="row gutter-16">
+                      <div class="col-3">
+                        <div class="form-group">
+                          <label>Check Number<sup>*</sup></label>
+                          <input type="text" class="form-control" [(ngModel)]="checkNumber"
+                            (keypress)="chkNumber($event)" placeholder="Enter check number" id="check-number">
+                        </div>
+                        
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row col-12" *ngIf="!recordInitialCheckUploadFile">
+                    <div class="col-6">
+                      <div class="form-group mb-16">
+                        <button type="button" class="btn btn-primary btn-icon" (click)='selectFile()' id="select-file-btn"><i
+                            class="icon icon-upload"></i>
+                          Upload Check Image
+                        </button>
+                        <span class="ml-12"><i>Optional</i></span>
+                        <form>
+                          <input type="file" accept=".jpeg, .png" hidden #recordInitialCheckImageInput
+                            (change)='uploadFile(recordInitialCheckImageInput.files)' id="change-file">
+                        </form>
+                        <span class="d-block font-weight-medium font-12 mt-8">File must be .jpeg or .png. Maximum upload
+                          file
+                          size: 5MB</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 mt-8" *ngIf="recordInitialCheck">
+                    <div [ngClass]="!this.recordInitialCheckUploadFile?'uploaded-image-danger':''"
+                      class="uploaded-image d-flex align-items-center justify-content-between p-16">
+                      <div class="d-flex align-items-center">
+                        <img src="../../../../../assets/images/Calendar/image.svg" alt="" width="18">
+                        <span class="small font-weight-medium ml-12"> {{selectedFile?.name}}</span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <div class="ml-12 mb-0 small d-flex align-items-center" *ngIf="recordInitialCheckErr">
+                          <em class="icon icon-error mr-8 text-danger text-large"></em>{{ recordInitialCheckErrMsg }}
+                        </div>
+                        <div (click)="onRecordInitialClose()" class="ml-24">
+                          <em class="icon icon-close-fill icon-color text-large cursor-pointer"></em>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="paymentMethod === 'E-CHECK'">
+                  <div class="col-5">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <div class="form-group">
+                          <label>First Name<sup>*</sup></label>
+                          <input type="text" class="form-control" [(ngModel)]="echeckFname"
+                            (keypress)="chkString($event)" placeholder="Enter First Name" id="echeck-first-name">
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="form-group">
+                          <label>Last Name<sup>*</sup></label>
+                          <input type="text" class="form-control" [(ngModel)]="echeckLname"
+                            (keypress)="chkString($event)" placeholder="Enter Last Name" id="echeck-last-name">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <div class="form-group">
+                          <label>Routing Number<sup>*</sup></label>
+                          <input type="text" class="form-control" mask="000000000" [(ngModel)]="routingNumber"
+                            (keypress)="chkNumber($event)" placeholder="Enter check number" id="routing-number">
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="form-group">
+                          <label>Account Number<sup>*</sup></label>
+                          <input type="text" class="form-control" mask="000000000000" [(ngModel)]="accountNumber"
+                            (keypress)="chkNumber($event)" placeholder="Enter check number" id="account-number">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <form [formGroup]="addressECheckForm">
+                      <div class="row gutter-16">
+                        <div class="col-12">
+                          <div class="form-group">
+                            <label>Billing Address <sup>*</sup></label>
+                            <input type="text" class="form-control" formControlName="address1" id="billing-address">
+                          </div>
+                        </div>
+                        <div class="col-12">
+                          <div class="form-group">
+                            <label>Address 2</label>
+                            <input type="text" class="form-control" formControlName="address2" placeholder="" id="address2">
+                          </div>
+                        </div>
+                        <div class="col-12">
+                          <div class="form-group">
+                            <label>City <sup>*</sup></label>
+                            <input type="text" formControlName="city" class="form-control" id="city">
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="form-group">
+                            <label>State <sup>*</sup></label>
+                            <ng-select [selectOnTab]="true" [items]="stateList" placeholder="Select State"
+                              formControlName="state" [bindValue]="'code'" [bindLabel]="'name'"
+                              [notFoundText]="'No record found'" id="state">
+                            </ng-select>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="form-group">
+                            <label>Zip Code <sup>*</sup></label>
+                            <input type="text" class="form-control" maxlength="6" minlength="5" placeholder=" Enter ZIP Code"
+                              formControlName="zipCode" (keypress)="checkNumberz($event)" id="zip-code">
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="paymentMethod === 'CREDIT_CARD'">
+                  <div class="col-8">
+                    <div class="form-group">
+                      <label>Select personal or company credit card</label>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" id="dropcheck-1" value="personal"
+                          name="rdbPersonal" [(ngModel)]="isPersonal" (ngModelChange)="updateForm()">
+                        <label class="custom-control-label" (click)="updateForm()" for="dropcheck-1">Personal</label>
+                      </div>
+                      <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" id="dropcheck-2" value="company"
+                          name="rdbCompany" [(ngModel)]="isPersonal" (ngModelChange)="updateForm()">
+                        <label class="custom-control-label" for="dropcheck-2">Company</label>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="row " [formGroup]="paymentForm">
+                          <div class="col-12">
+                            <div class="form-group" *ngIf="isPersonal==='personal'">
+                              <label>First Name <sup>*</sup></label>
+                              <input type="text" class="form-control" name="firstName" formControlName='firstName'
+                                placeholder="First Name" id="creditcard-first-name">
+                            </div>
+                          </div>
+                          <div class="col-12">
+                            <div class="form-group" *ngIf="isPersonal==='personal'">
+                              <label>Last Name <sup>*</sup></label>
+                              <input type="text" class="form-control" name="lastName" formControlName='lastName'
+                                placeholder="Last Name" id="creditcard-last-name">
+                            </div>
+                          </div>
+                          <div class="col-12">
+                            <div class="form-group" *ngIf="isPersonal==='company'">
+                              <label>Name on Card <sup>*</sup></label>
+                              <input type="text" class="form-control" name="nameoncard" formControlName='companyName'
+                                placeholder="Name on Card" id="name-on-card">
+                            </div>
+                          </div>
+                          <div class="col-12">
+                            <div class="form-group">
+                              <label>Card Number <sup>*</sup></label>
+                              <input type="text" class="form-control" mask="0000-0000-0000-0000" [showMaskTyped]="true"
+                                placeholder="Enter card number" name="cardNumber" formControlName='cardNumber' id="card-number">
+                            </div>
+                          </div>
+                          <div class="col-12">
+                            <div class="row gutter-16">
+                              <div class="col-6">
+                                <div class="form-group">
+                                  <label>Expiration Date <sup>*</sup></label>
+                                  <input type="text" class="form-control" placeholder="MM/YYYY"
+                                    [dropSpecialCharacters]='false' mask="00/0000" formControlName='expirationDate' id="expiration-date">
+                                </div>
+                              </div>
+                              <div class="col-6">
+                                <div class="form-group">
+                                  <label>CVV <sup>*</sup></label>
+                                  <input type="text" class="form-control" mask="000" placeholder="###"
+                                    formControlName='CVV' id="cvv">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-5 offset-1">
+                        <form [formGroup]="addressForm">
+                          <div class="row gutter-16">
+                            <div class="col-12">
+                              <div class="form-group">
+                                <label>Billing Address <sup>*</sup></label>
+                                <input type="text" class="form-control" formControlName="address1" id="billing-address">
+                              </div>
+                            </div>
+                            <div class="col-12">
+                              <div class="form-group">
+                                <label>Address 2</label>
+                                <input type="text" class="form-control" formControlName="address2" placeholder="" id="billing-address-2">
+                              </div>
+                            </div>
+                            <div class="col-12">
+                              <div class="form-group">
+                                <label>City <sup>*</sup></label>
+                                <input type="text" formControlName="city" class="form-control" id="billing-city">
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label>State <sup>*</sup></label>
+                                <ng-select [selectOnTab]="true" [items]="stateList" placeholder="Select State"
+                                  formControlName="state" [bindValue]="'code'" [bindLabel]="'name'"
+                                  [notFoundText]="'No record found'" id="billing-state">
+                                </ng-select>
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label>Zip Code <sup>*</sup></label>
+                                <input type="text" class="form-control" maxlength="6" minlength="5" placeholder=" Enter ZIP Code"
+                                  formControlName="zip" (keypress)="checkNumberz($event)" id="billing-zipcode">
+                              </div>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+                <div class="col-12" *ngIf="payment === 'otheramount' && waiveRemainingAmount =='No'">
+                  <h3 class="mb-116">Invoice</h3>
+                  <div class="form-group mb-20">
+                    <div class="custom-control custom-radio">
+                      <input type="radio" id="Print-1" name="invoiceType" class="custom-control-input" value="print"
+                        [(ngModel)]="invoiceType">
+                      <label class="custom-control-label" for="Print-1">Print</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                      <input type="radio" id="Email-2" name="invoiceType" class="custom-control-input" value="email"
+                        [(ngModel)]="invoiceType">
+                      <label class="custom-control-label" for="Email-2">Email</label>
+                    </div>
+                  </div>
+                  <div class="row gutter-16" *ngIf="invoiceType === 'email'">
+                    <div class="col-3">
+                      <form [formGroup]="emailform">
+                        <div
+                          [ngClass]="(emailform.controls.email.invalid && emailform.controls.email.touched)?'form-group has-error':'form-group'">
+                          <label>Email Address <sup>*</sup></label>
+                          <input type="text" name="invoiceEmail" [(ngModel)]="invoiceEmail" formControlName="email"
+                            class="form-control" placeholder="Enter Email Address" value="Email Address" id="email-address">
+                          <span class="field-message text-danger" *ngIf="emailform.controls.email.invalid"><em
+                              class="icon icon-error mr-4"></em>
+                            Invalid email address
+                          </span>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <app-billing-operating-list
+          *ngIf="officeId"
+          [officeId]="officeId"
+          [paymentMethod]="paymentMethod"
+          [operatingAccountError]="operatingAccountError"
+          (selectedOperatingAccount)="selectedAccount($event)"
+          (checkAchCredit)="checkAchCreditStatus($event)"></app-billing-operating-list>
+      </div>
+    </div>
+
+    <div class="card" *ngIf="pageMode == 'review'">
+      <div class="card-body pb-0">
+        <h2 class="mb-24">Review Payment</h2>
+        <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert"
+          *ngIf="displayMessage">
+          <div class="d-flex align-items-center">
+            <em class="alert-icon icon icon-error"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <h4 class="mr-20 mt-0 mb-0">Error </h4>
+              {{fail_msg}} Reason: {{message}}
+            </div>
+          </div>
+          <a href="javascript:void(0)" (click)="pageMode='record'" class="font-weight-medium" id="return-to-initial-con">Return to Record Initial
+            Consultation</a>
+        </div>
+        <div class="form-group">
+          <label class="d-block">Date of Payment</label>
+          {{displayPostingDate}}
+        </div>
+        <div class="form-group">
+          <label class="d-block">Charge Description</label>
+          {{postObject.description}}
+        </div>
+        <div class="form-group">
+          <label class="d-block">Current Balance</label>
+          {{(waiveRemainingAmount =='Yes' && payment === 'otheramount')? '$0.00(waived)' : (postObject.amountRemaining && payment === 'otheramount')? postObject.amountRemaining : 0 | currency : 'USD': 'symbol'}}
+        </div>
+        <div class="form-group">
+          <label class="d-block">Amount Paid Today</label>
+          {{postObject.amountToPay | currency : 'USD': 'symbol': '1.2-2'}}
+        </div>
+        <div class="form-group"
+          *ngIf="postObject.remainingBalDueDate && postObject.amountRemaining && payment == 'otheramount' && waiveRemainingAmount == 'No'">
+          <label class="d-block">Due Date for Remaning Balance</label>
+          {{displayRemainingBalDueDate}}
+        </div>
+        <div class="form-group">
+          <label class="d-block">Payment Method</label>
+          {{ postObject.methodType}}
+          <span *ngIf="postObject.methodType =='Credit Card'">
+            <p class="mt-16" *ngIf="isPersonal==='personal'">
+              {{paymentForm.value.firstName + " " + paymentForm.value.lastName}}</p>
+            <p class="mt-16" *ngIf="isPersonal==='company'">{{paymentForm.value.companyName}}</p>
+            <p>---- ---- {{postObject.cardNumber}}</p>
+            <p>Exp {{postObject.cardexpiryDate}}</p>
+            <p>{{cardType}}</p>
+          </span>
+
+          <span *ngIf="postObject.methodType =='Check'">
+            <label class="d-block mt-12">Cheque Number</label>
+            <p>{{postObject.checkNumber }}</p>
+
+            <div class="col-12 pl-0 mt-8" *ngIf="!!selectedFile?.name">
+              <div class="uploaded-image d-flex align-items-center justify-content-between p-16">
+                <div class="d-flex align-items-center">
+                  <img src="../../../../../assets/images/Calendar/image.svg" alt="" width="18">
+                  <span class="small font-weight-medium ml-12">{{selectedFile?.name}}</span>
+                </div>
+                <a href="javascript:void(0);" class="font-weight-medium"
+                  (click)="open(viewRecordInitialCheckModal,'','modal-lmd')" id="view-check-img">View Check Image</a>
+              </div>
+            </div>
+          </span>
+
+          <span *ngIf="postObject.methodType =='E-Check'">
+            <p></p>
+            <label class="d-block">Routing Number</label>
+            <p>{{postObject.routingNumber | appRoutingNumber}}</p>
+            <label class="d-block">Account Number</label>
+            <p>---- ---- {{postObject.accountNumber | substrByLength: 4}}</p>
+          </span>
+        </div>
+        <div class="form-group" *ngIf="payment == 'otheramount' && waiveRemainingAmount == 'No'">
+          <label class="d-block">Invoice</label>
+          <ng-container *ngIf="invoiceType == 'email'">
+            <p>Email</p>
+            {{postObject.invoiceEmail}}
+          </ng-container>
+          <ng-container *ngIf="invoiceType == 'print'">
+            <p>Print</p>
+          </ng-container>
+        </div>
+        <div class="form-group" *ngIf="((this.paymentMethod == 'CREDIT_CARD')
+        || (this.paymentMethod == 'E-CHECK')
+        || (this.paymentMethod == 'CASH')
+        || (this.paymentMethod == 'CHECK')
+        || (this.paymentMethod == 'PRIMARY_RETAINER_TRUST')) && operatingAccount?.name">
+          <label class="d-block">Operating Account</label>
+          {{ operatingAccount?.name }}
+        </div>
+        <app-loader [active]="loading"></app-loader>
+      </div>
+
+    </div>
+
+    <div class="card" *ngIf="pageMode == 'paymentsuccess' " id="payment-success-msg">
+      <div class="card-body pb-0">
+        <h2 class="mb-24">Payment Confirmation</h2>
+        <div class="alert alert-success d-flex justify-content-between" role="alert">
+          <div class="d-flex">
+            <em class="alert-icon icon icon-check-circle"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <h4 class="mr-36 mt-0 mb-4">Success</h4>
+              {{success_msg}}
+            </div>
+          </div>
+        </div>
+        <div class="display-not-visible">
+          <app-common-receipt-pdf [recordData]="postObject" [clientData]="clientDetail" [isInitialConsultation]='true'>
+          </app-common-receipt-pdf>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" *ngIf="pageMode=='record'" (click)="cancel()"
+          [routerLink]="['/contact/manage-initial-Consultation']"
+          [queryParams]="{clientId: clientId, state: state}" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" *ngIf="pageMode=='record'" (click)="reviewPayment()" id="review-payment">Review
+          Payment</button>
+        <button type="button" class="btn btn-light" *ngIf="pageMode=='review'"
+          (click)="cancelOnReview()" id="cancel-btn">Cancel</button>
+        <button type="button" (click)="addPayment()" *ngIf="pageMode=='review'"
+          class="btn btn-primary" id="post-payment-btn">{{postPaymentbtn}}</button>
+        <button type="button" class="btn btn-light" *ngIf="pageMode=='paymentsuccess'"
+          [routerLink]="['/contact/view-potential-client']" [queryParams]="{clientId: clientId,state:'view' }" id="return-to-potential-client-btn">Return to
+          Potential Client</button>
+        <button type="button" class="btn btn-light" *ngIf="pageMode=='paymentsuccess' && decision === 'decided_to_retain'"
+          [routerLink]="['/contact/client-conversion']" [queryParams]="{clientId:clientId,type:'individual'}" id="continue-client-conversion-btn">Continue to Client Conversion</button>
+        <button type="button" class="btn btn-primary" *ngIf="pageMode=='paymentsuccess'" (click)="printReceipt()" id="print-receipt-btn">Print
+          Receipt</button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #viewRecordInitialCheckModal let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Check Image - {{checkNumber}}</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="" style="background-color: #c8ced4;">
+        <img src={{this.recordInitialCheckFileContent}} height="200px" width="580px" id="check-img">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="close-btn">Close</button>
+    </div>
+  </ng-template>

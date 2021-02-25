@@ -1,0 +1,21 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">{{title}}</h3>
+  <button type="button" class="close" (click)='dismiss()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning mr-16" *ngIf="icon"></em>
+      <div class="lh-20">
+          <p class="m-0" [innerHtml]="message"></p>
+      </div>
+  </div>
+  <ul *ngIf="bulletList && bulletList.length > 0" class="list-unstyled mb-0 mt-12 lh-20 tba-list pl-12">
+    <li *ngFor="let item of bulletList;trackBy: trackByFn">{{item}}</li>
+  </ul>
+</div>
+<div class="modal-footer">
+  <button type="button" *ngIf="cancelButtonText" class="btn" [ngClass]="btnLight ? 'btn-outline-primary' : (bulletList && bulletList.length > 0) ? 'btn-primary' : 'btn-light'" (click)='dismiss()' id="cancel-btn">{{cancelButtonText}}</button>
+  <button type="button" *ngIf="dispConfirmBtn" class="btn btn-primary" (click)='ok()' id="ok-btn">{{okButtonText}}</button>
+</div>

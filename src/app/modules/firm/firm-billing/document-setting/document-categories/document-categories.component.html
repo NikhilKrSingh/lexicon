@@ -1,0 +1,103 @@
+
+
+<div class="d-flex justify-content-between mb-24">
+    <h2 class="m-0">Document Categories</h2>
+    <button class="btn btn-primary btn-icon" (click)="openAddCategoryModal(newCategory)" type="button" id="create-new-category"><i class="icon icon-plus"></i> Create New Category</button>
+</div>
+<div class="custom-table">
+  <div class="custom-table matter-list section-area">
+    <ngx-datatable #table class="material common-table no-min-height" [class.matter-no-data]="categoryList?.length === 0"
+      [rows]="categoryList" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight"
+      [messages]="messages" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+      [scrollbarH]="true" [sorts]="[{prop: 'name', dir: 'asc'}]" (sort)="updateDatatableFooterPage()" id="categorylisting-tbl">
+      <ngx-datatable-column [resizeable]="false" prop="name" name="Category Name" [sortable]="true" [width]="100">
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='true'
+        [width]="700" prop='id'>
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <div class="d-flex justify-content-end">
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)="openEditCategoryModal(row,newCategory)"><em class="icon icon-edit icon-color"></em></span>
+              <span (click)='deleteCategoryConfirmationModal(row, $event)'><em class="icon icon-remove icon-color"></em></span></div>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                  of {{page.totalPages}}</option>
+              </select>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="table.onFooterPage($event);pageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+</div>
+
+
+
+
+
+<ng-template #newCategory let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="mr-36 mt-0 mb-0"  *ngIf="!categoryForm?.value?.id">Add New Category</h3>
+      <h3 class="mr-36 mt-0 mb-0"  *ngIf="categoryForm?.value?.id">Edit Category</h3>
+      <button type="button" class="close" (click)="cancel();modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class=" mb-0" [formGroup]="categoryForm">
+      <div class="modal-body">
+        <div class="row gutter-16">
+          <div class="col-12">
+            <div class="form-group" [ngClass]="{'form-group has-error': IsExist}">
+              <label for="">Category Name <sup>*</sup></label>
+              <input type="text" (change)="validateCategory()" class="form-control" rows="4" placeholder="Provide a category name"
+                formControlName="name" id="category-name" />
+                <span class="field-message text-danger" *ngIf="IsExist"><em class="icon icon-error mr-4"></em>
+                 {{cat_exist}}
+                </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light"  (click)="cancel();modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" *ngIf="!categoryForm?.value?.id" [disabled]='categoryForm.invalid || disable'
+          (click)="saveCategory()" id="create-category">Create Category</button>
+          <button *ngIf="categoryForm?.value?.id" type="button" class="btn btn-primary" [disabled]='categoryForm.invalid'
+          (click)="updateCategory()" id="save-changes">Save Changes</button>
+      </div>
+  </div>
+</ng-template>

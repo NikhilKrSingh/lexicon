@@ -1,0 +1,99 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Edit Invoice Address</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body" [formGroup]='addressForm'>
+  <div class="form-group">
+    <div class="custom-control custom-checkbox mb-12">
+      <input type="checkbox" class="custom-control-input" id="customCheck1" [value]='true'
+        formControlName='isSameAsPrimaryAddress' (change)="sameAsPrimary($event)">
+      <label class="custom-control-label text-transform-none" for="customCheck1">Same as Primary Address</label>
+    </div>
+  </div>
+  <div>
+    <div class="form-group" [class.has-error]='addressFormError.address'>
+      <label>Invoice Address 1 <sup>*</sup></label>
+      <input type="text" [readonly]="addressForm?.value?.isSameAsPrimaryAddress" class="form-control" placeholder="Enter Street Address" formControlName='address1' id="address-one">
+      <app-validation-message [errorMessage]='addressFormError.addressMessage'
+        *ngIf='addressFormError.address'>
+      </app-validation-message>
+    </div>
+    <div class="form-group" [class.has-error]='addressFormError.address2'>
+      <label>Apt, Suite, Unit</label>
+      <input type="text" [readonly]="addressForm?.value?.isSameAsPrimaryAddress" class="form-control" placeholder="Enter Unit or Suite #" formControlName='address2' id="address-two">
+      <app-validation-message [errorMessage]='addressFormError.address2Message' *ngIf='addressFormError.address2'>
+      </app-validation-message>
+    </div>
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="form-group" [class.has-error]="formSubmitted && (addressForm.controls['zipCode'].errors || validZipErr)">
+          <label>Zip Code <sup>*</sup></label>
+          <input (keyup)="getCityState($event?.target?.value)" [readonly]="addressForm?.value?.isSameAsPrimaryAddress" minlength="3" maxlength="6" type="text" class="form-control" placeholder="Enter Zip Code" formControlName='zipCode' id="zip-code">
+          <span class="field-message text-danger" *ngIf="(formSubmitted && addressForm.controls['zipCode'].errors) && !validZipErr">
+            <em class="icon icon-error mr-4"></em>
+            {{errorData?.zip_code_required}}
+          </span>
+          <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr && !addressForm.value.isSameAsPrimaryAddress && !addressForm.controls['zipCode'].errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            {{errorData?.zip_code_error}}
+          </span>
+          <!-- <app-validation-message [errorMessage]="addressForm.controls['zipCode'].errors ? errorData.zip_code_required : zip_code_error" *ngIf="formSubmitted && (addressForm.controls['zipCode'].errors || validZipErr)">
+          </app-validation-message> -->
+        </div>
+      </div>
+      <div class="col-6">
+        <label>State <sup>*</sup></label>
+        <ng-select *ngIf="stateList?.length > 1 && !addressForm.value.isSameAsPrimaryAddress"
+          [items]="stateList" 
+          placeholder="State" 
+          formControlName='state' 
+          [bindValue]="'code'"
+          [bindLabel]="'name'" 
+          [clearable]="false"
+          [notFoundText]="'No record found'" 
+          [selectOnTab]="true" id="state">
+        </ng-select>
+        <input *ngIf="stateList?.length <= 1 || addressForm.value.isSameAsPrimaryAddress" 
+          type="text" 
+          class="form-control" 
+          placeholder="State"
+          [(ngModel)]="singleState" 
+          [ngModelOptions]="{standalone: true}"
+          [readOnly]='true' id="state">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>City <sup>*</sup></label>
+      <ng-select *ngIf="cityList?.length > 1 && !addressForm.value.isSameAsPrimaryAddress" 
+        [items]="cityList" 
+        placeholder="City" 
+        formControlName="city"
+        [clearable]="false"
+        [notFoundText]="'No record found'" 
+        [selectOnTab]="true" id="city">
+      </ng-select>
+      <input *ngIf="cityList?.length <= 1 || addressForm.value.isSameAsPrimaryAddress"
+        type="text" 
+        class="form-control" 
+        placeholder="City" 
+        formControlName='city'
+        [readOnly]='true' 
+        id="city">
+    </div>
+    <div class="form-group position-relative mb-0" [class.has-error]='addressFormError.notes'>
+      <label>Change Note (optional)</label>
+      <span class="count-char">{{addressForm?.value?.changeNotes?.length || 0}}/1000</span>
+      <textarea class="form-control" rows="4" [maxlength]='1000' placeholder="Enter change notes"
+        formControlName='changeNotes' id="change-note">
+      </textarea>
+      <app-validation-message [errorMessage]='addressFormError.notesMessage' *ngIf='addressFormError.notes'>
+      </app-validation-message>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-changes">Save Changes</button>
+</div>

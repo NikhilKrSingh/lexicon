@@ -1,0 +1,910 @@
+<div class="npc-block base-matt-info-block">
+  <h2 class="mb-24">Basic Information</h2>
+  <form [formGroup]="form">
+    <div class="form-group mb-32" [class.has-error]="t['contactType'].errors && formSubmitted">
+      <label class="d-block mb-20">Contact Type <sup>*</sup></label>
+      <div class="custom-control custom-radio m-0 pr-0">
+        <input type="radio" class="custom-control-input" id="rnd-btn-individual-1" formControlName="contactType"
+          value="individual">
+        <label class="custom-control-label" for="rnd-btn-individual-1">Individual</label>
+      </div>
+      <div class="custom-control custom-radio mt-12 mb-0 pr-0">
+        <input type="radio" class="custom-control-input" id="rnd-btn-Corporate-2" formControlName="contactType"
+          value="corporate">
+        <label class="custom-control-label" for="rnd-btn-Corporate-2">Corporate</label>
+      </div>
+      <span class="field-message text-danger ml-1 mt-3" *ngIf="t['contactType'].errors?.required && formSubmitted">
+        <em class="icon icon-error mr-4"></em>
+        {{ errorData?.conatct_type_required }}
+      </span>
+    </div>
+  </form>
+  <form [formGroup]="contactDetailsForm" *ngIf="contactType === 'individual'" autocomplete="false">
+    <div class="pb-24">
+      <div class="row gutter-16">
+        <div class="col-9">
+          <div class="row gutter-16">
+            <div class="col-3">
+              <div class="form-group">
+                <label>Client Number</label>
+                <input type="text" formControlName="uniqueNumber" [readOnly]="true" class="form-control" id="client-number">
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <label>Gender</label>
+                <ng-select [items]="genderList" placeholder="Select" formControlName="gender" [bindValue]="'val'"
+                  [bindLabel]="'text'" [selectOnTab]="true" [notFoundText]="'No record found'" id="gender-select">
+                </ng-select>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <label>Suffix</label>
+                
+                <ng-select [items]="suffixList" [bindLabel]="'name'" [bindValue]="'name'" [selectOnTab]="true"
+                  formControlName="suffix" placeholder="Select" id="suffix-select">
+                </ng-select>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <label>Salutation</label>
+                <ng-select [items]="salutationArr" placeholder="Select" formControlName="salutation"
+                  [bindValue]="'name'" [selectOnTab]="true" [bindLabel]="'name'" [notFoundText]="'No record found'" id="salutation-select">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group" [class.has-error]="f['firstName'].errors && formSubmitted">
+                <label>First Name <sup>*</sup></label>
+                <input type="text" formControlName="firstName" maxlength="50" class="form-control" placeholder="Enter first name"
+                  autocomplete="doNotAutoComplete" id="first-name">
+                <span class="field-message text-danger" *ngIf="f['firstName'].errors?.required && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.first_name_error }}
+                </span>
+                <span class="field-message text-danger"
+                  *ngIf="f['firstName'].errors?.insecure_input && (!f['firstName'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.insecure_input }}
+                </span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group" [class.has-error]="f['middleName'].errors &&formSubmitted">
+                <label>Middle Name</label>
+                <input type="text" formControlName="middleName" maxlength="50" class="form-control fakeClass"
+                  placeholder="Enter Middle Name" autocomplete="doNotAutoComplete" id="middle-name">
+                <span class="field-message text-danger"
+                  *ngIf="f['middleName'].errors && (!f['middleName'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.insecure_input }}
+                </span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group" [class.has-error]="f['lastName'].errors &&formSubmitted">
+                <label>Last Name <sup>*</sup></label>
+                <input type="text" formControlName="lastName" maxlength="50" class="form-control fakeClass"
+                  placeholder="Enter last name" autocomplete="doNotAutoComplete" id="last-name">
+                <span class="field-message text-danger" *ngIf="f['lastName'].errors?.required && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.last_name_error }}
+                </span>
+                <span class="field-message text-danger"
+                  *ngIf="f['lastName'].errors?.insecure_input && (!f['lastName'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.insecure_input }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group" [class.has-error]="f['formerName'].errors && formSubmitted">
+                <label>Former Name</label>
+                <input type="text" class="form-control" formControlName="formerName" placeholder="Enter former name"
+                  autocomplete="doNotAutoComplete" id="former-name">
+                <span class="field-message text-danger"
+                  *ngIf="f['formerName'].errors && (!f['formerName'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.insecure_input }}
+                </span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group" [class.has-error]="f['primaryLawOffice'].errors &&formSubmitted">
+                <label>Primary Law Office <sup>*</sup></label>
+                <ng-select [selectOnTab]="true" [items]="officeList" placeholder="Select primary law office"
+                  [bindValue]="'id'" [bindLabel]="'name'" (change)="primaryOfficeChange($event)"
+                  [notFoundText]="'No record found'" formControlName="primaryLawOffice" id="primary-law-office-select">
+                </ng-select>
+                <span class="field-message text-danger"
+                  *ngIf="f['primaryLawOffice'].errors && (!f['primaryLawOffice'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.select_primary_law_office }}
+                </span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label>Initial Contact Date</label>
+                <app-date-picker [isForm]='true' [maxDate]="currentDate" [dateform]='contactDetailsForm'
+                  controlName='initialContactDate' placeholderText="Select date" id="initial-contact-date"></app-date-picker>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group">
+                <label>Consult Date</label>
+                <app-date-picker [isForm]='true' [maxDate]="currentDate" [dateform]='contactDetailsForm'
+                  controlName='initialConsultDate' placeholderText="Select date" id="consult-date">
+                </app-date-picker>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label>Consult Law Office</label>
+                <ng-select [selectOnTab]="true" [items]="consultofficelist" placeholder="Select consult law office"
+                  [bindValue]="'id'" [bindLabel]="'officeName'" [notFoundText]="'No record found'"
+                  (change)="consultChange($event)" formControlName="consultLawOffice" id="consult-law-office">
+                </ng-select>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label>Consult Attorney</label>
+                <ng-select [selectOnTab]="true" [items]="attorneyList" placeholder="Select consult attorney" [bindValue]="'id'"
+                  [bindLabel]="'name'" [notFoundText]="'No record found'" (change)="consultAttorneyChange($event)"
+                  formControlName="consultAttorney" [readonly]="!contactDetailsForm.value.consultLawOffice" id="consult-attorney-select">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+
+          
+          <ng-container *ngIf="isTuckerAllenAccount">
+            <div class="row gutter-16">
+              <div class="col-12">
+                <div class="custom-control custom-checkbox pr-0 mb-24">
+                  <input type="checkbox" class="custom-control-input" formControlName="isDeceased" id="contactDeceased">
+                  <label class="custom-control-label" for="contactDeceased">The client is deceased.</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="form-group" [class.has-error]="f['spouseFirstName'].errors && formSubmitted">
+                      <label>Spouse First Name</label>
+                      <input type="text" class="form-control" formControlName="spouseFirstName"
+                        placeholder="Enter first name" autocomplete="doNotAutoComplete" id="spouse-firstname">
+                      <span class="field-message text-danger"
+                        *ngIf="f['spouseFirstName'].errors && (!f['spouseFirstName'].pristine || formSubmitted)">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group" [class.has-error]="f['spouseMiddleName'].errors && formSubmitted">
+                      <label>Spouse Middle Name</label>
+                      <input type="text" class="form-control" formControlName="spouseMiddleName"
+                        placeholder="Enter middle name" autocomplete="doNotAutoComplete" id="spouse-middle-name">
+                      <span class="field-message text-danger"
+                        *ngIf="f['spouseMiddleName'].errors && (!f['spouseMiddleName'].pristine || formSubmitted)">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group" [class.has-error]="f['spouseLastName'].errors &&  formSubmitted">
+                      <label>Spouse Last Name</label>
+                      <input type="text" class="form-control" formControlName="spouseLastName"
+                        placeholder="Enter last name" autocomplete="doNotAutoComplete" id="spouse-lastname">
+                      <span class="field-message text-danger"
+                        *ngIf="f['spouseLastName'].errors && (!f['spouseLastName'].pristine || formSubmitted)">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group">
+                      <label>Spouse Gender</label>
+                      <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Select" [bindValue]="'val'"
+                        [bindLabel]="'text'" formControlName="spouseGender" [notFoundText]="'No record found'" id="spouse-gender-select">
+                      </ng-select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="custom-control custom-checkbox pr-0 mb-20">
+                  <input type="checkbox" class="custom-control-input" formControlName="spouseIsDeceased"
+                    id="spousedeceased">
+                  <label class="custom-control-label" for="spousedeceased">The spouse is deceased.</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="form-group" [class.has-error]="f['prospectFirstName'].errors && formSubmitted">
+                      <label>Other Prospect First Name</label>
+                      <input type="text" class="form-control" formControlName="prospectFirstName"
+                        placeholder="Enter First Name" autocomplete="doNotAutoComplete" id="prospect-firstname">
+                      <span class="field-message text-danger"
+                        *ngIf="f['prospectFirstName'].errors && (!f['prospectFirstName'].pristine || formSubmitted)">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group" [class.has-error]="f['prospectMiddleName'].errors && formSubmitted">
+                      <label>Other Prospect Middle Name</label>
+                      <input type="text" formControlName="prospectMiddleName" class="form-control"
+                        placeholder="Enter Middle Name" autocomplete="doNotAutoComplete" id="prospect-middle-name">
+                      <span class="field-message text-danger"
+                        *ngIf="f['prospectMiddleName'].errors && (!f['prospectMiddleName'].pristine || formSubmitted)">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group" [class.has-error]="f['prospectLastName'].errors && formSubmitted">
+                      <label>Other Prospect Last Name</label>
+                      <input type="text" formControlName="prospectLastName" class="form-control"
+                        placeholder="Enter Last Name" autocomplete="doNotAutoComplete" id="prospect-last-name">
+                      <span class="field-message text-danger"
+                        *ngIf="f['prospectLastName'].errors && (!f['prospectLastName'].pristine || formSubmitted)">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Other Prospect Gender</label>
+                  <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Select" [bindValue]="'val'"
+                    [bindLabel]="'text'" formControlName="prospectGender" [notFoundText]="'No record found'" id="prospect-gender">
+                  </ng-select>
+                </div>
+              </div>
+              <div class="col-8">
+                <div class="form-group" [class.has-error]="f['prospectRelationship'].errors && formSubmitted">
+                  <label>Other Prospect Relationship</label>
+                  <input type="text" formControlName="prospectRelationship" class="form-control"
+                    placeholder="Enter Prospect Relationship" autocomplete="doNotAutoComplete" id="prospect-relationship">
+                  <span class="field-message text-danger"
+                    *ngIf="f['prospectRelationship'].errors && (!f['prospectRelationship'].pristine || formSubmitted)">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.insecure_input }}
+                  </span>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="custom-control custom-checkbox pr-0 mb-8">
+                  <input type="checkbox" class="custom-control-input" formControlName="prospectIsDeceased"
+                    id="prospectDeceased">
+                  <label class="custom-control-label" for="prospectDeceased">Other prospect is deceased.</label>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          
+        </div>
+      </div>
+    </div>
+    <div class="pb-24 cont-detail">
+      <div class="row gutter-16">
+        <div class="col-6">
+          <h3 class="mb-24">Contact Information</h3>
+          <div class="row gutter-16">
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="f['primaryPhoneNumber'].errors &&formSubmitted">
+                <label>Primary Phone Number <sup>*</sup></label>
+                <input type="text" class="form-control" formControlName="primaryPhoneNumber"
+                  placeholder="Enter phone number" mask="(000) 000 - 0000" autocomplete="doNotAutoComplete" id="primary-phone-number">
+                <span class="field-message text-danger" *ngIf="f['primaryPhoneNumber'].errors && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.potential_client_corporate_contact_phone }}
+                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Cell Phone Number</label>
+                <input type="text" formControlName="cellPhoneNumber" class="form-control"
+                  placeholder="Enter cell phone number" mask="(000) 000 - 0000" autocomplete="doNotAutoComplete" id="cell-phone-number">
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group"
+                [class.has-error]="(f['email'].errors &&formSubmitted) || emailExistenceForPotentialClient" [class.ng-invalid]='emailExistenceForPotentialClient'>
+                <label>Email Address</label>
+                <input type="email" formControlName="email" class="form-control" placeholder="Enter email address"
+                  (keyup)="onEmailChange()" autocomplete="doNotAutoComplete"
+                  (blur)="checkEmailExistenceForPotentialClient()" id="email-address">
+                <div class="mt-3 d-flex"
+                  *ngIf="!emailExistenceForPotentialClient && isDocumentPortalAccess && f['email'].value && (f['email'].touched) && (!f['email'].invalid)">
+                  <em class="icon icon-info text-primary mr-3"></em>A document portal account will be created for this
+                  email address.
+                </div>
+                <span class="field-message text-danger" *ngIf="f['email'].errors?.pattern && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.email_not_valid }}
+                </span>
+                <span class="field-message text-danger" *ngIf="emailExistenceForPotentialClient">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.potential_client_email_in_use }}
+                </span>
+                <span class="field-message text-danger"
+                  *ngIf="f['email'].errors?.insecure_input && (!f['email'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.insecure_input }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pb-24 cont-pref">
+      <div class="row gutter-16">
+        <div class="col-7">
+          <h4 class="mb-24">Primary Address</h4>
+          <div class="row gutter-16">
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="f['primaryAddress'].errors &&formSubmitted">
+                <label>Primary Address 1 <sup>*</sup></label>
+                <input type="text" formControlName="primaryAddress" class="form-control" placeholder="Enter address"
+                  autocomplete="doNotAutoComplete" id="primary-address-one">
+                <span class="field-message text-danger" *ngIf="f['primaryAddress'].errors?.required &&  formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.potential_client_corporate_contact_address }}
+                </span>
+                <span class="field-message text-danger"
+                  *ngIf="f['primaryAddress'].errors?.insecure_input && (!f['primaryAddress'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.insecure_input }}
+                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="f['primaryAddress2'].errors && formSubmitted">
+                <label>Primary Address 2</label>
+                <input type="text" formControlName="primaryAddress2" class="form-control"
+                  placeholder="Enter Unit or Suite #" autocomplete="doNotAutoComplete" id="primary-address-two">
+                <span class="field-message text-danger"
+                  *ngIf="f['primaryAddress2'].errors && (!f['primaryAddress2'].pristine || formSubmitted)">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.insecure_input }}
+                </span>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group" [class.has-error]="(f['primaryZipCode'].errors && (f['primaryZipCode'].touched || formSubmitted) && !validZipErr) || (formSubmitted && validZipErr)">
+                <label>ZIP Code <sup>*</sup></label>
+                <input type="text" maxlength="6" minlength="3" formControlName="primaryZipCode"
+                  (keypress)="checkNumber($event)" class="form-control" placeholder="Enter zip code"
+                  (keyup)="getCityState($event.target.value, 'individual')" autocomplete="doNotAutoComplete" id="zipcode">
+                  <span class="field-message text-danger"
+                  *ngIf="(f['primaryZipCode'].errors && (f['primaryZipCode'].touched || formSubmitted)) && !validZipErr">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.zip_code_required }}
+                </span>
+                <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr">
+                  <em class="icon icon-error mr-4"></em>
+                  {{errorData?.zip_code_error}}
+                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>City <sup>*</sup></label>
+                <ng-select *ngIf="cityList?.length > 1" 
+                  [items]="cityList" 
+                  placeholder="City" 
+                  formControlName="primaryCity"
+                  [notFoundText]="'No record found'" 
+                  [clearable]="false"
+                  [selectOnTab]="true" id="city">
+                </ng-select>
+                <input *ngIf="cityList?.length <= 1" type="text" formControlName="primaryCity" class="form-control" placeholder="City"
+                  autocomplete="doNotAutoComplete" [readOnly]='true' id="primary-city">
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group">
+                <label>State <sup>*</sup></label>
+                <input *ngIf="stateList?.length <= 1" 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="State"
+                  [(ngModel)]="singleState" 
+                  [ngModelOptions]="{standalone: true}"
+                  [readOnly]='true' id="state">
+                <ng-select *ngIf="stateList?.length > 1" [items]="stateList" placeholder="State" formControlName="primaryState"
+                  [bindValue]="'code'" [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" id="state-select">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pb-24 cont-pref">
+      <div class="row gutter-16">
+        <div class="col-7">
+          <h3 class="mb-24">Contact Preferences</h3>
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <div class="custom-control custom-checkbox mb-16 mt-4 pr-0">
+                  <input type="checkbox" (change)="changeDonotContact()" formControlName="doNotContact"
+                    class="custom-control-input" id="dropcheck-contact">
+                  <label class="custom-control-label" for="dropcheck-contact">Mark as Do Not Contact</label>
+                </div>
+              </div>
+              <div class="form-group" [class.has-error]="f['doNotContactReason'].errors &&  formSubmitted"
+                *ngIf="!notDoNotContact">
+                <label for="">Do Not Contact Reason <sup *ngIf="contactDetailsForm.value.doNotContact">*</sup></label>
+                <ng-select [items]="doNotContactReasonArr" placeholder="Select a reason"
+                  formControlName="doNotContactReason" [bindValue]="'name'" [bindLabel]="'name'"
+                  [notFoundText]="'No record found'" [selectOnTab]="true" (change)="selectDoNotContactReason()" id="reason-select">
+                </ng-select>
+                <span class="field-message text-danger"
+                  *ngIf="f['doNotContactReason'].errors?.required  && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.do_not_contact_select_reason }}
+                </span>
+              </div>
+              <div class="form-group" *ngIf="contactDetailsForm.controls.doNotContactReason.value =='Other'"
+                [class.has-error]="f['DoNotContactReasonOther'].errors && formSubmitted">
+                <label>Reason <sup>*</sup></label>
+                <input type="text" class="form-control" placeholder="Enter Do Not Contact Reason"
+                  formControlName="DoNotContactReasonOther" autocomplete="doNotAutoComplete" id="reason-other-text">
+                <span class="field-message text-danger"
+                  *ngIf="f['DoNotContactReasonOther'].errors?.required && formSubmitted">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ errorData?.do_not_contact_enter_reason }}
+                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="d-block mb-16">Preferred Contact Method <sup
+                  *ngIf="!contactDetailsForm.value.doNotContact">*</sup></label>
+              <div class="custom-control custom-radio">
+                <input formControlName="preferredContactMethod" value="Call" type="radio" id="customradio_1"
+                  class="custom-control-input">
+                <label class="custom-control-label" for="customradio_1">Call</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input #inputIndividualContact formControlName="preferredContactMethod" value="Email" type="radio" id="customradio_2"
+                  class="custom-control-input">
+                <label class="custom-control-label" for="customradio_2">Email</label>
+              </div>
+              <div class="custom-control custom-radio" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                <input formControlName="preferredContactMethod" value="Text" type="radio" id="customradio_3"
+                  class="custom-control-input">
+                <label class="custom-control-label" for="customradio_3">Text</label>
+              </div>
+              <span class="text-danger" *ngIf="f['preferredContactMethod'].errors?.required && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.potential_client_preferred_contact_method }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="row gutter-16">
+        <div class="col-6">
+          <h3 class="mb-28">Automatic Notifications</h3>
+          <div class="row">
+            <div class="col-4">
+              <label class="d-block mb-16">Case-Related</label>
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" formControlName="notifyEmailCase" id="notifyEmailCase_email_id"
+                  class="custom-control-input">
+                <label class="custom-control-label" for="notifyEmailCase_email_id">Email</label>
+              </div>
+              <div class="custom-control custom-checkbox" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                <input type="checkbox" formControlName="notifySMSCase" id="notifySMSCase_sms_id"
+                  class="custom-control-input">
+                <label class="custom-control-label" for="notifySMSCase_sms_id">SMS</label>
+              </div>
+            </div>
+            <div class="col-4">
+              <label class="d-block mb-16">Marketing</label>
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" formControlName="notifyEmailMarketing" id="notifyEmailMarketing_email_id"
+                  class="custom-control-input">
+                <label class="custom-control-label" for="notifyEmailMarketing_email_id">Email</label>
+              </div>
+              <div class="custom-control custom-checkbox" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                <input type="checkbox" formControlName="notifySMSMarketing" id="notifySMSMarketing_sms_id"
+                  class="custom-control-input">
+                <label class="custom-control-label" for="notifySMSMarketing_sms_id">SMS</label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </form>
+  <div *ngIf="contactType === 'corporate'">
+    <form [formGroup]="corporateClientForm" autocomplete="off">
+      
+      <div class="">
+        <div class="">
+          <div class="info-block">
+            <div class="row gutter-16">
+              <div class="col-6">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>Client Number</label>
+                      <input type="text" class="form-control" [readOnly]="true" formControlName="uniqueNumber"
+                        autocomplete="doNotAutoComplete" id="client-number">
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group" [class.has-error]="c['companyName'].errors && formSubmitted">
+                      <label>Company Name <sup>*</sup></label>
+                      <input type="text" class="form-control" placeholder="Enter company name"
+                        formControlName="companyName" autocomplete="doNotAutoComplete" id="company-name">
+                      <span class="field-message text-danger"
+                        *ngIf="c['companyName'].errors?.required && formSubmitted">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.first_name_error }}
+                      </span>
+                      <span class="field-message text-danger"
+                        *ngIf="c['companyName'].errors?.insecure_input && formSubmitted">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group" [class.has-error]="c['primaryLawOffice'].errors && formSubmitted">
+                      <label>Primary Law Office <sup>*</sup></label>
+                      <ng-select [selectOnTab]="true" [items]="officeList" placeholder="Select primary law office"
+                        [bindValue]="'id'" [bindLabel]="'name'" (change)="primaryOfficeChange($event)"
+                        [notFoundText]="'No record found'" formControlName="primaryLawOffice" id="primary-law-office">
+                      </ng-select>
+                      <span class="field-message text-danger" *ngIf="c['primaryLawOffice'].errors && formSubmitted">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.select_primary_law_office }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>Consult Date</label>
+                      <app-date-picker [isForm]='true' [maxDate]="currentDate" [dateform]='corporateClientForm'
+                        controlName='initialConsultDate' id="consult-date">
+                      </app-date-picker>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>Consult Law Office</label>
+                      <ng-select [selectOnTab]="true" [items]="consultofficelist"
+                        placeholder="Select consult law office" [bindValue]="'id'" [bindLabel]="'officeName'"
+                        [notFoundText]="'No record found'" (change)="consultChange($event)"
+                        formControlName="consultLawOffice" id="consult-law-office">
+                      </ng-select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>Consult Attorney</label>
+                      <ng-select [selectOnTab]="true" [items]="attorneyList" placeholder="Select consult attorney"
+                        [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'"
+                        (change)="consultAttorneyChange($event)" formControlName="consultAttorney"
+                        [readonly]="!corporateClientForm.value.consultLawOffice" id="consult-attorney">
+                      </ng-select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>Initial Contact Date</label>
+                      <app-date-picker [isForm]='true' [maxDate]="currentDate" [dateform]='contactDetailsForm'
+                        controlName='initialContactDate' id="initial-contact-date"></app-date-picker>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+      
+      <div class="pb-24 cont-detail">
+        <div class="row gutter-16">
+          <div class="col-12">
+            <h3 class="mb-24">Contact Information</h3>
+            <div class="row gutter-16">
+              <div class="col-7">
+                <h4 class="mb-24">Primary Address</h4>
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <div class="form-group" [class.has-error]="c['primaryAddress'].errors && formSubmitted">
+                      <label>Primary Address 1 <sup>*</sup></label>
+                      <input type="text" class="form-control" placeholder="Enter address" formControlName="primaryAddress"
+                        autocomplete="doNotAutoComplete" id="primary-address-one">
+                      <span class="field-message text-danger" *ngIf="c['primaryAddress'].errors?.required && formSubmitted"
+                        autocomplete="new-password">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.potential_client_corporate_contact_address }}
+                      </span>
+                      <span class="field-message text-danger" *ngIf="c['primaryAddress'].errors?.insecure_input && formSubmitted"
+                        autocomplete="new-password">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group" [class.has-error]="c['primaryAddress2'].errors && formSubmitted">
+                      <label>Primary Address 2 </label>
+                      <input type="text" class="form-control" placeholder="Enter Unit or Suite #" formControlName="primaryAddress2"
+                        autocomplete="doNotAutoComplete" id="primary-address-two">
+                      <span class="field-message text-danger" *ngIf="c['primaryAddress2'].errors && formSubmitted"
+                        autocomplete="new-password">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.insecure_input }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group" [class.has-error]="(c['primaryZipCode'].errors && (c['primaryZipCode'].touched || formSubmitted) && !validZipErr) || (formSubmitted && validZipErr)">
+                      <label>ZIP Code <sup>*</sup></label>
+                      <input type="text" class="form-control" placeholder=" Enter zip code" formControlName="primaryZipCode"
+                        maxlength="6" minlength="3" (keyup)="getCityState($event.target.value, 'corporate')" (keypress)="checkNumber($event)" autocomplete="new-password" id="zipcode">
+                      
+                      <span class="field-message text-danger"
+                                  *ngIf="(c['primaryZipCode'].errors && (c['primaryZipCode'].touched || formSubmitted)) && !validZipErr">
+                                  <em class="icon icon-error mr-4"></em>
+                                  {{ errorData?.zip_code_required}}
+                                </span>
+                                <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr">
+                                  <em class="icon icon-error mr-4"></em>
+                                  {{errorData?.zip_code_error}}
+                                </span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group">
+                      <label>City <sup>*</sup></label>
+                      <ng-select *ngIf="cityList?.length > 1" 
+                        [items]="cityList" 
+                        placeholder="City" 
+                        formControlName="primaryCity"
+                        [notFoundText]="'No record found'" 
+                        [selectOnTab]="true" id="city">
+                      </ng-select>
+                      <input *ngIf="cityList?.length <= 1" type="text" class="form-control" placeholder="City" formControlName="primaryCity"
+                        autocomplete="doNotAutoComplete" id="city" [readOnly]='true'>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>State <sup>*</sup></label>
+                      <input *ngIf="stateList?.length <= 1" 
+                        type="text" 
+                        class="form-control" 
+                        placeholder="State"
+                        [(ngModel)]="singleState" 
+                        [ngModelOptions]="{standalone: true}"
+                        [readOnly]='true' id="state">
+                      <ng-select *ngIf="stateList?.length > 1" [items]="stateList" placeholder="Select state" formControlName="primaryState" [bindValue]="'code'"
+                        [selectOnTab]="true" [bindLabel]="'name'" [notFoundText]="'No record found'" id="state">
+                      </ng-select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+      
+      <div class="pb-24 cont-pref">
+        <div class="row gutter-16">
+          <div class="col-7">
+            <h3 class="mb-24">Contact Preferences</h3>
+            <div class="row gutter-16">
+              <div class="col-6">
+                <div class="form-group">
+                  <div class="custom-control custom-checkbox m-0 pr-0">
+                    <input type="checkbox" class="custom-control-input" name="doNotContact" id="doNotContact-123"
+                      formControlName="doNotContact" (change)="changeDonotContactCorporate()">
+                    <label class="custom-control-label" for="doNotContact-123">Mark as Do Not
+                      Contact</label>
+                  </div>
+                </div>
+                <div class="form-group" [class.has-error]="c['doNotContactReason'].errors && formSubmitted"
+                  *ngIf="!notDoNotContact">
+                  <label for="">Do Not Contact Reason <sup
+                      *ngIf="corporateClientForm.value.doNotContact">*</sup></label>
+                  <ng-select [items]="doNotContactReasonArr" placeholder="Select a reason"
+                    formControlName="doNotContactReason" [bindValue]="'name'" [bindLabel]="'name'"
+                    [notFoundText]="'No record found'" [selectOnTab]="true" (change)="selectDoNotContactReasonCorp()" id="do-not-contact-reason">
+                  </ng-select>
+                  <span class="field-message text-danger" *ngIf="c['doNotContactReason'].errors && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.do_not_contact_select_reason }}
+                  </span>
+                </div>
+                <div class="form-group" *ngIf="corporateClientForm.controls.doNotContactReason.value =='Other'"
+                  [class.has-error]="c['DoNotContactReasonOther'].errors && formSubmitted">
+                  <label>Reason <sup>*</sup></label>
+                  <input type="text" class="form-control" placeholder="Enter Do Not Contact Reason"
+                    formControlName="DoNotContactReasonOther" autocomplete="doNotAutoComplete" id="do-not-contact-other-reason">
+                  <span class="field-message text-danger"
+                    *ngIf="c['DoNotContactReasonOther'].errors?.required && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.do_not_contact_enter_reason }}
+                  </span>
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="" class="mb-10">Preferred Contact Method <sup
+                    *ngIf="!corporateClientForm.value.doNotContact">*</sup></label>
+                <fieldset [disabled]="corporateClientForm.controls.doNotContact.value">
+                  <div class="custom-control custom-radio pr-0">
+                    <input type="radio" id="customradio1" class="custom-control-input"
+                      formControlName="preferredContactMethod" value="Cell">
+                    <label class="custom-control-label" for="customradio1">Call</label>
+                  </div>
+                  <div class="custom-control custom-radio pr-0">
+                    <input type="radio" id="customradi31" class="custom-control-input"
+                      formControlName="preferredContactMethod" value="Email">
+                    <label class="custom-control-label" for="customradi31">Email</label>
+                  </div>
+                  <div class="custom-control custom-radio pr-0"
+                    *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                    <input type="radio" id="customradio2" class="custom-control-input"
+                      formControlName="preferredContactMethod" value="Text">
+                    <label class="custom-control-label" for="customradio2">Text</label>
+                  </div>
+                  <span class="text-danger" *ngIf="c['preferredContactMethod'].errors?.required && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.potential_client_preferred_contact_method }}
+                  </span>
+                </fieldset>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-6">
+            <h4 class="mb-28">Automatic Notifications</h4>
+            <div class="row">
+              <div class="col-4">
+                <label class="d-block mb-16">Case-Related</label>
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" formControlName="notifyEmailCase" id="notifyEmailCase_email_id"
+                    class="custom-control-input">
+                  <label class="custom-control-label" for="notifyEmailCase_email_id">Email</label>
+                </div>
+                <div class="custom-control custom-checkbox"
+                  *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                  <input type="checkbox" formControlName="notifySMSCase" id="notifySMSCase_sms_id"
+                    class="custom-control-input">
+                  <label class="custom-control-label" for="notifySMSCase_sms_id">SMS</label>
+                </div>
+              </div>
+              <div class="col-4">
+                <label class="d-block mb-16">Marketing</label>
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" formControlName="notifyEmailMarketing" id="notifyEmailMarketing_email_id"
+                    class="custom-control-input">
+                  <label class="custom-control-label" for="notifyEmailMarketing_email_id">Email</label>
+                </div>
+                <div class="custom-control custom-checkbox"
+                  *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                  <input type="checkbox" formControlName="notifySMSMarketing" id="notifySMSMarketing_sms_id"
+                    class="custom-control-input">
+                  <label class="custom-control-label" for="notifySMSMarketing_sms_id">SMS</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+    </form>
+  </div>
+
+  
+
+  <div class="row gutter-16 mt-24">
+    <div class="col-12">
+      <div class="cust-card mb-16">
+        <div class="cust-card-head d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <h3 class="m-0">Client Association</h3>
+            <i class="lh-20 ml-8">Optional</i>
+          </div>
+        </div>
+        <div class="cust-card-body section-area">
+          <div class="d-inline-block mt-8" ngbDropdown>
+            <button class="btn btn-primary bulk-btn btn-icon" ngbDropdownToggle><i class="icon icon-plus"></i>Add Client
+              Association</button>
+            <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+              <button ngbDropdownItem type="button" (click)="addVendorClick()" id="add-vendor">Vendor</button>
+              <button ngbDropdownItem type="button" (click)='addSubsidiaryClick()' id="add-subsidiary">Subsidiary</button>
+            </div>
+          </div>
+
+          <div id='clientAssociationTable'
+            class="custom-table hide-datatable-footer-inner matter-list corporate-contact mt-24"
+            *ngIf="clientAssociations.length > 0">
+            <ngx-datatable #table class="material common-table matter-table fix-col-right datatable-auto-height" [rows]="clientAssociations"
+              [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" [rowHeight]="50"
+              [scrollbarH]="true" id="client-association-tbl">
+              <ngx-datatable-column [resizeable]="false" prop="uniqueNumber" name="Contact Number" [sortable]="false" [width]="145">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="firstName" name="Name" [sortable]="false" [width]="305">
+                <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  {{ row.lastName + ', ' + row.firstName }}
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="associationType" name="Association" [sortable]="false" [width]="295">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [sortable]="false" [width]="295">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="primaryPhone" name="Phone Number" [sortable]="false" [width]="145">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  {{row.primaryPhone?.name || row.primaryPhone | mask : '(000) 000-0000'}}
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='true'
+                [width]="105">
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div class="icon-group d-flex justify-content-end">
+                    
+                    <span (click)="deleteClientAssociations(row, rowIndex)" id="delete-association-index-{{rowIndex}}">
+                      <em class="icon icon-remove icon-color"></em>
+                    </span>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+
+          <app-loader [active]='associationTypeLoading'></app-loader>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
+
+<ng-container *ngIf="addVendorSubsidiary">
+  <app-add-vendor [mode]="actionMode" [addToDb]="false" [uniqueNumber]="uniqueNumber" [vendorDetails]='selectedRecord'
+    (closeModel)='closeVendor($event)' [associateVendor]="associateVendor" [type]="type" (added)='onAddAssoc($event)'>
+  </app-add-vendor>
+</ng-container>

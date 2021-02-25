@@ -1,0 +1,148 @@
+<div id="content-area">
+    <div class="aside-nav open">
+        <div class="mainsidebar-flex" mySlimScroll>
+            <nav class="aside-main-menu">
+                <ul>
+                    <li (click)="closeSideMenu();" [routerLinkActive]="['active']" [routerLink]="[userType + '/dashboard']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/user/home-icon.svg" alt=""></i> Dashboard
+                        </a>
+                    </li>
+                    <li (click)="closeSideMenu();" [routerLinkActive]="['active']" [routerLink]="[userType + '/messages']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/Messages.svg" alt=""></i> Calendar
+                            <span class="msg-notify" *ngIf="countData.unread_count !== '0'">{{countData.unread_count}}</span>
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/phonecall-logs']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/Calls.svg" alt=""></i> Offices
+                            <span class="msg-notify" *ngIf="countData.miss_call_count !== '0'">{{countData.miss_call_count}}</span>
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/set_fees']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/Pricing.svg" alt=""></i> Contacts
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/earnings']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/Earnings.svg" alt=""></i> Clients
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/paymentInfo']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/PaymentInfo.svg" alt=""></i> Employees
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'M'" id="report-menu-toggle-id" class="mydropdown" [ngClass]="{'active': displayReportMenu}">
+                        <a href="javascript:void(0);" (click)="toggleReportMenu()">
+                            <i><img src="assets/images/new-dashboard/user/report.png" alt=""></i> Matters
+                        </a>
+                        <ul class="mydropdown-menu report-menu">
+                            <li (click)="closeSideMenu()" [routerLink]="['/model/top-spenders']" [routerLinkActive]="['active']">
+                                <a href="javascript:void(0);">ABC</a>
+                            </li>
+                            <li (click)="closeSideMenu()" [routerLink]="['/model/mass-message-stats']" [routerLinkActive]="['active']">
+                                <a href="javascript:void(0);">ABC</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/leaderboard']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/Leaderboard.svg" alt=""></i> Documents
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/referral-bonus']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/Referrals.svg" alt=""></i> Timekeeping
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'C' && userVrfyDetails && userVrfyDetails.is_user_verify === 1" (click)="closeSideMenu();" [routerLink]="['/user/contacts']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/user/phone-book.svg" alt=""></i> Marketing
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'C'" (click)="closeSideMenu();" [routerLink]="['/user/account_history']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard/user/his-icon.svg" alt=""></i> Billing
+                        </a>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'C'" class="mydropdown" [ngClass]="{'active': displayModelMenu}">
+                        <a href="javascript:void(0);" (click)="toggleModelMenu()">
+                            <i><img src="assets/images/new-dashboard/user/models-icon.svg" alt=""></i> Accounting
+                        </a>
+                        <ul class="mydropdown-menu model-dr-menu">
+                            <li (click)="closeSideMenu();" [routerLink]="['/models']" [queryParams]="{ type:'All', isNav: 1}">
+                                <a href="javascript:void(0);">Accounting</a>
+                            </li>
+                            <li (click)="closeSideMenu();" [routerLink]="['/models']" [queryParams]="{ type:'All', isNav: 1, new_model: 1}">
+                                <a href="javascript:void(0);">Accounting</a>
+                            </li>
+                            <li (click)="closeSideMenu();" [routerLink]="['/models']" [queryParams]="{ topModel: 1, isNav: 1}">
+                                <a href="javascript:void(0);">Accounting</a>
+                            </li>
+                            <li (click)="closeSideMenu();" [routerLink]="['/models']" [queryParams]="{ isNav: 1, phoneNumber: 1}">
+                                <a href="javascript:void(0);">Accounting</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li *ngIf="profileDetails && profileDetails?.role === 'C'" (click)="closeSideMenu();" [routerLink]="['/howitworks']" [routerLinkActive]="['active']">
+                        <a href="javascript:void(0);">
+                            <i><img src="assets/images/new-dashboard//user/hiw-icon.svg" alt=""></i> Trust Accounting
+                        </a>
+                    </li>
+                    <li id="side-menu-toggle-id" class="mydropdown" [ngClass]="{'active': displaySubMenu}">
+                        <a href="javascript:void(0);" (click)="toggleSideMenu()">
+                            <i><img src="assets/images/new-dashboard/Help.svg" alt=""></i>Reporting
+                        </a>
+                        <ul class="mydropdown-menu help-drp-menu">
+                            <li (click)="closeSideMenu();" [routerLink]="[userType + '/faq']" [routerLinkActive]="['active']">
+                                <a href="javascript:void(0);">Reporting 1</a>
+                            </li>
+                            <li (click)="closeSideMenu();" [routerLink]="[userType + '/contact']" [routerLinkActive]="['active']">
+                                <a href="javascript:void(0);">Reporting 2</a>
+                            </li>
+                            <li *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/legal']" [routerLinkActive]="['active']">
+                                <a href="javascript:void(0);">Reporting 3</a>
+                            </li>
+                            <li (click)="closeSideMenu();" [routerLink]="[userType + '/code-of-conduct']" [routerLinkActive]="['active']">
+                                <a href="javascript:void(0);">Reporting 4</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            <div class="btn-aside-wrap" *ngIf="profileDetails && profileDetails?.role === 'C'">
+                <a class="btn btn-brand md-btn btn-full" href="javascript:void(0);" (click)="closeSideMenu();" [routerLink]="['/user/payment/6']">ADD CREDITS</a>
+            </div>
+            <div class="aside-nav-profile">
+                <div class="model-edit-wrap">
+                    <a *ngIf="profileDetails && profileDetails?.role === 'M'" (click)="closeSideMenu();" [routerLink]="['/model/profile']" class="modeledit-btn" href="javascript:void(0);">
+                        <figure>
+                            <img src="{{profileDetails?.th_image}}" [defaultImage]="'/assets/images/sp-imgs/img-default.png'" [lazyLoad]="profileDetails?.th_image" [offset]="'200'" alt="" />
+                        </figure>
+                        <p><span>{{profileDetails?.name}}</span> Edit Profile</p>
+                    </a>
+                    <a *ngIf="profileDetails && profileDetails?.role === 'C'" class="modeledit-btn" href="javascript:void(0);">
+                        <figure>
+                            <img src="{{profileDetails?.th_image}}" [defaultImage]="'/assets/images/sp-imgs/img-default.png'" [lazyLoad]="profileDetails?.th_image" [offset]="'200'" alt="" />
+                        </figure>
+                        <p><span>{{profileDetails?.name}}</span> {{lastThiryDays}} Credits</p>
+                    </a>
+                </div>
+                <div class="seting-logout-wrap flex">
+                    <a class="sl-btn" (click)="closeSideMenu();" [routerLink]="[userType + '/general']" href="javascript:void(0);">
+                        <img src="assets/images/new-dashboard/Settings.svg" alt="">Settings
+                    </a>
+                    <a class="sl-btn" href="javascript:void(0);" (click)="logout()">
+                        <img src="assets/images/new-dashboard/Logout.svg" alt="">Log Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="right-caption-area">
+        AASDASDS s
+    </div>
+</div>

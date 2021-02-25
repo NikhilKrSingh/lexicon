@@ -1,0 +1,30 @@
+.calsett-row{margin-bottom: 20px;
+    .calsett-item{border-bottom: 1px solid #C4CCD4;padding:15px;
+        .calsett-cap{margin: 0; padding: 0;-webkit-flex: 1; flex: 1;
+            figure{margin:0 auto;padding-right: 15px;margin:0;
+                img{max-width: 35px;}
+            }
+            p{ color: #353B4B;font-size: 18px;line-height:24px;margin:0;padding-left: 10px;
+                small{color: #5D6A86; font-size: 12px; line-height: 16px;display: inline-block;}
+            }
+        }
+        .calsett-btn{padding-left: 20px;
+            .lbl-txt{margin-right: 10px;font-style: normal;color:#353B4B;font-size: 14px;display: inline-block; vertical-align: middle;
+                .icon-success{color: #66BB69;}
+            }
+        }
+    &:last-child{border-bottom: none;}
+    }
+}
+.hours-list{min-width: 420px;}
+.disable{pointer-events: none;}
+
+.verifyIcon{
+    position: absolute;
+    right: -40px;
+    top: 1px;
+
+}
+.login-row {
+    min-height: auto;
+}

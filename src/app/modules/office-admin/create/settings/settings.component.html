@@ -1,0 +1,329 @@
+<div class="card">
+  <div class="card-body">
+    <app-billing-period
+      [isFormSubmitted]="formSubmitted"
+      (sendValue)="getValue($event);"
+      (getOpratingAccountsDetails) ="getOpratingAccountsDetails($event)" 
+      [pageType]="'createoffice'"
+      [billingSettings]="billingSettings">
+    </app-billing-period>
+    
+    <app-office-admin-billing (rateValues)="rateValues($event)"
+                              (disbursementValues)=disbursementValues($event)></app-office-admin-billing>
+    <form [formGroup]="settingForm" (ngSubmit)="next()">
+      <div class="info-block pt-20">
+        <h2 class="mb-24">Calendar</h2>
+        <div class="row">
+          <div class="col-5">
+            <div class="pr-52">
+              <h3 class="mb-8">Operating Hours</h3>
+              <p>The office is located in CDT (Central Daylight Time).</p>
+              <div class="hours-list">
+                <div class="row gutter-16 align-items-center">
+                  <div class="col-9 ml-auto">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <label>Open</label>
+                      </div>
+                      <div class="col-6">
+                        <label>Close</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row gutter-16 align-items-center mb-20">
+                  <div class="col-3">
+                    <span class="label mb-0">Monday</span>
+                  </div>
+                  <div class="col-9">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="mondayOpen" (change)="onHourChange('monday')" id="monday-open-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="mondayClose" id="monday-close-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row gutter-16 align-items-center mb-20">
+                  <div class="col-3">
+                    <span class="label mb-0">Tuesday</span>
+                  </div>
+                  <div class="col-9">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="tuesdayOpen" (change)="onHourChange('tuesday')" id="tuesday-open-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="tuesdayClose" id="tuesday-close-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row gutter-16 align-items-center mb-20">
+                  <div class="col-3">
+                    <span class="label mb-0">Wednesday</span>
+                  </div>
+                  <div class="col-9">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="wednesdayOpen"
+                                (change)="onHourChange('wednesday')" id="wednesday-open-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="wednesdayClose" id="wednesday-close-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row gutter-16 align-items-center mb-20">
+                  <div class="col-3">
+                    <span class="label mb-0">Thursday</span>
+                  </div>
+                  <div class="col-9">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="thursdayOpen"
+                                (change)="onHourChange('thursday')" id="thursday-open-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="thursdayClose" id="thursday-close-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row gutter-16 align-items-center mb-20">
+                  <div class="col-3">
+                    <span class="label mb-0">Friday</span>
+                  </div>
+                  <div class="col-9">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="fridayOpen" (change)="onHourChange('friday')" id="friday-open-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="fridayClose" id="friday-close-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row gutter-16 align-items-center mb-20">
+                  <div class="col-3">
+                    <span class="label mb-0">Saturday</span>
+                  </div>
+                  <div class="col-9">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="saturdayOpen"
+                                (change)="onHourChange('saturday')" id="saturday-open-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="saturdayClose" id="saturday-close-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row gutter-16 align-items-center mb-20">
+                  <div class="col-3">
+                    <span class="label mb-0">Sunday</span>
+                  </div>
+                  <div class="col-9">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="sundayOpen" (change)="onHourChange('sunday')" id="sunday-open-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                      <div class="col-6">
+                        <select class="custom-select" formControlName="sundayClose" id="sunday-close-select">
+                          <option [value]="tm.value" *ngFor="let tm of workingHours;trackBy: trackByFn">{{tm.key}}</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-7">
+            <h3 class="mb-3">Company Holidays</h3>
+            <div class="row">
+              <div class="col-12 section-area">
+                <div class="small d-flex justify-content-between align-items-center mb-8">
+                  <span class="helper-text" id="display-year-holiday">{{displayYear}} Holidays</span>
+                  <div class="d-flex align-items-center">
+                    <span class="year-arrow" *ngIf="currentYear < displayYear" (click)="displayYear=displayYear-1" id="display-year">
+                      <em class="icon icon-angle-left"></em>
+                    </span>
+                    <span class="change-year font-weight-medium">{{displayYear}}</span>
+                    <span class="year-arrow" (click)="displayYear = displayYear+1" id="display-year-1">
+                      <em class="icon icon-angle-right"></em>
+                    </span>
+                  </div>
+                </div>
+                <div class="custom-table">
+                  <ngx-datatable #table class="material common-table"
+                                 [rows]="officeHolidayList | officeHoliday: displayYear"
+                                 [columnMode]="ColumnMode.force"
+                                 [headerHeight]="50" rowHeight="auto" id="office-holiday-tbl">
+                    <ngx-datatable-column [resizeable]="false" prop="name" name="Holiday" [width]="200">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" prop="date" name="Date" [width]="150">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        {{row.date | date:'MMMM dd'}} </ng-template>
+                    </ngx-datatable-column>
+
+                    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Actions" [width]="100">
+                      <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" ngx-datatable-cell-template>
+                        <div class="icon-group d-flex justify-content-end">
+                          <span>
+                            <button class="btn btn-sm" type="button"
+                                    (click)="officeHoliday(AddOfficeHoliday,row, rowIndex)" id="add-office-holiday-{{rowIndex}}"><em
+                              class='icon icon-edit icon-color'></em>
+                            </button>
+                          </span>
+                          <span>
+                            <button class="btn btn-sm" type="button" (click)="deleteOfficeHoliday(row.id, rowIndex)" id="delete-office-holiday-{{rowIndex}}"><em
+                              class='icon icon-remove icon-color'></em> </button>
+                          </span>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                  </ngx-datatable>
+                  <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button"
+                          (click)="officeHoliday(AddOfficeHoliday,'')" id="add-holiday">
+                    <i class="icon icon-add-circle"></i>Add Holiday
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-block timekeep">
+        <h2>Timekeeping</h2>
+        <div class="row">
+          <div class="col-5">
+            <div class="pr-52">
+              <h3 class="mb-8">Time Entry Rounding</h3>
+              <p>All time entries will be rounded up to the nearest integer.</p>
+              <div class="form-group mb-0">
+                <label class="d-block">Estimate</label>
+                <div class="row gutter-16">
+                  <div class="col-5">
+                    <ng-select [items]="timeEntryRoundingList" placeholder="Select" formControlName="timeEntryRounding"
+                               [bindValue]="'id'" [selectOnTab]="true" [bindLabel]="'name'"
+                               [notFoundText]="'No record found'" id="estimate-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="col-5">
+            <div class="pr-52">
+              <h3 class="mb-8">Time Entry Reminders</h3>
+              <div class="custom-control custom-checkbox mb-16">
+                <input type="checkbox" class="custom-control-input" name="timeEntryRemindercheckbox"
+                       [ngModelOptions]="{standalone: true}" (change)="disableField()"
+                       [(ngModel)]="timeEntryReminderCheck" id="entry-check">
+                <label class="custom-control-label" for="entry-check">Send Time Entry Reminders</label>
+              </div>
+              <div class="form-group mb-0">
+                <label class="d-block">Days Prior to End of the Accounting Period</label>
+                <div class="row gutter-16">
+                  <div class="col-5">
+                    <ng-select [items]="timeEntryReminderList" placeholder="Select" formControlName="timeEntryReminder"
+                               [bindValue]="'id'" [selectOnTab]="true" [bindLabel]="'name'"
+                               [notFoundText]="'No record found'" id="time-entry-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
+<div class="d-flex justify-content-end">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='prev()' id="cancel-setting-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="afterGetingDetails" (click)='next()' id="next-setting-btn">Next</button>
+  </div>
+</div>
+
+<ng-template #AddOfficeHoliday let-modal>
+  <div class="modal-header pb-24">
+    <h2 class="modal-title m-0">{{ (addHoliday) ? 'Add' : 'Edit' }} Office Holiday</h2>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+
+    <form [formGroup]="officeHolidayForm">
+      
+        <div class="form-group"
+             [class.has-error]="officeHolidayForm.controls['date'].errors && officeHolidayForm.controls['date'].errors.required && officeHolidayFormSubmitted">
+          <label>Date<sup>*</sup></label>
+          <app-date-picker [isForm]='true' [dateform]='officeHolidayForm' controlName='date' id="date"></app-date-picker>
+          <input type="hidden" class="form-control" formControlName="date">
+          <span class="field-message text-danger"
+                *ngIf="officeHolidayForm.controls['date'].errors && officeHolidayForm.controls['date'].errors.required && officeHolidayFormSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            Please enter Date
+          </span>
+        </div>
+      
+        <div class="form-group mb-0"
+             [class.has-error]="officeHolidayForm.controls['name'].errors && officeHolidayForm.controls['name'].errors.required && officeHolidayFormSubmitted">
+          <label>Name<sup>*</sup></label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter a name" id="name-text">
+          <span class="field-message text-danger"
+                *ngIf="officeHolidayForm.controls['name'].errors && officeHolidayForm.controls['name'].errors.required && officeHolidayFormSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            Please enter Name
+          </span>
+        </div>
+    </form>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="insertOfficeHoliday()"
+            *ngIf="addHoliday" id="save-btn">Save
+    </button>
+    <button type="button" class="btn btn-primary" (click)="updateOfficeHoliday()"
+            *ngIf="!addHoliday" id="update-btn">Update
+    </button>
+  </div>
+</ng-template>

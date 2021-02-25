@@ -1,0 +1,77 @@
+<div class="modal-header d-block">
+  <h2 class="modal-title">Edit Invoice Preferences</h2>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)='dismiss()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-24">
+  <div class="row gutter-16">
+    <div class="col-12">
+      <div class="form-group">
+        <label class="mb-12">How does the client want to receive invoices?</label>
+        <div class="custom-control custom-radio pr-0" *ngFor="let invoiceDeliveryType of invoiceDeliveryList;trackBy :trackByFn;">
+          <input type="radio" id="customRadio1_{{invoiceDeliveryType.code}}" name="customRadio"
+            class="custom-control-input" [value]='invoiceDeliveryType.id' [(ngModel)]='invoiceDelivery'
+            (change)='change()' [disabled]="!hasEmailExist && (invoiceDeliveryType.code == 'ELECTRONIC' || invoiceDeliveryType.code == 'PAPER_AND_ELECTRONIC')">
+          <label class="custom-control-label"
+            for="customRadio1_{{invoiceDeliveryType.code}}">{{invoiceDeliveryType.name}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row gutter-16 pt-36">
+    <div class="col-12">
+      <div class="custom-control custom-checkbox pr-0 mb-16">
+        <input type="checkbox" class="custom-control-input" id="customCheck1">
+        <label class="custom-control-label text-transform-none" for="customCheck1">Same as Primary Address</label>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group">
+        <label>Street Address <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="1234 Main Street">
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group">
+        <label>Apt, Suite, Unit</label>
+        <input type="text" class="form-control" placeholder="Suite G">
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group">
+        <label>City <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="Minneapolis">
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group">
+        <label>State <sup>*</sup></label>
+        <select class="custom-select">
+          <option>MN</option>
+          <option>MN</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group">
+        <label>Zip Code <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="63101">
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group position-relative mb-0" [class.has-error]='createNoteError.note'>
+        <label>Change Note (optional)</label>
+        <span class="count-char">{{changeNotes?.length || 0}}/1000</span>
+        <textarea class="form-control" rows="4" maxlength="1000" [(ngModel)]='changeNotes' id="change-note"></textarea>
+        <app-validation-message [errorMessage]='createNoteError.noteMessage' *ngIf='createNoteError.note'>
+        </app-validation-message>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-changes">Save Changes</button>
+</div>

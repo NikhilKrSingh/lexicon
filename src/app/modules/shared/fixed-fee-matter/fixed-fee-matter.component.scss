@@ -1,0 +1,44 @@
+.custom-input {
+    border-radius: 20px 20px 20px 20px;
+    min-width: 544px;
+}
+
+.c-width {
+    width: 550px;
+}
+
+.badge-list {
+    min-width: 44px !important;
+    height: 23px;
+    margin-left: 22px;
+    margin-top: 6px;
+}
+
+.icon-size {
+    font-size: 11px;
+}
+
+.f-c {
+    color: #5d6a86;
+    float: right;
+}
+
+.error-wrapper{
+    display: flex;
+    align-items: center;
+}
+
+.error-wrapper .alert .alert-icon{
+    line-height: 18px !important;
+    margin-top: 2px;
+}
+
+.margin-c{
+    display: inline-block;
+    margin-left: 29px;
+    margin-top: 5px;
+}
+
+.c-width-service {
+    min-width: 722px;
+}

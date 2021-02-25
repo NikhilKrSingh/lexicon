@@ -1,0 +1,43 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Edit Write-Off Code - {{writeOffCode?.code}}</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="alert alert-warning d-flex justify-content-between no-shadow">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-warning"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="mr-24 mt-0 mb-4">Warning</h4>
+        <span>
+          Changes made to the code name will be applied to all historical entries of this code.
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Type <sup>*</sup></label>
+    <ng-select id="editBillingCodesWriteOffType" [items]="typeList" placeholder="Select Type" [(ngModel)]="selectedType" [bindValue]="'id'"
+      [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [readonly]="true">
+    </ng-select>
+  </div>
+  <ng-container [formGroup]='writeOffForm'>
+    <div class="form-group">
+      <label>Code <sup>*</sup></label>
+      <input id="editBillingCodesWriteOffCode" type="text" class="form-control" formControlName='code'>
+    </div>
+    <div class="position-relative form-group" [class.has-error]='writeOffCodeError?.name'>
+      <label>Name <sup>*</sup></label>
+      <span class="count-char">{{writeOffForm?.controls['name']?.value?.length || 0}}/50</span>
+      <input id="editBillingCodesWriteOffName" type="text" class="form-control" placeholder="Enter a name" formControlName='name' maxlength="50">
+      <app-validation-message [errorMessage]='writeOffCodeError?.nameMessage' *ngIf='writeOffCodeError?.name'>
+      </app-validation-message>
+    </div>
+  </ng-container>
+
+</div>
+<div class="modal-footer">
+  <button id="editBillingCodesWriteOffCancelBtn" type="button" class="btn btn-light" (click)="close()">Cancel</button>
+  <button id="editBillingCodesWriteOffSaveBtn" type="button" class="btn btn-primary" (click)='save()'>Save</button>
+</div>

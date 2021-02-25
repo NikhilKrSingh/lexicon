@@ -1,0 +1,16 @@
+<h3 class="mb-8">Configure Payment Plans</h3>
+<div class="row gutter-16">
+  <div class="col-6">
+    <p class="lh-20">Does a matter need to be closed to open a payment plan?</p>
+    <div class="custom-control custom-radio pr-0">
+      <input type="radio" id="yes" name="paymentplans" [value]="true" [(ngModel)]="billingSettings.paymentPlans" (change)="paymentChange()" class="custom-control-input">
+      <label class="custom-control-label" for="yes">Yes</label>
+    </div>
+    
+    <div class="custom-control custom-radio pr-0">
+      <input type="radio" id="no" name="paymentplans" [value]="false" [(ngModel)]="billingSettings.paymentPlans" (change)="paymentChange()" class="custom-control-input">
+      <label class="custom-control-label" for="no">No</label>
+    </div>
+  </div>
+</div>
+

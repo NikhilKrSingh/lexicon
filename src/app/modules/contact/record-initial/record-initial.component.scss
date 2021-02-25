@@ -1,0 +1,43 @@
+.display-not-visible {
+  height: 0;
+  overflow: hidden;
+}
+
+@print {
+  .display-not-visible {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.checkRecordInitial {
+  border-radius: 5px;
+  background-color: #f4f7f9;
+  margin-left: 11px;
+  padding: 5px 0;
+}
+
+.lblRecordInitialCheck {
+  margin-top: 11px !important;
+}
+
+.lblRecordInitialCheckErr {
+  float: right;
+}
+
+.lblRecordInitialCheckDanger {
+  border-color: #f44236 !important;
+  background-color: #fdd9d7 !important;
+  border: solid;
+}
+
+.lblViewCheckImage {
+  float: right;
+  color: blueviolet;
+}
+
+.tooltip {
+  .tooltip-inner {
+      min-width: 245px !important;
+  }
+}

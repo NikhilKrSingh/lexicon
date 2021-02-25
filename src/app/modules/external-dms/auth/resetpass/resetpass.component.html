@@ -1,0 +1,37 @@
+<div id="content-area" class="d-flex justify-content-between flex-column login-row">
+  <div class="login-wraps flex-grow-1 d-flex align-items-center justify-content-center">
+    <div class="container">
+      <div class="login-card">
+        <div class="card-head text-center">
+          <a  class="logo" href="javascript:void(0);"><img src="assets/images/default-logo-lexicon.png" alt=""></a>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h2>Set Your New Password</h2>
+            <form (ngSubmit)="setPassword()">
+              <div class="form-group">
+                <label for="">New Password</label>
+                <div class="form-control-cover">
+                  <input [type]="viewPassword ? 'text' : 'password'" name="password"  [(ngModel)]="password" placeholder="Set your password" class="form-control" id="password">
+                  <em class="icon" [ngClass]="!viewPassword ? 'icon-eye' : 'icon-eye-slash'" (click)="viewPassword=!viewPassword"></em>
+                </div>
+                <app-password-strength [password]="password" (setPasswordFlag)="setPasswordFlag($event)"></app-password-strength>
+              </div>
+              <div class="d-flex justify-content-end pt-24">
+                <div class="btn-group ">
+                  <button type="submit" class="btn btn-primary" [disabled]="!passwordFlag" id="set-password-btn">Set Password</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="login-ftr">
+    <div class="container">
+      <p>Powered By</p>
+      <img src="assets/images/lexicon-logo.svg" alt="">
+    </div>
+  </footer>
+</div>

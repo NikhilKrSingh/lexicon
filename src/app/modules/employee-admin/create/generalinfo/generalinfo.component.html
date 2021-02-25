@@ -1,0 +1,426 @@
+<div class="card">
+  <div class="card-body">
+    <div class="info-block mb-30">
+      <h2 class="mb-8">Profile Photo</h2>
+      <p>Photos can be uploaded in <strong>.jpg</strong> or <strong>.png</strong> formats and should be about
+        <strong>200px X 200px.</strong>
+      </p>
+      <div class="logo-dragger d-flex align-items-center justify-content-center mb-48" appFileDragAndDrop
+           (fileDropped)="uploadFileDragAndDrop($event)" id="drage-and-drop-section">
+        <div class="uploadSection">
+          <div *ngIf="!profileImage" class="displayImage">
+            <img class="defaultLogo" src="assets/images/user.png">
+          </div>
+          <div *ngIf="profileImage" class="uploadedImage">
+            <img [src]="profileImageSrc" [width]="100" [height]="100">
+          </div>
+          <div class="errorUploadFiles">
+            <a class="uploadButton" (click)='uploadButtonClick()' id="upload-btn-click">Browse your file </a>
+            <span class="dragDrop d-block mb-8"> or Drag and drop </span>
+          </div>
+          <div *ngIf="profileImageSrc">
+            <button type="button" class="btn btn-primary" (click)='deleteProfileImage()' id="remove-file-btn">Remove Photo</button>
+          </div>
+        </div>
+        <input type="file" accept="image/*" hidden #profileImageInput (change)='uploadFile(profileImageInput.files)' id="file-change">
+      </div>
+    </div>
+    <form [formGroup]="employeeForm" class="emp-frm" (ngSubmit)="next()">
+      <div class="info-block">
+        <h2 class="mb-16">Personal Information</h2>
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div class="form-group" [class.has-error]="f['firstName'].errors && formSubmitted">
+              <label>First Name <sup>*</sup></label>
+              <input type="text" name="firstName" (blur)="addToList()" formControlName="firstName" placeholder="First Name" class="form-control" value="First Name" id="first-name" maxlength="50">
+              <span class="field-message text-danger" *ngIf="f['firstName'].errors && formSubmitted ? !!f['firstName'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.echeck_first_name_error}}
+              </span>
+               <span class="field-message text-danger" *ngIf="f['firstName'].errors && formSubmitted ? !!f['firstName'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group" [class.has-error]="f['middleName'].errors && formSubmitted">
+              <label>Middle Name </label>
+              <input type="text" name="middleName" formControlName="middleName" placeholder="Middle Name" class="form-control" value="Middle Name" id="middle-name" maxlength="50">
+               <span class="field-message text-danger" *ngIf="f['middleName'].errors && formSubmitted ? !!f['middleName'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group" [class.has-error]="f['lastName'].errors && formSubmitted">
+              <label>Last Name <sup>*</sup></label>
+              <input type="text" name="lastName" (blur)="addToList()" formControlName="lastName" placeholder="Last Name" class="form-control" value="Last Name" id="last-name" maxlength="50">
+              <span class="field-message text-danger" *ngIf="f['lastName'].errors && formSubmitted ? !!f['lastName'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.echeck_last_name_error}}
+              </span>
+              <span class="field-message text-danger" *ngIf="f['lastName'].errors && formSubmitted ? !!f['lastName'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group" [class.has-error]="f['maidenName'].errors && formSubmitted">
+              <label>Maiden Name </label>
+              <input type="text" name="maidenName" formControlName="maidenName" placeholder="Maiden Name" class="form-control" value="Maiden Name" id="maiden-name" maxlength="50">
+               <span class="field-message text-danger" *ngIf="f['maidenName'].errors && formSubmitted ? !!f['maidenName'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group" [class.has-error]="f['nickName'].errors && formSubmitted">
+              <label>Nick Name </label>
+              <input type="text" name="nickName" formControlName="nickName" placeholder="Nick Name" class="form-control" value="Nickname" id="nick-name" maxlength="50">
+               <span class="field-message text-danger" *ngIf="f['nickName'].errors && formSubmitted ? !!f['nickName'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-md-0 mb-24" [class.has-error]="f['commonName'].errors && formSubmitted">
+              <label>Common Name </label>
+              <input type="text" name="commonName" formControlName="commonName" placeholder="Common Name" class="form-control" value="Common Name" id="common-name" maxlength="50">
+              <span class="field-message text-danger" *ngIf="f['commonName'].errors && formSubmitted ? !!f['commonName'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-md-0 mb-20"  [class.has-error]="f['jobFamily'].errors && formSubmitted">
+              <label>Job Family <sup>*</sup></label>
+              <ng-select [items]="jobList"
+                         placeholder="Job Family"
+                         formControlName="jobFamily"
+                         [bindValue]="'id'"
+                         [bindLabel]="'name'"
+                         [selectOnTab]="true"
+                         [notFoundText]="'No record found'"
+                         id="job-family-select">
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="f['jobFamily'].errors && formSubmitted ? !!f['jobFamily'].errors.required ? true : false : false">
+                <em class="icon icon-error mr-4"></em>
+                  {{errorData.jobFamily}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-24" [class.has-error]="f['jobTitle'].errors && formSubmitted">
+              <label>Job Title <sup>*</sup></label>
+              <input type="text" name="jobTitle" formControlName="jobTitle" placeholder="Job Title" class="form-control" id="job-title" maxlength="50">
+              <span class="field-message text-danger" *ngIf="f['jobTitle'].errors && formSubmitted ? f['jobTitle'].errors.required ? true : false : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.jobtitle_required}}
+              </span>
+               <span class="field-message text-danger" *ngIf="f['jobTitle'].errors && formSubmitted ? !!f['jobTitle'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="info-block mt-24 pt-0">
+        <h2 class="mb-16">Contact Information</h2>
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div [class.has-error]="(f['email'].errors && formSubmitted) || emailExistence" class="form-group"
+             [ngClass]="(employeeForm.controls.email.invalid && employeeForm.controls.email.touched)?'mb-24 has-error':'mb-24'">
+              <label>Email Address <sup>*</sup></label>
+              <input type="email" name="email" formControlName="email" class="form-control"
+                     (blur)="checkEmailExistence()"
+                     placeholder="Email Address"
+                     value="Email Address"
+                     id="email-address" maxlength="100">
+              <span class="field-message text-danger" *ngIf="f['email'].errors && formSubmitted && !emailExistence ? !!f['email'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.email_required}}
+              </span>
+              <span class="field-message text-danger" *ngIf="f['email'].invalid && !f['email'].errors.required && !emailExistence" ><em
+                class="icon icon-error mr-4"></em>
+                  Invalid email address
+              </span>
+              <span class="field-message text-danger" *ngIf="emailExistence">
+                <em class="icon icon-error mr-4"></em>
+                  This email address is already in use by a potential client, client, employee, or corporate contact.
+              </span>
+              <span class="field-message text-danger" *ngIf="f['email'].errors && formSubmitted ? !!f['email'].errors.insecure_input : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.insecure_input}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div [class.has-error]="f['primaryPhoneNumber'].errors && formSubmitted"
+            [ngClass]="(employeeForm.controls.primaryPhoneNumber.invalid && primaryPhoneNumberBlur)?'form-group mb-24 has-error':'form-group mb-24'">
+              <label>Primary Phone<sup>*</sup></label>
+              <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                     placeHolderCharacter=" " formControlName="primaryPhoneNumber" (blur)="onBlurMethod(employeeForm.controls.primaryPhoneNumber.value,'primaryPhoneNumber')" id="primary-phone" />
+              <span class="field-message text-danger" *ngIf="employeeForm.controls.primaryPhoneNumber.invalid && primaryPhoneNumberBlur" ><em
+                class="icon icon-error mr-4"></em>
+                  Invalid phone number
+                </span>
+              <span class="field-message text-danger" *ngIf="f['primaryPhoneNumber'].errors && formSubmitted ? !!f['primaryPhoneNumber'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.phone_required}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div [ngClass]="(employeeForm.controls.cellPhoneNumber.invalid && cellPhoneNumberBlur)?'form-group mb-md-0 mb-24 has-error':'form-group mb-md-0 mb-24'">
+              <label>Cell Phone</label>
+              <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                     placeHolderCharacter=" " formControlName="cellPhoneNumber" (blur)="onBlurMethod(employeeForm.controls.cellPhoneNumber.value,'cellPhoneNumber')" id="cell-phone" />
+              <span class="field-message text-danger" *ngIf="employeeForm.controls.cellPhoneNumber.invalid && cellPhoneNumberBlur" ><em
+                class="icon icon-error mr-4"></em>
+                    Invalid phone number
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div [ngClass]="(employeeForm.controls.fax.invalid && faxBlur)?'form-group mb-md-0 mb-24 has-error':'form-group mb-md-0 mb-24'">
+              <label>Fax</label>
+              <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                     placeHolderCharacter=" " formControlName="fax" (blur)="onBlurMethod(employeeForm.controls.fax.value,'fax')" id="fax" />
+              <span class="field-message text-danger" *ngIf="employeeForm.controls.fax.invalid && faxBlur" ><em
+                class="icon icon-error mr-4"></em>
+                    Invalid fax number
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-block mt-48 pt-0" *ngIf="reporting_relations">
+        <h2 class="mb-16">Reporting Relationships</h2>
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div class="form-group mb-md-0 mb-20">
+              <label>Direct Manager </label>
+              <ng-select [items]="employeeList"
+                         placeholder="Direct Manager"
+                         formControlName="directManager"
+                         [bindValue]="'id'"
+                         [bindLabel]="'name'"
+                         [selectOnTab]="true"
+                         [notFoundText]="'No record found'"
+                         id="direct-manager-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-md-0 mb-20">
+              <label>Approving Manager </label>
+              <ng-select [items]="employeeList"
+                         placeholder="Approving Manager"
+                         formControlName="approvingManager"
+                         [bindValue]="'id'"
+                         [bindLabel]="'name'"
+                         [selectOnTab]="true"
+                         [notFoundText]="'No record found'"
+                         id="approved-manager-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-md-0 mb-20">
+              <label>Practice Manager </label>
+              <ng-select [items]="employeeList"
+                         placeholder="Practice Manager"
+                         formControlName="practiceManager"
+                         [bindValue]="'id'"
+                         [bindLabel]="'name'"
+                         [selectOnTab]="true"
+                         [notFoundText]="'No record found'"
+                         id="practice-manager-select">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-block mt-48 pt-0">
+        <h2 class="mb-16">Offices</h2>
+        <h6 class="helper-text mb-16 mt-0">This employee is licensed to practice in the following states:</h6>
+        <div class="state-col-5">
+          <div *ngFor="let state of stateList;trackBy :trackByFn;let i = index;">
+            <div class="custom-control custom-checkbox pr-0">
+              <input class="custom-control-input" id="emp-licensed-{{state.id}}" (change)="onCheckChange($event)" [value]="state.id" type="checkbox" [checked]="state.checked">
+              <label class="custom-control-label" for="emp-licensed-{{state.id}}">{{state.name}}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-block mt-32 pt-0">
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div class="form-group mb-md-0 mb-20" [class.has-error]="f['primaryOffice'].errors && formSubmitted" >
+              <label>Primary Office <sup>*</sup></label>
+              <ng-select [items]="officeList"
+                         placeholder="Primary Office"
+                         formControlName="primaryOffice"
+                         [bindValue]="'id'"
+                         [bindLabel]="'name'"
+                         (change) = "changePrimaryOffice($event)"
+                         [selectOnTab]="true"
+                         [notFoundText]="'No record found'"
+                         id="primary-office-select">
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="f['primaryOffice'].errors && formSubmitted ? !!f['primaryOffice'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.select_primary_office}}
+              </span>
+            </div>
+          </div>
+          <div class="col-4 emp-cerate">
+            <div class="form-group mb-md-0 mb-20">
+              <label>Secondary Office(s) </label>
+              <app-multiselect-dropdown
+                [title]="title"
+                [placeholder]="'Search offices'"
+                [isHeadingPlaceholder]="true"
+                [selections]="sndryOfficeSelected"
+                [displaySubItem]="officeList"
+                [filterName]="filterName"
+                (onSelectionChanged)="getOfficeSelected($event)"
+                (clearFilter)="clrFilterPrmOfc()"
+                (applyFilter)="applyFilter()"
+                id="seconary-office-multi">
+              </app-multiselect-dropdown>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-block mt-32 pt-0">
+        <h6 class="helper-text mb-16">This employee is eligible for:</h6>
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div class="custom-control custom-checkbox mb-16">
+              <input class="custom-control-input" formControlName="retainer" id="eligible1" (change)="selectRetainer('Retainer')" type="checkbox">
+              <label class="custom-control-label" for="eligible1">Client assignment</label>
+            </div>
+            <div class="form-group mb-0 mb-md-32 emp-cerate" *ngIf="employeeForm.value.retainer"
+                 [class.has-error]="employeeForm.value.retainer && (!retainerPracticeArea || !retainerPracticeArea.length) && formSubmitted">
+              <label>Practice Area(s) <sup>*</sup></label>
+              <app-multiselect-dropdown
+                [title]="titlePracticeArea"
+                [isHeadingPlaceholder]="true"
+                [placeholder]="'Search practice areas'"
+                [selections]="retainerPracticeArea"
+                [displaySubItem]="practiceList"
+                [filterName]="filterName"
+                (onSelectionChanged)="retainerSelected($event)"
+                (clearFilter)="clearFilterRetainer()"
+                (applyFilter)="applyFilter()"
+                id="retainer-practice-area-multi">
+              </app-multiselect-dropdown>
+              <span class="field-message text-danger"
+                    *ngIf="employeeForm.value.retainer && (!retainerPracticeArea || !retainerPracticeArea.length) && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.retainer_practice_area_required}}
+            </span>
+            </div>
+            <div class="custom-control custom-checkbox mb-16">
+              <input class="custom-control-input" formControlName="initialConsultations" id="eligible2" (change)="selectRetainer('Initial')" type="checkbox">
+              <label class="custom-control-label" for="eligible2">Initial consultations</label>
+            </div>
+            <div class="form-group mb-0 emp-cerate" *ngIf="employeeForm.value.initialConsultations"
+                 [class.has-error]="employeeForm.value.initialConsultations && (!initialConsulPracticeArea || !initialConsulPracticeArea.length) && formSubmitted">
+              <label>Practice Area(s) <sup>*</sup></label>
+              <app-multiselect-dropdown
+                [title]="titlePracticeAreai"
+                [selections]="initialConsulPracticeArea"
+                [displaySubItem]="practiceListIC"
+                [isHeadingPlaceholder]="true"
+                [filterName]="filterName"
+                (onSelectionChanged)="initialConsulSelected($event)"
+                (clearFilter)="clearFilterInitialConsul()"
+                (applyFilter)="applyFilter()"
+                id="intial-practice-area-multi">
+              </app-multiselect-dropdown>
+              <span class="field-message text-danger" *ngIf="employeeForm.value.initialConsultations && (!initialConsulPracticeArea || !initialConsulPracticeArea.length) && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.initial_consulation_practice_area_required}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-block mt-32 pt-0">
+        <h2 class="mb-16">Groups </h2>
+        <div class="row gutter-16">
+          <div class="col-3 emp-cerate">
+            <div class="form-group mb-md-0 mb-20" [ngClass]="{'has-error': groupValidation && formSubmitted}">
+              <label>Add employee to a Group <sup>*</sup></label>
+              <app-multiselect-dropdown
+                [title]="groupsTitle"
+                [isHeadingPlaceholder]="true"
+                [selections]="groupsSelected"
+                [displaySubItem]="groupList"
+                [selectedMessage]="'groups are selected'"
+                [filterName]="filterName"
+                (onSelectionChanged)="getGroupsSelected($event)"
+                (clearFilter)="clrFilterGroups()"
+                (applyFilter)="applyFilter()"
+                id="add-employee-to-group">
+              </app-multiselect-dropdown>
+              <span class="field-message text-danger" *ngIf="groupValidation && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.select_group}}
+              </span>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="info-block mt-48 pt-0">
+        <h2 class="mb-16">Employment Dates</h2>
+        <div class="row">
+          <div class="col-3">
+            <div class="form-group mb-md-0 mb-20" [class.has-error]="f['employmentStartDate'].errors && formSubmitted">
+              <label>Employment Start Date<sup>*</sup></label>
+              <app-date-picker [isForm]='true' [dateform]='employeeForm' controlName='employmentStartDate' id="employee-start-date"></app-date-picker>
+              <span class="field-message text-danger" *ngIf="f['employmentStartDate'].errors && formSubmitted ? !!f['employmentStartDate'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+                {{errorData.select_employee_start_date}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="info-block mt-48 pt-0">
+      <h2 class="mb-16">Do Not Schedule</h2>
+      <div class="row">
+        <div class="col-4">
+          <div class="custom-control custom-checkbox">
+            <input id="isDoNotScheduleChk" class="custom-control-input" [(ngModel)]="isDoNotSchedule" type="checkbox">
+            <label class="custom-control-label" for="isDoNotScheduleChk">Do Not Schedule</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-end mt-24">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" [routerLink]="['/employee/list']" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='next()' id="next-btn">Next</button>
+  </div>
+</div>

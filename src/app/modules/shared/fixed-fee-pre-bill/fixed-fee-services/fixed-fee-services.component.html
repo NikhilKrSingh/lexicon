@@ -1,0 +1,164 @@
+<div class="custom-table section-area">
+  <ngx-datatable
+    #table class="material common-table fixed-free-table" [rows]="fixedFeeServices" [columnMode]="ColumnMode.force"
+    [headerHeight]="50" [footerHeight]="50" rowHeight="auto" [count]="page.totalElements"
+    [offset]="page.pageNumber"
+    [limit]="page.size" [scrollbarH]='true' [selected]="selected" (select)="onSelect($event)"
+    [selectionType]="SelectionType.checkbox" [rowIdentity]='rowIdentity' id="fixed-free-service-tbl">
+
+    <ngx-datatable-row-detail rowHeight="auto" #myDetailRow (toggle)="onDetailToggle($event)">
+      <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-row-detail-template>
+        <div class="table-responsive min-height-table">
+          <table class="table table-striped table-borderless" id="write-down-details-tbl-index-{{rowIndex}}">
+            <thead>
+            <tr>
+              <th class="pl-40" style="width: 23%;">Write Down Date/Time</th>
+              <th>Code</th>
+              <th style="width: 23%;">Name</th>
+              <th style="width: 20%;">Note to File</th>
+              <th style="width: 14%;white-space: nowrap;">Write Down Amount</th>
+              <th style="width: 17%;" class="text-right"
+                  *ngIf="(isAttorney || permissionList.BILLING_MANAGEMENTisAdmin) && viewmode && (row?.status != 'Relieved' && row?.status != 'Billed')">
+                Action
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-container *ngFor="let writedown of row.writeDownList; trackBy :trackByFn;let i = index">
+              <tr id="write-down-details-index-{{i}}">
+                <td class="pl-40">{{writedown.createdAt | date: 'MM/dd/yy, h:mm a'}}</td>
+                <td>{{writedown.writeDownCode?.code }}</td>
+                <td>{{writedown.writeDownCode?.name }}</td>
+                <td>
+                  <app-read-more [maxLines]='2' [text]='writedown.writeDownNarrative'></app-read-more>
+                </td>
+                <td>{{(writedown.writeDownAmount || 0) | currency : 'USD': 'symbol': '1.2-2'}}</td>
+                <td
+                  *ngIf="(isAttorney || permissionList.BILLING_MANAGEMENTisAdmin) && viewmode && (row?.status != 'Relieved' && row?.status != 'Billed')">
+                  <div class="d-flex justify-content-end">
+                    <div class="dropdown dropdown-hover-table" [class.active]="fixedFeeActive == i"
+                         (click)="openWriteDownMenu(i)" appAutoCloseOutsideClick (outsideClick)="closeMenu(i)">
+                      <em class="icon icon-dot-verti"></em>
+                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="javascript:void(0)" (click)='viewWriteDown(row, writedown)' id="view-write-down-index-{{rowIndex}}-{{i}}">
+                          View Write-Down Details
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)"
+                           (click)='writeDown(row, $event, false, writedown)' id="edit-write-down-index-{{rowIndex}}-{{i}}">
+                          Edit Write-Down
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)"
+                           (click)='deleteWriteDown(row, $event, writedown)' id="delete-write-down-index-{{rowIndex}}-{{i}}">
+                          Delete Write-Down
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </ng-template>
+    </ngx-datatable-row-detail>
+    <ngx-datatable-column [resizeable]="false" [headerClass]="viewmode ? 'pl-40 checkbox-header' : 'pl-12 checkbox-header'" prop="code" name="Code" [width]="120">
+      <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+        let-selectFn="selectFn">
+        <label class="cust-check cursor-pointer" *ngIf="viewmode">
+          <input type="checkbox" [checked]="allRowsSelected" [disabled]='isDisabled'
+                 (change)="selectFn(!allRowsSelected)"/>
+          <span class="check-style"></span>
+        </label>
+        <span class="datatable-header-cell-wrapper cursor-default ml-24" (click)="$event.stopPropagation()">
+          <span class="datatable-header-cell-label">Code</span>
+        </span>
+      </ng-template>
+      <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template
+                   let-isSelected="isSelected" let-onCheckboxChangeFn="onCheckboxChangeFn">
+        <div class="d-flex align-items-center" *ngIf='row.totalWriteDown && row.rateAmount >= 0'>
+          <a href="javascript:void(0)" class="icon font-10" [class.icon-angle-down]="!expanded"
+             [class.icon-angle-up]="expanded" title="Expand/Collapse Row"
+             (click)="toggleExpandRow(row, expanded, $event)">
+          </a>
+          <div class="d-flex align-items-start">
+            <label class="cust-check pl-20 cursor-pointer" *ngIf="viewmode">
+              <input type="checkbox" [checked]="isSelected" [disabled]='isDisabled'
+                     (change)="onCheckboxChangeFn($event)"/>
+              <span class="check-style"></span>
+            </label>
+            <div>
+              <span class="d-block ml-5">{{value}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="pl-8" *ngIf='!row.totalWriteDown || row.rateAmount < 0'>
+          <div class="d-flex align-items-start">
+            <label class="cust-check ml-5" *ngIf="viewmode">
+              <input type="checkbox" [checked]="isSelected" [disabled]='isDisabled'
+                     (change)="onCheckboxChangeFn($event)"/>
+              <span class="check-style"></span>
+            </label>
+            <div>
+              <span class="d-block ml-5">{{value}}</span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [width]="200">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span class="d-block">{{value}}</span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="rateAmount" name="Amount" [width]="100">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <div class="d-flex align-items-center">
+          <span *ngIf='value >= 0'> {{((value || 0) - row.totalWriteDown)  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+          <span *ngIf='value < 0'> {{((value || 0) + row.totalWriteDown)  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+          <div class="info-hover position-relative ml-12" *ngIf='row.writeDownList?.length > 0 && row.rateAmount >= 0'>
+            <img src="assets/images/bullet-list.svg">
+            <div class="tooltip bs-tooltip-top left" role="tooltip">
+              <div class="arrow"></div>
+              <div class="tooltip-inner">
+                <div class="d-flex pb-4 align-items-center justify-content-between">
+                  <span class="font-weight-medium small">Originial Amount</span>
+                  <span class="lh-20">{{value | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                </div>
+                <div class="d-flex pb-4 align-items-center justify-content-between">
+                  <span class="font-weight-medium small">Write-Down</span>
+                  <span class="lh-20" *ngIf='value >= 0'>{{(0 - row.totalWriteDown) | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                  <span class="lh-20" *ngIf='value < 0'>{{(row.totalWriteDown) | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                </div>
+                <div class="d-flex pt-8 align-items-center border-top-white justify-content-between">
+                  <span class="font-weight-medium small">To Be Billed</span>
+                  <span class="lh-20" *ngIf='value >= 0'>{{((value || 0) - row.totalWriteDown)  | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                  <span class="lh-20" *ngIf='value < 0'>{{((value || 0) + row.totalWriteDown)  | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false"
+      [sortable]="false" [headerClass]="'text-right'" name="Action" [width]="147"
+      *ngIf='(isAttorney || permissionList.BILLING_MANAGEMENTisAdmin) && viewmode'>
+      <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+        <div class="d-flex justify-content-end" *ngIf="row?.status != 'Relieved' && row?.status != 'Billed'">
+          <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+               (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+               (outsideClick)="onClickedOutside($event, rowIndex)">
+            <em class="icon icon-dot-verti"></em>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="javascript:void(0)" (click)='writeDown(row, $event, true, null)' id="add-write-down-index-{{rowIndex}}">
+                Write-Down
+              </a>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
+  <app-loader [active]='loading'></app-loader>
+</div>

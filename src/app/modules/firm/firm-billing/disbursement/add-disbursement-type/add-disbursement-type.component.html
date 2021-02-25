@@ -1,0 +1,64 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Create Disbursement Type</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0" [formGroup]='disbursementForm'>
+  <div class="form-group">
+    <label>Code <sup>*</sup></label>
+    <input type="text" class="form-control" formControlName='code' id="code-text">
+  </div>
+  <div class="form-group">
+    <label>Description <sup>*</sup></label>
+    <span class="count-char">{{disbursementForm?.controls['description']?.value?.length || 0}}/250</span>
+    <textarea class="form-control" maxlength='250' rows="4" placeholder="Write a description" formControlName='description' id="description"></textarea>
+  </div>
+  <div class="row gutter-16">
+    <div class="col-4">
+      <div class="form-group">
+        <label class="mb-12">Bill Type <sup>*</sup></label>
+        <div class="custom-control custom-radio pr-0" *ngFor="let bill of billingTypeList;trackBy :trackByFn;">
+          <input type="radio" id="billtype_{{bill.id}}" name="billType" class="custom-control-input" [value]='bill.id'
+            formControlName='billType' (change)='changeBillType()'>
+          <label class="custom-control-label" for="billtype_{{bill.id}}">{{bill.name}}</label>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="form-group">
+        <label class="mb-12">Disbursement Type <sup>*</sup></label>
+        <div class="custom-control custom-radio pr-0" *ngFor="let dis of disbursementTypeList;trackBy :trackByFn;">
+          <input type="radio" id="disbursementType_{{dis.id}}_{{dis.code}}" name="disbursementType"
+            class="custom-control-input" [value]='dis.id' formControlName='disbursementType'
+            (change)='changeDisbursementType()'>
+          <label class="custom-control-label" for="disbursementType_{{dis.id}}_{{dis.code}}">{{dis.name}}</label>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="form-group">
+        <label class="mb-12">Billable to Client <sup>*</sup></label>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="billable1" name="billingTo" class="custom-control-input" value="1"
+            formControlName='billingTo'>
+          <label class="custom-control-label" for="billable1">Yes</label>
+        </div>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="billable2" name="billingTo" class="custom-control-input" value="0"
+            formControlName='billingTo'>
+          <label class="custom-control-label" for="billable2">No</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class=" form-group" *ngIf='!isBillTypeOpen'>
+    <label>Default Rate <sup>*</sup></label>
+    <input type="text" class="form-control" prefix="$" mask="separator.2" thousandSeparator="," placeholder="Enter rate"
+      formControlName='rateAmount' id="enter-rate">
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' [disabled]='disbursementForm.invalid || disable' id="save-btn">Save</button>
+</div>

@@ -1,0 +1,66 @@
+<div class="multiselect-dropdown dropdown" [ngClass]="{'open':showDropdown}">
+  <button class="multiselect-dropdown-toggle custom-select select text-left" type="button">
+    <span *ngIf="displayFlag">{{ title }}</span>
+    <div class="multiselect-text position-relative" *ngIf="!displayFlag">
+      <span class="badge badge-primary mr-8" (click)="clear()">
+        <span>{{ title }}</span>
+        <em class="icon icon-close"></em>
+      </span>
+      filters are selected
+    </div>
+    <span (click)="show()" class="caret"><em class="icon icon-arrow-down"></em></span>
+  </button>
+  <div class="multiselect-dropdown-menu" id="main-class" *ngIf="showDropdown">
+    <div class="multiselect-dropdown-scroll">
+      <ul class="list-unstyled m-0 multiselect-dropdown-list main-list">
+        <li class="multiselect-dropdown-item" [class.open]="item.childDisplay" [class.has-dropdown]="item.childArray?.length > 0"
+          *ngFor="let item of displaySubItem; trackBy :trackByFn;let i=index">
+          <div class="custom-control custom-checkbox m-0 pr-0">
+            <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item.id}}"
+              (change)="changeSelection($event, item.id, i)" [checked]="item.checked">
+            <label class="custom-control-label" for="{{i}}-dropcheck-{{item.id}}">{{ item.name }}</label>
+          </div>
+          <a href="javascript:void(0)" class="filt-arrow ml-40" (click)="item.childDisplay=!item.childDisplay;next(i);">
+            <em class="icon icon-angle-right"></em>
+          </a>
+          <div class="sub-list">
+            <a href="javascript:void(0)" class="back-arrow" (click)="item.childDisplay=!item.childDisplay">
+              <em class="icon icon-angle-left"></em> Back
+            </a>
+            
+            <ul>
+              <li class="multiselect-dropdown-item" [class.open]="item1.childDisplay" [class.has-dropdown]="item1.childArray?.length > 0"
+                *ngFor="let item1 of item.childArray;trackBy :trackByFn;let j=index">
+                <div class="custom-control custom-checkbox m-0 pr-0">
+                  <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item1.id}}-{{j}}"
+                    (change)="changeSelection($event, item1.id, i, j)" [checked]="item1.checked">
+                  <label class="custom-control-label" for="{{i}}-dropcheck-{{item1.id}}-{{j}}">{{ item1.name }}</label>
+                </div>
+                <a href="javascript:void(0)" class="filt-arrow ml-40" (click)="item1.childDisplay=!item1.childDisplay;next(i, j);">
+                  <em class="icon icon-angle-right"></em>
+                </a>
+                <div class="sub-list">
+                  <a href="javascript:void(0)" class="back-arrow" (click)="item1.childDisplay=!item1.childDisplay">
+                    <em class="icon icon-angle-left"></em> Back
+                  </a>
+                  
+                  <ul>
+                    <li class="multiselect-dropdown-item" [class.has-dropdown]="item2.childArray?.length > 0"
+                      *ngFor="let item2 of item1.childArray;trackBy :trackByFn;let k=index">
+                      <div class="custom-control custom-checkbox m-0 pr-0">
+                        <input type="checkbox" class="custom-control-input" id="{{i}}-dropcheck-{{item2.id}}-{{k}}-{{j}}"
+                          (change)="changeSelection($event, item2.id, i, j, k)" [checked]="item2.checked">
+                        <label class="custom-control-label" for="{{i}}-dropcheck-{{item2.id}}-{{k}}-{{j}}">{{ item2.name }}</label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <button class="btn btn-primary btn-block" type="button" (click)="apply()">{{filterName}}</button>
+  </div>
+</div>

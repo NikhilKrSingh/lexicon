@@ -1,0 +1,17 @@
+{
+  "API_URL": "https://sc1-api.lexiconservices.com",
+  "SWAGGER_PATH": "src/common/swagger-providers/",
+  "SWAGGER_SUB_PATH": "/swagger/v1/swagger.json",
+  "calendar_key": "0540678778-fcs-1578950738",
+  "brand": "CPMG",
+  "cpmg_domain": "https://sc1.lexiconservices.com",
+  "default_logo": "assets/images/default-logo-lexicon.png",
+  "Common_Logout": "https://quarto-mta-common-dev-ui.azurewebsites.net/logout-b2c",
+  "Common_Login": "https://quarto-mta-common-dev-ui.azurewebsites.net",
+  "Common_API": "https://quarto-mta-common-dev-api.azurewebsites.net",
+  "intervalTime": 60000,
+  "timerSyncInterval": 15000,
+  "logRocketEnabled": "false",
+  "logRocketAppId": "gh04ik/lexicon-uat",
+  "environment": "DEV"
+}

@@ -1,0 +1,31 @@
+pool:
+  name: Azure Pipelines
+  demands: npm
+
+steps:
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    verbose: false
+
+- task: Npm@1
+  displayName: 'npm run build'
+  inputs:
+    command: custom
+    verbose: false
+    customCommand: 'run build'
+
+- task: CopyFiles@2
+  displayName: 'Copy File "web.config" to the QuartoUI Web App folder'
+  inputs:
+    Contents: web.config
+    TargetFolder: 'dist/Quarto-Frontend/'
+
+- task: ArchiveFiles@2
+  displayName: 'Archive Quarto-Frontend'
+  inputs:
+    rootFolderOrFile: 'dist/Quarto-Frontend'
+    includeRootFolder: false
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'

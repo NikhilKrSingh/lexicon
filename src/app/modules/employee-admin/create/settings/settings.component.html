@@ -1,0 +1,233 @@
+<div class="card">
+  <div class="card-body">
+    <div class="info-block emp-cerate">
+      <h2>Billing Settings</h2>
+      <div class="base-rate">
+        <h3 class="mb-24">Base Rate</h3>
+        <div class="custom-table">
+          <div class="table-responsive">
+            <table class="table table-striped table-borderless">
+              <thead>
+                <tr>
+                  <th>Job Family</th>
+                  <th class="w-218">Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                    <td class="py-4">{{jobFamilyDetail?.name}}</td>
+                    <td class="py-4">
+                      <div class="position-relative form-group mb-0" [class.has-error]="!jobFamilyBaseRate && formSubmitted">
+                        <input type="text" class="form-control bordred pr-36" [(ngModel)]="jobFamilyBaseRate"
+                               [prefix]="'$'" mask="separator.2" id="job-family-base-rate"
+                               thousandSeparator="," name="jobFamilyBaseRate" (blur)="setCurrencyValue()">
+                        <em class="icon icon-close icon-color custom-icon-close cursor-pointer"
+                            (click)="setJobFamilyBaseRate()" id="revert-job-family-rate-button"
+                            *ngIf="jobFamilyDetail?.baseRate !== jobFamilyBaseRate"></em>
+                        <span class="field-message text-danger">
+                          Enter a Base Rate
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <div class="info-block pt-48 emp-frm">
+      <h2>Calendar Settings</h2>
+      <h3 class="m-0">Time Zone</h3>
+      <div class="row mt-5">
+        <div class="col-4">
+          <div class="form-group" [class.has-error]="calendarSettings.timeZone === null && formSubmitted">
+            <label for="">Employee Time Zone<sup>*</sup></label>
+            <ng-select [items]="timeZones" placeholder="Select Time Zone"
+                       [(ngModel)]='calendarSettings.timeZone' [bindValue]="'id'" [bindLabel]="'name'"
+                       [clearable]='false' [selectOnTab]="true" (change)="submitAction = false"
+                       #employeeTimeZone="ngModel" id="employee-timezone"
+                       >
+            </ng-select>
+            <span class="field-message text-danger" *ngIf="calendarSettings.timeZone === null && formSubmitted">
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.select_employee_time_zone}}
+            </span>
+          </div>
+        </div>
+      </div>
+      <h3 class="mb-16">Working Hours</h3>
+      <div class="row gutter-16 emp-cerate">
+        <div class="col-6 section-area">
+          <div class="hours-list">
+            <div class="row gutter-16 align-items-center">
+              <div class="col-9 ml-auto">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <label class="text-small">Open</label>
+                  </div>
+                  <div class="col-6">
+                    <label class="text-small">Close</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16 align-items-center mb-20">
+              <div class="col-3 text-right">
+                <span class="label mb-0 mr-0 mr-md-16">Monday</span>
+              </div>
+              <div class="col-9">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open" [(ngModel)]="calendarSettings.mondayOpenHours"
+                               [bindValue]="'value'" [bindLabel]="'key'" [clearable]='false' (change)="hourChange('mondayOpenHours', 'mondayCloseHours')" id="monday-open-select">
+                    </ng-select>
+                  </div>
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                               [(ngModel)]="calendarSettings.mondayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' id="monday-close-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16 align-items-center mb-20">
+              <div class="col-3 text-right">
+                <span class="label mb-0 mr-0 mr-md-16">Tuesday</span>
+              </div>
+              <div class="col-9">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open" [(ngModel)]="calendarSettings.tuesdayOpenHours"
+                               [bindValue]="'value'" [bindLabel]="'key'" [clearable]='false' (change)="hourChange('tuesdayOpenHours', 'tuesdayCloseHours')" id="tuesday-open-select">
+                    </ng-select>
+                  </div>
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                               [(ngModel)]="calendarSettings.tuesdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' id="tuesday-close-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16 align-items-center mb-20">
+              <div class="col-3 text-right">
+                <span class="label mb-0 mr-0 mr-md-16">Wednesday</span>
+              </div>
+              <div class="col-9">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                               [(ngModel)]="calendarSettings.wednesdayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' (change)="hourChange('wednesdayOpenHours', 'wednesdayCloseHours')" id="wednesday-open-select">
+                    </ng-select>
+                  </div>
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                               [(ngModel)]="calendarSettings.wednesdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' id="wednesday-close-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16 align-items-center mb-20">
+              <div class="col-3 text-right">
+                <span class="label mb-0 mr-0 mr-md-16">Thursday</span>
+              </div>
+              <div class="col-9">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                               [(ngModel)]="calendarSettings.thursdayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' (change)="hourChange('thursdayOpenHours', 'thursdayCloseHours')" id="thursday-open-select">
+                    </ng-select>
+                  </div>
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                               [(ngModel)]="calendarSettings.thursdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' id="thursday-close-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16 align-items-center mb-20">
+              <div class="col-3 text-right">
+                <span class="label mb-0 mr-0 mr-md-16">Friday</span>
+              </div>
+              <div class="col-9">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open" [(ngModel)]="calendarSettings.fridayOpenHours"
+                               [bindValue]="'value'" [bindLabel]="'key'" [clearable]='false' (change)="hourChange('fridayOpenHours', 'fridayCloseHours')" id="friday-open-select">
+                    </ng-select>
+                  </div>
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                               [(ngModel)]="calendarSettings.fridayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' id="friday-close-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16 align-items-center mb-20">
+              <div class="col-3 text-right">
+                <span class="label mb-0 mr-0 mr-md-16">Saturday</span>
+              </div>
+              <div class="col-9">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                               [(ngModel)]="calendarSettings.saturdayOpenHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' (change)="hourChange('saturdayOpenHours', 'saturdayCloseHours')" id="saturday-open-select">
+                    </ng-select>
+                  </div>
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                               [(ngModel)]="calendarSettings.saturdayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' id="saturday-close-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16 align-items-center mb-0">
+              <div class="col-3 text-right">
+                <span class="label mb-0 mr-0 mr-md-16">Sunday</span>
+              </div>
+              <div class="col-9">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Open"
+                               [(ngModel)]="calendarSettings.sundayOpenHours"
+                               [bindValue]="'value'" [bindLabel]="'key'" [clearable]='false' (change)="hourChange('sundayOpenHours', 'sundayCloseHours')" id="sunday-open-select">
+                    </ng-select>
+                  </div>
+                  <div class="col-6">
+                    <ng-select [selectOnTab]="true" [items]="workingHours" placeholder="Select Close"
+                               [(ngModel)]="calendarSettings.sundayCloseHours" [bindValue]="'value'" [bindLabel]="'key'"
+                               [clearable]='false' id="sunday-close-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-end mt-24">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="prev()" id="back-button">Back</button>
+    <button type="button" class="btn btn-primary" (click)='finish()' [disabled]="false" id="finish-btn">Finish</button>
+  </div>
+</div>

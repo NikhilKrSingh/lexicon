@@ -1,0 +1,695 @@
+<div class="npc-block base-matt-info-block">
+  <div class="pb-20">
+    <div class="info-block">
+      <h2>Basic Information</h2>
+      <form [formGroup]="basicForm">
+        <div class="section-area">
+          <div class="row gutter-16">
+              <div class="col-10" *ngIf="clientType != 'company'">
+                  <div class="row -gutter-16">
+                      <div class="col-3">
+                      <div class="form-group">
+                        <label>Client Number</label>
+                        <input type="text" class="form-control" [readOnly]="true" formControlName="uniqueNumber" id="uniqueNumberId">
+                      </div>
+                      </div>
+                      <div class="col-3" *ngIf="clientType!='company'">
+                      <div class="form-group">
+                        <label>Gender</label>
+                        <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Gender" formControlName="gender" [bindValue]="'val'"
+                          [bindLabel]="'text'" [notFoundText]="'No record found'" id="genderId">
+                        </ng-select>
+                      </div>
+                      </div>
+                      <div class="col-3" *ngIf="clientType!='company'">
+                      <div class="form-group">
+                        <label>Suffix</label>
+                        <input type="text" class="form-control" placeholder="Select Suffix" formControlName="suffix" id="suffixId">
+                      </div>
+                      </div>
+                      <div class="col-3" *ngIf="clientType!='company'">
+                      <div class="form-group">
+                        <label>Salutation</label>
+                        <ng-select [selectOnTab]="true" [items]="salutationArr" formControlName="salutation" placeholder="Salutation"
+                          [bindValue]="'name'" [bindLabel]="'name'" [notFoundText]="'No record found'" id="salutationId">
+                        </ng-select>
+                      </div>
+                      </div>
+                      <div class="col-4" *ngIf="clientType!='company'">
+                      <div class="form-group" [class.has-error]="formSubmitted && bf.firstName.errors">
+                        <label>First Name <sup>*</sup></label>
+                        <input type="text" formControlName="firstName" class="form-control" placeholder="Enter First Name" id="firstNameId">
+                        <span class="field-message text-danger" *ngIf="formSubmitted && bf.firstName.errors">
+                          <span *ngIf="bf.firstName.errors.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please enter first name
+                          </span>
+                        </span>
+                      </div>
+                      </div>
+                      <div class="col-4" *ngIf="clientType!='company'">
+                      <div class="form-group">
+                        <label>Middle Name</label>
+                        <input type="text" formControlName="middleName" class="form-control" placeholder="Enter Middle Name" id="middleNameId">
+                      </div>
+                      </div>
+                      <div class="col-4" *ngIf="clientType!='company'">
+                      <div class="form-group" [class.has-error]="formSubmitted && bf.lastName.errors">
+                        <label>Last Name <sup>*</sup></label>
+                        <input type="text" formControlName="lastName" class="form-control" placeholder="Enter Last Name" id="lastNameId">
+                        <span class="field-message text-danger" *ngIf="formSubmitted && bf.lastName.errors">
+                          <span *ngIf="bf.lastName.errors.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please enter last name
+                          </span>
+                        </span>
+                      </div>
+                      </div>
+                      <div class="col-4" *ngIf="clientType!='company'">
+                      <div class="form-group">
+                        <label>Former Name</label>
+                        <input type="text" formControlName="formerName" class="form-control" placeholder="Enter Former Name" id="formerNameId">
+                      </div>
+                      </div>
+
+                      <div class="col-4">
+                      <div class="form-group">
+                        <label>Initial Contact Date</label>
+                        <input type="text" class="form-control disabled" formControlName="initialContactDate" id="initialContactDateId">
+                      </div>
+                      </div>
+                      <div class="col-4">
+                      <div class="form-group" [class.has-error]="formSubmitted && bf.initialConsultDate.errors">
+                        <label>Consult Date <sup>*</sup></label>
+                        <app-date-picker [page]="'clientretention'" [minDate]='lessThanContactDate' [maxDate]="todayDate" [isForm]='true' [dateform]='basicForm' controlName='initialConsultDate' id="initialConsultDateId"></app-date-picker>
+                        <span class="field-message text-danger" *ngIf="formSubmitted && bf.initialConsultDate.errors">
+                          <span *ngIf="bf.initialConsultDate.errors.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select consult date
+                          </span>
+                        </span>
+                      </div>
+                      </div>
+                      <div class="col-4" formGroupName="consultationLawOffice">
+                      <div class="form-group" [class.has-error]="formSubmitted && bfconsultationLawOffice.id.errors">
+                        <label>Consult Law Office <sup>*</sup></label>
+                        <ng-select [selectOnTab]="true" [items]="consultofficelist" placeholder="Choose an option" formControlName="id"
+                          [bindValue]="'id'" [bindLabel]="'officeName'" [notFoundText]="'No record found'"
+                          (change)="consultChange($event)" id="consultationLawOfficeId">
+                        </ng-select>
+                        <span class="field-message text-danger" *ngIf="formSubmitted && bfconsultationLawOffice.id.errors">
+                          <span *ngIf="bfconsultationLawOffice.id.errors.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select consult law office
+                          </span>
+                        </span>
+                      </div>
+                      </div>
+                      <div class="col-4" formGroupName="consultAttorney">
+                      <div class="form-group section-area" [class.has-error]="formSubmitted && bfconsultAttorney.id.errors">
+                        <label>Consult Attorney <sup>*</sup> </label>
+
+                        <ng-select [selectOnTab]="true" [items]="attorneyList" placeholder="Choose an option" formControlName="id" [bindValue]="'id'"
+                          [bindLabel]="'name'" [notFoundText]="'No record found'" (change)="consultAttorneyChange($event)" id="consultAttorneyId">
+                        </ng-select>
+                        <span class="field-message text-danger" *ngIf="formSubmitted && bfconsultAttorney.id.errors">
+                          <span *ngIf="bfconsultAttorney.id.errors.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select consult attorney
+                          </span>
+                        </span>
+
+                      </div>
+                      </div>
+                      <div class="col-4">
+                      <div class="form-group" formGroupName="primaryOffice" [class.has-error]="formSubmitted && bfprimaryOffice.id.errors">
+                        <label>Primary Law Office <sup>*</sup></label>
+                        <ng-select [selectOnTab]="true" [items]="officeList" placeholder="Choose an option" formControlName="id" [bindValue]="'id'"
+                          [bindLabel]="'name'" (change)="primaryOfficeChange($event)" [notFoundText]="'No record found'" id="primaryOfficeId">
+                        </ng-select>
+                        <span class="field-message text-danger" *ngIf="formSubmitted && bfprimaryOffice.id.errors">
+                          <span *ngIf="bfprimaryOffice.id.errors.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select primary law office
+                          </span>
+                        </span>
+                      </div>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="col-12" *ngIf="clientType == 'company'">
+                <div class="row -gutter-16">
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>Client Number</label>
+                      <input type="text" class="form-control" [readOnly]="true"
+                        formControlName="uniqueNumber" autocomplete="doNotAutoComplete">
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group" [class.has-error]="formSubmitted && bf.companyName.errors">
+                      <label>Company Name <sup>*</sup></label>
+                      <input type="text" formControlName="companyName" class="form-control"
+                        placeholder="Enter Company Name" id="companyNameId">
+                      <span class="field-message text-danger" *ngIf="formSubmitted && bf.companyName.errors">
+                        <span *ngIf="bf.companyName.errors.required">
+                          <em class="icon icon-error mr-4"></em>
+                          Please enter company name
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row -gutter-16">
+                  <div class="col-3">
+                    <div class="form-group" [class.has-error]="formSubmitted && bf.initialConsultDate.errors">
+                      <label>Consult Date<sup>*</sup></label>
+                      <app-date-picker [minDate]='lessThanContactDate' [maxDate]="todayDate" [isForm]='true' [dateform]='basicForm' controlName='initialConsultDate' id="initialConsultDateId"></app-date-picker>
+                      <span class="field-message text-danger" *ngIf="formSubmitted && bf.initialConsultDate.errors">
+                        <span *ngIf="bf.initialConsultDate.errors.required">
+                          <em class="icon icon-error mr-4"></em>
+                          Please select consult date
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-3" formGroupName="consultationLawOffice">
+                    <div class="form-group" [class.has-error]="formSubmitted && bfconsultationLawOffice.id.errors">
+                      <label>Consult Law Office <sup>*</sup></label>
+                      <ng-select [selectOnTab]="true" [items]="consultofficelist" placeholder="Choose an option" formControlName="id"
+                        [bindValue]="'id'" [bindLabel]="'officeName'" [notFoundText]="'No record found'"
+                        (change)="consultChange($event)" id="consultationLawOfficeId">
+                      </ng-select>
+                      <span class="field-message text-danger" *ngIf="formSubmitted && bfconsultationLawOffice.id.errors">
+                        <span *ngIf="bfconsultationLawOffice.id.errors.required">
+                          <em class="icon icon-error mr-4"></em>
+                          Please select consult law office
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row -gutter-16">
+                  <div class="col-3" formGroupName="consultAttorney">
+                    <div class="form-group section-area" [class.has-error]="formSubmitted && bfconsultAttorney.id.errors">
+                      <label>Consult Attorney <sup>*</sup> </label>
+
+                      <ng-select [selectOnTab]="true" [items]="attorneyList" placeholder="Choose an option" formControlName="id" [bindValue]="'id'"
+                        [bindLabel]="'name'" [notFoundText]="'No record found'" (change)="consultAttorneyChange($event)" id="consultAttorneyId">
+                      </ng-select>
+                      <span class="field-message text-danger" *ngIf="formSubmitted && bfconsultAttorney.id.errors">
+                        <span *ngIf="bfconsultAttorney.id.errors.required">
+                          <em class="icon icon-error mr-4"></em>
+                          Please select consult attorney
+                        </span>
+                      </span>
+
+                      </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group" formGroupName="primaryOffice" [class.has-error]="formSubmitted && bfprimaryOffice.id.errors">
+                      <label>Primary Law Office <sup>*</sup></label>
+                      <ng-select [selectOnTab]="true" [items]="officeList" placeholder="Choose an option" formControlName="id" [bindValue]="'id'"
+                        [bindLabel]="'name'" (change)="primaryOfficeChange($event)" [notFoundText]="'No record found'" id="primaryOfficeId">
+                      </ng-select>
+                      <span class="field-message text-danger" *ngIf="formSubmitted && bfprimaryOffice.id.errors">
+                        <span *ngIf="bfprimaryOffice.id.errors.required">
+                          <em class="icon icon-error mr-4"></em>
+                          Please select primary law office
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row -gutter-16">
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>Initial Contact Date</label>
+                      <input type="text" class="form-control disabled" formControlName="initialContactDate" id="initialContactDateId">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+
+
+
+
+            <div class="col-12" *ngIf="clientType!='company' && isTuckerAllenUser">
+                <div class="custom-control custom-checkbox pr-0 mb-24">
+                    <input type="checkbox" class="custom-control-input" formControlName="isDeceased" id="contactDeceased">
+                    <label class="custom-control-label" for="contactDeceased">The client is deceased.</label>
+                </div>
+                </div>
+                <div class="col-12" *ngIf="clientType!='company' && isTuckerAllenUser">
+                  <div class="row gutter-16">
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>Spouse First Name</label>
+                        <input type="text" class="form-control" formControlName="spouseFirstName" placeholder="Enter First Name" id="spouseFirstNameId">
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>Spouse Middle Name</label>
+                        <input type="text" class="form-control" formControlName="spouseMiddleName" placeholder="Enter Middle Name" id="spouseMiddleNameId">
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>Spouse Last Name</label>
+                        <input type="text" class="form-control" formControlName="spouseLastName" placeholder="Enter Last Name" id="spouseLastNameId">
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label>Spouse Gender</label>
+                        <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Select" [bindValue]="'val'"
+                        [bindLabel]="'text'" formControlName="spouseGender" [notFoundText]="'No record found'" id="spouseGenderId">
+                        </ng-select>
+                      </div>
+                    </div>
+                </div>
+              </div>
+              <div class="col-12" *ngIf="clientType!='company' && isTuckerAllenUser">
+                <div class="row gutter-16">
+                  <div class="col-5">
+                    <div class="custom-control custom-checkbox pr-0 mb-20">
+                      <input type="checkbox" class="custom-control-input" formControlName="spouseIsDeceased" id="spousedeceased">
+                      <label class="custom-control-label" for="spousedeceased">The spouse is deceased.</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12" *ngIf="clientType!='company' && isTuckerAllenUser">
+                <div class="row gutter-16">
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>Other Prospect First Name</label>
+                      <input type="text" class="form-control" formControlName="prospectFirstName" placeholder="Enter First Name" id="prospectFirstNameId">
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>Other Prospect Middle Name</label>
+                      <input type="text" formControlName="prospectMiddleName" class="form-control" placeholder="Enter Middle Name" id="prospectMiddleNameId">
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>Other Prospect Last Name</label>
+                      <input type="text" formControlName="prospectLastName" class="form-control" placeholder="Enter Last Name" id="prospectLastNameId">
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>Other Prospect Relationship</label>
+                      <input type="text" formControlName="prospectRelationship" class="form-control" placeholder="Enter Prospect Relationship" id="prospectRelationshipId">
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="form-group">
+                      <label>Other Prospect Gender</label>
+                      <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Select" [bindValue]="'val'"
+                        [bindLabel]="'text'" formControlName="prospectGender" [notFoundText]="'No record found'" id="prospectGenderId">
+                      </ng-select>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="custom-control custom-checkbox pr-0 mb-24">
+                      <input type="checkbox" class="custom-control-input" formControlName="prospectIsDeceased" id="prospectDeceased">
+                      <label class="custom-control-label" for="prospectDeceased">Other prospect is deceased.</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+          </div>
+          <app-loader [active]="detailsLoading"></app-loader>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="" *ngIf="clientType != 'company'">
+    <h2>Contact Information</h2>
+    <form [formGroup]="contactForm">
+      <div class="section-area">
+        <div class="row gutter-16">
+          <div class="col-10">
+            <div class="row gutter-16" formArrayName="phones">
+              <div class="col-4" *ngFor="let phone of phoneData.controls;trackBy: trackByFn; let i=index" [formGroupName]="i">
+                <div class="form-group" [class.has-error]="formSubmitted && phone['controls'].number.errors && i !== 1">
+                  <label *ngIf="i==0"> Primary Phone Number<sup>*</sup></label>
+                  <label *ngIf="i==1"> Cell Phone Number</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+                    placeHolderCharacter=" " formControlName="number" id="number-{{i}}"/>
+                  <span class="field-message text-danger" *ngIf="formSubmitted && phone['controls'].number.errors && i !== 1">
+                    <span *ngIf="phone['controls'].number.errors?.mask?.requiredMask">
+                      <em class="icon icon-error mr-4"></em>
+                      Invalid phone number
+                    </span>
+                    <span *ngIf="phone['controls'].number.errors?.required">
+                      <em class="icon icon-error mr-4"></em>
+                      Please enter primary phone number
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16">
+              <div class="col-8">
+                <div class="form-group" [class.has-error]="(formSubmitted && (cf.email.errors || emailExistence)) || (formSubmitted && !isValidEmail) " [class.ng-invalid]="formSubmitted && (cf.email.errors || emailExistence)">
+                  <label>Email Address</label>
+
+                  <input type="email" name="email"
+                         formControlName="email" class="form-control"
+                         placeholder="Email Address" value="Email Address" (blur)="checkEmailExistence()" id="emailId"
+                         (keyup)="enablePrefferedContact()">
+                  <div class="mt-3 d-flex" *ngIf="isDocumentPortalAccess">
+                    <em class="icon icon-info text-primary mr-3"></em>A document portal account will be created for this
+                    email address.
+                  </div>
+                  <span class="field-message text-danger" *ngIf="(formSubmitted && (cf.email.errors || emailExistence)) || (formSubmitted && !isValidEmail)">
+                    <span *ngIf="cf.email.errors?.pattern?.requiredPattern || !isValidEmail ">
+                      <em class="icon icon-error mr-4"></em>
+                      Invalid email address
+                    </span>
+                    <span *ngIf="!cf.email.errors?.pattern?.requiredPattern && emailExistence">
+                      <em class="icon icon-error mr-4"></em>
+                      This email address is already in use by a potential client, client, employee, or corporate contact.
+                    </span>
+                  </span>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-10">
+            <div class="row gutter-16">
+              <div class="col-10" formArrayName="addresses">
+                <h4 class="text-xlarge mt-8">Primary Address</h4>
+                <div class="row gutter-16" [formGroupName]="0">
+                  <div class="col-5">
+                    <div class="form-group" [class.has-error]="formSubmitted && contactForm.controls.addresses['controls'][0].controls.address.errors">
+                      <label>Primary Address 1<sup>*</sup></label>
+                      <input type="text" formControlName="address" class="form-control"
+                        placeholder="Enter Street Address" id="addressId">
+                      <span class="field-message text-danger" *ngIf="formSubmitted && contactForm.controls.addresses['controls'][0].controls.address.errors">
+                        <span *ngIf="contactForm.controls.addresses['controls'][0].controls.address.errors.required">
+                          <em class="icon icon-error mr-4"></em>
+                          Please enter primary address
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-5">
+                    <div class="form-group">
+                      <label>Primary Address 2</label>
+                      <input type="text" formControlName="address2" class="form-control"
+                        placeholder="Enter Unit or Suite #" id="address2Id">
+                    </div>
+                  </div>
+                  <div class="col-5">
+                    <div class="row gutter-16">
+                      <div class="col-6">
+                        <div class="form-group" [class.has-error]="(contactForm.controls.addresses['controls'][0].controls.zip.errors && (contactForm.controls.addresses['controls'][0].controls.zip.touched || formSubmitted) && !validZipErr) || (formSubmitted && validZipErr)">
+                          <label>Zip Code <sup>*</sup></label>
+                          <input 
+                            type="text" 
+                            formControlName="zip" 
+                            class="form-control" 
+                            placeholder="Enter Zip Code"
+                            maxlength="6" 
+                            minlength="3" 
+                            (keyup)="getCityState($event.target.value, false, 0)"
+                            (keypress)="checkNumber($event)" id="zipId">
+                            <span class="field-message text-danger"
+                            *ngIf="(contactForm.controls.addresses['controls'][0].controls.zip.errors && (contactForm.controls.addresses['controls'][0].controls.zip.touched || formSubmitted)) && !validZipErr">
+                               <em class="icon icon-error mr-4"></em>
+                                  {{ errorData?.zip_code_required }}
+                               </span>
+                               <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr">
+                                  <em class="icon icon-error mr-4"></em>
+                                     {{errorData?.zip_code_error}}
+                                  </span>
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="form-group">
+                          <label>State <sup>*</sup></label>
+                          <input *ngIf="stateList?.length <= 1" 
+                            type="text" 
+                            class="form-control" 
+                            placeholder="State"
+                            [(ngModel)]="singleState" 
+                            [ngModelOptions]="{standalone: true}"
+                            [readOnly]='true' id="state">
+                          <ng-select *ngIf="stateList?.length > 1"
+                            [selectOnTab]="true" 
+                            [items]="stateList" 
+                            placeholder="Select" 
+                            formControlName="state"
+                            [bindValue]='"code"' 
+                            [bindLabel]='"name"' 
+                            [clearable]="false"
+                            [notFoundText]="'No record found'" 
+                            id="stateId">
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-5">
+                    <div class="form-group">
+                      <label>City <sup>*</sup></label>
+                      <input *ngIf="cityList?.length <= 1"
+                        type="text" 
+                        formControlName="city" 
+                        class="form-control" 
+                        placeholder="City" 
+                        [readOnly]='true'
+                        id='cityId'>
+                      <ng-select *ngIf="cityList?.length > 1" 
+                        [items]="cityList" 
+                        placeholder="City" 
+                        [clearable]="false"
+                        formControlName="city"
+                        [notFoundText]="'No record found'" 
+                        [selectOnTab]="true" id="city">
+                      </ng-select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <app-loader [active]="detailsLoading"></app-loader>
+      </div>
+
+    </form>
+  </div>
+
+<div>
+  <form [formGroup]="CorporateContactForm">
+    <div class="">
+      <h2>Contact Preferences</h2>
+      <div class="row gutter-16 section-area">
+        <div class="col-6">
+          <div class="row ">
+            <div class="col-6">
+              <div class="form-group">
+                <div class="custom-control custom-checkbox m-0 pr-0">
+                  <input type="checkbox" class="custom-control-input" formControlName="doNotContact"
+                    id="dropcheck-contact" (change)="showHideReason()">
+                  <label class="custom-control-label" for="dropcheck-contact">Mark as Do Not
+                    Contact</label>
+                </div>
+              </div>
+              <div class="form-group" *ngIf="CorporateContactForm.controls.doNotContact.value" [class.has-error]="formSubmitted && cff.doNotContactReason.errors">
+                <label for="">Do Not Contact Reason <sup>*</sup></label>
+                <ng-select [selectOnTab]="true" [items]="doNotContactReasonArr" placeholder="Select a reason"
+                  formControlName="doNotContactReason" [bindValue]="'name'" [bindLabel]="'name'"
+                  [notFoundText]="'No record found'" id="doNotContactReasonId">
+                </ng-select>
+                <span class="field-message text-danger" *ngIf="formSubmitted && cff.doNotContactReason.errors">
+                  <span *ngIf="cff.doNotContactReason.errors.required">
+                    <em class="icon icon-error mr-4"></em>
+                    Please enter do not contact reason
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="formSubmitted && cff.preferredContactMethod.errors">
+                <label>Preferred Contact Method <sup *ngIf="!CorporateContactForm.controls.doNotContact.value">*</sup></label>
+                <div class="custom-control custom-radio" *ngFor="let contact of preferredContactArr;trackBy: trackByFn; let i=index">
+                  <input type="radio" id="customradio_{{i}}" formControlName="preferredContactMethod"
+                    class="custom-control-input" [value]="contact.name">
+                    <label class="custom-control-label" for="customradio_{{i}}">{{ contact.name }}</label>
+                </div>
+                <span class="field-message text-danger" *ngIf="formSubmitted && cff.preferredContactMethod.errors">
+                  <span *ngIf="cff.preferredContactMethod.errors.required">
+                    <em class="icon icon-error mr-4"></em>
+                    Please select preferred contact method
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <app-loader [active]="detailsLoading"></app-loader>
+      </div>
+      <fieldset [disabled]="CorporateContactForm.controls.doNotContact.value">
+        <div class="info-block pt-24">
+          <h2>Automatic Notifications</h2>
+          <div class="row gutter-16 section-area">
+            <div class="col-3">
+              <div class="row ">
+                <div class="col-6">
+                  <div class="form-group">
+                    <label for="" style="margin-bottom: 17px;">Case-Related</label>
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" name="notifyEmail" id="notifyEmail_email_id" formControlName="notifyEmail"
+                        class="custom-control-input">
+                      <label class="custom-control-label" for="notifyEmail_email_id">Email</label>
+                    </div>
+                    <div class="custom-control custom-checkbox" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                      <input type="checkbox" name="notifySmS" id="notifySmS_sms_id" formControlName="notifySmS"
+                        class="custom-control-input">
+                      <label class="custom-control-label" for="notifySmS_sms_id">SMS</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-group">
+                    <label for="" style="margin-bottom: 17px;">Marketing</label>
+
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" name="marketingEmail" id="marketingEmail_email_id" formControlName="marketingEmail"
+                        class="custom-control-input">
+                      <label class="custom-control-label" for="marketingEmail_email_id">Email</label>
+                    </div>
+                    <div class="custom-control custom-checkbox" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                      <input type="checkbox" name="marketingSMS" id="marketingSMS_sms_id" formControlName="marketingSMS"
+                        class="custom-control-input">
+                      <label class="custom-control-label" for="marketingSMS_sms_id">SMS</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <app-loader [active]="detailsLoading"></app-loader>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+  </form>
+
+</div>
+<div class="cust-card">
+  <div class="cust-card-head d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <h3 class="m-0">Client Association</h3>
+      <i class="lh-20 ml-8">Optional</i>
+    </div>
+  </div>
+  <div class="cust-card-body">
+    <div class="d-inline-block mt-8" ngbDropdown>
+      <button class="btn btn-primary bulk-btn btn-icon" ngbDropdownToggle id="addClientAssociationId"><i class="icon icon-plus"></i> Add Client Association</button>
+      <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+        <button ngbDropdownItem type="button" (click)="addVendorClick()" id="addVendorId">Vendor</button>
+        <button ngbDropdownItem type="button" (click)='addSubsidiaryClick()' id="addSubsidiaryId">Subsidiary</button>
+      </div>
+    </div>
+
+    <div class="custom-table pt-16" *ngIf="clientAssociationsList.length > 0">
+      <div class="table-responsive">
+        <table class="table table-striped table-borderless" id="clientAssociationsListId">
+          <thead>
+            <tr>
+              <th>Contact Number</th>
+              <th>Name</th>
+              <th>Association</th>
+              <th>Email Address</th>
+              <th>Phone Number</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody *ngIf="clientAssociationsList.length > 0">
+            <tr *ngFor="let opp of clientAssociationsList;trackBy: trackByFn;let i = index" id="clientAssociationsListId-{{i}}">
+              <td class="cursor-default">{{opp.uniqueNumber}}</td>
+              <td class="cursor-default">
+                {{(opp.isCompany) ? opp.companyName : opp.lastName + ', ' + opp.firstName }}
+              </td>
+              <td class="cursor-default">
+                  {{opp.associationType}}
+              </td>
+              <td class="cursor-default">{{opp?.email}}</td>
+              <td class="cursor-default">{{opp.primaryPhone?.name || opp.primaryPhone | mask : '(000) 000-0000'}}</td>
+              <td class="text-right">
+                <div class="icon-group d-flex justify-content-end">
+                  <span (click)='editClientAssociations(opp, i)' id="editClientAssociationsId">
+                    <em class="icon icon-edit icon-color"></em>
+                  </span>
+                  <span
+                    (click)="deleteClientAssociations(opp.associationType, i)" id="deleteClientAssociationsId">
+                    <em class="icon icon-remove icon-color"></em>
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<app-loader [active]="loading"></app-loader>
+
+<ng-template #no_data_found>
+  <tbody>
+  <tr>
+    <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+  </tr>
+  </tbody>
+</ng-template>
+<ng-container *ngIf="addVendor">
+  <app-add-vendor
+    [uniqueNumber]="localUniqueNumber"
+    [mode]="addVendorMode"
+    [addToDb]="false"
+    [vendorDetails]='selectedVendor'
+    [matterId]="clientDetails.matterId"
+    (closeModel)='closeVendor($event)'
+    [associateVendor]="associateVendor"
+    [associateFlag]="'add'"
+    [type]="'Vendor'">
+  </app-add-vendor>
+</ng-container>
+
+
+<ng-container *ngIf="addSubsidiary">
+  <app-add-vendor
+    [uniqueNumber]="localUniqueNumber"
+    [mode]="addSubsidiaryMode"
+    [addToDb]="false"
+    [vendorDetails]='selectedSubsidiary'
+    [matterId]="clientDetails.matterId"
+    (closeModel)='closeSubsidiary($event)'
+    [associateVendor]="associateSubsidiary"
+    [associateFlag]="'add'"
+    [type]="'Subsidiary'">
+  </app-add-vendor>
+</ng-container>

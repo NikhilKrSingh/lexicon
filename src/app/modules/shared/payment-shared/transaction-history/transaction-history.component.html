@@ -1,0 +1,580 @@
+<h2 *ngIf="matterId && !clientId">Matter Ledger History</h2>
+<h2 *ngIf="clientId && matterId">Potential Client Ledger History</h2>
+<div>
+  <div class="custom-table">
+    <ngx-datatable #table class="material common-table history-table menu-table-z-index" [rows]="invoiceList"
+      id="matter-ledgerhistory-ltable" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight"
+      rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" [scrollbarH]='true'
+      [rowClass]='getRowClass'>
+
+      <ngx-datatable-row-detail rowHeight="auto" #myDetailRow (toggle)="onDetailToggle($event)">
+        <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-row-detail-template>
+          <div class="table-responsive">
+            <table class="table table-striped table-borderless" id="matter-lhisory-details-{{rowIndex}}">
+              <ng-container *ngIf="row.type === 'Payment'">
+                <thead>
+                  <tr>
+                    <th class="pl-40 w-25">Date of Payment</th>
+                    <th class="w-25">Target Account</th>
+                    <th class="w-25">Payment Method</th>
+                    <th class="w-25" *ngIf="row.status === 'Failed'">Attempted Amount</th>
+                    <th class="w-25 ac-th"
+                      *ngIf="row.paymentMethodType === 'E-Check' || row.paymentMethodType === 'Credit Card'">
+                      Transaction Code
+                    </th>
+                    <th class="text-right pr-40">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pl-40 align-top">
+                      <span class="font-weight-normal">{{row?.initialPostingDate | date:
+                        'MM/dd/yyyy'}}</span>
+                    </td>
+                    <td class="w-25" *ngIf="row?.accountInfo">
+                      <app-payment-account-detail [row]='row' [isPaymentMethod]='false'></app-payment-account-detail>
+                    </td>
+                    <td class="w-25" *ngIf="!row?.accountInfo">
+                      <span class="font-weight-normal">
+                        N/A
+                      </span>
+                    </td>
+                    <td class="w-25" [class.align-top]="row?.paymentMethodType === 'Cash'">
+                      <app-payment-account-detail [row]='row' [isPaymentMethod]='true'></app-payment-account-detail>
+                    </td>
+                    <td *ngIf="row.status === 'Failed'" class="w-25 align-top">
+                      {{row?.credit | usdCurrency}}
+                    </td>
+                    <td class="w-25 align-top"
+                      *ngIf="row.paymentMethodType === 'E-Check' || row.paymentMethodType === 'Credit Card'">
+                      {{row?.confirmationId}}
+                    </td>
+                    <td class="text-right pr-40">
+                      <ng-container *ngIf="row.paymentMethodType === 'Credit Card' && row.status != 'Reversed'">
+                        <div class=" d-flex justify-content-end">
+                          <div class="dropdown dropdown-hover-table" *ngIf="currentActive == rowIndex"
+                            [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)"
+                            appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)">
+                            <em class="icon icon-dot-verti"></em>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                              <a href="javascript:void(0)"
+                                *ngIf="row.paymentMethodType === 'Credit Card' && row.status === 'Success' && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin)"
+                                (click)="chargeBack('issue')" class=" dropdown-item"
+                                id="mtr-lhisorydtlsissuchrgbk-{{rowIndex}}">
+                                Issue Chargeback
+                              </a>
+                              <a href="javascript:void(0)" class="" (click)="chargeBack('view')"
+                                *ngIf="row.paymentMethodType === 'Credit Card' && row.status === 'Chargeback'"
+                                class=" dropdown-item" id="mtr-lhtrdtlsviewchrgbk-{{rowIndex}}">
+                                View Chargeback
+                              </a>
+                              <a href="javascript:void(0)" *ngIf="row.status == 'Failed'"
+                                (click)="retryPayment(row, $event)" class=" dropdown-item"
+                                id="mtr-lhtrdtlsretrypymt-{{rowIndex}}">
+                                Retry Payment
+                              </a>
+                              <a href="javascript:void(0)"
+                                *ngIf="(row.status === 'Success' || row.status === 'Pending') && (isBillingOrResponsibleAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.ACCOUNTINGisAdmin || permissionList.ACCOUNTINGisEdit)"
+                                (click)="reverTransaction(reverseCheckModal,row)" class=" dropdown-item"
+                                id="mtr-lhisorydtlsreversetrsctn-{{rowIndex}}">
+                                Reverse Transaction
+                              </a>
+                              <a href="javascript:void(0)" id="mtr-lhtrdtlsprintrecept-{{rowIndex}}"
+                                class=" dropdown-item" (click)='printReceipt(row.receiptFileUrl)'>
+                                Print Reciept
+                              </a>
+                            </div>
+                          </div>
+                          <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                            *ngIf='currentActive != rowIndex' (click)="openMenu(rowIndex, $event)">
+                            <em class="icon icon-dot-verti"></em>
+                          </div>
+                        </div>
+                      </ng-container>
+
+                      <ng-container *ngIf="row.paymentMethodType === 'Check' && row.status != 'Reversed'">
+                        <div class=" d-flex justify-content-end">
+                          <div class="dropdown dropdown-hover-table" *ngIf="currentActive == rowIndex"
+                            [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)"
+                            appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)">
+                            <em class="icon icon-dot-verti"></em>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                              <a href="javascript:void(0)"
+                                *ngIf="row.paymentMethodType === 'Check' && row.status === 'Success' && !!row.scannedCheckImgUrl"
+                                (click)="open(viewPaymentCheckModal,row,'','modal-lmd')" class="dropdown-item"
+                                id="mtr-lhtrdtlscheckimg-{{rowIndex}}">
+                                View Check Image
+                              </a>
+                              <a href="javascript:void(0)" class=" dropdown-item"
+                                (click)='printReceipt(row.receiptFileUrl)' id="mtr-lhtrdtlscheckprintre-{{rowIndex}}">
+                                Print Reciept
+                              </a>
+                              <a href=" javascript:void(0)"
+                                *ngIf="(row.status === 'Success' || row.status === 'Pending') && (isBillingOrResponsibleAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.ACCOUNTINGisAdmin || permissionList.ACCOUNTINGisEdit)"
+                                (click)="reverTransaction(reverseCheckModal,row)" class="dropdown-item"
+                                id="mtr-lhtrdtlscheckrevrschek-{{rowIndex}}">
+                                Reverse Transaction
+                              </a>
+                            </div>
+                          </div>
+                          <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                            *ngIf='currentActive != rowIndex' (click)="openMenu(rowIndex, $event)">
+                            <em class="icon icon-dot-verti"></em>
+                          </div>
+                        </div>
+                      </ng-container>
+
+                      <ng-container
+                        *ngIf='row.paymentMethodType === "E-Check" && (row.status === "Success" || row.status === "Pending")'>
+                        <div class=" d-flex justify-content-end">
+                          <div class="dropdown dropdown-hover-table" *ngIf="currentActive == rowIndex"
+                            [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)"
+                            appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)">
+                            <em class="icon icon-dot-verti"></em>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                              <a href="javascript:void(0)" class=" dropdown-item"
+                                (click)='printReceipt(row.receiptFileUrl)' id="mtr-lhtrdtlsecheckrecpt-{{rowIndex}}">
+                                Print Reciept
+                              </a>
+                              <a href=" javascript:void(0)"
+                                *ngIf="(isBillingOrResponsibleAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.ACCOUNTINGisAdmin || permissionList.ACCOUNTINGisEdit)"
+                                (click)="reverTransaction(reverseCheckModal,row)" class="dropdown-item"
+                                id="mtr-lhtrdtlsecheckrevrschek-{{rowIndex}}">
+                                Reverse Transaction
+                              </a>
+                            </div>
+                          </div>
+                          <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                            *ngIf='currentActive != rowIndex' (click)="openMenu(rowIndex, $event)">
+                            <em class="icon icon-dot-verti"></em>
+                          </div>
+                        </div>
+                      </ng-container>
+                      <ng-container *ngIf='row.paymentMethodType === "E-Check" && row.status === "Failed"'>
+                        <a href="javascript:void(0)" id="mtr-lhtrdtlsecheckretrypymt-{{rowIndex}}"
+                          class="font-weight-medium text-primary" (click)="retryPayment(row, $event)">
+                          Retry Payment
+                        </a>
+                      </ng-container>
+                      <ng-container *ngIf='row.paymentMethodType === "Cash" && row.status != "Reversed"'>
+                        <div class=" d-flex justify-content-end">
+                          <div class="dropdown dropdown-hover-table" *ngIf="currentActive == rowIndex"
+                            [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)"
+                            appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)">
+                            <em class="icon icon-dot-verti"></em>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                              <a href="javascript:void(0)" class=" dropdown-item"
+                                (click)='printReceipt(row.receiptFileUrl)'
+                                id="mtr-lhtrdtlscashprintreceipt-{{rowIndex}}">
+                                Print Reciept
+                              </a>
+                              <a href=" javascript:void(0)"
+                                *ngIf="(row.status === 'Success' || row.status === 'Pending') && (isBillingOrResponsibleAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.ACCOUNTINGisAdmin || permissionList.ACCOUNTINGisEdit)"
+                                (click)="reverTransaction(reverseCheckModal,row)" class="dropdown-item"
+                                id="mtr-lhtrdtlscashrevrs-{{rowIndex}}">
+                                Reverse Transaction
+                              </a>
+                            </div>
+                          </div>
+                          <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                            *ngIf='currentActive != rowIndex' (click)="openMenu(rowIndex, $event)">
+                            <em class="icon icon-dot-verti"></em>
+                          </div>
+                        </div>
+                      </ng-container>
+                      <ng-container
+                        *ngIf='row.paymentMethodType === "Primary Retainer Trust" && (row.status === "Success" || row.status === "Pending") && (isBillingOrResponsibleAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.ACCOUNTINGisAdmin || permissionList.ACCOUNTINGisEdit)'>
+                        <a href="javascript:void(0)" class="font-weight-medium text-primary"
+                          (click)="reverTransaction(reverseCheckModal,row)"
+                          id="mtr-lhtrdtlscheckrevrschek-pr-trust-{{rowIndex}}">
+                          Reverse Transaction
+                        </a>
+                      </ng-container>
+
+                      <ng-container
+                        *ngIf='row.paymentMethodType != "Primary Retainer Trust" && row.status === "Reversed"'>
+                        <a href="javascript:void(0)" class="font-weight-medium text-primary"
+                          (click)='printReceipt(row.receiptFileUrl)'
+                          id="mtr-lhtrdtlscashprintreceipt-payment-reversed-row-{{rowIndex}}">
+                          Print Reciept
+                        </a>
+                      </ng-container>
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+              <ng-container *ngIf="row.type === 'Reversal'">
+                <thead>
+                  <tr>
+                    <th class="pl-40 w-25">Applicable Date</th>
+                    <th class="w-25">Target Account</th>
+                    <th class="w-25">Payment Method</th>
+                    <th class="w-25 ac-th">Reversed Transaction Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pl-40 align-top">
+                      <span class="font-weight-normal">{{row?.applicableDate | date: 'MM/dd/yyyy'}}</span>
+                    </td>
+                    <td class="w-25" *ngIf="row?.accountInfo">
+                      <app-payment-account-detail [row]='row' [isPaymentMethod]='false'></app-payment-account-detail>
+                    </td>
+                    <td class="w-25" *ngIf="!row?.accountInfo">
+                      <span class="font-weight-normal">
+                        N/A
+                      </span>
+                    </td>
+                    <td class="w-25" [class.align-top]="row?.paymentMethodType === 'Cash'">
+                      <app-payment-account-detail [row]='row' [isPaymentMethod]='true'></app-payment-account-detail>
+                    </td>
+                    <td class="w-25 align-top" *ngIf='row.reversePaymentReason'>
+                      {{row?.reversePaymentId}} - {{row?.reversePaymentReason}}
+                    </td>
+                    <td class="w-25 align-top" *ngIf='!row.reversePaymentReason'>
+                      {{row?.reverseCheckReason?.code}} - {{row?.reverseCheckReason?.name}}
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+              <ng-container *ngIf="row.type === 'Invoice' || row.type === 'Bill Reversed'">
+                <thead>
+                  <tr>
+                    <th class="pl-40">Invoice Number</th>
+                    <th class="text-right pr-40">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pl-40">
+                      <span class="text-primary">{{row.id}}</span>
+                    </td>
+                    <td class="text-right pr-40">
+                      <a href="javascript:void(0)" (click)="downloadInvoice(row)"
+                        class="font-weight-medium text-primary">Download Invoice</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+              <ng-container *ngIf="row.type === 'Write-Off'">
+                <thead>
+                  <tr>
+                    <th class="pl-40 w-25">Applicable Date</th>
+                    <th class="w-100">Note to File</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pl-40 w-25 align-top">
+                      {{row.applicableDate | date: 'MM/dd/yyyy'}}
+                    </td>
+                    <td class="w-100 align-top">
+                      <div class="note-table-text user-prof-note">
+                        <app-read-more [text]="row.noteToFile" [maxLines]='2'> </app-read-more>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+              <ng-container *ngIf="row.type === 'Chargeback'">
+                <thead>
+                  <tr>
+                    <th class="pl-40 w-25">Initial Posting Date</th>
+                    <th class="w-25">Source Account</th>
+                    <th class="w-25">Chargeback Method</th>
+                    <th class="w-25">Transaction Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pl-40 align-top">
+                      <span class="font-weight-normal">
+                        {{row?.postingDate | date: 'MM/dd/yyyy'}}
+                      </span>
+                    </td>
+                    <td class="w-25" *ngIf="row?.accountInfo">
+                      <span class="font-weight-medium d-block">{{row?.accountInfo?.accountName}}</span>
+                      <span class="helper-text font-weight-normal" *ngIf='row?.accountInfo?.accountNumber'>
+                        Account ending in {{row?.accountInfo?.accountNumber | slice : -4}}
+                      </span>
+                    </td>
+                    <td class="w-25" *ngIf="!row?.accountInfo">
+                      <span class="font-weight-normal">
+                        N/A
+                      </span>
+                    </td>
+                    <td class="w-25">
+                      <span class="font-weight-medium d-block">Credit Card</span>
+                      <span class="helper-text font-weight-normal" *ngIf='row?.creditCard?.name'>
+                        Card ending in {{row?.creditCard?.name}}
+                      </span>
+                    </td>
+                    <td class="w-25">
+                      {{row?.confirmationId}}
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+              <ng-container *ngIf="row.type === 'Refund'">
+                <thead>
+                  <tr>
+                    <th class="pl-40"
+                      [ngClass]="((row.status != 'Error' && row.status != 'Failed' && row.scannedCheckImgUrl) || (row.status === 'Error' || row.status === 'Failed')) ? 'w-10' : 'w-25'">
+                      Date of Refund</th>
+                    <th class="w-25">Refund Source</th>
+                    <th class="w-25">Refund Target</th>
+                    <th class="w-25" *ngIf="row.status === 'Failed'">Attempted Amount</th>
+                    <th class="w-25"
+                      *ngIf="row.paymentMethodType === 'E-Check' || row.paymentMethodType === 'Credit Card'">Transaction
+                      Code</th>
+                    <th [class.pr-40]="row.status === 'Success'" class="pm-width">Note to File</th>
+                    <th class="text-right pr-40"
+                      *ngIf="(row.status != 'Error' && row.status != 'Failed' && row.scannedCheckImgUrl) || (row.status === 'Error' || row.status === 'Failed')">
+                      Action</th>
+                  </tr>
+                </thead>
+                <tbody class="row-detail">
+                  <tr>
+                    <td class="pl-40 align-top">
+                      <span class="font-weight-normal">{{row?.postingDate | date: 'MM/dd/yyyy'}}</span>
+                    </td>
+                    <td class="w-25">
+                      <app-payment-account-detail [row]='row' [isPaymentMethod]='false'></app-payment-account-detail>
+                    </td>
+                    <td class="w-25">
+                      <app-payment-account-detail [row]='row' [isPaymentMethod]='true'></app-payment-account-detail>
+                    </td>
+                    <td *ngIf="row.status === 'Failed'" class="w-25 align-top">
+                      {{row?.credit | usdCurrency}}</td>
+                    <td class="w-25 align-top"
+                      *ngIf="row.paymentMethodType === 'E-Check' || row.paymentMethodType === 'Credit Card'">
+                      {{row?.confirmationId}}
+                    </td>
+                    <td [class.pr-40]="row.status === 'Success'" class="pm-width align-top">
+                      <div class="note-table-text user-prof-note">
+                        <app-read-more [text]="row.noteToFile" [maxLines]='2'> </app-read-more>
+                      </div>
+                    </td>
+                    <td class="text-right pr-40" *ngIf="row.status === 'Error' || row.status === 'Failed'">
+                      <ng-container>
+                        <a href="javascript:void(0)" (click)="retryRefund(row.id)"
+                          id="mtr-lhisorydtlsissuchrgbk-{{rowIndex}}" class="font-weight-medium text-primary">
+                          Retry Refund
+                        </a>
+                      </ng-container>
+                    </td>
+                    <td class="text-right pr-40"
+                      *ngIf="row.status != 'Error' && row.status != 'Failed' && row.scannedCheckImgUrl">
+                      <ng-container>
+                        <a href="javascript:void(0)" (click)="open(viewPaymentCheckModal, row, '', 'modal-lmd')"
+                          id="mtr-lhisorydtlsissuchrgbk-{{rowIndex}}" class="font-weight-medium text-primary">
+                          View Check Image
+                        </a>
+                      </ng-container>
+                    </td>
+                  </tr>
+                </tbody>
+              </ng-container>
+            </table>
+          </div>
+        </ng-template>
+      </ngx-datatable-row-detail>
+      <ngx-datatable-column [resizeable]="false" prop="postingDate" name="Posting Date" [width]="100">
+        <ng-template let-row='row' let-value="value" let-rowIndex="rowIndex" let-expanded="expanded"
+          ngx-datatable-cell-template>
+          <a href="javascript:void(0)" style="width: 12px;" class="icon font-10 mr-16"
+            [class.icon-angle-down]="!expanded" [class.icon-angle-up]="expanded" title="Expand/Collapse Row"
+            (click)="toggleExpandRow(row)" id="matter-lhistory-expand-{{rowIndex}}">
+          </a>
+          {{value | date: 'MM/dd/yyyy'}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="type" name="Type" [width]="100">
+        <ng-template let-value="value" ngx-datatable-cell-template>
+          {{value}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="postedBy" name="Posted By" [width]="120">
+        <ng-template let-row='row' let-value="value" ngx-datatable-cell-template>
+          <span *ngIf='row.isAutoPay'>Auto-Pay</span>
+          <span *ngIf='!row.isAutoPay'>{{value}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" prop="amount" name="Amount" [width]="120">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf='row.status == "Failed"'> {{0 | usdCurrency}} </span>
+          <span *ngIf='row.status != "Failed" && value<0 && row.type=="Invoice"' [class.negative-row]="value<0">
+            {{value | usdCurrency}}
+          </span>
+          <span *ngIf='row.status != "Failed" && value>=0 && row.type=="Invoice"'>
+            {{value | usdCurrency}}
+          </span>
+          <span *ngIf='row.status != "Failed" && value<0 && row.type=="Bill Reversed"' [class.negative-row]="value<0">
+            {{value | usdCurrency}}
+          </span>
+          <span *ngIf='row.status != "Failed" && value>=0 && row.type=="Bill Reversed"'>
+            {{value | usdCurrency}}
+          </span>
+          <span
+            *ngIf='row.status != "Failed" && value && (row.type=="Payment" || row.type=="Write-Off" || row.type == "Auto-Pay")'
+            [class.negative-row]="value>0"> -{{value | usdCurrency}}
+          </span>
+          <span
+            *ngIf='row.status != "Failed" && value && (row.type == "Refund" || row.type == "Reversal" || row.type == "Chargeback")'>
+            {{value | usdCurrency}}
+          </span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="endingBalance" name="Ending Balance" [width]="120">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span [class.negative-row]="value < 0"> {{value | usdCurrency}} </span>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="120">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span [class.negative-row]="value == 'Failed' || value == 'Rejected'">{{value}}</span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                  Page {{ i+1 }}
+                  of {{page.totalPages}}</option>
+              </select>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="table.onFooterPage($event);pageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<div class="d-none">
+  <app-common-invoice-pdf></app-common-invoice-pdf>
+</div>
+
+<ng-template #viewPaymentCheckModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Check Image - {{checkNumber}}</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="" style="background-color: #c8ced4;">
+      <img src={{checkImageUrl}} height="200px" width="100%">
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')"
+      id="close-btn-bottom">Close</button>
+    <button type="button" class="btn btn-primary" (click)="onDownloadImage();" id="download-image-btn">Download
+      Image</button>
+  </div>
+</ng-template>
+
+<ng-template #reverseCheckModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Reverse Transaction</h3>
+    <button type="button" class="close" (click)="modal.close(false)" aria-label="Close" id="close-btn-reverse">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <form [formGroup]="reverseForm">
+      <div class="row gutter-16">
+        <div class="col-6">
+          <div class="form-group"
+            [class.has-error]="reverseForm.controls['reverseTransactionReason'].errors && reverseForm.controls['reverseTransactionReason'].errors.required && reverseTransactionSubmitted">
+            <label>Reason <sup>*</sup> </label>
+            <ng-select id="enter-reverse-reason" [items]="originalReversedCheckCodes" placeholder="Choose a reason"
+              formControlName="reverseTransactionReason" [selectOnTab]="true" [bindValue]="'id'"
+              [bindLabel]="'reasonCode'" [notFoundText]="'No record found'">
+            </ng-select>
+            <app-validation-message [errorMessage]='error_data.reverse_check_reason_error'
+              *ngIf="reverseForm.controls['reverseTransactionReason'].errors && reverseTransactionSubmitted">
+            </app-validation-message>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group"
+            [class.has-error]="reverseForm.controls['applicableDate'].errors && reverseForm.controls.applicableDate.errors.required && reverseTransactionSubmitted">
+            <label>Applicable Date <sup>*</sup></label>
+            <app-date-picker [id]="'application-date'" [isForm]='true' [dateform]='reverseForm'
+              controlName='applicableDate'></app-date-picker>
+            <app-validation-message [errorMessage]='error_data.applicable_date_error'
+              *ngIf="reverseForm.controls['applicableDate'].errors && reverseForm.controls.applicableDate.errors.required && reverseTransactionSubmitted">
+            </app-validation-message>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-group"
+            [class.has-error]="reverseForm.controls['noteToFile'].errors && reverseTransactionSubmitted">
+            <div class="d-flex justify-content-between align-items-end">
+              <label>Note to File <sup>*</sup></label>
+              <div class="text-right visble-to-client">
+                <div class="custom-control custom-checkbox m-0 pr-0">
+                  <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                    formControlName="isVisibleToClient">
+                  <label class="custom-control-label" for="dropcheck-1">
+                    Visibile to Client
+                  </label>
+                </div>
+              </div>
+            </div>
+            <textarea class="form-control" formControlName="noteToFile" rows="4" placeholder="Enter Note Text"
+              id="note-text"></textarea>
+            <span class="field-message text-danger"
+              *ngIf="reverseForm.controls['noteToFile'].errors && reverseTransactionSubmitted">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data.note_file_required}}
+            </span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer pb-0">
+    <div class="btn-group">
+      <button type="button" class="btn btn-light" (click)="modal.close(false)"
+        id="close-btn-reverse-bottom">Close</button>
+      <button type="button" class="btn btn-primary"
+        (click)="reverseForm.valid ? modal.close(true): reverseTransactionSubmitted = true" id="confirm-btn">Reverse
+        Transaction</button>
+    </div>
+  </div>
+</ng-template>

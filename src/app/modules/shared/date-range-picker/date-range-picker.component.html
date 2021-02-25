@@ -1,0 +1,16 @@
+<div class="date-field position-relative">
+    <input type="text" class="form-control dark-placeholder" (focus)="show(true)" (keypress)="dontAllow()" [placeholder]="placeholderText"/>
+    <em class="icon icon-calendar-invitation" (click)="show(true)"></em>
+    <div class="date-range-dropdown" *ngIf="isShow">
+        <div class="py-20 px-16 border-bottom">
+            <div class="custom-control custom-checkbox m-0 pr-0">
+                <input type="checkbox" class="custom-control-input" id="customCheck1"
+                       [(ngModel)]="lifeofMatter" (change)="choosedDate()">
+                <label class="custom-control-label text-transform-none" for="customCheck1">{{placeholderText}}</label>
+            </div>
+        </div>
+        <div class="datepicker-rang" [class.disable]="lifeofMatter">
+            <ngx-daterangepicker-material #picker2 [linkedCalendars]="true" [startDate]="startDate" [endDate]="endDate" [autoApply]="true" [closeOnAutoApply]="true" (choosedDate)="choosedDate($event)"></ngx-daterangepicker-material>
+        </div>
+    </div>
+</div>

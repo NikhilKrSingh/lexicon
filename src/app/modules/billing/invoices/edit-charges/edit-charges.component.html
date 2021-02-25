@@ -1,0 +1,268 @@
+<div class="container" *ngIf='!showInvoice'>
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item" *ngIf="pageType != 'matter'"><a href="javascript:void(0)"
+          [routerLink]="['/billing']">Billing</a></li>
+      <li class="breadcrumb-item" *ngIf="pageType == 'matter'"><a href="javascript:void(0)"
+          [routerLink]="['/matter/list']" *ngIf="pageType == 'matter'">Matter</a></li>
+      <li class="breadcrumb-item" aria-current="page" [title]='matterDetails?.matterName' *ngIf="pageType == 'matter'">
+        <a href="javascript:void(0)" [routerLink]="['/matter/dashboard']"
+          [queryParams]="{matterId: matterId, selectedtab: 'Invoices'}">
+          <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+            {{matterDetails?.matterName}} - {{matterDetails?.matterNumber}}
+          </ng-container>
+          <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+            {{matterDetails?.matterName?.slice(0, 25)}}... - {{matterDetails?.matterNumber}}
+          </ng-container>
+        </a>
+      </li>
+      <li class="breadcrumb-item active" *ngIf="pageType == 'matter'">Edit Charges - Invoice Number {{ invoiceId }}</li>
+      <li class="breadcrumb-item active" *ngIf="pageType != 'matter'">Edit Charges - {{matterDetails?.matterName}}</li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2">Edit Charges</h2>
+          <span class="text-small font-weight-medium d-flex align-items-center">Canceled - Invoice Number
+            {{invoiceId}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex align-items-end justify-content-between mb-24">
+      <div class="d-flex align-items-start pr-20">
+        <em class="icon icon-info text-primary mr-8 text-large"></em>
+        <p class="m-0 lh-20 mxw-418">You can update your charges below and re-bill to a new invoice. Any charges you do
+          not select to re-bill now will remain in WIP and will be billed as part of the next, regularly scheduled
+          billing cycle</p>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" (click)="openPersonalinfo(CancelAllCharge, 'xl', '')"
+          id="cancel-all-charges">
+          Cancel All Charges
+        </button>
+
+        <button type="button" class="btn btn-outline-primary" (click)='previewInvoice()' id="preview-invoice">
+          Preview Invoice
+        </button>
+
+        <button type="button" class="btn btn-primary" (click)='reBill(reBillClient)'
+          id="re-bill-charges-to-new-invoice">
+          Re-Bill Charges to New Invoice
+        </button>
+      </div>
+    </div>
+    <div class="card" *ngIf='matterDetails && matterDetails?.isFixedFee'>
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Fixed Fee Services</h2>
+          </div>
+          <ng-container *ngIf='prebillingSettings?.fixedFeeService?.length > 0; else noFixedFeeService'>
+            <app-fixed-fee-services [prebillingSettings]='prebillingSettings' [billNow]='true'
+              [isAttorney]='timeWriteDownBtn' (validateSaveBtn)="validateSaveBtn($event)" [isDisabled]='workComplete'>
+            </app-fixed-fee-services>
+          </ng-container>
+
+          <ng-template #noFixedFeeService>
+            <p>No unbilled fixed fee service recorded</p>
+          </ng-template>
+        </div>
+        <div class="info-block pt-32">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Add-Ons</h2>
+          </div>
+          <ng-container *ngIf='prebillingSettings?.addOnServices?.length > 0; else noAddOnServices'>
+            <app-add-on-services [prebillingSettings]='prebillingSettings' [isDisabled]='workComplete' [billNow]='true'
+              (validateSaveBtn)="validateSaveBtn($event)" [isAttorney]='timeWriteDownBtn'>
+            </app-add-on-services>
+          </ng-container>
+
+          <ng-template #noAddOnServices>
+            <p>No unbilled fixed fee add-ons recorded</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+    <div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+      <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice'
+        [invoiceTemplateDetails]='invoiceTemplateDetails' [matterBillingSettings]='billingSettings'
+        [tenantDetails]='tenantDetails' [loggedinuserId]='loginUser.id' [default_logo_url]='default_logo_url'
+        (invoiceHTMLDetails)='sendEmailAndPrint($event)'>
+      </app-invoice-extended-pdf>
+    </div>
+    <app-time-entry-bill-now *ngIf='matterDetails && !matterDetails?.isFixedFee' [timekeepingList]="timekeepingList"
+      [loginUser]="loginUser" [timeWriteDownBtn]="timeWriteDownBtn" (getDetails)="getDetails()"
+      (validateSaveBtn)="validateSaveBtn($event)" [workComplete]="workComplete" [matterDetails]="matterDetails"
+      [page]="'charges'" [lastPrebillDate]="lastPrebillDate" [(timeEntrySelected)]="timeEntrySelected"
+      (removeWriteDown)="removeWriteDown($event)">
+    </app-time-entry-bill-now>
+    <app-disbursement *ngIf="matterDetails" [isBillNow]="false" [matterDetails]="matterDetails"
+      [disbursementList]="disbursementList" [loginUser]="loginUser" [timeWriteDownBtn]="timeWriteDownBtn"
+      (getDetails)="getDetails()" (validateSaveBtn)="validateSaveBtn($event)" [workComplete]="workComplete"
+      [(disbursementSelected)]="disbursementSelected" (removeWriteDown)="removeWriteDown($event)">
+    </app-disbursement>
+  </div>
+  <app-loader [active]='loading'></app-loader>
+</div>
+
+<ng-container *ngIf='showInvoice'>
+  <div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/billing']">Billing</a></li>
+        <li class="breadcrumb-item" *ngIf="pageType == 'matter'"><a href="javascript:void(0)"
+            [routerLink]="['/matter/list']" *ngIf="pageType == 'matter'">Matter</a></li>
+        <li class="breadcrumb-item" aria-current="page" [title]='matterDetails?.matterName'
+          *ngIf="pageType == 'matter'">
+          <a href="javascript:void(0)" [routerLink]="['/matter/dashboard']"
+            [queryParams]="{matterId: matterId, selectedtab: 'Invoices'}">
+            <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+              {{matterDetails?.matterName}} - {{matterDetails?.matterNumber}}
+            </ng-container>
+            <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+              {{matterDetails?.matterName?.slice(0, 25)}}... - {{matterDetails?.matterNumber}}
+            </ng-container>
+          </a>
+        </li>
+        <li class="breadcrumb-item active" *ngIf="pageType == 'matter'">Edit Charges - Invoice Number {{ invoiceId }}
+        </li>
+        <li class="breadcrumb-item active" *ngIf="pageType != 'matter'">Edit Charges - {{matterDetails?.matterName}}
+        </li>
+      </ol>
+      <div class="d-flex align-items-end justify-content-between mb-32">
+        <div class="profile-content d-flex align-items-start profile-client">
+          <div class="profile-heading mr-16">
+            <h2 class="mt-0 mb-2">Preview Invoice</h2>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="info-block pt-0">
+            <div class="d-flex justify-content-between align-items-center mb-32">
+              <h2 class="mb-0">Invoice</h2>
+            </div>
+            <ng-container *ngIf='matterId'>
+              <app-common-invoice-pdf [default_invoice]='invoiceTemplateDetails'
+                [matter_settings]='matterBillingSettings' [matterId]='matterId' [billNowData]='billNowModel'
+                [callback]='loaderCallback'>
+              </app-common-invoice-pdf>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end pb-24">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" (click)='returnToEditCharges()' id="return-to-bill-now">
+            Return to Edit Charges
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-loader [active]='loader'></app-loader>
+</ng-container>
+
+<ng-template #CancelAllCharge let-modal>
+  <form [formGroup]="cancelAllChargeForm" #cancelForm="ngForm" (submit)="cancelAllCharges()">
+    <div class="modal-header pb-24">
+      <h3 class="modal-title mb-0">Cancel All Charges</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="row gutter-16">
+        <div class="col-6">
+          <h5 class="mb-16 mt-0">Billing Narrative</h5>
+          <div class="form-group"
+            [ngClass]="{'has-error': cancelForm.submitted && cancelAllChargeForm.controls.billingNarrative.errors }">
+            <label>Billing Narrative <sup>*</sup></label>
+            <textarea class="form-control height-2 non-resize" (blur)="copytoNote()"
+              placeholder="Describe the work performed" formControlName="billingNarrative" cols="12" rows="2"
+              id="billing-narrative-textarea"></textarea>
+            <span class="field-message text-danger"
+              *ngIf="cancelForm.submitted && cancelAllChargeForm.controls.billingNarrative.errors?.required">
+              <em class="icon icon-error mr-4"></em>
+              Please enter billing narrative.
+            </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <h5 class="mb-16 mt-0">Note to File</h5>
+          <div class="form-group"
+            [ngClass]="{'has-error': cancelForm.submitted && cancelAllChargeForm.controls.noteToFile.errors }">
+            <label>Notes <sup>*</sup></label>
+            <textarea class="form-control height-2 non-resize" placeholder="Describe the work performed"
+              formControlName="noteToFile" cols="12" rows="2" id="notes"></textarea>
+            <span class="field-message text-danger"
+              *ngIf="cancelForm.submitted && cancelAllChargeForm.controls.noteToFile.errors?.required">
+              <em class="icon icon-error mr-4"></em>
+              Please enter note to file.
+            </span>
+          </div>
+          <div class="form-group mb-0">
+            <label class="mb-20">Visible to Client</label>
+            <div class="custom-control custom-radio pr-0 mb-12">
+              <input type="radio" value="yes" id="vis1" formControlName="isVisibleToClient"
+                class="custom-control-input">
+              <label class="custom-control-label" for="vis1">Yes</label>
+            </div>
+            <div class="custom-control custom-radio pr-0 mb-0">
+              <input type="radio" value="no" id="vis2" formControlName="isVisibleToClient" class="custom-control-input">
+              <label class="custom-control-label" for="vis2">No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
+    </div>
+    <app-loader [active]='cancelFormLoader'></app-loader>
+  </form>
+</ng-template>
+
+<ng-template #reBillClient let-modal>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title mb-0">Re-Bill Charges</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-12">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning" style="font-size: 22px;"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to re-bill the charges to
+          <strong>{{matterDetails?.matterName}}</strong> for
+          <strong>{{totalBillAmount | currency : 'USD' : 'symbol': '1.2-2'}}</strong>?
+        </p>
+        <div class="mt-12">
+          <div class="custom-control custom-checkbox mb-12 pr-0"
+            *ngIf='billingSettings?.invoiceDelivery?.id == electronicInvoice?.id || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+            <input type="checkbox" class="custom-control-input" id="customCheck1_email" [value]='true'
+              [(ngModel)]='sendEmail'>
+            <label class="custom-control-label" for="customCheck1_email">Email invoice to client</label>
+          </div>
+          <div class="custom-control custom-checkbox mb-0 pr-0"
+            *ngIf='billingSettings?.invoiceDelivery?.id == paperInvoice?.id  || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+            <input type="checkbox" class="custom-control-input" id="customCheck2_print" [value]='true'
+              [(ngModel)]='print'>
+            <label class="custom-control-label" for="customCheck2_print">Print invoice</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="yes-re-bill-charges">
+      Yes, Re-Bill Charges
+    </button>
+  </div>
+</ng-template>

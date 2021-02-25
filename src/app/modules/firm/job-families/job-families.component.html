@@ -1,0 +1,243 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Job Families</li>
+    </ol>
+    <div class="heading">
+      <h1>Job Families</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" placeholder="Search Job Families "
+                   (keyup)="searchFilter($event)" id="search-job-family">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+          </div>
+        </form>
+      </div>
+      <div class="btn-group ml-md-24 ml-0">
+        <button class="btn btn-primary btn-icon" [routerLink]="['/firm/job-families/create']" type="button"
+                id="create-job-family">
+          <i class="icon icon-plus"></i> Create Job Family
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="position-relative">
+          <div class="custom-table">
+            <ngx-datatable #table class="material common-table" [class.fix-col-right]="tables?.frozenRightArr[0]"
+                           [class.matter-no-data]="rows?.length === 0" [rows]="rows" [columnMode]="ColumnMode.force"
+                           [headerHeight]="50" [footerHeight]="footerHeight" [messages]="messages" rowHeight="auto"
+                           [count]="page1.totalElements" [offset]="page1.pageNumber" [limit]="page1.size"
+                           [scrollbarH]='true'
+                           [sorts]="[{prop: 'name', dir: 'asc'}]" (sort)="updateDatatableFooterPage()"
+                           [selectionType]="SelectionType.single" [selected]="selected"
+                           id="job-family-listing-tbl">
+              <ngx-datatable-column [resizeable]="false" prop="name" name="Name" [sortable]="true" [width]="400">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="numberOfEmployee" name="Number of Employees"
+                                    [sortable]="true"
+                                    [width]="150">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action"
+                                    [frozenRight]='tables?.frozenRightArr[0]'
+                                    [width]="100" prop='id'>
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div class="d-flex justify-content-end">
+                    <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+                         (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                         (outsideClick)="onClickedOutside($event, rowIndex)">
+                      <em class="icon icon-dot-verti"></em>
+                      <div class="dropdown-menu dropdown-menu-right document-matter"
+                           aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" *ngIf="row.numberOfEmployee > 0"
+                            (click)="viewEmployees(row.id);"
+                            id="view-emp-index-{{rowIndex}}">View
+                            Employees</a>
+                        <a class="dropdown-item" [routerLink]="['/firm/job-families/edit/' + row.id]"
+                           id="edit-emp-index-{{rowIndex}}">Edit</a>
+                        <a class="dropdown-item"
+                           (click)="open(deleteJobFamily,'','','md');row.numberOfEmployee > 0 ? isDelete = false : isDelete = true;deleteRecord=row"
+                           id="delete-emp-index-{{rowIndex}}">Delete</a>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                             let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                             let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                                  (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray;trackBy: trackByFn"
+                                    [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                          {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                        {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of
+                        {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected1" (change)="changePage()">
+                        <option *ngFor='let num of page1.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                                [value]="i+1">Page {{ i + 1 }}
+                          of {{page1.totalPages}}</option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                         [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                         [pagerPreviousIcon]="'datatable-icon-prev'"
+                                         [pagerNextIcon]="'datatable-icon-skip'"
+                                         [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                         [hidden]="!((rowCount / pageSize) > 1)"
+                                         (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #deleteJobFamily let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Delete Job Family</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start" *ngIf="!isDelete">
+      <em class="icon icon-warning text-warning mt-4"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">You cannot delete this job family, because it is assigned to at least one employee.</p>
+      </div>
+    </div>
+    <div class="d-flex align-items-start" *ngIf="isDelete">
+      <em class="icon icon-warning text-warning mt-4"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to delete this job family?</p>
+      </div>
+    </div>
+
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');"
+            id="close-btn-bottom">Close
+    </button>
+    <button type="button" class="btn btn-primary" (click)="deleteJob();modal.dismiss('Cross click');"
+            *ngIf="isDelete" id="yes-delete">Yes, Delete
+    </button>
+  </div>
+</ng-template>
+
+<!-- <ng-template #employeeListModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Associate Attorney Job Family - Employees</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="custom-table">
+      <ngx-datatable #table2 class="material common-table text-break" [class.matter-no-data]="employeeList?.length === 0"
+                     [rows]="employeeList" [columnMode]="ColumnMode.force" [headerHeight]="50"
+                     [footerHeight]="50"
+                     [messages]="messages" rowHeight="auto" [count]="page2.totalElements"
+                     [offset]="page2.pageNumber"
+                     [limit]="page2.size" [scrollbarH]="false" [sorts]="[{prop: 'lastName', dir: 'asc'}]"
+                     (sort)="updateDatatableFooterPage2()" id="employee-listing-tbl">
+        <ngx-datatable-column [resizeable]="false" prop="lastName" name="Name" [sortable]="true">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            {{(row.lastName) ? row.lastName + ', ' + row.firstName : row.firstName}} </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="jobFamilyName" name="Job Family" [sortable]="true">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Title" [sortable]="true">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action"
+                              prop='id'>
+          <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+            <div class="d-flex justify-content-end pr-12">
+              <a class="font-weight-medium text-primary" href="javascript:void(0)"
+                 (click)="redirectEmployeePage(row.id)" id="view-profile-index-{{rowIndex}}">View Profile</a>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-footer>
+          <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                       let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                       let-isVisible="isVisible">
+            <div class="d-flex justify-content-between flex-fill">
+              <div class="d-flex align-items-center">
+                <div class="table-items d-flex align-items-center mr-36">
+                  Items per page1:
+                  <div class=" ml-8">
+                    <select class="custom-select border-less" [formControl]="pageSelector2"
+                            (change)="changePageSize2()">
+                      <option *ngFor="let limit of limitArray;trackBy: trackByFn"
+                              [value]="limit">{{ limit }}</option>
+                    </select>
+                  </div>
+                </div>
+                <span>
+                        {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                  {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of
+                  {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+                      </span>
+              </div>
+
+              <div class="d-flex align-items-center">
+                <select class="custom-select border-less" [(ngModel)]="pageSelected2" (change)="changePage2()">
+                  <option *ngFor='let num of page2.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                          [value]="i+1">Page
+                    {{ i + 1 }}
+                    of {{page2.totalPages}}</option>
+                </select>
+                <div class="ml-8">
+                  <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                   [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                   [pagerPreviousIcon]="'datatable-icon-prev'"
+                                   [pagerNextIcon]="'datatable-icon-skip'"
+                                   [page]="curPage" [size]="pageSize" [count]="rowCount"
+                                   [hidden]="!((rowCount / pageSize) > 1)"
+                                   (change)="table2.onFooterPage($event);pageChange2($event)">
+                  </datatable-pager>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-footer>
+      </ngx-datatable>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');"
+            id="close-btn-bottom">Close
+    </button>
+  </div>
+</ng-template> -->

@@ -1,0 +1,741 @@
+<div class="card">
+    <div class="card-body">
+        <h3 class="mb-24">Transfer Source</h3>
+        <p class="mb-16">Specify one or more accounts to transfer funds from.</p>
+        <div class="alert alert-primary d-flex justify-content-between mb-24 no-shadow col-8" id="alert">
+            <div class="d-flex">
+                <em class="alert-icon icon icon-info"></em>
+                <div class="d-flex align-items-center flex-wrap">
+                    <h4 class="mr-16 mt-0 mb-0">Available Funds</h4>
+                    Funds that are pending processing are not available for transfer.
+                </div>
+            </div>
+        </div>
+        <div class="custom-table">
+            <div class="table-responsive">
+                <table class="table table-striped table-borderless" id="acttrusttrnsfrsrc-listtable">
+                    <thead>
+                        <tr>
+                            <th class="source">Source</th>
+                            <th class="client">Client</th>
+                            <th class="matter">Matter</th>
+                            <th class="balance">Balance</th>
+                            <th class="amount">Amount to Transfer</th>
+                            <th class="text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngIf="transferSourceList.length > 0;else no_data_found">
+                        <tr *ngFor="let item of transferSourceList; trackBy: trackByFn;let i = index">
+                            <td>
+                                <span *ngIf="item.source">{{item.source.name}}</span>
+                                <span *ngIf="!item.source">
+                                    <a class="font-weight-medium btn-link specific-source" id="acttrusttrnsfrsrc-clktospcfysrcact-{{i}}"
+                                        (click)="openModal(SelectTransferType,'','modal-lmd', 'transfer' )">
+                                        Click to Specify Source Account
+                                    </a>
+                                </span>
+                            </td>
+                            <td>
+                                <span *ngIf="item.client && !item.isBankAccount">
+                                    {{item.client.name}}
+                                </span>
+                                <span *ngIf="item.isBankAccount">
+                                    -
+                                </span>
+                            </td>
+                            <td>
+                                <div class="matter-name" *ngIf="item.matter && !item.isBankAccount">
+                                    {{item.matter.name}}
+                                </div>
+                                <span *ngIf="item.isBankAccount">
+                                    -
+                                </span>
+                            </td>
+                            <td>
+                                <span *ngIf="item.balance != null && !item.isBankAccount">
+                                    {{item.balance | currency : 'USD': 'symbol': '1.2-2'}}
+                                </span>
+                                <span *ngIf="item.isBankAccount">
+                                    -
+                                </span>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0" [class.has-error]="item.amountTransfer <= 0 && isSubmitted" >
+                                <input type="text" class="form-control w-185"  [(ngModel)]="item.amountTransfer"
+                                    prefix="$" mask="separator.2" thousandSeparator=","
+                                    (focusout)="modifyLineItemVal(i)"
+                                    (focusin)="clearValue(i)"
+                                    [attr.disabled]="!item.source ? true : null" min="0" id="acttrusttrnsfrsrc-amonttransfer-{{i}}"/>
+                                    <span class="field-message text-danger" *ngIf="item.amountTransfer <= 0 && isSubmitted">
+                                      <em class="icon icon-error mr-4"></em>
+                                       Select an amount to transfer
+                                   </span>
+                                </div>
+                            </td>
+                            <td class="text-right">
+                                <span *ngIf="item.source" (click)='delete(item, i)' class="cursor-pointer" id="acttrusttrnsfrsrc-delete-{{i}}">
+                                    <em class="icon icon-remove icon-color"></em>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <ng-template #no_data_found>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+                            </tr>
+                        </tbody>
+                    </ng-template>
+
+                    <tfoot>
+                        <tr *ngIf="transferSourceList && transferSourceList.length && transferSourceList[0].source">
+                            <td>Total Amount</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <span class="pl-16 d-block">
+                                    {{ getTotal | currency : 'USD': 'symbol': '1.2-2'}}
+                                </span>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <button class="btn btn-link btn-icon px-0 d-flex align-items-center" id="acttrusttrnsfrsrc-adanthrtsrc"
+            (click)="openModal(SelectTransferType,'','modal-lmd', 'transfer' )" type="button">
+            <i class="icon icon-add-circle"></i> Add Another Transfer Source
+        </button>
+        
+        
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="mb-24">Transfer Target</h3>
+        <div class="row gutter-16">
+            <div class="col-7">
+                <div class="step-radio mb-24">
+                    <div class="d-flex align-items-start">
+                        <label class="cust-radio text-base mr-8">
+                            <input type="radio" name="steptype1" id="acttrusttrnsfrsrc-banktransfer"
+                                (click)="selectTransferTypeMainPageClick($event, 'bank')"
+                                [checked]="selectTransferTypeMainPage == true" aria-label="select Bank Transfer" (change)="selectTransfer()">
+                            <span class="radio-style"></span>
+                        </label>
+                        <div>
+                            <strong class="d-block font-weight-medium mb-4">Bank Transfer</strong>
+                            <p class="m-0 helper-text font-weight-normal lh-20">This includes transfers from firm-level
+                                bank accounts and operating accounts.<br>
+                                You must select an account option to proceed.</p>
+                        </div>
+                    </div>
+                    <div class="pl-48 pt-16" *ngIf="selectTransferTypeMainPage == true">
+                        <div>
+                            <form>
+                                <fieldset id="bank-transfer1">
+                                    <div class="custom-control custom-radio pr-0 mb-12">
+                                        <input type="radio" id="trust-btfoa-1" name="bank-transfer1" class="custom-control-input"
+                                            [checked]="selectBankTypeMain==1"
+                                            (click)="selectBankTypeClickMain($event, 'operating')" aria-label="select firm operating account" (change)="selectTransfer()">
+                                        <label class="custom-control-label" for="trust-btfoa-1">Firm Operating Account</label>
+                                    </div>
+                                    <div class="custom-control custom-radio pr-0 mb-12">
+                                        <input type="radio" id="trust-btftba-2" name="bank-transfer1" class="custom-control-input"
+                                            [checked]="selectBankTypeMain==2"
+                                            (click)="selectBankTypeClickMain($event, 'trust')" aria-label="select firm trust bank account" (change)="selectTransfer()">
+                                        <label class="custom-control-label" for="trust-btftba-2">Firm Trust Bank Account</label>
+                                    </div>
+                                    <div class="custom-control custom-radio pr-0 mb-12">
+                                        <input type="radio" id="trust-btfcctb-3" name="bank-transfer1" class="custom-control-input"
+                                            [checked]="selectBankTypeMain==3"
+                                            (click)="selectBankTypeClickMain($event, 'credit')" aria-label="select credit card trust bank account" (change)="selectTransfer()">
+                                        <label class="custom-control-label" for="trust-btfcctb-3">Firm Credit Card Trust Bank
+                                            Account</label>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div *ngIf="selectBankTypeMain==1" class="form-group pt-4 mb-0">
+                            <label>Operating Account <sup>*</sup></label>
+                            <ng-select [items]="firmOperatingBankAccountsMain" class="bank-dropdown white-bg" id="acttrusttrnsfrsrc-foba"
+                                placeholder="Select operating account" [(ngModel)]='selectedfirmOperatingBankAccountMain'
+                                [bindValue]="'id'" [bindLabel]="'accountName'" [clearable]='false' [selectOnTab]="true"
+                                (change)="firmOperatingAccountChangeMain($event)">
+                                <ng-template ng-option-tmp let-item="item">
+                                    <div>
+                                    <div class="font-weight-medium">
+                                        <span>
+                                        {{item?.accountName}}
+                                        </span>
+                                        <span *ngIf="item?.accountNumber != null" class="d-block small account-type-text helper-text font-weight-normal">{{'Account ending '+item?.accountNumber }}</span>
+                                    </div>
+                                    </div>
+                                </ng-template>
+                            </ng-select>
+                        </div>
+                        <div *ngIf="selectBankTypeMain==2" class="form-group pt-4 mb-0">
+                            <label>Trust Bank Account <sup>*</sup></label>
+                            <ng-select [items]="trustBankAccountsMain" class="bank-dropdown white-bg" id="acttrusttrnsfrsrc-tbam"
+                                placeholder="Select trust bank account" [(ngModel)]='selectedTrustBankAccountMain'
+                                [bindValue]="'id'" [bindLabel]="'accountName'" [clearable]='false' [selectOnTab]="true"
+                                (change)="trustAccountChangeMain($event)">
+                                <ng-template ng-option-tmp let-item="item">
+                                    <div>
+                                    <div class="font-weight-medium">
+                                        <span>
+                                        {{item?.accountName}}
+                                        </span>
+                                        <span *ngIf="item?.accountNumber != null" class="d-block small account-type-text helper-text font-weight-normal">{{'Account ending '+item?.accountNumber }}</span>
+                                    </div>
+                                    </div>
+                                </ng-template>
+                            </ng-select>
+                        </div>
+                        <div *ngIf="selectBankTypeMain==3" class="form-group pt-4 mb-0">
+                            <label>Credit Card Trust Bank Account <sup>*</sup></label>
+                            <ng-select [items]="creditBankAccountsMain" class="bank-dropdown white-bg" id="acttrusttrnsfrsrc-cctba"
+                                placeholder="Select credit card trust bank account"
+                                [(ngModel)]='selectedCreditBankAccountMain' [bindValue]="'id'"
+                                [bindLabel]="'accountName'" [clearable]='false' [selectOnTab]="true"
+                                (change)="creditCardAccountChangeMain($event)">
+                                <ng-template ng-option-tmp let-item="item">
+                                    <div>
+                                    <div class="font-weight-medium">
+                                        <span>
+                                        {{item?.accountName}}
+                                        </span>
+                                        <span *ngIf="item?.accountNumber != null" class="d-block small account-type-text helper-text font-weight-normal">{{'Account ending '+item?.accountNumber }}</span>
+                                    </div>
+                                    </div>
+                                </ng-template>
+                            </ng-select>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="step-radio mb-24">
+                    <div class="d-flex align-items-start">
+                        <label class="cust-radio text-base mr-8">
+                            <input type="radio" name="steptype1" id="acttrusttrnsfrsrc-tt"
+                                (click)="selectTransferTypeMainPageClick($event, 'trust')"
+                                [checked]="selectTransferTypeMainPage == false" aria-label="select Trust Transfer" (change)="selectTransfer()">
+                            <span class="radio-style"></span>
+                        </label>
+                        <div>
+                            <strong class="d-block font-weight-medium mb-4">Trust Transfer</strong>
+                            <p class="m-0 helper-text font-weight-normal lh-20">This includes transfers from client- and
+                                matter-level trust accounts.</p>
+                        </div>
+                    </div>
+                    <div class="pl-28 pt-24" *ngIf="selectTransferTypeMainPage == false">
+                        <div class="form-group">
+                            <label>Client <sup>*</sup></label>
+                            <div class="search-group position-relative">
+                                <form action="#"  (outsideClick)="clearDropDown('clientListPopUpMain')" appAutoCloseOutsideClick>
+                                    <span class="search-icn"></span>
+                                    <input #clientFilterPopupMain type="text" class="form-control bg-white"
+                                        [(ngModel)]="searchclientMain" [ngModelOptions]="{standalone: true}"
+                                        placeholder="Search clients" (keyup)="updateClientFilterMain($event,'2')"
+                                        id="acttrusttrnsfrsrc-searchclient">
+                                    <div class="search-group-result px-0 mt-4 pb-16" *ngIf="clientListPopUpMain.length > 0 && searchclientMain.length > 0">
+                                        <div class="search-result pl-16 pr-8"  >
+                                            <div>
+                                                <h5 class="d-inline-block text-large lh-20 mt-8 mb-4">
+                                                    {{clientListPopUpMain.length}}
+                                                    {{clientListPopUpMain.length && clientListPopUpMain.length > 1 ? 'results' : 'result'}}
+                                                </h5>
+                                            </div>
+                                            <div class="search-collapse custom-style-scroll pr-16">
+                                                <div class="search-panel"
+                                                    [ngClass]="(item.showGrid)?'search-panel-open':''"
+                                                    *ngFor="let item of clientListPopUpMain;trackBy: trackByFn; let i = index">
+                                                    <div class="search-panel-head">
+                                                        <em class="search-res-icon icon icon-clients"></em>
+                                                        <div (click)="selectClientMain(item)">
+                                                            <span *ngIf='item.isCompany'>
+                                                                <span
+                                                                    [innerHTML]="item.companyName | highlightText : clientFilterPopupMain?.value"></span>
+                                                            </span>
+                                                            <span *ngIf='!item.isCompany'>
+                                                                <span
+                                                                    [innerHTML]="(item.lastName+', '+item.firstName) | highlightText : clientFilterPopupMain?.value"></span>
+                                                            </span>
+                                                        </div>
+                                                        <span
+                                                            class="small helper-text font-weight-medium d-block mt-4">Client</span>
+                                                        <span class="arrow" (click)="clickClientMain(item, i)">
+                                                            <em class="icon icon-angle-down"></em></span>
+                                                    </div>
+                                                    <div class="search-panel-body">
+                                                        <div class="mt-12">
+                                                            <span
+                                                                class="small helper-text d-block mb-4 font-weight-medium">
+                                                                Preferred Contact
+                                                            </span>
+                                                            {{item.preferredContactMethod=='Email' ? item.email : (item.preferredPhone | phoneFormatter) }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="search-group-result px-0 mt-4 " *ngIf="clientSearchLoading">
+                                        <app-search-loader  [active]="clientSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                                      </div>
+                                </form>
+                            </div>
+                            
+                        </div>
+                        <div class="form-group">
+                            <label>Matter<sup>*</sup></label>
+                            <div class="search-group position-relative">
+                                <form action="#" (outsideClick)="clearDropDown('matterListPopUpMain')" appAutoCloseOutsideClick>
+                                    <span class="search-icn"></span>
+                                    <input #metterFilterPopupMain type="text" class="form-control bg-white "
+                                        placeholder="Search matters" [(ngModel)]="searchMatterMain"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (keyup)="updateMatterFilterMain($event,'2')" id="acttrusttrnsfrsrc-searchmatter">
+                                    <div class="search-group-result px-0 mt-4 pb-16" *ngIf="matterListPopUpMain.length>0">
+                                        <div class="search-result pl-16 pr-8" >
+                                            <div>
+                                                <h5 class="d-inline-block text-large lh-20 mt-8 mb-4">
+                                                    {{matterListPopUpMain.length}}
+                                                    {{matterListPopUpMain.length && matterListPopUpMain.length > 1 ? 'results' : 'result'}}
+                                                </h5>
+                                            </div>
+                                            <div class="search-collapse custom-style-scroll pr-16">
+                                                <div class="search-panel "
+                                                    [ngClass]="(item.showGrid)?'search-panel-open':''"
+                                                    *ngFor="let item of matterListPopUpMain; trackBy: trackByFn;let i = index">
+                                                    <div class="search-panel-head">
+                                                        <em class="search-res-icon icon icon-matters"></em>
+                                                        <div (click)="selectMatterMain(item)">
+                                                            <span [innerHTML]="item.matterName | highlightText : metterFilterPopupMain?.value"></span>
+                                                            <span> (</span>
+                                                            <span
+                                                                [innerHTML]="item.matterNumber | highlightText : metterFilterPopupMain?.value"></span>
+                                                            <span>)</span>
+
+
+
+                                                        </div>
+                                                        <span class="arrow" (click)="clickMatterMain(item, i)">
+                                                            <em class="icon icon-angle-down"></em></span>
+                                                    </div>
+                                                    <div class="search-panel-body">
+                                                        <div class="mt-12">
+                                                            <span
+                                                                class="small helper-text d-block mb-4 font-weight-medium">
+                                                                Client Name
+                                                            </span>
+                                                            <span *ngIf="item.client">
+                                                                {{item.client.isCompany?item.client.companyName:(item.client.firstName+', '+item.client.lastName)}}
+                                                            </span>
+                                                        </div>
+                                                        <div class="mt-12">
+                                                            <span
+                                                                class="small helper-text d-block mb-4 font-weight-medium">
+                                                                Attorney
+                                                            </span>
+                                                            <span *ngFor="let att of item.responsibleAttorny;trackBy: trackByFn">
+                                                                {{att.name}}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="search-group-result px-0 mt-4 " *ngIf="matterSearchLoading">
+                                        <app-search-loader  [active]="matterSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                                      </div>
+                                </form>
+                            </div>
+                            
+                        </div>
+                        <div class="form-group">
+                            <label>Trust <sup>*</sup></label>
+                            <ng-select class="white-bg" [items]="trustListMain" placeholder="Select trust" id="acttrusttrnsfrsrc-selecttrust"
+                                [(ngModel)]='selectedTrustMain' [bindValue]="'id'" [bindLabel]="'name'"
+                                [clearable]='false'
+                                [readonly]="!trustListMain.length || !searchMatterMain || !matterDetailSourceMain"
+                                [selectOnTab]="true" (change)="trustChangeMain($event)">
+                            </ng-select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="mb-24">Transfer Details</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Date of Transfer <sup>*</sup></label>
+                    <div class="custom-date">
+                        <app-date-picker [isNgModel]="true" placeholderText="Select Date" [(data)]="dateOfTransfer" (dataChange)="pickDate()">
+                        </app-date-picker>
+                    </div>
+                    <div *ngIf="isSubmitted && !dateOfTransfer" class="error">
+                        {{errorData.select_transfer_date_error_message}}
+                    </div>
+                    <div *ngIf="isSubmitted && maxDateError" class="error">
+                        <div *ngIf="checkValidDate">
+                            {{errorData.select_max_transfer_date_error_message}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Description <sup>*</sup></label>
+                    <textarea class="form-control" [(ngModel)]="description" placeholder="Enter a description"
+                        controlName='description' id="acttrusttrnsfrsrc-description"></textarea>
+                    <div *ngIf="isSubmitted && (!description || (description === '' && !description.length))" class="error">
+                        {{errorData.select_transfer_description_error_message}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-end pt-8 pb-24">
+    <div class="btn-group">
+        <button type="button" [routerLink]="['/accounting/transfer-queue']" class="btn btn-light" id="acttrusttrnsfrsrc-tquesu-cancel-btn">Cancel</button>
+        <button type="button" (click)="review()" class="btn btn-primary"
+            [attr.disabled]="!isReviewEnabled ? true : null" id="acttrusttrnsfrsrc-rtransfer-btn">Review
+            Transfer</button>
+    </div>
+</div>
+
+
+<ng-template #SelectTransferType let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Select Transfer Type</h3>
+        <button type="button" class="close" id="acttrusttrnsfrsrc-slttt-close-btn" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-8">
+        <div class="step-radio mb-24">
+            <div class="d-flex align-items-start">
+                <label class="cust-radio text-base mr-8">
+                    <input type="radio" name="steptype" (click)="selectTransferTypeClick($event, 'bank')"
+                        [checked]="selectTransferType == true" id="acttrusttrnsfrsrc-slttt-bt">
+                    <span class="radio-style"></span>
+                </label>
+                <div>
+                    <strong class="d-block font-weight-medium mb-4">Bank Transfer</strong>
+                    <p class="m-0 helper-text font-weight-normal lh-20">This includes transfers from firm-level bank
+                        accounts and operating accounts.</p>
+                </div>
+            </div>
+        </div>
+        <div class="step-radio mb-24">
+            <div class="d-flex align-items-start">
+                <label class="cust-radio text-base mr-8">
+                    <input type="radio" name="steptype" (click)="selectTransferTypeClick($event, 'trust')"
+                        [checked]="selectTransferType == false" id="acttrusttrnsfrsrc-slttt-tt">
+                    <span class="radio-style"></span>
+                </label>
+                <div>
+                    <strong class="d-block font-weight-medium mb-4">Trust Transfer</strong>
+                    <p class="m-0 helper-text font-weight-normal lh-20">This includes transfers from client- and
+                        matter-level trust accounts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="closeModal()" id="acttrusttrnsfrsrc-slttt-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="acttrusttrnsfrsrc-slttt-next-btn"
+            (click)="selectTransferType ? openModal(BankTransfer,'','modal-lmd', 'bank' ) : openModal(TrustTransfer,'','modal-lmd', 'trust' ); modal.dismiss('Cross click')">Next</button>
+    </div>
+</ng-template>
+
+
+<ng-template #TrustTransfer let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Trust Transfer</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" id="acttrusttrnsfrsrc-trusttrnsf-close-btn" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <p>Specify a source account for the transfer.</p>
+        <div class="form-group">
+            <label>Client <sup>*</sup></label>
+            <div class="search-group position-relative">
+                <form action="#" (outsideClick)="clearDropDown('clientListPopUp')" appAutoCloseOutsideClick>
+                    <input #clientFilterPopup type="text" class="form-control bg-white custom-input-color"
+                        [(ngModel)]="searchclient" [ngModelOptions]="{standalone: true}" placeholder="Search clients"
+                        (keyup)="updateClientFilter($event,'2')" id="acttrusttrnsfrsrc-trusttrnsf-clientsearch">
+                    <div class="search-group-result px-0 mt-4 pb-16 " *ngIf="clientListPopUp.length>0">
+                        <div class="search-result pl-16 pr-8">
+                            <div>
+                                <h5 class="d-inline-block text-large lh-20 mt-8 mb-4">{{clientListPopUp.length}}
+                                    {{clientListPopUp.length && clientListPopUp.length > 1 ? 'results' : 'result'}}
+                                </h5>
+                            </div>
+                            <div class="search-collapse custom-style-scroll pr-16">
+                                <div class="search-panel" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                                    *ngFor="let item of clientListPopUp;trackBy: trackByFn; let i = index">
+                                    <div class="search-panel-head">
+                                        <em class="search-res-icon icon icon-clients"></em>
+                                        <div (click)="selectClient(item)">
+                                            <span *ngIf='item.isCompany'>
+                                                <span
+                                                    [innerHTML]="item.companyName | highlightText : clientFilterPopup?.value"></span>
+                                            </span>
+                                            <span *ngIf='!item.isCompany'>
+                                                <span
+                                                    [innerHTML]="(item.lastName+', '+item.firstName) | highlightText : clientFilterPopup?.value"></span>
+                                            </span>
+                                        </div>
+                                        <span class="small helper-text font-weight-medium d-block mt-4">Client</span>
+                                        <span class="arrow" (click)="clickClient(item, i)">
+                                            <em class="icon icon-angle-down"></em></span>
+                                    </div>
+                                    <div class="search-panel-body">
+                                        <div class="mt-12">
+                                            <span class="small helper-text d-block mb-4 font-weight-medium">
+                                                Preferred Contact
+                                            </span>
+                                            {{item.preferredContactMethod=='Email' ? item.email : (item.preferredPhone | phoneFormatter) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-group-result px-0 mt-4 " *ngIf="clientSearchLoading">
+                        <app-search-loader  [active]="clientSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                      </div>
+                </form>
+            </div>
+            
+        </div>
+        <div class="form-group">
+            <label>Matter <sup>*</sup></label>
+            <div class="search-group position-relative">
+                <form action="#" (outsideClick)="clearDropDown('matterListPopUp')" appAutoCloseOutsideClick>
+                    <input #metterFilterPopup type="text" class="form-control bg-white custom-input-color"
+                        placeholder="Search matters" [(ngModel)]="searchMatter" [ngModelOptions]="{standalone: true}"
+                        (keyup)="updateMatterFilter($event,'2')" id="acttrusttrnsfrsrc-trusttrnsf-mattersearch">
+                    <div class="search-group-result px-0 mt-4 pb-16" *ngIf="matterListPopUp.length>0">
+                        <div class="search-result pl-16 pr-8">
+                            <div>
+                                <h5 class="d-inline-block text-large lh-20 mt-8 mb-4">{{matterListPopUp.length}}
+                                    {{matterListPopUp.length && matterListPopUp.length > 1 ? 'results' : 'result'}}
+                                </h5>
+                            </div>
+                            <div class="search-collapse custom-style-scroll pr-16">
+                                <div class="search-panel " [ngClass]="(item.showGrid)?'search-panel-open':''"
+                                    *ngFor="let item of matterListPopUp;trackBy: trackByFn; let i = index">
+                                    <div class="search-panel-head">
+                                        <em class="search-res-icon icon icon-matters"></em>
+                                        <div (click)="selectMatter(item)">
+                                            <span
+                                                [innerHTML]="item.matterName | highlightText : metterFilterPopup?.value"></span>
+                                            <span> (</span>
+                                            <span [innerHTML]="item.matterNumber | highlightText : metterFilterPopup?.value"></span>
+                                                <span>)</span>
+                                        </div>
+                                        <span class="arrow" (click)="clickMatter(item, i)">
+                                            <em class="icon icon-angle-down"></em></span>
+                                    </div>
+                                    <div class="search-panel-body">
+                                        <div class="mt-12">
+                                            <span class="small helper-text d-block mb-4 font-weight-medium">
+                                                Client Name
+                                            </span>
+                                            <span *ngIf="item.client">
+                                                {{item.client.isCompany?item.client.companyName:(item.client.firstName+', '+item.client.lastName)}}
+                                            </span>
+                                        </div>
+                                        <div class="mt-12">
+                                            <span class="small helper-text d-block mb-4 font-weight-medium">
+                                                Attorney
+                                            </span>
+                                            <span *ngFor="let att of item.responsibleAttorny;trackBy: trackByFn">
+                                                {{att.name}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-group-result px-0 mt-4 " *ngIf="matterSearchLoading">
+                        <app-search-loader  [active]="matterSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                      </div>
+                </form>
+            </div>
+            
+        </div>
+        <div class="form-group">
+            <label>Trust <sup>*</sup></label>
+            <ng-select [items]="trustList" class="custom-input-color"
+                placeholder="Select trust" id="acttrusttrnsfrsrc-trusttrnsf-trustselect"
+                [(ngModel)]='selectedTrust' [bindValue]="'id'" [bindLabel]="'name'" [clearable]='false'
+                [readonly]="!trustList.length || !searchMatter || !matterDetailSource" [selectOnTab]="true"
+                (change)="trustChange($event)">
+            </ng-select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="closeModal()" id="acttrusttrnsfrsrc-trusttrnsf-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-outline-primary"
+            (click)="modal.dismiss(); openModal(SelectTransferType,'','modal-lmd', 'transfer' ); matterSearchLoading = false; clientSearchLoading = false; clientListPopUp = []; matterListPopUp = [];" id="acttrusttrnsfrsrc-trusttrnsf-back-btn">Back</button>
+        <button type="button" class="btn btn-primary" (click)="saveSource();" id="acttrusttrnsfrsrc-trusttrnsf-savesrc-btn"
+            [attr.disabled]="!matterDetailSource || !clientDetailSource || !searchclient || !searchMatter || selectedTrust == null ? true : null">Save
+            Source</button>
+    </div>
+</ng-template>
+
+
+<ng-template #BankTransfer let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Bank Transfer</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" id="acttrusttrnsfrsrc-banktrnsf-close-btn" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <p>Specify a source account for the transfer.</p>
+        <div class="pb-16">
+            <form>
+                <fieldset id="group1">
+                    <div class="custom-control custom-radio pr-0 mb-12">
+                        <input type="radio" id="bankbtfoa-11" name="group1" class="custom-control-input"
+                            [checked]="selectBankType==1" (click)="selectBankTypeClick($event, 'operating')">
+                        <label class="custom-control-label" for="bankbtfoa-11">Firm Operating Account</label>
+                    </div>
+                    <div class="custom-control custom-radio pr-0 mb-12">
+                        <input type="radio" id="bankbtftba-22" name="group1" class="custom-control-input"
+                            [checked]="selectBankType==2" (click)="selectBankTypeClick($event, 'trust')">
+                        <label class="custom-control-label" for="bankbtftba-22">Firm Trust Bank Account</label>
+                    </div>
+                    <div class="custom-control custom-radio pr-0 mb-12">
+                        <input type="radio" id="bankbtfcctba-33" name="group1" class="custom-control-input"
+                            [checked]="selectBankType==3" (click)="selectBankTypeClick($event, 'credit')">
+                        <label class="custom-control-label" for="bankbtfcctba-33">Firm Credit Card Trust Bank Account</label>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+        <div *ngIf="selectBankType==1" class="form-group custom-dropdown">
+            <div class="form-group mb-20" [class.has-error]="!selectedfirmOperatingBankAccount && bankTransferFormSubmitted">
+                <label>Operating Account <sup>*</sup></label>
+                <ng-select [items]="firmOperatingBankAccounts" id="acttrusttrnsfrsrc-banktrnsf-sltfoba" placeholder="Select operating account"
+                    [(ngModel)]='selectedfirmOperatingBankAccount' [bindValue]="'id'" [bindLabel]="'accountName'"
+                    [clearable]='false' [selectOnTab]="true" (change)="firmAccountChange($event)">
+                    <ng-template ng-option-tmp let-item="item">
+                        <div>
+                        <div class="font-weight-medium">
+                            <span>
+                            {{item?.accountName}}
+                            </span>
+                            <span *ngIf="item?.accountNumber != null" class="d-block small account-type-text helper-text font-weight-normal">{{'Account ending '+item?.accountNumber }}</span>
+                        </div>
+                        </div>
+                    </ng-template>
+                </ng-select>
+                <span class="field-message text-danger" *ngIf="!isValidSource">
+                    <em class="icon icon-error mr-4"></em>
+                    <span>{{ errorData?.accounting_transfer_source_operating_bank }}</span>
+                </span>
+            </div>
+        </div>
+        <div *ngIf="selectBankType==2" class="form-group">
+            <label>Trust Bank Account <sup>*</sup></label>
+            <div class="form-group mb-20" [class.has-error]="!selectedTrustBankAccount && bankTransferFormSubmitted">
+                <ng-select [items]="trustBankAccounts" placeholder="Select trust bank account" id="acttrusttrnsfrsrc-banktrnsf-slttba"
+                [(ngModel)]='selectedTrustBankAccount' [bindValue]="'id'" [bindLabel]="'accountName'"
+                [clearable]='false' [selectOnTab]="true" (change)="trustAccountChange($event)">
+                    <ng-template ng-option-tmp let-item="item">
+                        <div>
+                        <div class="font-weight-medium">
+                            <span>
+                            {{item?.accountName}}
+                            </span>
+                            <span *ngIf="item?.accountNumber != null" class="d-block small account-type-text helper-text font-weight-normal">{{'Account ending '+item?.accountNumber }}</span>
+                        </div>
+                        </div>
+                    </ng-template>
+                </ng-select>
+                <span class="field-message text-danger" *ngIf="!isValidSource">
+                    <em class="icon icon-error mr-4"></em>
+                    <span>{{ errorData?.accounting_transfer_source_trust_bank }}</span>
+                </span>
+            </div>
+        </div>
+        <div *ngIf="selectBankType==3" class="form-group">
+            <label>Credit Card Trust Bank Account <sup>*</sup></label>
+            <div class="form-group mb-20" [class.has-error]="!selectedCreditBankAccount && bankTransferFormSubmitted">
+                <ng-select [items]="creditBankAccounts" placeholder="Select credit card trust bank account" id="acttrusttrnsfrsrc-banktrnsf-sltsstba"
+                [(ngModel)]='selectedCreditBankAccount' [bindValue]="'id'" [bindLabel]="'accountName'"
+                [clearable]='false' [selectOnTab]="true" (change)="creditCardAccountChange($event)">
+                    <ng-template ng-option-tmp let-item="item">
+                        <div>
+                        <div class="font-weight-medium">
+                            <span>
+                            {{item?.accountName}}
+                            </span>
+                            <span *ngIf="item?.accountNumber != null" class="d-block small account-type-text helper-text font-weight-normal">{{'Account ending '+item?.accountNumber }}</span>
+                        </div>
+                        </div>
+                    </ng-template>
+                </ng-select>
+                <span class="field-message text-danger" *ngIf="!isValidSource">
+                    <em class="icon icon-error mr-4"></em>
+                    <span>{{ errorData?.accounting_transfer_source_credit_bank }}</span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="closeModal()" id="acttrusttrnsfrsrc-banktrnsf-calcel-btn">Cancel</button>
+        <button type="button" class="btn btn-outline-primary"
+            (click)="modal.dismiss(); openModal(SelectTransferType,'','modal-lmd', 'transfer' )" id="acttrusttrnsfrsrc-banktrnsf-back-btn">Back</button>
+        <button type="button" class="btn btn-primary" (click)="saveSource('bankTransfer')" id="acttrusttrnsfrsrc-banktrnsf-savesrc-btn">Save
+            Source</button>
+            
+    </div>
+</ng-template>
+
+
+<ng-template #TrustTransferAlert let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Trust Transfer</h3>
+        <button type="button" class="close" id="acttrusttrnsfrsrc-trusttrnsfalt-close-btn" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="d-flex align-items-start">
+            <em class="icon icon-info text-danger fs-24"></em>
+            <div class="lh-20 ml-16">
+                <p class="m-0">The transfer cannot be completed as selected, because you must select a bank account as a
+                    Transfer Target.</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="acttrusttrnsfrsrc-trusttrnsfalt-rttt-btn">Return to Trust Transfer</button>
+    </div>
+</ng-template>

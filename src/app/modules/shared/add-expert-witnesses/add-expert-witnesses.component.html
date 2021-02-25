@@ -1,0 +1,263 @@
+
+<div style="z-index: 1050" aria-hidden="true" class="modal-backdrop fade show"></div>
+<div class="modal fade show d-block">
+  <div class="modal-dialog modal-dialog-centered modal-xl margin-auto">
+    <div class="modal-content">
+      <div class="modal-header d-block">
+        <h3 class="modal-title mb-0" *ngIf="mode == 'create'">Add Expert Witnesses</h3>
+        <h3 class="modal-title mb-0" *ngIf="mode == 'edit'">Edit Expert Witnesses</h3>
+        <button aria-label="Close" class="close" type="button" (click)="close()" id="close-btn"><em
+            class="icon icon-close"></em></button>
+      </div>
+      <div *ngIf="mode == 'create'">
+        <div class="modal-body pb-0">
+          <div class="form-group">
+            <div class="custom-control custom-radio">
+              <input type="radio" id="cust-rdcrtnewoppoprt" [(ngModel)]="createType" value="create" name="customRadio"
+                class="custom-control-input">
+              <label class="custom-control-label" for="cust-rdcrtnewoppoprt">Create new Expert Witnesses</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="cust-rdextassocias" [(ngModel)]="createType" value="existing" name="customRadio"
+                class="custom-control-input">
+              <label class="custom-control-label" for="cust-rdextassocias">Select from existing Associations</label>
+            </div>
+          </div>
+
+          <form *ngIf="createType === 'create'" [formGroup]='addExpertWitness'>
+            <div class="row gutter-16">
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group" [class.has-error]='formSubmitted && f.FirstName.invalid'>
+                  <label>First Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName='FirstName' placeholder="Enter First Name" id="first-name">
+                  <span class="field-message text-danger" *ngIf="f.FirstName.errors && formSubmitted">
+                    <span *ngIf="f.FirstName.errors.required && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.first_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.FirstName.value && formSubmitted && f.FirstName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group" [class.has-error]='formSubmitted && f.LastName.invalid'>
+                  <label>Last Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName='LastName' placeholder="Enter Last Name" id="last-name">
+                  <span class="field-message text-danger" *ngIf="f.LastName.errors && formSubmitted">
+                    <span *ngIf="f.LastName.errors.required && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.last_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.LastName.value && formSubmitted && f.LastName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group"
+                  [class.has-error]='formSubmitted && (f.Email.invalid || (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern)))'>
+                  <label>Email Address <sup>*</sup></label>
+                  <input type="email" name="email" formControlName="Email" class="form-control" required
+                    autocomplete="off" placeholder="Enter Email Address" value="Email Address" id="email-address">
+                  <span class="field-message text-danger" *ngIf="f.Email.errors && formSubmitted">
+                    <span *ngIf="f.Email.errors.required && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{ errorData.email_error }}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="formSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData.email_not_valid }}
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="formSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.insecure_input))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData.insecure_input }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div
+                  [ngClass]="(addExpertWitness.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                  <label>Phone Number</label>
+                  <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="false"
+                    formControlName="PrimaryPhone"
+                    (blur)="onBlurMethod(addExpertWitness.controls.PrimaryPhone.value,'PrimaryPhone')"  placeholder="(###) ###-####" id="phone-number"/>
+                  <span class="field-message text-danger"
+                    *ngIf="addExpertWitness.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                      class="icon icon-error mr-4"></em>
+                    Invalid phone number
+                  </span>
+                </div>
+              </div>
+              <div class="col-4" *ngIf='matterList'>
+                <div class="form-group">
+                  <label>Matter Name</label>
+                  <ng-select [items]="matterList" placeholder="Select Matter" [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="matterId" [bindValue]="'id'" [bindLabel]="'matterName'"
+                    [notFoundText]="'No record found'" [selectOnTab]="true" id="matter-name-select">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+
+          </form>
+
+
+          <ng-container *ngIf="createType === 'existing'">
+            <div>
+              <app-association-search [associationType]="'Expert Witness'"
+                (selectedAssociation)='onAssociationSelect($event)'>
+              </app-association-search>
+            </div>
+
+            <div class="col-6" *ngIf='matterList'>
+              <div class="form-group">
+                <label>Matter Name</label>
+                <ng-select [items]="matterList" placeholder="Select Matter" [ngModelOptions]="{standalone: true}"
+                  [(ngModel)]="matterId" [bindValue]="'id'" [bindLabel]="'matterName'"
+                  [notFoundText]="'No record found'" [selectOnTab]="true" id="matter-name">
+                </ng-select>
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+        <ng-container *ngIf="createType === 'create'">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary" (click)='save()' id="save-btn">
+              Save
+            </button>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="createType === 'existing'">
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+            <button type="button" class="btn btn-primary"
+              (click)="savedExistingAssociations(selectedAssociation.id, selectedAssociation)" id="save-btn">Save</button>
+          </div>
+        </ng-container>
+      </div>
+      <div *ngIf="mode == 'edit'">
+        <div class="modal-body pb-0">
+          <form [formGroup]='addExpertWitness'>
+            <div class="row gutter-16">
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group" [class.has-error]='formSubmitted && f.FirstName.invalid'>
+                  <label>First Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName='FirstName' id="first-name">
+                  <span class="field-message text-danger" *ngIf="f.FirstName.errors && formSubmitted">
+                    <span *ngIf="f.FirstName.errors.required && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.first_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.FirstName.value && formSubmitted && f.FirstName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group" [class.has-error]='formSubmitted && f.LastName.invalid'>
+                  <label>Last Name <sup>*</sup></label>
+                  <input type="text" class="form-control" formControlName='LastName' id="last-name">
+                  <span class="field-message text-danger" *ngIf="f.LastName.errors && formSubmitted">
+                    <span *ngIf="f.LastName.errors.required && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.last_name_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.LastName.value && formSubmitted && f.LastName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group"
+                  [class.has-error]='formSubmitted && (f.Email.invalid || (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern)))'>
+                  <label>Email Address <sup>*</sup></label>
+                  <input type="email" class="form-control" formControlName='Email' required autocomplete="off">
+                  <span class="field-message text-danger" *ngIf="f.Email.errors && formSubmitted" id="email-address">
+                    <span *ngIf="f.Email.errors.required && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{errorData.email_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="formSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.pattern}}
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="formSubmitted && (!!f.Email.value && (!!f.Email.errors && f.Email.errors.insecure_input))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group" [class.has-error]='formSubmitted && f.CompanyName.invalid && !!f.CompanyName.value'>
+                  <label>Company</label>
+                  <input type="text" class="form-control" formControlName='CompanyName' id="company-name">
+                  <span class="field-message text-danger"
+                    *ngIf="!!f.CompanyName.value && formSubmitted && f.CompanyName.invalid">
+                    <em class="icon icon-error mr-4"></em>
+                    {{errorData.insecure_input}}
+                  </span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Phone Number</label>
+                  <input type="text" class="form-control" formControlName='PrimaryPhone' mask='(000) 000-0000' [showMaskTyped]="false" placeholder="(###) ###-####" id="primary-phone">
+                </div>
+              </div>
+              <div class="col-4" *ngIf='matterList'>
+                <div class="form-group">
+                  <label>Matter Name</label>
+                  <ng-select [items]="matterList" placeholder="Select Matter" disabled
+                    [ngModelOptions]="{standalone: true}" [(ngModel)]="matterId" [bindValue]="'id'"
+                    [bindLabel]="'matterName'" [notFoundText]="'No record found'" [selectOnTab]="true" id="matter-name-select">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">
+            Save
+          </button>
+        </div>
+      </div>
+      <app-loader [active]='loading'></app-loader>
+    </div>
+  </div>
+</div>

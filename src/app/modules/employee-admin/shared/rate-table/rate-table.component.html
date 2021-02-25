@@ -1,0 +1,83 @@
+<div class="custom-table matter-list section-area">
+  <ngx-datatable #table class="material common-table" [class.matter-no-data]="rateList?.length === 0"
+    [rows]="rateList" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="50" rowHeight="auto"
+    [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" (sort)="calcTotalPages()" id="ratelist-tbl">
+    <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Select" [canAutoResize]="false" [width]="80">
+      <ng-template
+        ngx-datatable-header-template
+        let-value="value"
+        let-allRowsSelected="allRowsSelected"
+        let-selectFn="selectFn"
+      >
+        <label class="cust-check cursor-pointer">
+          <input type="checkbox" [checked]="allRowsSelected" (change)="selectFn(!allRowsSelected); selectAllRates(!allRowsSelected)" />
+          <span class="check-style"></span>
+        </label>
+      </ng-template>
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" id="select_{{row.id}}" name="matter_rate" value="true"
+                 class="custom-control-input" (click)='onSelect( row)' [checked]="row.checked">
+          <label class="custom-control-label" for="select_{{row.id}}"></label>
+        </div>
+      </ng-template>
+
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [width]="100"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [width]="300"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="billingTo.name" name="Billable To" [width]="100">
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="rateAmount" name="Rate" [width]="100">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span *ngIf='value'> {{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="billingType.name" name="Billing Type" [width]="100">
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" name="Inherit/Custom" [width]="100">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <span> Inherit </span>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-footer>
+      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="pageSelector"
+                  (change)="changePageSize()">
+                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+              {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                {{ i+1 }} of {{page.totalPages}}</option>
+            </select>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                (change)="table.onFooterPage($event);pageChange($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+  <app-loader [active]="loading"></app-loader>
+</div>
+

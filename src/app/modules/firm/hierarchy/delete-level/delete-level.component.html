@@ -1,0 +1,26 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Delete Hierarchy Level</h3>
+  <button type="button" class="close" (click)="cancel()" aria-label="Close">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <p class="lh-20 mb-12" *ngIf='canDelete'>
+    This will delete this hierarchy level and all of its nodes.
+    Are you sure you want to continue?
+  </p>
+
+  <p class="lh-20 mb-12" *ngIf='!canDelete'>
+    You cannot delete this hierarchy level because at least one group is assigned to its node(s).
+    Please reassign all groups assigned to these nodes before deleting.
+  </p>
+</div>
+
+<div class="modal-footer" *ngIf='canDelete'>
+  <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='ok()' id="continue-btn">Continue</button>
+</div>
+
+<div class="modal-footer" *ngIf='!canDelete'>
+  <button type="button" class="btn btn-primary" (click)='cancel()' id="return-to-system-btn">Return to System Hierarchy</button>
+</div>

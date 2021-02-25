@@ -1,0 +1,197 @@
+<div class="d-flex justify-content-between align-items-start">
+  <div>
+    <div class="d-flex mb-8 align-items-center">
+      <h3 class="mb-0">Configure Bill Generation Frequency</h3>
+      <em *ngIf="!billingSettings?.effectiveBillFrequencyQuantity && !editBill" (click)="editBilling()"
+        class="cursor-pointer icon icon-edit ml-12 icon-color" id="edit-billing"></em>
+    </div>
+    <p class="lh-20">Pre-bills are generated at the end of each period and sent for approval before invoicing.</p>
+  </div>
+  <button type="button" class="btn btn-outline-primary">View Audit History</button>
+</div>
+
+<div class="form-group">
+  <label class="d-block mb-4">Current Period</label>
+  {{billingSettings?.billFrequencyStartingDate | date : 'MM/dd/yyyy'}} -
+  {{billingSettings?.billFrequencyNextDate | date : 'MM/dd/yyyy'}}
+</div>
+<ng-container *ngIf="!editBill">
+  <div class="form-group">
+    <label class="d-block mb-4">Bill Every</label>
+    {{billingSettings?.billFrequencyQuantity}} {{billFrequencyDurationName}}
+  </div>
+  <div class="form-group">
+    <label class="d-block mb-4">Repeats on</label>
+    <ng-container class="m-0 lh-20" *ngIf="billingSettings?.billFrequencyDuration?.code === 'WEEKS'">
+      {{billFrequencyDayObj?.name}}
+    </ng-container>
+    <ng-container class="m-0 lh-20" *ngIf="billingSettings?.billFrequencyDuration?.code === 'MONTHS'">
+      <ng-container *ngIf="billingSettings?.repeatType === 2; else viewAsMonthWeek">
+        {{billingSettings?.billFrequencyRecursOn}}{{(billingSettings?.billFrequencyRecursOn === 1) ? 'st' :
+          (billingSettings?.billFrequencyRecursOn === 2) ? 'nd' :
+          (billingSettings?.billFrequencyRecursOn === 3) ? 'rd' : 'th'}} of the month
+      </ng-container>
+      <ng-template #viewAsMonthWeek>
+        {{recurringName[billingSettings.billFrequencyRecursOn-1]}} {{billFrequencyDayObj?.name}} of the month
+      </ng-template>
+    </ng-container>
+  </div>
+  <div class="form-group" *ngIf="billingSettings && billingSettings.effectiveBillFrequencyQuantity; else basicdetails">
+    <p class="mb-0 lh-20"
+      *ngIf="billingSettings && billingSettings.billFrequencyDuration && billingSettings.billFrequencyDuration.code === 'WEEKS'">
+      Pre-bills and invoices generate <strong>every {{billingSettings?.billFrequencyQuantity}}
+        {{billingSettings?.billFrequencyQuantity == 1 ? 'Week' : billingSettings?.billFrequencyDuration?.name}}</strong>&nbsp;at
+      approximately midnight on&nbsp;<strong>{{billFrequencyDayObj?.name}}</strong> <ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0"> (plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container> until
+      <strong>{{billFrequencyEndDate}}</strong>.</p>
+    <p class="mb-0 lh-20"
+      *ngIf="billingSettings && billingSettings.billFrequencyDuration && billingSettings.billFrequencyDuration.code === 'MONTHS'">
+      <ng-container *ngIf="billingSettings?.repeatType === 2; else viewAsdetailssummaryupcoming">
+        Pre-bills and invoices generate <strong>every {{billingSettings?.billFrequencyQuantity}}
+          {{billingSettings?.billFrequencyQuantity == 1 ? 'Month' : billingSettings?.billFrequencyDuration?.name}}</strong>&nbsp;at
+        approximately midnight on&nbsp;<strong>the
+          {{billingSettings?.billFrequencyRecursOn}}{{(billingSettings?.billFrequencyRecursOn === 1) ? 'st' :
+          (billingSettings?.billFrequencyRecursOn === 2) ? 'nd' :
+          (billingSettings?.billFrequencyRecursOn === 3) ? 'rd' : 'th'}}&nbsp;of the
+          month</strong> <ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0"> (plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container> until <strong>{{billFrequencyEndDate}}</strong>.
+      </ng-container>
+      <ng-template #viewAsdetailssummaryupcoming>
+        Pre-bills and invoices generate <strong>every {{billingSettings?.billFrequencyQuantity}}
+          {{billingSettings?.billFrequencyQuantity == 1 ? 'Month' : billingSettings?.billFrequencyDuration?.name}}</strong>&nbsp;at
+        approximately midnight on&nbsp;<strong>the
+          {{recurringName[billingSettings.billFrequencyRecursOn-1]}}&nbsp;{{billFrequencyDayObj?.name}}&nbsp;of the
+          month</strong> <ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0"> (plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container> until <strong>{{billFrequencyEndDate}}</strong>.
+      </ng-template>
+    </p>
+  </div>
+  <ng-template #basicdetails>
+    <p class="mb-0 lh-20"
+      *ngIf="billingSettings && billingSettings.billFrequencyDuration && billingSettings.billFrequencyDuration.code === 'WEEKS'">
+      Pre-bills and invoices will generate <strong>every {{billingSettings?.billFrequencyQuantity}}
+        {{billingSettings?.billFrequencyQuantity == 1 ? 'Week' : billingSettings?.billFrequencyDuration?.name}}</strong>&nbsp;at
+      approximately midnight on&nbsp;<strong>{{billFrequencyDayObj?.name}}</strong>
+      <ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0"> (plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container>.
+    </p>
+    <p class="mb-0 lh-20"
+      *ngIf="billingSettings && billingSettings.billFrequencyDuration && billingSettings.billFrequencyDuration.code === 'MONTHS'">
+      <ng-container *ngIf="billingSettings?.repeatType === 2; else viewAsdetailssummaryupcoming">
+        Pre-bills and invoices will generate <strong>every {{billingSettings?.billFrequencyQuantity}}
+          {{billingSettings?.billFrequencyQuantity == 1 ? 'Month' : billingSettings?.billFrequencyDuration?.name}}</strong>&nbsp;at
+        approximately midnight on&nbsp;<strong>the&nbsp;{{billingSettings?.billFrequencyRecursOn}}{{(billingSettings?.billFrequencyRecursOn === 1) ? 'st' :
+          (billingSettings?.billFrequencyRecursOn === 2) ? 'nd' :
+          (billingSettings?.billFrequencyRecursOn === 3) ? 'rd' : 'th'}}&nbsp;of the
+          month</strong> <ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0"> (plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container>.
+      </ng-container>
+      <ng-template #viewAsdetailssummaryupcoming>
+        Pre-bills and invoices will generate <strong>every {{billingSettings?.billFrequencyQuantity}}
+          {{billingSettings?.billFrequencyQuantity == 1 ? 'Month' : billingSettings?.billFrequencyDuration?.name}}</strong>&nbsp;at
+        approximately midnight on&nbsp;<strong>the
+          {{recurringName[billingSettings.billFrequencyRecursOn-1]}}&nbsp;{{billFrequencyDayObj?.name}}&nbsp;of the
+          month</strong> <ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0"> (plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container>.
+      </ng-template>
+    </p>
+  </ng-template>
+  <div class="upcoming-change" *ngIf="billingSettings?.effectiveBillFrequencyQuantity">
+    <h4>Upcoming Changes</h4>
+    <div class="upcome-accordian open">
+      <div class="d-flex align-items-center upcome-head">
+        <span class="cursor-pointer upcome-drop mr-16" (click)="showUpcoming = !showUpcoming">
+          <em class="icon icon-angle-down icon-color" [ngClass]="showUpcoming ? 'icon-angle-down':'icon-angle-up'"></em>
+        </span>
+        <ng-container
+          *ngIf="upcomingChangesDisplay && upcomingChangesDisplay.effectiveBillFrequencyDuration && upcomingChangesDisplay.effectiveBillFrequencyDuration.code === 'WEEKS'">
+          Billing frequency will occur&nbsp;<strong>every {{upcomingChangesDisplay?.effectiveBillFrequencyQuantity}}
+            {{upcomingChangesDisplay?.effectiveBillFrequencyQuantity == 1 ? 'Week' : upcomingChangesDisplay?.effectiveBillFrequencyDuration?.name}}</strong>&nbsp;at
+          approximately midnight on&nbsp;<strong>{{effectiveBillFrequencyDayObj?.name}}</strong><ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0">&nbsp;(plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container>&nbsp;starting
+          on&nbsp;<strong>{{upcomingChangesDisplay?.effectiveBillFrequencyStartingDate | date : 'MM/dd/yyyy'}}</strong>.
+        </ng-container>
+        <ng-container
+          *ngIf="upcomingChangesDisplay && upcomingChangesDisplay.effectiveBillFrequencyDuration && upcomingChangesDisplay.effectiveBillFrequencyDuration.code === 'MONTHS'">
+          <ng-container *ngIf="billingSettings?.effectiveRepeatType === 2; else viewAsdetailssummaryupcoming">
+              Billing frequency will occur&nbsp;<strong>every {{upcomingChangesDisplay?.effectiveBillFrequencyQuantity}}
+                {{upcomingChangesDisplay?.effectiveBillFrequencyQuantity == 1 ? 'Month' : upcomingChangesDisplay?.effectiveBillFrequencyDuration?.name}}</strong>&nbsp;at
+              approximately midnight on&nbsp;<strong>the
+                {{billingSettings?.effectiveBillFrequencyRecursOn}}{{(billingSettings?.effectiveBillFrequencyRecursOn === 1) ? 'st' :
+              (billingSettings?.effectiveBillFrequencyRecursOn === 2) ? 'nd' :
+              (billingSettings?.effectiveBillFrequencyRecursOn === 3) ? 'rd' : 'th'}}&nbsp;of
+                the month</strong><ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0">&nbsp;(plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container>&nbsp;starting
+              on&nbsp;<strong>{{upcomingChangesDisplay?.effectiveBillFrequencyStartingDate | date : 'MM/dd/yyyy'}}</strong>.
+          </ng-container>
+          <ng-template #viewAsdetailssummaryupcoming>
+            Billing frequency will occur&nbsp;<strong>every {{upcomingChangesDisplay?.effectiveBillFrequencyQuantity}}
+              {{upcomingChangesDisplay?.effectiveBillFrequencyQuantity == 1 ? 'Month' : upcomingChangesDisplay?.effectiveBillFrequencyDuration?.name}}</strong>&nbsp;at
+            approximately midnight on&nbsp;<strong>the
+              {{recurringName[upcomingChangesDisplay.effectiveBillFrequencyRecursOn-1]}}&nbsp;{{effectiveBillFrequencyDayObj?.name}}&nbsp;of
+              the month</strong><ng-container *ngIf="billingSettings.timeEntryGracePeriod > 0">&nbsp;(plus the {{billingSettings.timeEntryGracePeriod}}-Day Time Entry Grace Period)</ng-container>&nbsp;starting
+            on&nbsp;<strong>{{upcomingChangesDisplay?.effectiveBillFrequencyStartingDate | date : 'MM/dd/yyyy'}}</strong>.
+          </ng-template>
+        </ng-container>
+        <div class="upcome-icon-action d-flex align-items-center pl-16" *ngIf="!editBillUpcoming">
+          <span class="cursor-pointer" (click)="editUpcoming()" id="edit-upcoming">
+            <em class="icon icon-edit icon-color"></em>
+          </span>
+          <span class="cursor-pointer ml-16" (click)="removeUpcoming()" id="remove-upcoming">
+            <em class="icon icon-remove icon-color"></em>
+          </span>
+        </div>
+      </div>
+      <div class="upcome-body pt-24 pl-32" *ngIf="showUpcoming">
+        <ng-container *ngIf="!editBillUpcoming">
+          <div class="form-group">
+            <label class="d-block mb-4">Effective Period</label>
+            {{billingSettings?.effectiveBillFrequencyStartingDate | date : 'MM/dd/yyyy'}} -
+            {{billingSettings?.effectiveBillFrequencyNextDate | date : 'MM/dd/yyyy'}}
+          </div>
+          <div class="form-group">
+            <label class="d-block mb-4">Bill Every</label>
+            <ng-container
+              *ngIf="billingSettings && billingSettings.effectiveBillFrequencyDuration && billingSettings.effectiveBillFrequencyDuration.code === 'WEEKS'">
+              {{billingSettings?.effectiveBillFrequencyQuantity}}
+              {{billingSettings?.effectiveBillFrequencyQuantity == 1 ? 'Week' : billingSettings?.effectiveBillFrequencyDuration?.name}}
+            </ng-container>
+            <ng-container
+              *ngIf="billingSettings && billingSettings.effectiveBillFrequencyDuration && billingSettings.effectiveBillFrequencyDuration.code === 'MONTHS'">
+              {{billingSettings?.effectiveBillFrequencyQuantity}}
+              {{billingSettings?.effectiveBillFrequencyQuantity == 1 ? 'Month' : billingSettings?.effectiveBillFrequencyDuration?.name}}
+            </ng-container>
+          </div>
+          <div class="form-group mb-0">
+            <label class="d-block mb-4">Repeats on</label>
+            <ng-container class="m-0 lh-20" *ngIf="billingSettings?.effectiveBillFrequencyDuration?.code === 'WEEKS'">
+              {{effectiveBillFrequencyDayObj?.name}}
+            </ng-container>
+            <ng-container class="m-0 lh-20" *ngIf="billingSettings?.effectiveBillFrequencyDuration?.code === 'MONTHS'">
+              <ng-container *ngIf="billingSettings?.effectiveRepeatType === 2; else viewAsMonthWeekUpcom">
+                {{billingSettings?.effectiveBillFrequencyRecursOn}}{{(billingSettings?.effectiveBillFrequencyRecursOn === 1) ? 'st' :
+                  (billingSettings?.effectiveBillFrequencyRecursOn === 2) ? 'nd' :
+                  (billingSettings?.effectiveBillFrequencyRecursOn === 3) ? 'rd' : 'th'}} of the month
+              </ng-container>
+              <ng-template #viewAsMonthWeekUpcom>
+                {{recurringName[billingSettings.effectiveBillFrequencyRecursOn-1]}} {{effectiveBillFrequencyDayObj?.name}} of the month
+              </ng-template>
+            </ng-container>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="editBillUpcoming">
+          <app-billing-period-upcoming [isFormSubmitted]="isFormSubmitted" (sendValue)="getValue($event);"
+            [pageType]="pageType" [billingSettings]="billingSettings">
+          </app-billing-period-upcoming>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</ng-container>
+<ng-container *ngIf="editBill">
+  <app-billing-period [isFormSubmitted]="isFormSubmitted" (sendValue)="getValue($event);" [pageType]="pageType"
+    [billingSettings]="billingSettings" [visibleOpratingAccount] = "'false'">
+  </app-billing-period>
+</ng-container>
+
+<div class="row gutter-16" *ngIf="editBill || editBillUpcoming">
+  <div class="col-6">
+    <div class="form-group position-relative mb-0" [ngClass]="{'pl-36': editBillUpcoming}">
+      <label>Change Note (optional)</label>
+      <span class="count-char">{{billingSettings?.changeNotes?.length || 0}}/1000</span>
+      <textarea class="form-control" maxlength='1000' rows="4" [(ngModel)]='billingSettings.changeNotes' id="change-note"></textarea>
+    </div>
+  </div>
+</div>

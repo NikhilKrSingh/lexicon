@@ -1,0 +1,211 @@
+<div class="npc-block base-matt-info-block">
+    <h2 class="mb-24">Basic Matter Information</h2>
+    <form [formGroup]="form">
+        <div class="form-group mb-32" [class.has-error]="f['contactType'].errors && formSubmitted">
+            <label class="d-block mb-20">Contact Type <sup>*</sup></label>
+            <div class="custom-control custom-radio m-0 pr-0">
+                <input type="radio" class="custom-control-input" id="rnd-btn-individual-1" formControlName="contactType" value="individual">
+                <label class="custom-control-label" for="rnd-btn-individual-1">Individual</label>
+            </div>
+            <div class="custom-control custom-radio mt-12 mb-0 pr-0">
+                <input type="radio" class="custom-control-input" id="rnd-btn-Corporate-2" formControlName="contactType" value="corporate">
+                <label class="custom-control-label" for="rnd-btn-Corporate-2">Corporate</label>
+            </div>
+            <span class="field-message text-danger ml-1 mt-3" *ngIf="f['contactType'].errors?.required && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.conatct_type_required }}
+            </span>
+        </div>
+        <div class="row gutter-16">
+            <div class="col-9">
+                <div class="row gutter-16">
+                    <div class="col-6">
+                        <div class="form-group" [class.has-error]="f['practiceId'].errors && (!f['practiceId'].pristine || formSubmitted)">
+                            <label>Practice Area <sup>*</sup></label>
+                            <ng-select [items]="practiceList" placeholder="Practice Area" formControlName="practiceId"
+                                [bindValue]="'id'" [bindLabel]="'name'"
+                                (change)="changePracticeArea($event)"
+                                [notFoundText]="'No record found'" [selectOnTab]="true" id="practiceIdId">
+                            </ng-select>
+                            <span class="field-message text-danger" *ngIf="f['practiceId'].errors && (!f['practiceId'].pristine || formSubmitted)">
+                                <em class="icon icon-error mr-4"></em>
+                                {{ errorData?.practice_area_error }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group" [class.has-error]="f['matterTypeId'].errors && (!f['matterTypeId'].pristine || formSubmitted)">
+                            <label>Matter Type <sup>*</sup></label>
+                            <ng-select [items]="matterTypeList"
+                                placeholder="Matter Type" [readonly]="matterTypeLoad" formControlName="matterTypeId" [bindValue]="'id'"
+                                [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" id="matterTypeIdId">
+                            </ng-select>
+                            <span class="field-message text-danger" *ngIf="f['matterTypeId'].errors && (!f['matterTypeId'].pristine || formSubmitted)">
+                                <em class="icon icon-error mr-4"></em>
+                                {{ errorData?.matter_type_error }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group m-0">
+                    <label>Jurisdiction of Matter</label>
+                    <div class="row gutter-16">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <ng-select [items]="stateList" placeholder="Jurisdiction"
+                                    formControlName="juridictionState" [bindValue]="'id'" [bindLabel]="'name'"
+                                    [notFoundText]="'No record found'" (change)="changeState()"
+                                    [selectOnTab]="true" id="juridictionStateId">
+                                </ng-select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group" [class.has-error]="f['juridictionCounty'].errors && (!f['juridictionCounty'].pristine || formSubmitted)">
+                                <input type="text" class="form-control" formControlName="juridictionCounty" placeholder="County" id="juridictionCountyId">
+                                <span class="field-message text-danger" *ngIf="f['juridictionCounty'].errors && (!f['juridictionCounty'].pristine || formSubmitted)">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.insecure_input }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="pt-8">
+            <div class="row gutter-16">
+                <div class="col-11">
+                    <h3 class="mb-16">Matter Details</h3>
+                    <div class="row gutter-16">
+                        <div class="col-9">
+                            <p class="lh-20">These selections for the <span class="font-weight-medium">Consultation
+                                    Office</span> and <span class="font-weight-medium">Attorney</span> will
+                                automatically pre-populate as filters inside of the Scheduling section. If you decide to
+                                schedule an event with a different attorney than is selected here, these fields will be
+                                automatically updated to reflect that change.</p>
+                        </div>
+                    </div>
+                    <div class="row gutter-16">
+                        <div class="col-4">
+                            <div class="form-group" [class.has-error]="f['initialConsultLawOffice'].errors && (!f['initialConsultLawOffice'].pristine || formSubmitted)">
+                                <label>Consultation Office <sup>*</sup></label>
+                                <ng-select [items]="officeList" placeholder="Choose an Office"
+                                    formControlName="initialConsultLawOffice" [bindValue]="'id'" [bindLabel]="'name'"
+                                    [notFoundText]="'No record found'" [clearable]="false" (change)='officeChange($event)' [selectOnTab]="" id="initialConsultLawOfficeId">
+                                </ng-select>
+                                <span class="field-message text-danger"
+                                *ngIf="f['initialConsultLawOffice'].errors && (!f['initialConsultLawOffice'].pristine || formSubmitted)">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.potential_client_basic_info_consultation_office }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group" [class.has-error]="f['initialConsultAttoney'].errors && (!f['initialConsultAttoney'].pristine || formSubmitted)">
+                                <label>Attorney <sup>*</sup></label>
+                                <ng-select [items]="attorneyList" placeholder="Choose an Attorney"
+                                    formControlName="initialConsultAttoney" [clearable]="false" [bindValue]="'id'" [bindLabel]="'name'"
+                                    [notFoundText]="'No record found'" [selectOnTab]="true" (change)="attorneychange($event)" id="initialConsultAttoneyId">
+                                </ng-select>
+                                <span class="field-message text-danger"
+                                *ngIf="f['initialConsultAttoney'].errors && (!f['initialConsultAttoney'].pristine || formSubmitted)">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.potential_client_basic_info_attorney }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group" [class.has-error]="f['originatingAttoney'].errors && (!f['originatingAttoney'].pristine || formSubmitted)">
+                                <label>Originating Attorney <sup>*</sup></label>
+                                <ng-select [items]="originatingAttorneyList" placeholder="Choose an Attorney"
+                                    formControlName="originatingAttoney" [bindValue]="'id'" [bindLabel]="'name'"
+                                    [notFoundText]="'No record found'" [selectOnTab]="true" id="originatingAttoneyId">
+                                </ng-select>
+                                <span class="field-message text-danger"
+                                *ngIf="f['originatingAttoney'].errors && (!f['originatingAttoney'].pristine || formSubmitted)">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.potential_client_basic_info_attorney_originating }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cust-card pt-8 mb-0">
+            <div class="cust-card-head d-flex align-items-center justify-content-between mx-0">
+                <div class="d-flex align-items-center">
+                  <h3 class="m-0">Blocked Employees</h3>
+                  <i class="lh-20 ml-8">Optional</i>
+                </div>
+            </div>
+            <div class="cust-card-body section-area">
+                <p class="lh-20">Blocked employees cannot see the matter anywhere in the system, including in detail, lists, mentions, or reports, unless otherwise specified.</p>
+                <button class="btn btn-primary bulk-btn btn-icon" (click)="addBlockedEmployee()"><i class="icon icon-plus"></i>Add Blocked Employee</button>
+                <div id="blockedEmployeeTable" class="position-relative pt-24" *ngIf="employeesRows?.length > 0">
+                    <div class="custom-table matter-list corporate-contact section-area hide-datatable-footer-inner">
+                        <ngx-datatable class="material common-table matter-table" [rows]="employeesRows" [columnMode]="ColumnMode.force"
+                            [headerHeight]="50" [footerHeight]="0" rowHeight="auto" id="blocked-employee-tbl">
+                            <ngx-datatable-column [resizeable]="false" prop="fullName" name="Name" [sortable]="true" [width]="145">
+                                <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                                    <span
+                                        class="d-block lh-20 font-weight-medium mb-4">{{row.fullName}}</span>
+                                    <span class="d-block lh-20 helper-text font-weight-normal">{{row.email}}</span>
+                                </ng-template>
+                            </ngx-datatable-column>
+                            <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [sortable]="true" [width]="125">
+                            </ngx-datatable-column>
+                            <ngx-datatable-column [resizeable]="false" prop="primaryOffice.name" name="Primary Office" [sortable]="true" [width]="145">
+                            </ngx-datatable-column>
+                            <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [sortable]="true" [width]="305">
+                                <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                                    <div *ngIf="row.description">
+                                        <app-read-more [maxLines]='2' [text]='row.description'></app-read-more>
+                                    </div>
+                                    <span class="d-block" *ngIf="!row.description">
+                                        --
+                                    </span>
+                                </ng-template>
+                            </ngx-datatable-column>
+
+                            <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100">
+                                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                                    <div class="icon-group d-flex justify-content-end">
+                                        <span
+                                            (click)="removeBlockedEmployee(row, RemoveBlockedEmployee)" id="remove-blocked-employee-index-{{rowIndex}}">
+                                            <em class="icon icon-remove icon-color"></em>
+                                        </span>
+                                    </div>
+                                </ng-template>
+                            </ngx-datatable-column>
+                        </ngx-datatable>
+                    </div>
+                    <app-loader [active]="blockedLoading"></app-loader>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<ng-template #RemoveBlockedEmployee let-modal class="delete-modal">
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Remove Blocked Employee</h3>
+        <button type="button" class="close" (click)="modal.close(false)" aria-label="Close" id="closeId">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-24">
+        <div class="d-flex align-items-start">
+            <em class="icon icon-warning text-warning fs-18 mr-16"></em>
+            <div class="lh-20">
+                <p class="m-0">Are you sure you want to remove this blocked employee?</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.close(false)" id="cancleId">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="modal.close(true) " id="yesRemoveId">
+            Remove
+        </button>
+    </div>
+</ng-template>

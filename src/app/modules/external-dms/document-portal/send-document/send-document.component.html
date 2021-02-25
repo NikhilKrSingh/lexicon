@@ -1,0 +1,118 @@
+<div class="container">
+  <div class="main-content">
+    <div class="heading">
+      <h1>Send Document for Upload</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="info-block">
+          <h4 class="text-xlarge mt-0 mb-8">Select Files</h4>
+          <p class="helper-text font-weight-normal lh-20">Select one or more files from your local system to upload.</p>
+          <div class="upload-check d-inline-block position-relative">
+            <form id="fileForm">
+              <input type="file" id="inpuFile" #file (change)="selectedFile(file.files)" multiple="true">
+            </form>
+            <span class="btn btn-primary"> Select Files</span>
+          </div>
+          <div class="fprogress-bar select-file-up progress-error max-width-fit" *ngIf="fileErrorMsg">
+            <div class="d-flex mt-4" >
+              <span class="prog-close mr-8">
+                <em class="icon icon-close"></em>
+              </span>
+              <div class="lh-20">
+                <span class="d-block font-weight-medium">
+                  File upload error!
+                </span>
+                {{fileErrorMsg}}
+              </div>
+            </div>
+          </div>
+          <div class="upload-file-group pt-8" *ngIf="fileArray.length > 0">
+            <div class="upload-file-block" [ngClass]="(file.isFileSizeError) ? 'upload-file-error d-flex justify-content-between align-items-center p-16' :''" *ngFor="let file of fileArray;trackBy: trackByFn;let i=index">
+              <div class="row gutters-16" *ngIf="!file.isFileSizeError">
+                <div class="col-4">
+                  <div class="uploaded-file-name d-flex align-items-center justify-content-between mb-16">
+                    <div class="d-flex align-items-center font-weight-medium small helper-text">
+                      <img width="20px" class="mr-20" [src]="file.name | commonService : 'getFileImage' : true">
+                      {{file.name}}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group mb-16 " [ngClass]="(file.isExistError) ? 'email-exist has-error' : ''">
+                    <input type="text" [(ngModel)]="file.nameOfFile" class="form-control" placeholder="Provide name"
+                      (ngModelChange)="onNameChanged(i)" [disabled]="file.uploaded" id="provide-name-{{i}}">
+                    <span class="field-message text-danger d-flex align-items-start" *ngIf="file.isExistError">
+                      <em class="icon icon-error mr-4 mt-0"></em>
+                      {{file.isExistError}}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="d-flex align-items-center justify-content-between pt-12 badge-dots-block float-right">
+                    
+                    <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                      [class.active]="currentIndex == i" (click)="openSubMenu(i)" appAutoCloseOutsideClick
+                      (outsideClick)="onClickedOutside(i)">
+                      <em class="icon icon-dot-verti"></em>
+                      <div class="dropdown-menu dropdown-menu-right overflow-hide custom-height"
+                        aria-labelledby="dropdownMenuButton">
+                        <div class="dropdown-slimscrol">
+                          <a href="javascript:void(0);" class="dropdown-item"
+                            (click)="currentIndex=null;removeImage(i);" id="remove-image-index-{{i}}">
+                            Remove document
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="d-flex align-items-center font-weight-medium small helper-text" *ngIf="file.isFileSizeError">
+                  <img [src]="file.name | commonService : 'getFileImage' : true" width="20px">
+                  <span class="ml-12">{{file?.name}}</span>
+                </div>
+                <div class="d-flex align-items-center" *ngIf="file.isFileSizeError">
+                  <div class="d-flex align-items-center">
+                    <em class="icon icon-error text-danger mr-8"></em>
+                    <span class="small lh-16">Files must be no larger than 25 MB in size</span>
+                  </div>
+                  <span class="ml-24">
+                    <em class="icon icon-close-fill text-large cursor-pointer icon-color" (click)="removeImage(i)" id="rem-img-index-{{i}}"></em>
+                  </span>
+                </div>
+            </div>
+          </div>
+          <h4 class="text-xlarge mt-40 mb-8">Select Matter</h4>
+          <p class="helper-text font-weight-normal lh-20">Select which matter the document is associated with.</p>
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group" [ngClass]="{'has-error': matterFolderError && !matterFolderId}">
+                <label>Matter Folder</label>
+                <ng-select [items]="matterList" placeholder="Select Matter Folder" [selectOnTab]="true"
+                  [searchable]="false" [clearable]="false" bindValue="folderId" bindLabel="matterName"
+                  [(ngModel)]="matterFolderId" (ngModelChange)="reVerifyDocs($event)" id="matter-folder">
+                  <ng-template ng-option-tmp let-item="item">
+                    <h4 class="m-0">{{ item.matterName ? item.matterName : '--'}}</h4>
+                    <span
+                      class="small helper-text font-weight-regular d-block">{{ (item.matterName === 'Not Matter Related') ? "If you're not sure which matter your document is for, select this option" : item?.practiceArea?.name ? item?.practiceArea?.name : '' }}</span>
+                  </ng-template>
+                </ng-select>
+                <span class="field-message text-danger" [style.display]="(matterFolderError) ? 'block': 'none'"
+                  *ngIf="matterFolderError && !matterFolderId">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select matter folder.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+      </div>
+    </div>
+    <button type="button" class="btn btn-primary float-right"
+      [disabled]="fileLoader || loading || !checkIfScanPassedDocsExistFn"
+      (click)="sendFilesForScan()" id="send-document">Send Document</button>
+    <button type="button" class="btn btn-light float-right mr-10" (click)="cancelFilesUpload()" id="cancel-btn">Cancel</button>
+  </div>
+</div>

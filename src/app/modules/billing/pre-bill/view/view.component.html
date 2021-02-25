@@ -1,0 +1,140 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" (click)='gotoPrebilling()'><a href="javascript:void(0)">Pre-Bills</a></li>
+      <li class="breadcrumb-item active" aria-current="page" [title]='prebillingSettings?.matter?.name'>
+        <ng-container *ngIf='prebillingSettings?.matter?.name?.length < 30'>
+          Pre-Bill - {{prebillingSettings?.matter?.name}}
+        </ng-container>
+        <ng-container *ngIf='prebillingSettings?.matter?.name?.length >= 30'>
+          Pre-Bill - {{prebillingSettings?.matter?.name?.slice(0, 25)}}...
+        </ng-container>
+      </li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2">
+            <span *ngIf='viewmode'>Review</span>
+            <span *ngIf='!viewmode'>View</span>
+            <span> Pre-Bill</span>
+          </h2>
+          <span
+            class="text-small font-weight-medium d-flex align-items-center">{{prebillingSettings?.preBillStatus?.name}}</span>
+        </div>
+        <div class="schedule-label d-flex align-items-center mt-16" *ngIf='prebillingSettings?.isFixed'>
+          <span class="mr-8"><em class="icon icon-info text-primary view-bil-icon"></em></span>
+          <span class="schedule-text text-large font-weight-medium">Fixed-Fee Matter</span>
+        </div>
+      </div>
+      <div class="btn-group" *ngIf='isBillingAttorney'>
+        
+        
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" (click)='previewInvoice()' id="reviw-preview-invoice-btn">Preview Invoice</button>
+        <div class="d-inline-block ml-16" ngbDropdown *ngIf="viewmode" id="review-pre-bill-action-div">
+          <button class="btn btn-primary bulk-btn" ngbDropdownToggle>Pre-Bill Actions</button>
+          <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+            <a href="javascript:void(0)" ngbDropdownItem (click)="deferSelected()" [disabled]="!showDefer" id="review-defer-selected-btn">Defer Selected</a>
+            <a href="javascript:void(0)" ngbDropdownItem  (click)="submitPriBill('submit')" *ngIf="submitBtn" [disabled]="!showSubmit" id="review-submit-btn">Submit</a>
+            <a href="javascript:void(0)" ngbDropdownItem  (click)="submitPriBill('force')" *ngIf="forceApproveBtn" [disabled]="!showSubmit" id="review-force-approve-btn">Force Approve</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" *ngIf='prebillingSettings?.isFixed && plan'>
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Fixed Fee Services</h2>
+          </div>
+          <ng-container *ngIf='prebillingSettings?.fixedFeeService; else noFixedFeeService'>
+            <app-fixed-fee-services
+              [prebillingSettings]='prebillingSettings'
+              [isAttorney]='isBillingAttorney'
+              [viewmode]="viewmode"
+              (validateSaveBtn)="selectedPreBill($event)">
+            </app-fixed-fee-services>
+          </ng-container>
+
+          <ng-template #noFixedFeeService>
+            <p>No unbilled fixed fee service recorded</p>
+          </ng-template>
+        </div>
+        <div class="info-block pt-32">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Add-Ons</h2>
+          </div>
+          <ng-container *ngIf='prebillingSettings?.addOnServices?.length > 0; else noAddOnServices'>
+            <app-add-on-services
+              [prebillingSettings]='prebillingSettings'
+              [isAttorney]='isBillingAttorney'
+              [viewmode]="viewmode"
+              (validateSaveBtn)="selectedPreBill($event)">
+            </app-add-on-services>
+          </ng-container>
+
+          <ng-template #noAddOnServices>
+            <p>No unbilled fixed fee add-ons recorded</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <ng-container *ngIf='prebillingSettings'>
+      <app-view-pre-billing-time *ngIf='!prebillingSettings?.isFixed'
+        [matterDetails]="matterDetails"
+        [prebillingSettings]='prebillingSettings'
+        (selectedPreBill)="selectedPreBill($event)"
+        [isBillingAttorney]='isBillingAttorney'
+        [viewmode]="viewmode"
+        (updateList)="updateList($event)">
+      </app-view-pre-billing-time>
+
+      <ng-container>
+        <app-view-pre-billing-disbursements
+          [matterDetails]="matterDetails"
+          [prebillingSettings]='prebillingSettings'
+          [isBillingAttorney]='isBillingAttorney'
+          (updateList)="updateList($event)"
+          [viewmode]="viewmode"
+          (selectedPreBill)="selectedPreBill($event)">
+        </app-view-pre-billing-disbursements>
+      </ng-container>
+
+      <ng-template #noPreBillingDisbursementss>
+        <div class="card">
+          <div class="card-body">
+            <div class="info-block pt-0">
+              <div class="d-flex justify-content-between align-items-center mb-0">
+                <h2>Disbursements</h2>
+              </div>
+              <p>No disbursements recorded</p>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
+      
+
+      
+
+      <ng-template #noWriteOffs>
+        <div class="card">
+          <div class="card-body">
+            <div class="info-block pt-0">
+              <div class="d-flex justify-content-between align-items-center mb-0">
+                <h2>Write-Offs</h2>
+              </div>
+              <p>No write-offs recorded</p>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ng-container>
+  </div>
+</div>
+
+<app-loader [active]='loading'></app-loader>

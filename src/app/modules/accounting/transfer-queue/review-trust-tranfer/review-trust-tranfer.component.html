@@ -1,0 +1,186 @@
+<div class="container">
+    <div class="main-content review">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" id="rttbrd-dash" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item"><a [routerLink]="['/accounting/transfer-queue']" id="rttbrd-tqueue" href="javascript:void(0)">Transfer Queue</a></li>
+            <li class="breadcrumb-item"><a [routerLink]="['/accounting/new-trust-transfer']" id="rttbrd-vewtt" href="javascript:void(0)">New Trust Transfer</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Review Trust Transfer</li>
+        </ol>
+        <div class="heading">
+            <h1>Review Trust Transfer</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h3 class="mb-24">Transfer Source</h3>
+                <div class="custom-table transfer-source-preview">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-borderless table-align-top" id="rtttransfersrc-listtable">
+                            <thead>
+                                <tr>
+                                    <th class="source">Source Account</th>
+                                    <th *ngIf="!isBankAccount" class="client">Client</th>
+                                    <th *ngIf="!isBankAccount" class="matter">Matter</th>
+                                    <th *ngIf="!isBankAccount" class="previous-balance">Previous Balance</th>
+                                    <th *ngIf="!isBankAccount" class="new-balance">New Balance</th>
+                                    <th *ngIf="isBankAccount" class="transfer-amount">Transfer Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody *ngIf="transferSourceList.length > 0">
+                                <tr *ngFor="let item of transferSourceList; trackBy :trackByFn; let i = index">
+                                    <td>
+                                        <span *ngIf="item.source">{{item.source.name}}</span>
+                                    </td>
+                                    <td *ngIf="!isBankAccount">
+                                        <span *ngIf="item.client && !item.isBankAccount">
+                                            {{item.client.name}}
+                                        </span>
+                                        <span *ngIf="item.isBankAccount">
+                                            -
+                                        </span>
+                                    </td>
+                                    <td *ngIf="!isBankAccount">
+                                        <div class="matter-name" *ngIf="item.matter && !item.isBankAccount">
+                                            {{item.matter.name}}
+                                        </div>
+                                        <span *ngIf="item.isBankAccount">
+                                            -
+                                        </span>
+                                    </td>
+                                    <td *ngIf="!isBankAccount">
+                                        <div *ngIf="!item.isBankAccount">
+                                            <strong>{{item.balance | currency : 'USD' : 'symbol': '1.2-2'}}</strong>
+                                        </div>
+                                        <div *ngIf="item.isBankAccount">
+                                            -
+                                        </div>
+                                        <div class="text-danger mt-4" *ngIf="item.amountTransfer != null">
+                                            {{-item.amountTransfer | currency : 'USD' : 'symbol': '1.2-2'}}
+                                        </div>
+
+                                    </td>
+                                    <td *ngIf="!isBankAccount">
+                                        <span *ngIf="!item.isBankAccount">
+                                            <strong>
+                                                {{item.balance - item.amountTransfer | currency : 'USD' : 'symbol': '1.2-2'}}
+                                            </strong>
+                                        </span>
+                                        <span *ngIf="item.isBankAccount">
+                                            -
+                                        </span>
+                                    </td>
+                                    <td *ngIf="isBankAccount">
+                                        <div class="text-danger mt-4" *ngIf="item.amountTransfer != null">
+                                            {{-item.amountTransfer | currency : 'USD' : 'symbol': '1.2-2'}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h3 class="mb-24">Transfer Target</h3>
+                <div class="custom-table">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-borderless" id="rtttransfertarget-listtable">
+                            <thead>
+                                <tr>
+                                    <th class="source">Target Account</th>
+                                    <th *ngIf="!isTargetBankAccount" class="client">Client</th>
+                                    <th *ngIf="!isTargetBankAccount" class="matter">Matter</th>
+                                    <th *ngIf="!isTargetBankAccount" class="previous-balance">Previous Balance</th>
+                                    <th *ngIf="!isTargetBankAccount" class="new-balance">New Balance</th>
+                                    <th *ngIf="isTargetBankAccount" class="transfer-amount">Added Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span
+                                            *ngIf="transferTargetDisplay && transferTargetDisplay.source">{{transferTargetDisplay.source.name}}</span>
+                                    </td>
+                                    <td *ngIf="!isTargetBankAccount">
+                                        <span
+                                            *ngIf="transferTargetDisplay && transferTargetDisplay.client && transferTargetDisplay.client.name">{{transferTargetDisplay.client.name}}</span>
+                                        <span
+                                            *ngIf="!(transferTargetDisplay && transferTargetDisplay.client && transferTargetDisplay.client.name)">-</span>
+                                    </td>
+                                    <td *ngIf="!isTargetBankAccount">
+                                        <span
+                                            *ngIf="transferTargetDisplay && transferTargetDisplay.matter && transferTargetDisplay.matter.name">{{transferTargetDisplay.matter.name}}</span>
+                                        <span
+                                            *ngIf="!(transferTargetDisplay && transferTargetDisplay.matter && transferTargetDisplay.matter.name)">-</span>
+                                    </td>
+                                    <td *ngIf="!isTargetBankAccount">
+                                        <span *ngIf="transferTargetDisplay && !transferTargetDisplay.isBankAccount"
+                                            class="d-block lh-20">
+                                            <strong>
+                                                {{transferTargetDisplay.balance  | currency : 'USD' : 'symbol': '1.2-2'}}
+                                            </strong>
+                                        </span>
+                                        <span *ngIf="transferTargetDisplay && transferTargetDisplay.isBankAccount"
+                                            class="d-block lh-20">-</span>
+                                    </td>
+                                    <td *ngIf="!isTargetBankAccount">
+                                        <strong>
+                                            {{newTargetBalance  | currency : 'USD' : 'symbol': '1.2-2'}}
+                                        </strong>
+                                    </td>
+                                    <td *ngIf="isTargetBankAccount">
+                                        <strong>
+                                            {{newTargetBalance  | currency : 'USD' : 'symbol': '1.2-2'}}
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h3 class="mb-24">Transfer Details</h3>
+                <div class="form-group">
+                    <label class="d-block mb-4">Date of Transfer</label>
+                    <span class="d-block">{{dateOfTransfer | date: 'MM/dd/yyyy'}}</span>
+                </div>
+                <div class="form-group">
+                    <label class="d-block mb-4">Description</label>
+                    <span class="d-block">{{description}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pt-8">
+            <div class="btn-group">
+                <button type="button" (click)="back()" class="btn btn-light" id="rtttransfertarget-back-btn">Back</button>
+                <button type="button" (click)="transferFund(TrustTransferAlert,'','')" class="btn btn-primary" id="rtttransfertarget-trnsfrfund-btn" [disabled]="transferFundClick">Transfer Funds</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #TrustTransferAlert let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Trust Transfer</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" id="rttttta-close-btn" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="d-flex align-items-start">
+            <em class="icon icon-info text-danger fs-24"></em>
+            <div class="lh-20 ml-16">
+                <p class="m-0">{{trasferErrorMsg}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" (click)="modal.dismiss('Cross click'); back();" class="btn btn-primary"  id="rttttta-rttt-btn">Return to Trust Transfer</button>
+    </div>
+</ng-template>

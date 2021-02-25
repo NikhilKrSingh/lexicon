@@ -1,0 +1,45 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Create Charge Code</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  
+  <div [formGroup]='chargeForm'>
+    <div class="form-group">
+      <label>Code <sup>*</sup></label>
+      <input type="text" class="form-control" formControlName="code" disabled id="code">
+    </div>
+    <div class="form-group position-relative">
+      <label>Description <sup>*</sup></label>
+      <span class="count-char">{{chargeForm?.value?.description?.length || 0}}/250</span>
+      <textarea class="form-control" maxlength='250' rows="4" placeholder="Write a description" formControlName="description" id="description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="mb-12">Bill Type <sup>*</sup></label>
+      <div class="custom-control custom-radio pr-0" *ngFor="let billType of billingTypeList;trackBy :trackByFn;">
+        <input type="radio" id="customRadio1_{{billType.code}}" class="custom-control-input"
+          [value]='billType.id' formControlName='billingType'>
+        <label class="custom-control-label" for="customRadio1_{{billType.code}}">{{billType.name}}</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Billable To <sup>*</sup></label>
+      <ng-select [items]="billingToList" placeholder="Select billable To" formControlName="billableTo" [bindValue]="'id'"
+        [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" id="billable-to">
+      </ng-select>
+    </div>
+    <div class="form-group">
+      <label>Initial Rate <sup>*</sup></label>
+      <input type="text" class="form-control" prefix="$" mask="separator.2" thousandSeparator="," placeholder="Enter rate"
+      formControlName='rateAmount' id="initial-rate">
+    </div>
+  </div>
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!chargeForm.valid || disable" id="save-btn">Save</button>
+</div>

@@ -1,0 +1,286 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a [routerLink]="['/dashboard']" href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item"><a [routerLink]="['/firm/account-settings']" href="javascript:void(0)">Accounting Settings</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ accountDetails?.name }}</li>
+        </ol>
+        <div class="profile-content profile-client mb-32">
+            <div class="profile-heading">
+                <h2 class="mt-0 mb-2">{{ accountDetails?.name }}</h2>
+                <span class="text-small font-weight-medium d-flex align-items-center">{{ accountDetails?.isMerchantAccount ? 'Merchant Bank Account' : 'Non-Merchant Bank Account'}}</span>
+            </div>
+        </div>
+        <div *ngIf="accountDetails?.isMerchantAccount">
+            <div class="row gutter-16">
+                <div class="col-6">
+                    <div class="card card-full-h">
+                        <div class="card-body">
+                            <h3 class="mb-16">Account Details</h3>
+                            <div class="cust-table-scroll">
+                                <table class="cust-table table">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="label d-block">Account Name</span>
+                                                {{ accountDetails?.name }}
+                                            </td>
+                                            <td>
+                                                <span class="label d-block">Transaction Type</span>
+                                                {{ accountDetails?.isCreditCardAccount ? 'Credit Card' : ''}} {{ accountDetails?.isAchAccount ? 'ACH' : ''}}
+                                            </td>
+                                            <td>
+                                                <span class="label d-block">Account Type</span>
+                                                {{ accountDetails?.usioAccountTypeId == 1 ? 'Operating' : accountDetails?.usioAccountTypeId == 2 ? 'Trust' : accountDetails?.usioAccountTypeId == 3 ? 'Credit Card Trust ' : ''}}
+                                            </td>
+                                            <td>
+                                                <span class="label d-block">Status</span>
+                                                {{ accountDetails?.accountUsioStatus == 'PendingSignatory' ?  'Pending Signatory': accountDetails?.accountUsioStatus }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="label d-block">Last Activity</span>
+                                                {{ accountDetails?.lastUpdated | date: 'MM/dd/yyyy' }}
+                                            </td>
+                                            <td>
+                                                <span class="label d-block">Merchant Username</span>
+                                                {{ accountDetails?.merchantUserName }}
+                                            </td>
+                                            <td colspan="2">
+                                                <span class="label d-block">Merchant ID</span>
+                                                {{ accountDetails?.merchantId }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card card-full-h">
+                        <div class="card-body">
+                            <h3 class="mb-16">Owners</h3>
+                            <div class="cust-table-scroll">
+                                <table class="cust-table table">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="label d-block">Owners</span>
+                                                {{ accountDetails?.ownerEmail1 }}<br>
+                                                {{ accountDetails?.ownerEmail2 }}<br>
+                                                {{ accountDetails?.ownerEmail3 }}<br>
+                                                {{ accountDetails?.ownerEmail4 }}<br>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-16">Business Details</h3>
+                    <div class="cust-table-scroll">
+                        <table class="cust-table table">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <span class="label d-block">Business Name (DBA)</span>
+                                        {{ accountDetails?.businessName }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Legal Business Name</span>
+                                        {{ accountDetails?.legalBusinessName }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Business Start Date</span>
+                                        {{ accountDetails?.businessStartDate | date: 'MM/dd/yyyy' }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Business Description</span>
+                                        <div style="max-width: 320px;">
+                                        {{ accountDetails?.businessDescription }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span class="label d-block">Address</span>
+                                        {{ accountDetails?.address1 }}
+                                        {{ accountDetails?.address2 }}<br>
+                                        {{ accountDetails?.city }}, {{ accountDetails?.stateName }} {{ accountDetails?.postalCode }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Phone Number</span>
+                                        {{ accountDetails?.phoneNo }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Website</span>
+                                        {{ accountDetails?.website }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Business Email Address</span>
+                                        {{ accountDetails?.email }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span class="label d-block">Merchant Category Code</span>
+                                        {{ accountDetails?.merchantCategoryCode }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">NAICS Code</span>
+                                        {{ accountDetails?.naicsCode }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Ownership Type</span>
+                                        {{ accountDetails?.ownershipType }}
+                                    </td>
+                                    <td>
+                                        <span class="label d-block">Federal Tax ID/SSN</span>
+                                        {{ accountDetails?.federalTaxIdOrSsn }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-16">Account Information</h3>
+                    <div>
+                        <h4 class="mb-16 text-xlarge">Settlement Account</h4>
+                        <div class="cust-table-scroll">
+                            <table class="cust-table table">
+                                <tbody>
+                                    <tr>
+                                        <td class="w-200">
+                                            <span class="label d-block">Account Type</span>
+                                            {{ accountDetails?.isSettlementPersonal ? 'Personal' : 'Business'}}
+                                        </td>
+                                        <td class="w-200">
+                                            <span class="label d-block">Name on Settlement Account</span>
+                                            {{ accountDetails?.settlementAccountName }}
+                                        </td>
+                                        <td class="w-270">
+                                            <span class="label d-block">Settlement Account Routing Number</span>
+                                            {{ accountDetails?.settlementAccountRoutingNumber}}
+                                        </td>
+                                        <td>
+                                            <span class="label d-block">Settlement Account Number</span>
+                                            {{ accountDetails?.settlementAccountNumber }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="pt-24">
+                        <h4 class="mb-16 text-xlarge">Fees Settlement Account</h4>
+                        <div class="cust-table-scroll">
+                            <table class="cust-table table">
+                                <tbody>
+                                    <tr>
+                                        <td class="w-200">
+                                            <span class="label d-block">Fees Settlement Account Type</span>
+                                            {{ accountDetails?.isFeesSettlementPersonal ? 'Personal' : 'Business'}}
+                                        </td>
+                                        <td class="w-200">
+                                            <span class="label d-block">Name on Fees Account</span>
+                                            {{ accountDetails?.feesSettlementAccountName }}
+                                        </td>
+                                        <td class="w-270">
+                                            <span class="label d-block">Fees Settlement Account Routing Number</span>
+                                            {{ accountDetails?.feesSettlementAccountRoutingNumber }}
+                                        </td>
+                                        <td>
+                                            <span class="label d-block">Fees Settlement Account Number</span>
+                                            {{accountDetails?.feesSettlementAccountNumber}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="!accountDetails?.isMerchantAccount">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-16">Account Details</h3>
+                    <div class="row gutter-16">
+                        <div class="col-xl-6">
+                            <div class="cust-table-scroll">
+                                <table class="cust-table table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="w-200">
+                                                <span class="label d-block">Account Name</span>
+                                                {{ accountDetails?.name }}
+                                            </td>
+                                            <td class="w-200">
+                                                <span class="label d-block">Account Type</span>
+                                                {{ accountDetails?.usioAccountTypeId == 1 ? 'Operating' : accountDetails?.usioAccountTypeId == 2 ? 'Trust' : accountDetails?.usioAccountTypeId == 3 ? 'Credit Card Trust ' : ''}}
+                                            </td>
+                                            <td class="w-270">
+                                                <span class="label d-block">Status</span>
+                                                {{ accountDetails?.accountUsioStatus }}
+                                            </td>
+                                            <td>
+                                                <span class="label d-block">Last Activity</span>
+                                                {{ accountDetails?.lastUpdated | date: 'MM/dd/yyyy' }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-16">Account Information</h3>
+                    <div class="row gutter-16">
+                        <div class="col-xl-7">
+                            <div class="cust-table-scroll">
+                                <table class="cust-table table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="w-200">
+                                                <span class="label d-block">Account Type</span>
+                                                Personal
+                                            </td>
+                                            <td class="w-200">
+                                                <span class="label d-block">Name on Account</span>
+                                                {{ accountDetails?.name }}
+                                            </td>
+                                            <td class="w-270">
+                                                <span class="label d-block">Account Routing Number</span>
+                                                {{ accountDetails?.nonMerchaneAccountRountingNumber }}
+                                            </td>
+                                            <td>
+                                                <span class="label d-block">Account Number</span>
+                                                {{ accountDetails?.nonMerchaneAccountNumber }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pb-24">
+            <button type="button" class="btn btn-light"><a [routerLink]="['/firm/account-settings']" href="javascript:void(0)" id="back-to-account-settings">Back to Accounting Settings</a></button>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+    </div>
+</div>

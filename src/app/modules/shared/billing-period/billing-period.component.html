@@ -1,0 +1,535 @@
+<ng-container *ngIf="(opratingaccount == 'View' || opratingaccount == 'Edit' || opratingaccount == 'Create') && visibleOpratingAccount == 'true'">
+  <app-loader [active]="loading"></app-loader>
+
+  <div class="mb-24 d-flex align-items-center justify-content-start">
+    <h3 class="mb-0 mt-0">Operating Accounts
+      <sup class="text-danger ml-4"*ngIf="opratingaccount == 'Edit' || opratingaccount == 'Create' ">*</sup>
+    </h3>
+    <a *ngIf="opratingaccount == 'View' && isEditPermission" class="ml-8 lh-20" href="javascript:void(0);" (click)="opratingaccount='Edit'; editOperatingAccount(); editAccount.emit(true)" id="edit-operating-btn" ><em class="icon icon-edit icon-color small"></em></a>
+  </div>
+
+
+  <div  class="alert alert-warning d-flex justify-content-between my-24 no-shadow" *ngIf="!permissionList?.BANK_ACCOUNT_CONFIGURATIONisAdmin && !permissionList?.ACCOUNTINGisAdmin" id="warning-confirm-department">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-warning ml-12"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="mr-16 mt-0 mb-0">Warning</h4>
+        <span>Please confirm with your accounting department before connecting any accounts to the office.</span>
+      </div>
+    </div>
+  </div>
+
+  <div  class="alert alert-danger d-flex justify-content-between my-24 no-shadow" *ngIf="selectedOpratingAccounts.length == 0 && next" id="err-select-operating-ac">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-info ml-12"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="mr-16 mt-0 mb-0">Error</h4>
+        <span>Please select an operating account before proceeding.</span>
+      </div>
+    </div>
+  </div>
+  <div class="row my-24" *ngIf="originalOfficeBankList?.length > 1">
+    <div class="col-8">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input
+            type="text"
+            class="form-control search-input"
+            name="searchAccount"
+            placeholder="Search by account name or account number"
+            [(ngModel)]="searchText"
+            (keyup)='applyFilter()'
+            [disabled]="loading"
+            id="searchTextId">
+
+            <button
+            class="btn"
+            type="button"
+            (click)='applyFilter()'
+            [disabled]="loading"
+            id="search-acc-name-number-btn"
+            >Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-18" *ngIf="originalOfficeBankList?.length > 1">
+    <div class="col-3">
+        <div class="form-group">
+            <label>Merchant Account</label>
+            <ng-select
+              [items]="merchantAccountFilterList"
+              placeholder="Choose an option"
+              [(ngModel)]="merchantAccountFilterId"
+              [bindValue]="'id'"
+              [bindLabel]="'name'"
+              [clearable]="true"
+              [selectOnTab]="true"
+              [readonly]="loading"
+              (change)="applyFilter()"
+              id="merchantAccountFilterIdId">
+            </ng-select>
+        </div>
+    </div>
+
+    <div class="col-3">
+        <div class="form-group">
+            <label>Transaction Account</label>
+            <app-multiselect-dropdown [title]="title" [selections]="transactionAccountFilterId" [displaySubItem]="transactionAccountFilterList"
+            [filterName]="'Apply Filter'"
+            (applyFilter)="applyFilter()" (onSelectionChanged)="getSelectedStatus($event)" id="transactionAccountFilterIdId"></app-multiselect-dropdown>
+        </div>
+    </div>
+  </div>
+  <div class="custom-table section-area">
+      <ngx-datatable
+          #table
+          class="material common-table no-min-height"
+          [class.matter-no-data]="officeBankList?.length === 0"
+          [rows]="officeBankList"
+          [columnMode]="'force'"
+          [headerHeight]="50"
+          [footerHeight]="footerHeight"
+          rowHeight="auto"
+          [selectionType]="SelectionType.checkbox"
+          [count]="page.totalElements"
+          [offset]="page.pageNumber"
+          [limit]="page.size"
+          [selected]="selectedOpratingAccounts"
+          (select)="onSelect($event)"
+          id="officeBankListId">
+          <ngx-datatable-column [resizeable]="false"
+            name="Name"
+            prop="name"
+            [width]="150">
+              <ng-template
+                ngx-datatable-cell-template
+                let-value="value"
+                let-row="row"
+                let-rowIndex="rowIndex"
+                let-isSelected="isSelected"
+                let-onCheckboxChangeFn="onCheckboxChangeFn">
+                <div class="d-flex align-items-start">
+                  <label [hidden]="isCheckboxHidden" class="cust-check mr-12 mt-2" *ngIf="(opratingaccount == 'Create' || opratingaccount == 'Edit' ) && originalOfficeBankList?.length >= 1">
+                    <input type="checkbox" [checked]="isSelected || originalOfficeBankList?.length==1" (change)="onCheckboxChangeFn(row)" id="operating-ac-{{rowIndex}}" [disabled]="originalOfficeBankList?.length==1"/>
+                    <span class="check-style"></span>
+                  </label>
+                    {{value}}
+                </div>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="isMerchantAccount"
+              name="Merchant Account"
+              [width]="50">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <div *ngIf="value" class="ml-48">
+                  <em class="icon icon-check fs-10 icon-color"></em>
+                </div>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="isCreditCardAccount"
+              name="Credit Card"
+              [width]="40">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <div *ngIf="value" class="ml-28">
+                  <em class="icon icon-check fs-10 icon-color"></em>
+                </div>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="isAchAccount"
+              name="ACH"
+              [width]="40">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <div *ngIf="value" class="ml-8">
+                  <em class="icon icon-check fs-10 icon-color"></em>
+                </div>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+              name="Account Number"
+              [width]="80" >
+              <ng-template ngx-datatable-cell-template let-row="row">
+                <span *ngIf="row.isMerchantAccount">{{ '---- ---- ---- ' + row?.merchantAccountNumber?.substr(row?.merchantAccountNumber?.length - 4) }}</span>
+                <span *ngIf="!row.isMerchantAccount">{{ '---- ---- ---- ' + row?.nonMerchantAccountNumber?.substr(row?.nonMerchantAccountNumber?.length - 4) }}</span>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="lastTransactionDate"
+              name="Last Transaction Date"
+              [width]="100">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <span>{{ value | date: 'MM/dd/yyyy'}}</span>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-footer>
+              <ng-template
+                let-rowCount="rowCount"
+                ngx-datatable-footer-template
+                let-pageSize="pageSize"
+                let-selectedCount="selectedCount"
+                let-curPage="curPage"
+                let-offset="offset"
+                let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select
+                            class="custom-select border-less"
+                            [formControl]="selectPageSize"
+                            (change)="pageSizeChange()">
+                              <option
+                                *ngFor="let limit of limitArray;trackBy: trackByFn"
+                                [value]="limit">
+                                {{ limit }}
+                              </option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                        {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                        {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                          Page {{ i+1 }} of {{page.totalPages}}
+                        </option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager
+                          [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'"
+                          [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage"
+                          [size]="pageSize"
+                          [count]="rowCount"
+                          [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);changePageDropDown($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+              </ng-template>
+            </ngx-datatable-footer>
+      </ngx-datatable>
+      <br *ngIf="this.officeBankList.length <= 10">
+    </div>
+</ng-container>
+
+
+<ng-container *ngIf="opratingaccount == 'Create'">
+  <form [formGroup]="billingSettingsForm">
+    <div class="info-block">
+      <ng-container *ngIf="pageType === 'createoffice'">
+        <h2>Billing Period</h2>
+        <h3 class="mb-8">Default Billing Frequency</h3>
+        <p>Pre-bills are generated at the end of each period and sent for approval before invoicing.</p>
+      </ng-container>
+      <div class="custom-control custom-checkbox pr-8 mb-24"
+           *ngIf="pageType !== 'setfirmlevel' && pageType !== 'creatematter' && pageType !== 'client' && pageType !== 'createclient'">
+        <input class="custom-control-input" id="bfo-det" formControlName="isInherited"
+               (change)="defaultInharitChange($event)" name="isInherited" type="checkbox">
+        <label class="custom-control-label" for="bfo-det">
+          <ng-container
+            *ngIf="pageType === 'editclient' || pageType === 'editmatter'; else elsecheckboxlbl">
+            Use the office default billing frequency
+          </ng-container>
+          <ng-template #elsecheckboxlbl>
+            Use the default firm billing frequency
+          </ng-template>
+        </label>
+      </div>
+      <div class="mb-20" *ngIf="(pageType == 'editmatter' || pageType === 'editclient') && !billingSettingsForm.value.isInherited">
+        <div class="custom-control custom-radio pr-8">
+          <input class="custom-control-input" id="bfo-det-bill-info-custom"
+                 name="isWorkComplete"
+                 formControlName="isWorkComplete" (change)="emitValue()"
+                 [value]="false"
+                 type="radio">
+          <label class="custom-control-label text-case-none" for="bfo-det-bill-info-custom">
+            Set custom frequency
+          </label>
+        </div>
+        <div class="custom-control custom-radio pr-8">
+          <input class="custom-control-input" id="bfo-det-bill-info-eof"
+                 name="isWorkComplete"
+                 formControlName="isWorkComplete" (change)="emitValue()"
+                 [value]="true"
+                 type="radio">
+          <label class="custom-control-label text-case-none" for="bfo-det-bill-info-eof">
+            Send once marked as Work Complete
+          </label>
+        </div>
+      </div>
+      <div class="row col-12 gutter-16" *ngIf="billingSettingsForm.value.isWorkComplete">
+        <p class="mb-16 max-width-fit">
+          The client will be billed when the matter is marked as <strong>Work Complete</strong>.
+        </p>
+      </div>
+      <div class="row gutter-16" *ngIf="!billingSettingsForm.value.isWorkComplete">
+        <div [ngClass]="pageType == 'editmatter' || pageType == 'editclient' ? 'col-5' : 'col-3'">
+          <div class="form-group mb-0">
+            <label>Bill Every<sup>*</sup></label>
+            <div class="row gutter-16">
+              <div class="col-5 form-group"
+                   [class.has-error]="(isFormSubmitted || billingSettingsForm.controls.billFrequencyQuantity.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyQuantity">
+                <input type="text" class="form-control" (keypress)="checkNumber($event)" maxlength="2"
+                       formControlName="billFrequencyQuantity" [readonly]="billingSettingsForm.value.isInherited"
+                       placeholder="Enter Bill Frequency" id="billFrequencyQuantityId">
+                <span class="field-message text-danger"
+                      *ngIf="(isFormSubmitted || billingSettingsForm.controls.billFrequencyQuantity.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyQuantity">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter how often to bill.
+                </span>
+              </div>
+              <div class="col-7 form-group"
+                   [class.has-error]="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyDuration">
+                <ng-select
+                  [items]="billFrequencyList"
+                  placeholder="Select duration"
+                  formControlName="billFrequencyDuration"
+                  [bindValue]="'id'"
+                  [bindLabel]="'name'"
+                  (change)="onSelectDur($event)"
+                  [notFoundText]="'No record found'"
+                  [readonly]="billingSettingsForm.value.isInherited"
+                  [clearable]="false"
+                  [selectOnTab]="true"
+                  id="billFrequencyDurationId">
+                </ng-select>
+                <span class="field-message text-danger"
+                      *ngIf="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billFrequencyDuration">
+                  <em class="icon icon-error mr-4"></em>
+                  Required
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-3"
+             *ngIf="pageType === 'creatematter' || pageType === 'client' || pageType === 'createclient'  || pageType === 'matter'">
+          <div class="form-group"
+               [class.has-error]="(isFormSubmitted || billingSettingsForm.controls.effectiveDate.touched) && !billingSettingsForm.value.isInherited && (!effectiveDateDisplay || effectiveDateDisplay == 'Invalid Date')">
+            <label>Effective date<sup>*</sup></label>
+            <div class="date-field position-relative">
+              <input type="text" class="form-control cust-readonlyinput" name="employmentStartdt"
+                     formControlName="effectiveDate" [owlDateTimeFilter]="myFilter" [min]='minDate'
+                     placeholder="Select effective date" [owlDateTimeTrigger]="dt1" [(ngModel)]="effectiveDateDisplay"
+                     [owlDateTime]="dt1" readonly (dateTimeChange)='selectDate()' [max]='maxDate' id="effectiveDateId">
+              <em class="icon icon-calendar-invitation" [owlDateTimeTrigger]="dt1"></em>
+              <owl-date-time [pickerType]="'calendar'" #dt1></owl-date-time>
+            </div>
+            <span class="field-message text-danger"
+                  *ngIf="(isFormSubmitted || billingSettingsForm.controls.effectiveDate.touched) && !billingSettingsForm.value.isInherited && (!effectiveDateDisplay || effectiveDateDisplay == 'Invalid Date')">
+              <em class="icon icon-error mr-4"></em>
+              Effective date Required
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group"
+           *ngIf="(pageType === 'setfirmlevel' || pageType === 'editoffice' || pageType === 'createoffice' || pageType === 'editclient' || pageType === 'editmatter' || pageType === 'creatematter' || pageType === 'client' || pageType === 'createclient') && selectedDuration && selectedDuration.code === 'MONTHS' && !billingSettingsForm.value.isWorkComplete">
+        <label class="mb-20">Repeat Type <sup>*</sup></label>
+        <div class="custom-control custom-radio pr-0" [class.pointer-vent-none-f]="billingSettingsForm.value.isInherited">
+          <input type="radio" id="aday_ofthe_week_id" name="repeatType" formControlName="repeatType"
+                 class="custom-control-input" [value]="1" [class.radio-disabled]="billingSettingsForm.value.isInherited">
+          <label class="custom-control-label" for="aday_ofthe_week_id" [class.text-disabled]="billingSettingsForm.value.isInherited">A Day of the Week Instance</label>
+        </div>
+        <div class="custom-control custom-radio pr-0" [class.pointer-vent-none-f]="billingSettingsForm.value.isInherited">
+          <input type="radio" id="aday_ofthe_month_id" name="repeatType" formControlName="repeatType"
+                 class="custom-control-input" [value]="2" [class.radio-disabled]="billingSettingsForm.value.isInherited">
+          <label class="custom-control-label" for="aday_ofthe_month_id" [class.text-disabled]="billingSettingsForm.value.isInherited">A Day of the Month</label>
+        </div>
+      </div>
+      <div class="form-group"
+           *ngIf="(billingSettingsForm?.value?.repeatType == 1 || selectedDuration && selectedDuration.code === 'WEEKS') && !billingSettingsForm.value.isWorkComplete">
+        <label>
+          <ng-container
+            *ngIf="pageType === 'setfirmlevel' || pageType === 'editoffice' || pageType === 'createoffice' || pageType === 'editclient' || pageType === 'editmatter' || pageType === 'creatematter' || pageType === 'client' || pageType === 'createclient'; else oldDesign">
+            <span
+              id="repeats-on-type-one">{{(selectedDuration && selectedDuration.code === 'MONTHS') ? 'Occurs on' : 'Repeats on'}}</span>
+          </ng-container>
+          <ng-template #oldDesign>
+            <span id="repeats-on-type-one">Repeats on</span>
+          </ng-template>
+          <sup>*</sup>
+        </label>
+        <ul class="list-unstyled mb-0 day-list d-flex">
+          <li (click)="selectDay(0)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[0].selected" id="sunday">S</li>
+          <li (click)="selectDay(1)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[1].selected" id="monday">M</li>
+          <li (click)="selectDay(2)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[2].selected" id="tuesday">t</li>
+          <li (click)="selectDay(3)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[3].selected" id="wendnesday">w</li>
+          <li (click)="selectDay(4)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[4].selected" id="thursday">t</li>
+          <li (click)="selectDay(5)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[5].selected" id="friday">f</li>
+          <li (click)="selectDay(6)" [class.disabled]="billingSettingsForm.value.isInherited" [class.active]="repeatsOn[6].selected" id="saturday">s</li>
+        </ul>
+      </div>
+
+
+      <div class="form-group"
+           [class.has-error]="(isFormSubmitted || billingSettingsForm.controls.billingFrequencyRecursDay.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billingFrequencyRecursDay"
+           *ngIf="selectedDuration && selectedDuration.code === 'MONTHS' && !billingSettingsForm.value.isWorkComplete">
+        <div class="row gutter-16">
+          <div class="col-4">
+            <label>
+              Repeats on <sup>*</sup>
+            </label>
+            <ng-select
+              [items]="recursOnList"
+              [placeholder]="(billingSettingsForm?.value?.repeatType === 2) ? 'Select day of the month' : 'Select day of the week instance'"
+              [bindValue]="'id'"
+              [bindLabel]="'name'"
+              formControlName="billingFrequencyRecursDay"
+              (change)="onSelectRecursDay($event)"
+              [notFoundText]="'No record found'"
+              [readonly]="billingSettingsForm.value.isInherited"
+              [clearable]="false"
+              [selectOnTab]="true"
+              id="billingFrequencyRecursDayId">
+            </ng-select>
+            <span class="field-message text-danger"
+                  *ngIf="(isFormSubmitted || billingSettingsForm.controls.billingFrequencyRecursDay.touched) && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billingFrequencyRecursDay">
+              <em class="icon icon-error mr-4"></em>
+              Please select when billing repeats on.
+            </span>
+          </div>
+        </div>
+        <div *ngIf="billingSettingsForm?.value?.repeatType === 2"
+             class="alert alert-primary d-inline-flex justify-content-between mt-12 mb-0" role="alert"
+             id="info-repeattype-one">
+          <div class="d-flex align-items-center">
+            <em class="alert-icon icon icon-info text-large"></em>
+            <div>
+              If the day does not apply to a given month, the frequency will end on the last day of that month.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row gutter-16"  *ngIf="(pageType === 'editoffice' || pageType === 'createoffice' || pageType === 'setfirmlevel' || pageType === 'editclient' || pageType === 'editmatter') && !billingSettingsForm.value.isWorkComplete">
+        <div class="col-4">
+          <div class="form-group"
+          [class.has-error]="(isFormSubmitted || billingSettingsForm.controls.effectiveDate.touched) && !billingSettingsForm.value.isInherited && (!effectiveDateDisplay || effectiveDateDisplay == 'Invalid Date')">
+            <label>Effective date<sup>*</sup></label>
+            <div class="date-field position-relative">
+              <input type="text" class="form-control cust-readonlyinput" name="employmentStartdt"
+                formControlName="effectiveDate" [owlDateTimeFilter]="myFilter" [min]='minDate'
+                placeholder="Select effective date" [owlDateTimeTrigger]="dt1" [(ngModel)]="effectiveDateDisplay"
+                [owlDateTime]="dt1" (dateTimeChange)='selectDate()' [max]='maxDate' id="effectiveDateId">
+              <em class="icon icon-calendar-invitation" [owlDateTimeTrigger]="dt1"></em>
+              <owl-date-time [pickerType]="'calendar'" #dt1></owl-date-time>
+            </div>
+            <span class="field-message text-danger"
+            *ngIf="(isFormSubmitted || billingSettingsForm.controls.effectiveDate.touched) && !billingSettingsForm.value.isInherited && (!effectiveDateDisplay || effectiveDateDisplay == 'Invalid Date')">
+              <em class="icon icon-error mr-4"></em>
+              Please select an effective date
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="row gutter-16"
+           *ngIf="pageType === 'setfirmlevel'  || pageType === 'editoffice' || pageType === 'createoffice' && !billingSettingsForm.value.isWorkComplete">
+        <div class="col-6">
+          <div class="form-group"
+               [class.has-error]="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billWhenHoliday">
+            <label>If Billing Date Falls on Holiday or Non-Working Day <sup>*</sup></label>
+            <div class="date-field position-relative">
+              <ng-select
+                [items]="billWhenHolidayList"
+                placeholder="Generate pre-bills and invoices on that date"
+                [bindValue]="'id'"
+                [bindLabel]="'name'"
+                formControlName="billWhenHoliday"
+                (change)="emitValue()"
+                [notFoundText]="'No record found'"
+                [readonly]="billingSettingsForm.value.isInherited"
+                [clearable]="false"
+                [selectOnTab]="true"
+                id="billWhenHolidayId">
+              </ng-select>
+            </div>
+            <span class="field-message text-danger"
+                  *ngIf="isFormSubmitted && !billingSettingsForm.value.isInherited && !billingSettingsForm.value.billWhenHoliday">
+              <em class="icon icon-error mr-4"></em>
+              Billing Date Falls on Holiday or Non-Working Day Required
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group"
+           *ngIf="(pageType === 'creatematter' || pageType === 'client' || pageType === 'createoffice' || pageType === 'createclient') && selectedDuration?.code === 'WEEKS' && displayEndDate && displayStartDate && !billingSettingsForm.value.isWorkComplete">
+        <label class="d-block mb-4">First Billing Period</label>
+        <span id="first-bill-period-date">{{displayStartDate}} - {{displayEndDate}}</span>
+      </div>
+      <div class="form-group"
+           *ngIf="(pageType === 'creatematter' || pageType === 'client' || pageType === 'createoffice' || pageType === 'createclient') && selectedDuration?.code === 'MONTHS' && displayEndDate && displayStartDate && billingSettingsForm.value.billingFrequencyRecursDay && !billingSettingsForm.value.isWorkComplete">
+        <label class="d-block mb-4">First Billing Period</label>
+        <span id="first-bill-period-date">{{displayStartDate}} - {{displayEndDate}}</span>
+      </div>
+      <ng-container
+        *ngIf="pageType === 'setfirmlevel'  || pageType === 'editoffice' || pageType === 'createoffice'; else oldsummaryView">
+        <p class="lh-20" *ngIf="selectedDuration && selectedDuration.code === 'WEEKS'" id="duration-info">
+          Pre-bills and invoices will
+          generate&nbsp;<strong>every {{billingSettingsForm.value.billFrequencyQuantity}} {{billingSettingsForm.value.billFrequencyQuantity == 1 ? 'week' : selectedDuration?.name}}</strong>&nbsp;at
+          approximately midnight on&nbsp;<strong>{{selectedDay}}</strong>
+          <ng-container *ngIf="billingSettings?.timeEntryGracePeriod > 0"> (plus
+            the {{billingSettings?.timeEntryGracePeriod}}-Day Time Entry Grace Period)
+          </ng-container>
+          <ng-container *ngIf="effectiveDateDisplay && effectiveDateDisplay != 'Invalid Date'">&nbsp;starting
+            on&nbsp;<strong>{{effectiveDateDisplay | date : 'MM/dd/yyyy'}}&nbsp;</strong></ng-container>
+          .
+        </p>
+        <p class="lh-20" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'" id="duration-info">
+          Pre-bills and invoices will
+          generate&nbsp;<strong>every {{billingSettingsForm.value.billFrequencyQuantity}} {{billingSettingsForm.value.billFrequencyQuantity == 1 ? 'month' : selectedDuration?.name}}</strong>&nbsp;at
+          approximately midnight on&nbsp;<strong>the {{selectedRecursDay?.name}}</strong>
+          <ng-container *ngIf="billingSettings?.timeEntryGracePeriod > 0"> (plus
+            the {{billingSettings?.timeEntryGracePeriod}}-Day Time Entry Grace Period)
+          </ng-container>
+          <ng-container *ngIf="effectiveDateDisplay && effectiveDateDisplay != 'Invalid Date'">&nbsp;starting
+            on&nbsp;<strong>{{effectiveDateDisplay | date : 'MM/dd/yyyy'}}&nbsp;</strong></ng-container>
+          .
+        </p>
+      </ng-container>
+      <ng-template #oldsummaryView>
+        <div *ngIf="!billingSettingsForm.value.isWorkComplete">
+          <p class="lh-20" *ngIf="selectedDuration && selectedDuration.code === 'WEEKS'" id="duration-info">
+            Billing frequency will
+            occur&nbsp;<strong>every {{billingSettingsForm.value.billFrequencyQuantity}} {{billingSettingsForm.value.billFrequencyQuantity == 1 ? 'week' : selectedDuration?.name}}</strong>&nbsp;at
+            approximately midnight on&nbsp;<strong>{{selectedDay}}</strong>
+            <ng-container *ngIf="effectiveDateDisplay && effectiveDateDisplay != 'Invalid Date'">&nbsp;starting
+              on&nbsp;<strong>{{effectiveDateDisplay | date : 'MM/dd/yyyy'}}&nbsp;</strong></ng-container>
+            .
+          </p>
+          <p class="lh-20" *ngIf="selectedDuration && selectedDuration.code === 'MONTHS'" id="duration-info">
+            Billing frequency will
+            occur&nbsp;<strong>every {{billingSettingsForm.value.billFrequencyQuantity}} {{billingSettingsForm.value.billFrequencyQuantity == 1 ? 'month' : selectedDuration?.name}}</strong>&nbsp;at
+            approximately midnight on&nbsp;<strong>the {{selectedRecursDay?.name}}</strong>
+            <ng-container *ngIf="effectiveDateDisplay && effectiveDateDisplay != 'Invalid Date'">&nbsp;starting
+              on&nbsp;<strong>{{effectiveDateDisplay | date : 'MM/dd/yyyy'}}&nbsp;</strong></ng-container>
+            .
+          </p>
+        </div>
+      </ng-template>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+  </form>
+</ng-container>

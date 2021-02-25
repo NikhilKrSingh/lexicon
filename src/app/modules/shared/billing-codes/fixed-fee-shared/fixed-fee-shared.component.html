@@ -1,0 +1,139 @@
+<div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">{{modalHeader}} </h3>
+    <button type="button" class="close" (click)="actionEmit('Close')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+
+  <div *ngIf="action.type === 'Enable' || action.type === 'Disable'" class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">
+          {{ action.type === 'Disable' ?
+          'Are you sure you want to disable this ' + message + '? It will not be available for use on future matters, but existing matters will not be affected.'
+          : action.type === 'Enable' ?
+            'Are you sure you want to re-enable this ' + message + '?'
+            : ''
+          }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="action.type === 'Create' || action.type === 'Edit'" class="modal-body">
+      <div [class]="selectedTypeId === 0 && formSubmitted ? 'form-group has-error' : 'form-group'">
+        <label>Type <sup>*</sup></label>
+        <ng-select
+        id="billinCodesFixedFeeCommonType"
+        placeholder="Select Type"
+        [items]="typeList"
+        [(ngModel)]="selectedTypeId"
+        [bindValue]="'id'"
+        [bindLabel]="'name'"
+        [clearable]="false"
+        [notFoundText]="'No record found'"
+        [selectOnTab]="true"
+        [readonly]="action.type === 'Edit' ? true : false"
+        [class]="action.type === 'Edit' ? 'disable-input' : 'f-c'"
+        >
+        </ng-select>
+
+        <span
+        class="field-message text-danger"
+        *ngIf="selectedTypeId === 0 && formSubmitted">
+          <em class="icon icon-error mr-4"></em>
+          You must select a type.
+        </span>
+      </div>
+
+    <form [formGroup]="fixedFeeServiceFormCreateEdit">
+      <div [class]="(f['code']?.errors && f['code'].touched) || (f['code']?.errors && formSubmitted) || (f['code'].value === '') || (action.chargeCode === '-1') ? 'form-group has-error' : 'form-group'">
+        <label>Code <sup>*</sup></label>
+        <input
+        type="text"
+        class="form-control f-c"
+        formControlName="code"
+        placeholder="Enter a code"
+        [readonly]="action.type === 'Edit' ? true : false"
+        id="billinCodesFixedFeeCommonCode">
+
+        <span
+        class="field-message text-danger d-flex"
+        *ngIf="action.chargeCode === '-1' ">
+          <em class="icon icon-error mr-4 mt-1"></em>
+          <div class="mt-2 p-0">
+            <p class="mb-0">There are no available code values for the preconfigured range. Please contact your system administrator to auto assign more code values.</p>
+          </div>
+        </span>
+
+        <span
+        class="field-message text-danger"
+        *ngIf="f['code'].errors?.required && action.chargeCode !== '-1'">
+          <em class="icon icon-error mr-4"></em>
+          Please enter a code
+        </span>
+      </div>
+
+      <div [class]="(f['name']?.errors && f['name'].touched) || (f['name']?.errors && formSubmitted) ? 'form-group has-error text-dark' : 'form-group'">
+        <label>Name<sup>*</sup></label>
+        <span class="char-counter f-c">{{fixedFeeServiceFormCreateEdit?.controls['name']?.value?.length || 0}}/50</span>
+        <input
+        type="text"
+        formControlName="name"
+        placeholder="Enter a name"
+        class="form-control f-c"
+        maxlength='50'
+        id="billinCodesFixedFeeCommonName">
+        <span
+        class="field-message text-danger"
+        *ngIf="f['name'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          Please enter a name
+        </span>
+      </div>
+
+      <div [class]="(f['amount']?.errors && f['amount']?.touched) || (f['amount']?.errors && formSubmitted) ? 'form-group has-error text-dark' : 'form-group mb-0'">
+        <label>Amount <sup>*</sup></label>
+        <input
+        type="text"
+        class="form-control f-c"
+        (keyup)="removePrefix($event)"
+        (blur)="formatRate()"
+        (focusout)="removePrefix()"
+        formControlName="amount"
+        placeholder="Enter an amount"
+        prefix="$"
+        mask="separator.2"
+        thousandSeparator=","
+        id="billinCodesFixedFeeCommonAmount">
+        <span
+        class="field-message text-danger"
+        *ngIf="f['amount'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          Please enter an amount
+        </span>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button
+    type="button"
+    class="btn btn-light"
+    (click)="actionEmit('Close')"
+    id="billinCodesFixedFeeCommonCancelBtn"
+    >Cancel</button>
+    <button
+    type="button"
+    class="btn btn-primary"
+    (click)="actionEmit()"
+    [disabled]="loader"
+    id="billinCodesFixedFeeCommonSaveBtn"
+    >{{(action.type === 'Enable' || action.type === 'Disable') ?
+      'Yes, '+ (action.type | lowercase)
+      : (action.type === 'Create' || action.type === 'Edit') ? 'Save'
+        : ''
+    }}
+    </button>
+  </div>

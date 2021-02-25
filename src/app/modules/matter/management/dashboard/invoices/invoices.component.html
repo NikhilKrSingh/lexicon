@@ -1,0 +1,274 @@
+<h2>Invoices</h2>
+
+<div class="d-flex align-items-center justify-content-between mb-24">
+  <div class="header-search flex-fill d-flex">
+    <form>
+      <div class="header-search-wrapper">
+        <input type="text" class="form-control search-input"
+          placeholder="Search by invoice number, sent by, client name or matter name" name="description"
+          [(ngModel)]='description' (ngModelChange)='applyFilter()' id="text-search">
+        <button class="btn" type="submit" id="search-btn">Search</button>
+      </div>
+    </form>
+  </div>
+  <!-- <div class="btn-group ml-md-24 ml-0">
+    <button class="btn btn-primary btn-icon" type="button" (click)="downloadInvoices()" [disabled]='selectedTableRow?.length != 1' id="download-invoices">
+      <i class="icon icon-upload"></i> Download Invoices
+    </button>
+  </div> -->
+</div>
+
+<div class="row">
+  <div class="col-3">
+    <div class="form-group">
+      <label>Service Date - Start</label>
+      <app-date-picker [isNgModel]="true" placeholderText="Select service date" [(data)]="startServiceDate" (dataChange)="applyFilter()" id="service-start-date"></app-date-picker>
+    </div>
+
+  </div>
+  <div class="col-3">
+    <div class="form-group">
+      <label>Service Date - End</label>
+      <app-date-picker [isNgModel]="true" placeholderText="Select service date" [(data)]="endServiceDate"
+        (dataChange)="applyFilter()" id="billing-end-date"></app-date-picker>
+    </div>
+
+  </div>
+  <div class="col-3">
+    <div class="form-group">
+      <label>Billed Date - Start</label>
+      <app-date-picker [isNgModel]="true" placeholderText="Select billed date" [(data)]="startBilledDate"
+        (dataChange)="applyFilter()" id="billed-start-date"></app-date-picker>
+    </div>
+
+  </div>
+  <div class="col-3">
+    <div class="form-group">
+      <label>Billed Date - End</label>
+      <app-date-picker [isNgModel]="true" placeholderText="Select billed date" [(data)]="endBilledDate"
+        (dataChange)="applyFilter()" id="billed-date-end"></app-date-picker>
+    </div>
+
+  </div>
+
+  <div class="col-3">
+    <div class="form-group">
+      <label>Status</label>
+      <app-multiselect-dropdown [showSearch]="false" [unsort]="true" [title]="titleInvoiceStatus" [selections]="selectedStatus"
+        [displaySubItem]="invoiceStatusList" [unsort]='true' (onSelectionChanged)="selectStatus($event)"
+        [filterName]="'Apply Filter'" (clearFilter)="clearFilter('status')" (applyFilter)="applyFilter()" id="status-multi">
+      </app-multiselect-dropdown>
+    </div>
+  </div>
+  <div class="col-3">
+    <div class="form-group">
+      <label class="d-flex justify-content-between">
+        Total Invoiced
+        <span>
+          {{rateMin | currency : 'USD': 'symbol': '1.0-0'}} -
+          {{rateMax | currency : 'USD': 'symbol': '1.0-0'}}
+        </span>
+      </label>
+      <div class="custom-slider">
+        <div class="min-label">{{rate_min | currency : 'USD': 'symbol': '1.0-0'}}</div>
+        <ng5-slider [(value)]="rateMin" [(highValue)]="rateMax" [options]="rateOptions" (valueChange)='applyFilter()'
+          (highValueChange)='applyFilter()' id="total-invoiced"></ng5-slider>
+        <div class="max-label">{{rate_max | currency : 'USD': 'symbol': '1.0-0'}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-6">
+    <div class="d-inline-block" ngbDropdown>
+      <button [disabled]='!selectedTableRow?.length || selectedTableRow?.length == 1' 
+      class="btn btn-primary bulk-btn" id="dropdownConfig" ngbDropdownToggle>Bulk Action</button>
+      <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+        <a href="javascript:void(0)" id="dropdown-download-invoices" ngbDropdownItem>Download Invoices</a>
+        <a href="javascript:void(0)" id="dropdown-print-invoices" ngbDropdownItem>Print Invoices</a>
+        <a href="javascript:void(0)" id="dropdown-send-invoices" ngbDropdownItem>Send Invoices</a>
+        <a href="javascript:void(0)" id="dropdown-mark-as-mailed" ngbDropdownItem>Mark as Mailed</a>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+<div class="custom-table">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="custom-table matter-list">
+        <ngx-datatable #table class="material common-table matter-table" [selected]="selectedTableRow" 
+        [class.matter-no-data]="invoiceList?.length === 0" 
+        [rows]="invoiceList" [columnMode]="ColumnMode.force"
+         [selectionType]="SelectionType.checkbox"
+          [headerHeight]="50" [footerHeight]="footerHeight"
+           rowHeight="auto"  [count]="page.totalElements"
+            [offset]="page.pageNumber" [limit]="page.size"
+             [scrollbarV]="false" [scrollbarH]="true"
+              (sort)="calcTotalPages()" [sorts]="[{prop: 'id', dir: 'desc'}]" id="invoice-list">
+
+            <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false"
+              [draggable]="false">
+              <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                let-selectFn="selectFn">
+                <label class="cust-check cursor-pointer">
+                  <input type="checkbox" [checked]="allSelected" (change)="selectDeselectRecords()" />
+                  <span class="check-style"></span>
+                </label>
+              </ng-template>
+              <ng-template ngx-datatable-cell-template let-row="row" let-isSelected="isSelected"
+                let-onCheckboxChangeFn="onCheckboxChangeFn">
+                <label class="cust-check cursor-pointer">
+                  <input type="checkbox" [checked]="row.selected" (change)="changeChildSelection(row)" />
+                  <span class="check-style"></span>
+                </label>
+              </ng-template>
+            </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false" prop="id" name="Invoice Number" [width]="150" [headerClass]="'checkbox-header'">
+            <ng-template ngx-datatable-header-template let-value="value">
+              <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                <span class="datatable-header-cell-label">Invoice Number</span>
+              </span>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false" prop="generated" name="Service Date" [width]="130">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <span *ngIf='value'> {{value  | date : 'MM/dd/yyyy'}} </span>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false" prop="billedDate" name="Billed Date" [width]="130">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <span *ngIf='value'> {{value  | date : 'MM/dd/yyyy'}} </span>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false" prop="totalInvoiced" name="Total Invoiced" [width]="140">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <span> {{(value || 0)  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"  name="Status" prop="invoiceStatusId.name" [width]="100">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <ng-container *ngIf="row.invoiceStatusId">
+                <span class="sh-badge text-nowrap font-weight-medium" [ngClass]="row?.invoiceStatusId?.name === 'Canceled' ? 'sh-badge-danger': 'sh-badge-success'">{{row?.invoiceStatusId?.name}}</span>
+              </ng-container>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false" prop="downloadsCount" name="Download Total" [width]="150">
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right'" name="Action" [width]="100">
+            <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+              <div class="d-flex justify-content-end">
+                <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+                  (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                  (outsideClick)="onClickedOutside($event, rowIndex)">
+                  <em class="icon icon-dot-verti"></em>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="javascript:void(0)" (click)='printToPDF(row)' id="print-to-pdf-index-{{rowIndex}}">
+                      Print to PDF
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0)" (click)='reverseInvoice(row)' *ngIf="row.invoiceStatusId && row.invoiceStatusId.name != 'Canceled' && hasBillingPermission" id="reverse-invoice-index-{{rowIndex}}">
+                      <span>
+                        Reverse Invoice
+                      </span>
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0)" (click)='emailInvoice(row)'
+                      *ngIf='row.invoicePreference?.id == paperAndElectronicInvoice?.id' id="email-invoices-paper-index-{{rowIndex}}">
+                      Email Invoice
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0)" (click)='emailInvoice(row)'
+                      *ngIf='row.invoicePreference?.id == electronicInvoice?.id' id="email-invoices-electronic-index-{{rowIndex}}">
+                      Email Invoice
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-footer>
+            <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+              let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+              <div class="d-flex justify-content-between flex-fill">
+                <div class="d-flex align-items-center">
+                  <div class="table-items d-flex align-items-center mr-36">
+                    Items per page:
+                    <div class=" ml-8">
+                      <select class="custom-select border-less" [formControl]="pageSelector"
+                        (change)="changePageSize()">
+                        <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <span>
+                    {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                    {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+                  </span>
+                </div>
+
+                <div class="d-flex align-items-center">
+                  <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                    <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                      {{ i+1 }} of {{page.totalPages}}</option>
+                  </select>
+                  <div class="ml-8">
+                    <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                      [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                      [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                      [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                      (change)="table.onFooterPage($event);pageChange($event)">
+                    </datatable-pager>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-footer>
+        </ngx-datatable>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>
+<div class="display-not-visible">
+  <app-common-invoice-pdf email='1'></app-common-invoice-pdf>
+</div>
+
+<ng-template #IncludeCorrespondence let-modal>
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Include Correspondence</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-popup">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="header-search-wrapper mb-24">
+      <input type="text" class="form-control search-input"
+        placeholder="Search by folder name, document name, etc..." id="search-by">
+      <button class="btn" type="submit" id="search-submit">Search</button>
+    </div>
+    <div class="folder-drop-block mb-32">
+      <img src="../../../../../../assets/images/Screenshot_2.png" alt="" id='screen-shot'>
+    </div>
+     <div class="form-group mb-0">
+        <label class="mb-12">Document Order</label>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="docorder-1" name="docorder" class="custom-control-input">
+          <label class="custom-control-label" for="docorder-1">Attach before invoice</label>
+        </div>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="docorder-2" name="docorder" class="custom-control-input">
+          <label class="custom-control-label" for="docorder-2">Attach after invoice</label>
+        </div>
+     </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="do-not-include-correspondence">Do Not Include Correspondence</button>
+    <button type="button" class="btn btn-primary disabled" id="attach-correspondence-send">Attach Correspondence & Send</button>
+  </div>
+</ng-template>

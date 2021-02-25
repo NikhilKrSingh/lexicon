@@ -1,0 +1,233 @@
+<div class="d-flex align-items-center justify-content-between mb-24">
+  <div class="header-search flex-fill d-flex">
+    <form action="#">
+      <div class="header-search-wrapper">
+        <input id="billingCodesWriteDownSearhField" type="text" class="form-control search-input" name='name' [(ngModel)]='name'
+          (ngModelChange)='applyFilter()' placeholder="Search by code or name">
+        <button id="billingCodesWriteDownSearhBtn" class="btn" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+  <div class="btn-group ml-md-24 ml-0">
+    <button id="billingCodesWriteDownCreateNewBtn" class="btn btn-primary btn-icon" type="button" [disabled]='!firmDetails || !listLoaded || loading'
+      (click)="createWriteDownCode()">
+      <i class="icon icon-plus" ></i> Create New
+    </button>
+  </div>
+</div>
+<div>
+	<div class="row gutter-16">
+	  <div class="col-10">
+	    <div class="row gutter-16">
+	      <div class="col-3">
+	        <div class="form-group">
+	          <label>Status</label>
+	          <ng-select id="billingCodesWriteDownStatusFilter" [selectOnTab]="true" [items]="statusList" placeholder="Select status" (change)='applyFilter()'
+	            [(ngModel)]="status" [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'">
+	          </ng-select>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+	<div class="row pt-8 mb-16" *ngIf="tenantTierName === 'Ascending' ||tenantTierName === 'Iconic'">
+      <div class="col-3">
+        <label  class="d-block">Selection Actions
+        </label>
+        <div class="btn-group pt-8">
+          <button class="btn btn-primary" [disabled]="selected?.length < 2 || !showDisableBulkAction"
+            (click)="open(disableWriteDownCode,null,'')" id="disable-btn">
+            Disable
+          </button>
+          <button class="btn btn-primary" [disabled]="selected?.length < 2 || !showEnableBulkAction"
+            (click)="open(enableWriteDownCode,null,'')" id="enable-btn">
+            Enable
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="row pt-16" *ngIf="(tenantTierName === 'Ascending' ||tenantTierName === 'Iconic') && showCodeSelectionWarning">
+      <div class="col-12">
+        <div class="alert alert-primary d-flex justify-content-between mb-16" role="alert">
+          <div class="d-flex">
+            <em class="alert-icon icon icon-error mr-12"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <b class="mr-36">Code Selection</b> You've selected codes that are both Active and Disabled. Choose codes
+              of the same status to complete a bulk action.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+        <div class="position-relative">
+          <div class="custom-table matter-list">
+            <ngx-datatable id="billingCodesWriteDownTableList" #table class="material common-table matter-table"
+              [class.matter-no-data]="writeDownCodes?.length === 0" [rows]="writeDownCodes" [columnMode]="ColumnMode.force"
+              [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="page.totalElements"
+              [offset]="page.pageNumber" [limit]="page.size" (sort)="calcTotalPages()"  [scrollbarH]="true" [selectionType]="SelectionType.checkbox"
+              (select)="onSelect($event)" [selected]="selected">
+              <ngx-datatable-column [resizeable]="false" *ngIf="tenantTierName == 'Iconic' || tenantTierName == 'Ascending'" [width]="34"
+                [sortable]="false" [canAutoResize]="false" [draggable]="false">
+                <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                  let-selectFn="selectFn">
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" id="billingCodesWriteDownAllSelection" [checked]="allRowsSelected" (change)="selectFn(!allRowsSelected)" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+                <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+                  let-onCheckboxChangeFn="onCheckboxChangeFn" let-row="row">
+                  <label class="cust-check cursor-pointer">
+                    <input id="billingCodesWriteDownSingleSelection_{{row.id}}"  type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [width]="100" [headerClass]="'checkbox-header'">
+                <ng-template ngx-datatable-header-template let-value="value">
+                  <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                    <span class="datatable-header-cell-label">Code</span>
+                  </span>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="name" name="Name" [width]="400"> </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="status" name="Status" [width]="100"> </ngx-datatable-column>
+
+              <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right'" name="Action" [width]="100" prop="id">
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div class="d-flex justify-content-end">
+                    <div id="billingCodesWriteDownActionMenu_{{row.id}}"  class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+                      (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                      (outsideClick)="onClickedOutside($event, rowIndex)">
+                      <em class="icon icon-dot-verti"></em>
+                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                        <a id="billingCodesWriteDownEditOption_{{row.id}}" class="dropdown-item" (click)='editWriteDownCode(row, $event)' *ngIf="row.status == 'Active'">Edit</a>
+                        <a id="billingCodesWriteDownDisableOption_{{row.id}}" class="dropdown-item" *ngIf="row.status == 'Active'" (click)="open(disableWriteDownCode,row,$event)">Disable</a>
+                        <a id="billingCodesWriteDownEnableOption_{{row.id}}" class="dropdown-item" *ngIf="row.status == 'Disabled'" (click)="open(enableWriteDownCode,row,$event)">Enable</a>
+                      </div>
+                    </div>
+                    <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                  let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                            (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                        {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                          {{ i+1 }} of {{page.totalPages}}</option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+
+</div>
+
+
+<ng-template #disableWriteDownCode let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!isBulkEnableDisable">Disable Write-Down Code - {{selectedCode.code}} </h3>
+    <h3 class="modal-title mb-0" *ngIf="isBulkEnableDisable">Disable Write-Down Codes </h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p *ngIf="!isBulkEnableDisable" class="m-0">Are you sure you want to disable this Write-Down Code? It will not be
+          available for use on future
+          matters, but existing matters will not be affected.</p>
+
+        <p *ngIf="isBulkEnableDisable" class="m-0">Are you sure you want to disable these Write-Down Codes? They will not be
+          available for use on future
+          matters, but existing matters will not be affected.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="disable-write-down-cancel-btn">Cancel</button>
+
+    <button type="button" class="btn btn-primary" id="disable-write-down-btn"
+      (click)="onEnableDisableWriteDownCode(false);modal.dismiss('Cross click');" *ngIf="!isBulkEnableDisable">
+      Yes, disable write-down code
+    </button>
+
+    <button type="button" class="btn btn-primary" id="disable-write-down-bulk-btn"
+      (click)="onEnableDisableWriteDownCode(false);modal.dismiss('Cross click');" *ngIf="isBulkEnableDisable">
+      Yes, disable write-down codes
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #enableWriteDownCode let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!isBulkEnableDisable">Enable Write-Down Code - {{selectedCode.code}}</h3>
+    <h3 class="modal-title mb-0" *ngIf="isBulkEnableDisable">Enable Write-Down Codes</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-12">
+        <p class="m-0" *ngIf="!isBulkEnableDisable">Are you sure you want to enable this Write-Down Code?</p>
+        <p class="m-0" *ngIf="isBulkEnableDisable">Are you sure you want to enable these Write-Down Codes?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="enable-write-down-cancel-btn">Cancel</button>
+
+    <button type="button" class="btn btn-primary" id="enable-write-down-btn"
+      (click)="onEnableDisableWriteDownCode(true);modal.dismiss('Cross click');" *ngIf="!isBulkEnableDisable">
+      Yes, enable write-down code
+    </button>
+
+    <button type="button" class="btn btn-primary" id="enable-write-down-bulk-btn"
+      (click)="onEnableDisableWriteDownCode(true);modal.dismiss('Cross click');" *ngIf="isBulkEnableDisable">
+      Yes, enable write-down codes
+    </button>
+  </div>
+</ng-template>

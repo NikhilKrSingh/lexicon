@@ -1,0 +1,28 @@
+<div class="d-flex justify-content-between align-items-start">
+  <div>
+    <h3 class="mb-8">Bulk Approval</h3>
+    <p class="mb-32">Select whether bulk-approval of documents submitted by clients is enabled or disabled.</p>
+  </div>
+</div>
+<div class="form-group">
+  <label class="mb-20">Enable/Disable Document Bulk-Approval</label>
+  <div class="custom-control custom-radio pr-0">
+    <input type="radio" id="yes" name="bulkApproval" [value]="true" [(ngModel)]="bulkApproval"
+      (change)="radioChange($event)" class="custom-control-input">
+    <label class="custom-control-label" for="yes">Enable</label>
+  </div>
+
+  <div class="custom-control custom-radio pr-0">
+    <input type="radio" id="no" name="bulkApproval" [value]="false" [(ngModel)]="bulkApproval"
+      (change)="radioChange($event)" class="custom-control-input">
+    <label class="custom-control-label" for="no">Disable</label>
+  </div>
+</div>
+<app-loader [active]="loading"></app-loader>
+
+<div class="d-flex">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="change()" id="cancel-btn">Cancel</button>
+    <button type=" button" class="btn btn-primary" (click)="save()" id="save-btn">Save</button>
+  </div>
+</div>

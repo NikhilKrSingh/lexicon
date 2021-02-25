@@ -1,0 +1,148 @@
+<div class="container">
+  <div class="main-content pb-0">
+    <div class="matter-assoc section-area">
+      <div>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a  href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+          <li class="breadcrumb-item"><a [routerLink]="['/matter/list']">Matters</a></li>
+          <li class="breadcrumb-item active" [title]='matterDetails?.matterName'>
+            <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+              Edit Matter - {{matterDetails?.matterName}}
+            </ng-container>
+            <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+              Edit Matter - {{matterDetails?.matterName?.slice(0, 25)}}...
+            </ng-container>
+          </li>
+        </ol>
+      <div class="heading">
+        <h1 *ngIf='matterDetails?.matterName?.length < 30'>Edit Matter - {{matterDetails?.matterName}}</h1>
+          <h1 *ngIf='matterDetails?.matterName?.length >= 30'>
+            <div class="col-8 p-0">
+              <div class="info-hover position-relative">
+                <span innerHTML="Edit Matter - {{matterDetails?.matterName?.slice(0, 25)}}...">
+                </span>
+                <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                  <div class="arrow"></div>
+                  <div class="tooltip-inner tooltip-lg">
+                    {{matterDetails?.matterName}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </h1>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="info-block">
+            <h2>Matter Details</h2>
+            <div class="row gutter-16" *ngIf='matterDetails' [formGroup]='matterForm'>
+              <div class="col-5">
+                <div class="row gutter-16">
+                  <div class="col-5">
+                    <div class="form-group">
+                      <label>Matter Number <sup>*</sup></label>
+                      <input type="text" class="form-control " formControlName='matterNumber' id="matter-number">
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="form-group" [class.has-error]='matterFormError.matterName'>
+                      <label>Matter Name <sup>*</sup></label>
+                      <input class="form-control" type="text" formControlName='matterName' id="matter-name">
+                      <app-validation-message [errorMessage]='matterFormError.matterNameMessage' *ngIf='matterFormError.matterName'>
+                      </app-validation-message>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-5">
+                <div class="row gutter-16">
+                  <div class="col-5">
+                    <div class="form-group" [class.has-error]='matterFormError.matterDate'>
+                      <label>Matter Open Date <sup>*</sup> </label>
+                      <app-date-picker [isForm]='true' [dateform]='matterForm' controlName='matterOpenDate' id="matter-open-date">
+                      </app-date-picker>
+                      <app-validation-message [errorMessage]='matterFormError.matterDateMessage' *ngIf='matterFormError.matterDate'>
+                      </app-validation-message>
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="form-group" [class.has-error]='matterFormError.caseNumbers'>
+                      <label>Case Numbers</label>
+                      <input type="text" class="form-control" formControlName='caseNumbers' id="case-number">
+                      <app-validation-message [errorMessage]='matterFormError.caseNumbersMessage' *ngIf='matterFormError.caseNumbers'>
+                      </app-validation-message>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 mb-2">
+                <div class="custom-control custom-checkbox m-0 pr-0">
+                  <input type="checkbox" class="custom-control-input" id="contingent-1" value="1"
+                    formControlName='isContingentCase'>
+                  <label class="custom-control-label" for="contingent-1">This is a contingent case</label>
+                </div>
+              </div>
+              <div class="col-10">
+                <div class="form-group mb-0 mt-16">
+                  <label>Change Notes</label>
+                  <textarea class="form-control" formControlName="changeNotes" placeholder="Enter change notes (optional)" rows="4" id="change-note"></textarea>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-28" *ngIf='isCorporateType'>
+          <h2 class="mb-24">Corporate Contact</h2>
+          <div class="custom-table">
+            <div class="table-responsive">
+              <table class="table table-striped table-borderless">
+                <thead>
+                  <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Job Title</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let contact of corporateContacts; trackBy :trackByFn;let i = index">
+                    <td>{{contact?.firstName}}</td>
+                    <td>{{contact?.firstName}}</td>
+                    <td>Attorney</td>
+                    <td>{{contact.email}}</td>
+                    <td>{{contact.primaryPhone}} (work)</td>
+                    <td>{{contact?.isActive ? 'Yes' : 'No'}}</td>
+                    <td class="text-right">
+                      <div class="icon-group d-flex justify-content-end">
+                        <span>
+                          <em class="icon icon-edit icon-color"></em>
+                        </span>
+                        <span>
+                          <em class="icon icon-remove icon-color"></em>
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              <button class="btn btn-link btn-icon px-0 d-flex align-items-center mb-16" type="button"
+                (click)='addCorporateContact()' id="add-corporate-client">
+                <i class="icon icon-add-circle"></i>Add Corporate Client
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+</div>
+<div class="d-flex justify-content-end pb-24 px-24">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn"
+      >Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='update()' id="save-btn">Save</button>
+  </div>
+  </div>

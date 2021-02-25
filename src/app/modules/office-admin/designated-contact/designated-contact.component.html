@@ -1,0 +1,129 @@
+<div class="row gutter-16" [formGroup]='designatedContactForm'>
+  <div class="col-12">
+    <div class="form-group mb-0">
+      <div class="custom-control custom-radio">
+        <input type="radio" id="customRadio1_designated_contact" name="isDesignatedContactother" class="custom-control-input"
+          [value]='false' formControlName='isDesignatedContactother' (change)='changeType()'>
+        <label class="custom-control-label" for="customRadio1_designated_contact">Select an active employee</label>
+      </div>
+      <div class="pl-28 pb-16 pt-8" *ngIf='designatedContactForm?.value?.isDesignatedContactother == false'>
+        <div class="search-group position-relative" *ngIf='!designatedContact'>
+          <div>
+            <span class="search-icn"></span>
+            <input #clientFilterText type="text" class="form-control bg-white"
+              placeholder="Search name or email to add employee" [formControl]='searchEmployeeFilter' autocomplete="doNotAutoComplete" id="search-employee-add">
+            <div class="search-group-result px-0 mt-4 " *ngIf="employeeList.length>0">
+              <div class="search-result px-16" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+                <div>
+                  <h5 class="d-inline-block text-large lh-20 mt-8 mb-4">{{employeeList.length}} results</h5>
+                </div>
+                <div class="search-collapse">
+                  <div class="search-panel" *ngFor="let item of employeeList;trackBy :trackByFn;let i = index;" id="employee-index-{{i}}">
+                    <div class="search-panel-head" (click)="selectEmployee(item)">
+                      <em class="search-res-icon icon icon-employees"></em>
+                      <div>
+                        <span [innerHTML]="(item.lastName+', '+item.firstName) | highlightText : clientFilterText?.value" id="active-employee-fullname-{{i}}">
+                        </span>
+                      </div>
+                      <div class="d-flex pt-8">
+                        <div style='width: 250px;'>
+                          <span class="small helper-text font-weight-medium d-block mt-4 mb-4">Email</span>
+                          <span [innerHTML]="item.email | highlightText : clientFilterText?.value" id="active-employee-email-{{i}}"></span>
+                        </div>
+                        <div style='width: 125px;'>
+                          <span class="small helper-text font-weight-medium d-block mt-4 mb-4">Job Title</span>
+                          <span id="active-employee-jobtitle">{{item.jobTitle}}</span>
+                        </div>
+                        <div>
+                          <span class="small helper-text font-weight-medium d-block mt-4 mb-4">Status</span>
+                          <span id="active-employee-status">{{(!item.isActivated && item.isVisible) ? 'Pending' : (item.isVisible) ? 'Active' : 'Inactive'}}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf='designatedContact'>
+          <span class="badge badge-primary small">
+            <span class='mr-3'>{{designatedContact.lastName}}, {{designatedContact.firstName}}</span>
+            <em class="icon icon-close font-10 cursor-pointer" (click)='updateDesignatedContact(null)' id="update-designed-contact"></em>
+          </span>
+        </div>
+      </div>
+      <div class="custom-control custom-radio">
+        <input type="radio" id="customRadio2_desinated_contact" name="isDesignatedContactother" class="custom-control-input"
+          [value]='true' formControlName='isDesignatedContactother' (change)='changeType()'>
+        <label class="custom-control-label" for="customRadio2_desinated_contact">Specify Other</label>
+      </div>
+
+      <div class="pl-28" *ngIf='designatedContactForm?.value?.isDesignatedContactother == true'>
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="designatedContactForm.controls['firstName'].errors && designatedContactForm.controls['firstName'].errors.required && isFormSubmitted">
+              <label>First Name <sup>*</sup></label>
+              <input type="text" placeholder='Enter First Name' class="form-control"
+                     formControlName="firstName"
+                (blur)='updateContactFromForm()' id="firstname-employee">
+              <span class="field-message text-danger"
+                    *ngIf="designatedContactForm.controls['firstName'].errors && designatedContactForm.controls['firstName'].errors.required && isFormSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                First Name Required
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="designatedContactForm.controls['lastName'].errors && designatedContactForm.controls['lastName'].errors.required && isFormSubmitted">
+              <label>Last Name <sup>*</sup></label>
+              <input type="text" placeholder='Enter Last Name' class="form-control" formControlName="lastName"
+                (blur)='updateContactFromForm()' id="lastname-employee">
+              <span class="field-message text-danger"
+                    *ngIf="designatedContactForm.controls['lastName'].errors && designatedContactForm.controls['lastName'].errors.required && isFormSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Last Name Required
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group mb-0"
+                 [class.has-error]="(designatedContactForm.controls['email'].errors && designatedContactForm.controls['email'].errors.required && isFormSubmitted) || (designatedContactForm.controls['email'].errors && designatedContactForm.controls['email'].errors.pattern && designatedContactForm.controls['email'].touched)">
+              <label>Email Address <sup>*</sup></label>
+              <input type="email" placeholder='Enter Email Address' class="form-control" formControlName="email"
+                (blur)='updateContactFromForm()' id="email-employee">
+              <span class="field-message text-danger"
+                    *ngIf="designatedContactForm.controls['email'].errors && designatedContactForm.controls['email'].errors.required && isFormSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Email Required
+              </span>
+              <span class="field-message text-danger"
+                    *ngIf="designatedContactForm.controls['email'].errors && designatedContactForm.controls['email'].errors.pattern && designatedContactForm.controls['email'].touched">
+                <em class="icon icon-error mr-4"></em>
+                Invalid Email
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div [ngClass]="(phone.invalid && phoneBlur)?'form-group has-error mb-0':'form-group mb-0'"
+                 [class.has-error]="designatedContactForm.controls['phone'].errors && designatedContactForm.controls['phone'].errors.required && isFormSubmitted">
+              <label>Phone Number <sup>*</sup></label>
+              <input type="text" class="form-control" placeHolderCharacter=" " formControlName="phone"
+                mask="(000) 000-0000" [showMaskTyped]="true" (blur)="onBlurMethod(phone.value);updateContactFromForm()" id="phone-number-employee">
+              <span class="field-message text-danger" *ngIf="phone.invalid && phoneBlur && !designatedContactForm.controls['phone'].errors.required"><em
+                  class="icon icon-error mr-4"></em>
+                Invalid phone number
+              </span>
+              <span class="field-message text-danger"
+                    *ngIf="designatedContactForm.controls['phone'].errors && designatedContactForm.controls['phone'].errors.required && isFormSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Phone Number Required
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

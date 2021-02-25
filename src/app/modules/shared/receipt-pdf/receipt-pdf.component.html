@@ -1,0 +1,8 @@
+<div #receiptPdf>
+  <ng-container *ngIf='receiptHTML'>
+    <div [innerHTML]='receiptHTML | safeHTML'></div>
+  </ng-container>
+  <ng-container *ngIf='!receiptHTML'>
+    <p>Loading...</p>
+  </ng-container>
+</div>

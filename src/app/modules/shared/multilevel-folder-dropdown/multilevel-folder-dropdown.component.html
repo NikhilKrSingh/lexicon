@@ -1,0 +1,46 @@
+<div class="multiselect-dropdown dropdown" [ngClass]="{ open: showDropdown }">
+  <button class="multiselect-dropdown-toggle custom-select select text-left" type="button" (click)="show()">
+    <span *ngIf="displayFlag">{{ title }}</span>
+    <div class="multiselect-text position-relative" *ngIf="!displayFlag">
+      <em class="icon icon-folder"></em>
+      Select Folder Name
+    </div>
+    <span class="caret">
+      <em class="icon icon-arrow-down"></em>
+    </span>
+  </button>
+  <div class="multiselect-dropdown-menu" id="main-class" *ngIf="showDropdown">
+    <div class="multiselect-dropdown-scroll">
+      <ul class="list-unstyled m-0 multiselect-dropdown-list main-list">
+        <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center">
+          <span class="back-arrow">
+            <em (click)="getSubFolders(currentFolder.parentFolderId)"
+              *ngIf="(!currentFolder?.isFirstFolder && !isClientFolder) || (isClientFolder && currentFolder.id !== folderId)"
+              class="icon icon-angle-left mr-8"></em><span
+              (click)="emitSelectedFolder(currentFolder)">{{ currentFolder?.name }}</span>
+          </span></li>
+        <li class="multiselect-dropdown-item p-0">
+          <div class="position-relative dropdown-search">
+            <em class="icon icon-search icon-color text-large"></em>
+            <input type="text" class="form-control" (keyup)="updateFilter($event)" name="q" id="q"
+              placeholder="Search Folder Name" required="" autocomplete="off">
+          </div>
+        </li>
+        <li class="multiselect-dropdown-item d-flex justify-content-between align-items-center open has-dropdown"
+          *ngFor="let folder of folders; trackBy :trackByFn;let i = index"
+          [ngStyle]="{'background-color':folder.status === 'Active' ? '' : '#dddddd' }">
+          <div class="custom-control custom-checkbox m-0 pr-0"
+            (click)="folder.status === 'Active' && emitSelectedFolder(folder)">
+            <i class="icon icon-folder" [ngClass]="{'cursor-pointer': folder.status === 'Active'}"></i>
+            <label [ngClass]="{'cursor-pointer': folder.status === 'Active'}"> {{ folder.name }}</label>
+          </div>
+          <span class="filt-arrow ml-40" *ngIf="!folder.isLastFolder && folder.status === 'Active'"
+            (click)="getSubFolders(folder.id)">
+            <em class="icon icon-angle-right"></em>
+          </span>
+        </li>
+      </ul>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>

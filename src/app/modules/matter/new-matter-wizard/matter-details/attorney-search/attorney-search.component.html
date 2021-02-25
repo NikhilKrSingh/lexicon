@@ -1,0 +1,114 @@
+<div class="modal-header pb-24 d-block">
+  <h3 class="modal-title mb-8" id="advncesercehrd2">Advanced Search - Attorneys</h3>
+  <div class="row mt-5">
+    <div class="col-4">
+      <label>Matter Law Office <sup>*</sup></label>
+      <ng-select
+        [items]="officeList"
+        placeholder="Primary Law Office"
+        [(ngModel)]="data.officeId"
+        [bindValue]="'id'"
+        [bindLabel]="'name'"
+        [notFoundText]="'No record found'"
+        (change)='officeChange()'
+        [clearable]="false"
+        [selectOnTab]="true"
+        id="officeListId">
+      </ng-select>
+    </div>
+    <div class="col-8">
+      <label>&nbsp;</label>
+      <div class="header-search-wrapper">
+        <input type="text" class="form-control search-input" name="qUsers" id="qUsers"
+          placeholder="Search By name, email address, or job title" [(ngModel)]="data.search" (ngModelChange)="searchAttorneys()">
+        <button class="btn" type="submit" (click)="searchAttorneys()">Search</button>
+      </div>
+    </div>
+  </div>
+  <button type="button" class="close" (click)="close()" aria-label="Close">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+
+<div class="modal-body pb-24">
+  <ngx-datatable #attorneytable class="material common-table no-min-height"
+    [class.matter-no-data]="attorneyList?.length === 0"
+    [rows]="attorneyList"
+    [columnMode]="ColumnMode.force"
+    [headerHeight]="50"
+    [footerHeight]="footerHeight"
+    rowHeight="auto"
+    [count]="page.totalElements"
+    [offset]="page.pageNumber"
+    [limit]="page.size"
+    (sort)="calcTotalPages()"
+    id="attorneyListId"
+    [selected]="selectedRow" [selectionType]="'checkbox'">
+
+    <ngx-datatable-column [resizeable]="false" prop="code" [sortable]="false" name="Select" [width]="100">
+      <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+        <div class="custom-control custom-radio pr-0 d-inline-block">
+          <input type="radio" id="attornynovis{{row.id}}" name="attorny" class="custom-control-input"
+            (change)="onSelected(row)"
+            [checked]="selectedRow?.id == row.id"
+            >
+          <label class="custom-control-label" for="attornynovis{{row.id}}"></label>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="rank" name="Ranking" [sortable]="true" [width]="100" *ngIf="data?.officeId">
+      <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+        {{(data.officeId) ? (row?.rankingView && row?.rankingView !== null && row?.rankingView !== '') ? (row.rank > 0) ? row.rank : '-' : '-' : '-'}}
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="name" name="Name" [width]="270"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="250"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [width]="150"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="primaryOffice" name="Primary Office" [width]="150"> </ngx-datatable-column>
+    <ngx-datatable-footer>
+      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="pageSelector"
+                  (change)="changePageSize()">
+                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+              {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                {{ i+1 }} of {{page.totalPages}}</option>
+            </select>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                (change)="attorneytable.onFooterPage($event);pageChange($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancleId">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' [disabled]='!selectedRow' id="saveId">
+    Save
+  </button>
+</div>
+<app-loader [active]="isLoading"></app-loader>

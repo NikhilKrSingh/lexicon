@@ -1,0 +1,140 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/import']"><a href="javascript:void(0)">Data Import</a></li>
+      
+      <li class="breadcrumb-item" *ngIf="importType === 'clients'">Import Client</li>
+      <li class="breadcrumb-item" *ngIf="importType === 'trusts'">Import Trust</li>
+      <li class="breadcrumb-item" *ngIf="importType === 'offices'">Import Office</li>
+      <li class="breadcrumb-item" *ngIf="importType === 'employees'">Import Employees</li>
+      <li class="breadcrumb-item active" *ngIf="importType === 'clients'">Run Client Import</li>
+      <li class="breadcrumb-item active" *ngIf="importType === 'offices'">Run Office Import</li>
+      <li class="breadcrumb-item active" *ngIf="importType === 'employees'">Run Employee Import</li>
+    </ol>
+    <div class="heading">
+      <h1 *ngIf="importType === 'clients'">Run Client Import</h1>
+      <h1 *ngIf="importType === 'offices'">Run Office Import</h1>
+      <h1 *ngIf="importType === 'employees'">Run Employee Import</h1>
+      <h1 *ngIf="importType === 'trusts'">Run Trust Import</h1>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h2>File Import</h2>
+        <div class="info-block">
+          <div  *ngIf="step===1" class="file-wrap">
+            <input type="file" (change)="uploadFileDragAndDrop($event.target.files)" id="files" name="logo" accept=".csv, text/plain">
+            <label for="files" class="upload-file-lbl d-flex align-items-center justify-content-center" appFileDragAndDrop
+              (fileDropped)="uploadFileDragAndDrop($event)">
+              <p>
+                <img class="upload-icon" src="assets/images/file.png" alt="">
+                <strong>Drag and drop here <br>or<br>
+                  <a class="btn btn-primary ">Browse Your Files</a>
+                </strong>
+              </p>
+            </label>
+          </div>
+          <div *ngIf="step===2" class="upload-file d-flex justify-content-center align-items-center flex-column">
+            <figure class="d-flex align-items-center mb-32 mt-32">
+              <img src="assets/images/files icon-XLS.png" class="mr-12">{{csvfile.name}}
+            </figure>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" *ngIf="!afterImport" [routerLink]="['/import']" id="cancle-btn">Cancel</button>
+        
+        <button type="button" class="btn btn-primary" *ngIf="!uploading" (click)="importFile()" [disabled]="step===1" id="import-file-btn">Import File</button>
+      </div>
+    </div>
+    <ng-container *ngIf="afterImport">
+      <div class="fixed-btm-bar relative-btm-bar bg-gray" *ngIf="failedRecords && failedRecords.length > 0">
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-6">
+                <h4 class="m-0"><em class="icon-big icon icon-info "></em>{{failedRecords.length}} unsuccessful records</h4>
+              </div>
+              <div class="col-6 ">
+                <div class="text-right d-flex justify-content-end">
+                  <a href="javascript:void(0)" (click)="displayFailerTable=!displayFailerTable" class="btn btn-light btn-icon">
+                    <em class="icon-small icon" [ngClass]="(displayFailerTable)?'icon-angle-up':'icon-angle-down'"></em>
+                    Show Errors
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="failedRecords && failedRecords.length > 0 && displayFailerTable" class="custom-table pt-8 bg-white">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+              <tr>
+                <th>Row Number</th>
+                <th>Primary Key</th>
+                
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of failedRecords; trackBy: trackByFn;let i = index;" id=failed-record-{{i}}>
+                <td>{{item.rownumber}}</td>
+                <td>{{item.primaryKey}}</td>
+                
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="fixed-btm-bar relative-btm-bar bg-gray" *ngIf="successRecords && successRecords.length > 0">
+        <div class="card">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-6">
+                <h4 class="m-0"><em class="icon-big icon icon-check-circle icon-success "></em>{{successRecords.length}} successful records</h4>
+              </div>
+              <div class="col-6 ">
+                <div class="text-right d-flex justify-content-end">
+                  <a href="javascript:void(0)" (click)="displaySuccessTable=!displaySuccessTable" class="btn btn-light btn-icon">
+                    <em class="icon-small icon" [ngClass]="(displaySuccessTable)?'icon-angle-up':'icon-angle-down'"></em>
+                    Show Records
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="successRecords && successRecords.length > 0 && displaySuccessTable" class="fixed-btm-bar relative-btm-bar ">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+              <tr>
+                <th>Row Number</th>
+                <th>Primary Key</th>
+                
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of successRecords; trackBy: trackByFn;let i = index;" id="success-record-{{i}}">
+                <td>{{item.rownumber}}</td>
+                <td>{{item.primaryKey}}</td>
+                
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  </ng-container>
+  <div class="custom-loader" *ngIf="loading">
+    <div class="loader-inn d-flex justify-content-center align-items-center">
+      <img src="assets/images/loader-blue.gif">
+    </div>
+  </div>
+  </div>
+</div>

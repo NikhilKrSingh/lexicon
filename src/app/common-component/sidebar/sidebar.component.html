@@ -1,0 +1,234 @@
+<div class="aside-nav open">
+    <div class="mainsidebar-flex d-flex justify-content-start flex-column h-100">
+        <div class="logo text-center" *ngIf='permissionList.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisViewOnly'>
+            <a href="javascript:void(0);" [routerLink]="['/timekeeping/all-timesheets']">
+                <img *ngIf="!logoImage && !noImage" [src]="appConfigService.appConfig.default_logo">
+                <img *ngIf="noImage && !logoImage">
+                <img *ngIf="logoImage" [src]="logoImage">
+            </a>
+        </div>
+        <div class="logo text-center none" *ngIf='permissionList.TIMEKEEPING_SELFisEdit && !permissionList.TIMEKEEPING_OTHERSisAdmin && !permissionList.TIMEKEEPING_OTHERSisViewOnly'>
+            <a href="javascript:void(0);" [routerLink]="['/timekeeping/my-timesheet']">
+                <img *ngIf="!logoImage && !noImage" [src]="appConfigService.appConfig.default_logo">
+                <img *ngIf="noImage && !logoImage">
+                <img *ngIf="logoImage" [src]="logoImage">
+            </a>
+        </div>
+        <div class="logo text-center none" *ngIf='!permissionList.TIMEKEEPING_SELFisEdit && !permissionList.TIMEKEEPING_OTHERSisAdmin && !permissionList.TIMEKEEPING_OTHERSisViewOnly'>
+            <a href="javascript:void(0);" [routerLink]="['/calendar']">
+                <img *ngIf="!logoImage && !noImage" [src]="appConfigService.appConfig.default_logo">
+                <img *ngIf="noImage && !logoImage">
+                <img *ngIf="logoImage" [src]="logoImage">
+            </a>
+        </div>
+        <div class="sidemenu-scroll" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+            <nav class="aside-main-menu">
+                <ul>
+                    <li class="mydropdown" [class.active]="openAdminSettings" *ngIf="isAdmin">
+                        <a href="javascript:void(0);" id="admin-settings-menu" (click)="openAdminSettings = !openAdminSettings">
+                            <i class="icon icon-setting"></i> Admin Settings
+                        </a>
+                        <ul class="mydropdown-menu list-unstyled report-menu" *ngIf="openAdminSettings">
+                            <li *ngIf='permissionList?.TENANT_CONFIGURATIONisAdmin'>
+                                <a href="javascript:void(0)" id="admin-general-menu" (click)="navigate('/firm/general')" [ngClass]="currentNavigateURL == 'firmGeneral' ? 'active' : ''">
+                  General
+                </a>
+                            </li>
+
+
+                            <li *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin'>
+                                <a href="javascript:void(0)" id="admin-job-families-menu" (click)="navigate('/firm/job-families')" [ngClass]="currentNavigateURL == 'firmJobFamilies' ? 'active' : ''">
+                  Job Families
+                </a>
+                            </li>
+                            <li *ngIf="permissionList.ACCESS_MANAGEMENTisAdmin">
+                                <a id="admin-group-menu" [ngClass]="currentNavigateURL == 'accessManagement' ? 'active' : ''" href="javascript:void(0)" (click)="navigate('/access-management/list')">
+                  Groups
+                </a>
+                            </li>
+                            <li *ngIf="permissionList.TENANT_CONFIGURATIONisAdmin">
+                                <a href="javascript:void(0)" id="admin-import-export-menu" (click)="navigate('/import')" [ngClass]="currentNavigateURL == 'import' ? 'active' : ''">
+                  Import & Export
+                </a>
+                            </li>
+                            <li *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+                                <a href="javascript:void(0)" id="admin-biling-settings-menu" (click)="navigate('/firm/billing-settings')" [ngClass]="currentNavigateURL == 'firmBillingSettings' ? 'active' : ''">
+                  Billing Settings
+                </a>
+                            </li>
+                            <li *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+                                <a href="javascript:void(0)" id="admin-receipt-invoice-temp-menu" [ngClass]="currentNavigateURL == 'firmContentTemplate' ? 'active' : ''" (click)="navigate('/firm/content-template')">
+                  Billing Templates
+                </a>
+                            </li>
+                            <li *ngIf="permissionList?.ACCOUNTINGisAdmin">
+                                <a href="javascript:void(0)" id="admin-accounting-settings-menu" (click)="navigate('/firm/account-settings')" [ngClass]="currentNavigateURL == 'firmAccountSettings' ? 'active' : ''">
+                Accounting Settings
+                </a>
+                            </li>
+                            <li *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin">
+                                <a href="javascript:void(0)" id="admin-donot-contact-codes-menu" (click)="navigate('/contact/do-not-contact')" [ngClass]="currentNavigateURL == 'contactDoNotContact' ? 'active' : ''">
+                  Do Not Contact Codes
+                </a>
+                            </li>
+
+                            <li *ngIf='permissionList?.TENANT_CONFIGURATIONisAdmin'>
+                                <a href="javascript:void(0)" id="admin-code-ranges-menu" (click)="navigate('/firm/code-ranges')" [ngClass]="currentNavigateURL == 'firmCodeRanges' ? 'active' : ''">
+                  Code Ranges
+                </a>
+                            </li>
+                            <li *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+                                <a href="javascript:void(0)" id="admin-biling-codes-menu" (click)="navigate('/firm/billing-codes')" [ngClass]="currentNavigateURL == 'firmBillingCodes' ? 'active' : ''">
+                  Billing Codes
+                </a>
+                            </li>
+                            <li *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+                                <a href="javascript:void(0)" id="admin-rate-tables-menu" (click)="navigate('/firm/rate-table')" [ngClass]="currentNavigateURL == 'firmRateTable' ? 'active' : ''">
+                  Rate Tables
+                </a>
+                            </li>
+
+
+
+                            <li *ngIf="permissionList.BILLING_MANAGEMENTisAdmin">
+                                <a href="javascript:void(0)" id="admin-demo-tables-menu" (click)="navigate('/firm/demo-table')" [ngClass]="currentNavigateURL == 'firmDemoTable' ? 'active' : ''">
+                  Demo Tables
+                </a>
+                            </li>
+
+
+                            <li *ngIf="permissionList.DOCUMENT_MANAGEMENT_SYSTEMisAdmin && isValidTenantTier">
+                                <a href="javascript:void(0)" id="admin-document-menu" (click)="navigate('/firm/document-setting')" [ngClass]="currentNavigateURL == 'firmDocumentSetting' ? 'active' : ''">
+                  Documents
+                </a>
+                            </li>
+                            <li *ngIf='permissionList?.TENANT_CONFIGURATIONisAdmin'>
+                                <a href="javascript:void(0)" id="admin-timekeeping-settings-menu" (click)="navigate('/firm/timekeeping-setting')" [ngClass]="currentNavigateURL == 'firmTimekeepingSetting' ? 'active' : ''">
+                  Timekeeping Settings
+                </a>
+                            </li>
+                            <li *ngIf='permissionList?.TENANT_CONFIGURATIONisAdmin'>
+                                <a href="javascript:void(0)" id="admin-calendar-settings-menu" (click)="navigate('/firm/calendar-settings')" [ngClass]="currentNavigateURL == 'firmCalendarSettings' ? 'active' : ''">
+                  Calendar Settings
+                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <div class="div-line" *ngIf="isAdmin"></div>
+                    <li class="coming-soon-div" *ngIf="!isTuckerAllenUser">
+                        <div class="only-coming-soon-tooltip top">
+                            <div class="coming-soon-tooltip-inner">
+                                <span class="font-weight-medium small d-block">Coming Soon</span>
+
+                            </div>
+                        </div>
+                        <a href="javascript:void(0);" id="dashboard-menu" (click)="navigate('/dashboard')">
+                            <i class="icon icon-dashboard"></i> Dashboard
+                        </a>
+                    </li>
+                    <li [ngClass]="currentNavigateURL == 'dashboard' ? 'active' : ''" *ngIf="isTuckerAllenUser">
+                        <a href="javascript:void(0);" id="dashboard1-menu" (click)="navigate('/dashboard')">
+                            <i class="icon icon-dashboard"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <li [ngClass]="currentNavigateURL == 'calendar' ? 'active' : ''">
+                        <a href="javascript:void(0);" id="calendar-menu" (click)="navigate('/calendar')" id="calendar-main-menu">
+                            <i class="icon icon-calendar"></i> Calendar
+                        </a>
+                    </li>
+
+                    <li [ngClass]="currentNavigateURL == 'office' ? 'active' : ''">
+                        <a href="javascript:void(0);" id="offices-menu" (click)="navigate('/office/list')">
+                            <i class="icon icon-building"></i> Offices
+                        </a>
+                    </li>
+                    <li class="mydropdown" [class.active]="displayContactsMenu" *ngIf="!permissionList.CLIENT_CONTACT_MANAGEMENTisNoVisibility">
+                        <a href="javascript:void(0);" id="contacts-menu" (click)="displayContactsMenu = !displayContactsMenu">
+                            <i class="icon icon-contacts"></i> Contacts
+                        </a>
+                        <ul class="mydropdown-menu list-unstyled report-menu" *ngIf="displayContactsMenu">
+                            <li>
+                                <a id="all-contacts-menu" [ngClass]="currentNavigateURL == 'contactAllContact' ? 'active' : ''" (click)="navigate('/contact/all-contact')" href="javascript:void(0);">All Contacts</a>
+                            </li>
+                            <li>
+                                <a [ngClass]="currentNavigateURL == 'contactPotentialClient' ? 'active' : ''" (click)="navigate('/contact/potential-client')" href="javascript:void(0);" id="potential-clients-menu">Potential Clients</a>
+                            </li>
+                            <li>
+                                <a [ngClass]="currentNavigateURL == 'contactCorporateContact' ? 'active' : ''" (click)="navigate('/contact/corporate-contact')" href="javascript:void(0);" id="corporate-contacts-menu">Corporate Contacts</a>
+                            </li>
+                            <li>
+                                <a (click)="navigate('/contact/client-associations')" href="javascript:void(0);" [ngClass]="currentNavigateURL == 'contactClientAssociations' ? 'active' : ''" id="associations-menu">Associations</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li [ngClass]="currentNavigateURL == 'clientList' ? 'active' : ''" *ngIf="!permissionList.CLIENT_CONTACT_MANAGEMENTisNoVisibility">
+                        <a href="javascript:void(0);" id="clients-menu" (click)="navigate('/client-list/list')">
+                            <i class="icon icon-clients"></i> Clients
+                        </a>
+                    </li>
+                    <li [ngClass]="currentNavigateURL == 'employee' ? 'active' : ''">
+                        <a href="javascript:void(0);" id="employees-menu" (click)="navigate('/employee/list')">
+                            <i class="icon icon-employees"></i> Employees
+                        </a>
+                    </li>
+                    <li [ngClass]="currentNavigateURL == 'matter' ? 'active' : ''" *ngIf="!permissionList.CLIENT_CONTACT_MANAGEMENTisNoVisibility && !permissionList.MATTER_MANAGEMENTisNoVisibility">
+                        <a href="javascript:void(0);" (click)="navigate('/matter/list')" id="matter-sidebar-menu">
+                            <i class="icon icon-matters"></i> Matters
+                        </a>
+                    </li>
+                    <li [ngClass]="currentNavigateURL == 'timekeepingAllTimesheets' ? 'active' : ''" *ngIf='permissionList.TIMEKEEPING_SELFisEdit || permissionList.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisViewOnly'>
+                        <a href="javascript:void(0);" id="timekeeping-menu" (click)="navigate('/timekeeping')">
+                            <i class="icon icon-timekeeping"></i> Timekeeping
+                        </a>
+                    </li>
+                    <li [ngClass]="currentNavigateURL == 'manageFolders' ? 'active' : ''">
+                        <a href="javascript:void(0);" id="documents-menu" (click)="navigate('/manage-folders/document')">
+                            <i class="icon icon-documents"></i> Documents
+                        </a>
+                    </li>
+                    <li class="mydropdown" [class.active]="accounting" *ngIf='permissionList?.ACCOUNTINGisAdmin || permissionList?.ACCOUNTINGisEdit'>
+                        <a href="javascript:void(0);" id="admin-settings-menu" (click)="accounting = !accounting">
+                            <i class="icon icon-accounting"></i> Accounting
+                        </a>
+                        <ul class="mydropdown-menu list-unstyled report-menu" *ngIf="accounting">
+                            <li *ngIf='isValidTenantTier'>
+                                <a href="javascript:void(0)" id="admin-general-menu" (click)="navigate('/accounting/transfer-queue')" [ngClass]="((currentURL | indexfinder :'/accounting/transfer-queue') > -1 ) ? 'active' : ''">
+                  Accounting Queue
+                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)" id="admin-general-menu" (click)="navigateByUrl('/reporting/daily-deposit?from=accounting', checkReportingDailyDeposit)" [ngClass]="((currentURL | indexfinder :'reporting/daily-deposit?from=accounting') > -1 ) ? 'active' : ''">
+                  Daily Deposit Report
+                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li [ngClass]="currentNavigateURL == 'billing' ? 'active' : ''" *ngIf=" !permissionList.MATTER_MANAGEMENTisNoVisibility">
+                        <a href="javascript:void(0);" id="billing-menu" (click)="navigate('/billing')">
+                            <i class="icon icon-contacts"></i> Billing
+                        </a>
+                    </li>
+                    <li [ngClass]="checkPermissionClass ? 'active' : ''" *ngIf='permissionList.ACCOUNTINGisAdmin || permissionList.ACCOUNTINGisEdit
+          || permissionList.BILLING_MANAGEMENTisAdmin
+          || permissionList.BILLING_MANAGEMENTisEdit
+          || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin || permissionList.CLIENT_CONTACT_MANAGEMENTisEdit
+          || permissionList.TIMEKEEPING_SELFisEdit || permissionList.TIMEKEEPING_OTHERSisAdmin
+          ||isBillingOrResponsibleAttorney || isConsultAttorney'>
+                        <a href="javascript:void(0);" id="reporting-menu" (click)="navigate('/reporting')">
+                            <i class="icon icon-reporting"></i> Reporting
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="bottom-content text-center mt-24 powered-by">
+                <p class="text-small font-weight-medium mb-4">Powered By</p>
+                <a href="javascript:void" id="application-logo-id"><img src="assets/images/nav-logo.png"></a>
+                <div class="text-center pt-16 small font-weight-medium text-light" id="application-version-id">
+                    2.3.2
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

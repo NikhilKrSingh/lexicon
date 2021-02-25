@@ -1,0 +1,41 @@
+
+  <form [formGroup]="supportForm">
+    <div class="container">
+      <div class="main-content">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+          <li class="breadcrumb-item active">Support</li>
+        </ol>
+        <div class="heading">
+          <h1>Support</h1>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="col-7">
+              <div class="form-group">
+                <label for="">Message Subject <sup>*</sup></label>
+                <input type="text" class="form-control" placeholder="Enter a subject" formControlName="msg" id="message">
+              </div>
+            </div>
+            <div class="col-7">
+              <div class="form-group">
+                <label> Message <sup>*</sup></label>
+                <textarea class="form-control min-h-200" placeholder="Let us know how we can help" formControlName="content" id="content"></textarea>
+
+              </div>
+            </div>
+            <div class="d-flex justify-content-end pb-24">
+              <div class="btn-group">
+                <button type="button" class="btn btn-light" [routerLink]="['/dashboard']" id="cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary" [disabled]="!supportForm.valid"
+                        (click)="onSupportRequestSubmit()" id="submit-btn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>

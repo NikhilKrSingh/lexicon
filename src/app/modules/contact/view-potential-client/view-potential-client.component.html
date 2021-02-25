@@ -1,0 +1,1986 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb mb-32">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/contact/potential-client']"><a href="javascript:void(0)">Contacts</a>
+      </li>
+      <li class="breadcrumb-item" [ngClass]="{'active': !editAssociations && !editCorporateContacts}" *ngIf="clientDetail" (click)='editAssociations=null; editCorporateContacts=null'>Contact Profile - {{ clientDetail?.isCompany ? clientDetail?.companyName : clientDetail?.firstName + ' ' + clientDetail?.lastName }}</li>
+      <li class="breadcrumb-item active" *ngIf="editAssociations">Edit Associations</li>
+      <li class="breadcrumb-item active" *ngIf="editCorporateContacts">Edit Corporate Contacts</li>
+    </ol>
+    <div class="heading" *ngIf="editAssociations" id="edit-association-heading">
+      <h1>Edit Associations</h1>
+    </div>
+
+    <div class="contactInfo position-relative">
+      <div class="d-flex align-items-center justify-content-between mb-32" *ngIf="!editAssociations && !editCorporateContacts">
+        <div class="profile-content d-flex align-items-start profile-client">
+          <div class="profile-heading mr-16">
+            <h2 class="mt-0 mb-2" *ngIf="!clientDetail?.isCompany"><span id="contact-name-display">{{clientDetail?.firstName}}
+              {{clientDetail?.lastName}}</span>
+            </h2>
+            <h2 class="mt-0 mb-2" *ngIf="clientDetail?.isCompany"><span id="contact-name-display">{{clientDetail?.companyName}}</span>
+            </h2>
+            <div class="d-flex align-items-center">
+              <span class="text-small font-weight-medium d-flex align-items-center"
+                *ngIf="!clientDetail?.isCompany">Individual Potential Client -
+                <span id="contact-status-display">{{(clientDetail?.isVisible) ? 'Active' : (clientDetail?.isArchived) ? 'Archived' : 'Inactive'}}</span></span>
+              <span class="text-small font-weight-medium d-flex align-items-center"
+                *ngIf="clientDetail?.isCompany">Corporate Potential Client -
+                <span id="contact-status-display">{{(clientDetail?.isVisible) ? 'Active' : (clientDetail?.isArchived) ? 'Archived' : 'Inactive'}}</span></span>
+
+                <span class="cursor-pointer sh-badge sh-badge-primary font-weight-medium ml-8" *ngIf="!decisionActionAllowed">
+                  {{clientDetail?.consultationFeeRecordStatus?.name}}
+              </span>
+
+            <div ngbDropdown class="badge-dropdown ml-8" *ngIf="decisionActionAllowed">
+              <span class="cursor-pointer sh-badge sh-badge-primary font-weight-medium" id="dropdownBasic1" ngbDropdownToggle>
+               {{clientDetail?.consultationFeeRecordStatus?.name}}
+                <em class="icon icon-angle-down fs-8 ml-4" ></em>
+              </span>
+              <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                <button ngbDropdownItem (click)="updateDecisionStatus(status.id)" *ngFor="let status of decisionStatusList;">{{status?.name}}</button>
+              </div>
+            </div>
+        </div>
+
+          </div>
+          <div class="schedule-label d-flex align-items-center mt-16" *ngIf="clientDetail?.doNotContact">
+            <span class="close-icon mr-8"><i class="icon icon-close"></i></span>
+            <span class="schedule-text text-large font-weight-medium text-uppercase">Do not Contact</span>
+            <div class="info-hover position-relative">
+              <em class="icon icon-info ml-8 icon-color text-large"></em>
+              <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                <div class="arrow"></div>
+                <div class="tooltip-inner ">
+                  {{clientDetail?.doNotContactReason}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="btn-group">
+          <div class="d-inline-block ml-16" ngbDropdown>
+            <button class="btn btn-primary bulk-btn" ngbDropdownToggle id="pc-actions-btn">
+              Potential Client Actions
+            </button>
+            <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+              <button type="button" ngbDropdownItem [routerLink]="['/contact/reassign-client']"
+                [queryParams]="{clientId: clientId, matterId: clientDetail?.matterId}"
+                *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin"
+                id="reassign-btn-top">
+                Reassign
+              </button>
+              <button type="button" ngbDropdownItem (click)="navigateUrl(clientDetail)"
+                *ngIf="clientDetail?.isVisible && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                id="convert-to-client-top">
+                Convert to Client
+              </button>
+              <button
+                *ngIf="isConsultAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin"
+                type="button" ngbDropdownItem [routerLink]="['/contact/refund-potential-client']"
+                [queryParams]="{clientId: clientDetail?.id}" id="refund-client-btn-top">
+                Refund Client
+              </button>
+              <button
+                *ngIf="isConsultAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin"
+                type="button" ngbDropdownItem [routerLink]="['/contact/post-payment']"
+                [queryParams]="{matterId:clientDetail?.matterId,clientId:clientDetail?.id, officeId: clientDetail?.consultationLawOffice?.id,type:'potential-client'}"
+                id="pc-record-payment-top">
+                Record Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" *ngIf="showTaskBuilder && isTuckerAllenUser">
+        <div class="col-12 pb-4 pt-4">
+          <app-task-builder *ngIf="isWorkFlowCreated && !editAssociations && !editCorporateContacts" [matterId]="clientDetail.matterId"
+        [type]="'client'"></app-task-builder>
+        </div>
+        <app-loader [active]="taskBuilder_loader"></app-loader>
+      </div>
+      <div class="row" *ngIf="!editAssociations && !editCorporateContacts">
+        <div class="col-4">
+          <div class="card card-full-h" *ngIf="!clientDetail?.isCompany">
+            <div class="card-body">
+                <h3 class="mb-24 d-flex align-items-center justify-content-between">General Information
+                    <a href="javascript:void(0);" class="ml-8 px-4 lh-20" (click)="editGeneralInfo(EditGenInfo)"
+                      *ngIf="!isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" id="edit-general-info"><em
+                        class="icon icon-edit icon-color small"></em></a></h3>
+              <div class="row">
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Contact Number</span>
+                    <span id="contact-number-display">{{clientDetail?.uniqueNumber}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Salutation</span>
+                    <span id="contact-salutation-display">{{(clientDetail?.salutation) ? clientDetail?.salutation : "-"}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">First Name</span>
+                    <span id="contact-firstname-display">{{clientDetail?.firstName}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Middle Name</span>
+                    <span id="contact-middle-name">{{(clientDetail?.middleName) ? clientDetail?.middleName : '-' }}</span></div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Last Name</span>
+                    <span id="contact-last-name">{{clientDetail?.lastName}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Suffix</span>
+                    <span id="contact-suffix">{{(clientDetail?.suffix) ? clientDetail?.suffix : '-' }}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Former Name</span>
+                    <span id="contact-formername">{{(clientDetail?.formerName) ? clientDetail?.formerName : '-' }}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Gender</span>
+                    <span id="contact-gender">{{(clientDetail?.gender) ? clientDetail?.gender : '-' }}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="isTuckerAllenUser">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Contact Deceased?
+                    </span>
+                    <span id="contact-deceased">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.isDeceased) ? 'Yes': (clientDetail?.personFormBuilder) ? 'No': '' }}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Initial Contact Date</span>
+                    <span id="contact-intial-contact-date">{{clientDetail?.initialContactDate | date: 'MM/dd/yyyy'}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Consult Date</span>
+                    <ng-container *ngIf="clientDetail?.initialConsultDate; else noConsultDatep">
+                      <span id="contact-consult-date">{{clientDetail?.initialConsultDate | date: 'MM/dd/yyyy'}}</span>
+                    </ng-container>
+                    <ng-template #noConsultDatep>
+                      <span id="contact-consult-date">None</span>
+                    </ng-template>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Created By
+                    </span> <span id="contact-created-by">{{clientDetail?.createdBy}}</span></div>
+                </div>
+                <ng-container *ngIf="isTuckerAllenUser">
+                  <div class="col-6">
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Spouse First Name
+                      </span>
+                      <span id="contact-spouse-firstname">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.spouseFirstName) ? clientDetail.personFormBuilder?.spouseFirstName: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Spouse Middle Name
+                      </span>
+                      <span id="contact-spouse-middlename">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.spouseMiddleName) ? clientDetail.personFormBuilder?.spouseMiddleName: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Spouse Last Name
+                      </span>
+                      <span id="contact-spouse-lastname">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.spouseLastName) ? clientDetail.personFormBuilder?.spouseLastName: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Spouse Gender
+                      </span>
+                      <span id="contact-spouse-gender">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.spouseGender) ? clientDetail.personFormBuilder?.spouseGender: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Spouse Deceased?
+                      </span>
+                      <span id="contact-spouse-deceased">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.spouseIsDeceased) ? 'Yes': (clientDetail?.personFormBuilder) ? 'No': '' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Other Prospect First Name
+                      </span>
+                      <span id="contact-other-prospect-firstname">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.prospectFirstName) ? clientDetail.personFormBuilder?.prospectFirstName: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Other Prospect Middle Name
+                      </span>
+                      <span id="contact-other-prospect-middlename">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.prospectMiddleName) ? clientDetail.personFormBuilder?.prospectMiddleName: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Other Prospect Last Name
+                      </span>
+                      <span id="contact-other-prospect-lastname">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.prospectLastName) ? clientDetail.personFormBuilder?.prospectLastName: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Other Prospect Relationship
+                      </span>
+                      <span id="contact-other-prospect-relationship">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.prospectRelationship) ? clientDetail.personFormBuilder?.prospectRelationship: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Other Prospect Gender
+                      </span>
+                      <span id="contact-other-prospect-gender">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.prospectGender) ? clientDetail.personFormBuilder?.prospectGender: '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" >
+                    <div class="mb-24"><span class="small helper-text d-block mb-8">Other Prospect Deceased?
+                      </span>
+                      <span id="contact-other-prospect-deceased">{{ (clientDetail?.personFormBuilder && clientDetail.personFormBuilder?.prospectIsDeceased) ? 'Yes': (clientDetail?.personFormBuilder) ? 'No': '' }}</span>
+                    </div>
+                  </div>
+                </ng-container>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Next Action
+                    </span> <span id="contact-next-action">{{clientDetail | nextAction }}</span>
+                    <div class="info-hover position-relative">
+                      <div>&nbsp;</div>
+                      <a href="javascript:void(0);" class="font-weight-medium lh-20" *ngIf="clientDetail?.nextActionNote">View Notes</a>
+                      <div class="tooltip bs-tooltip-bottom left" role="tooltip" *ngIf="clientDetail?.nextActionNote">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner tooltip-lg">
+                          <p>{{clientDetail?.nextActionNote}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card card-full-h" *ngIf="clientDetail?.isCompany">
+            <div class="card-body">
+                <h3 class="mb-24 d-flex align-items-center justify-content-between">General Information <a href="javascript:void(0);"
+                  *ngIf="!isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                  class="ml-8 px-4 lh-20" (click)="editGeneralInfo(EditGenInfo)" id="edit-general-info"><em class="icon icon-edit icon-color small"></em></a></h3>
+              <div class="row">
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Contact Number</span>
+                    <span id="contact-number-display">{{clientDetail?.uniqueNumber}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Company Name</span>
+                    <span id="contact-company-name">{{clientDetail?.companyName}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Primary Contact</span>
+                    <span class="d-block mb-8" *ngFor="let item of primaryContact;let i = index; trackBy: trackByFn">
+                      <span id="contact-primary-contact-index-{{i}}">{{item.name}}</span><br>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Billing Contact</span>
+
+                    <span class="d-block mb-8" *ngFor="let item of billingContact;let i = index;trackBy: trackByFn">
+                      <span id="contact-billing-contact-index-{{i}}">{{item.name}}</span><br>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Initial Contact Date</span>
+                    <span id="contact-intial-contact-date">{{clientDetail?.initialContactDate | date: 'MM/dd/yyyy'}}</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Consult Date</span>
+                    <ng-container *ngIf="clientDetail?.initialConsultDate; else noConsultDate">
+                      <span id="contact-contact-date">{{clientDetail?.initialConsultDate | date: 'MM/dd/yyyy'}}</span>
+                    </ng-container>
+                    <ng-template #noConsultDate>
+                      <span id="contact-contact-date">None</span>
+                    </ng-template>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Created By
+                    </span> <span id="contact-created-by">{{clientDetail?.createdBy}}</span></div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">General Counsel
+                    </span>
+                    <span class="d-block mb-8" *ngFor="let item of generalCounsel;let i = index;trackBy: trackByFn">
+                      <span id="contact-general-counsel-index-{{i}}">{{item.name}}</span> <br>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-4">
+          <div class="card card-full-h">
+            <div class="card-body">
+                <h3 class="mb-24 d-flex align-items-center justify-content-between">Contact Information<a href="javascript:void(0);" class="ml-8 px-4 lh-20"
+                  *ngIf="!isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                  (click)="editContactInfo(EditConInfo)" id="edit-contact-info"><em class="icon icon-edit icon-color small"></em></a></h3>
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Primary Address</span>
+                    <div class="lh-20">
+                      <span id="contact-address-line-one" class="d-block">{{address}}</span>
+                      <span *ngIf='address2' id="contact-address-line-two" class="d-block">{{address2}}</span>
+                      <div class="d-flex">
+                        <span id="contact-city-display" class="mr-4" *ngIf="city">{{city}}, </span>
+                        <span id="contact-state-display" class="mr-4">{{clientState}} </span>
+                        <span id="contact-zip-display">{{zip}}</span></div>
+                      </div>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="!clientDetail?.isCompany">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Primary Phone</span>
+                    <span id="contact-primary-phone">{{clientPrimaryPhoneNumber | mask: '(000) 000-0000'}}</span></div>
+                </div>
+                <div class="col-6" *ngIf="!clientDetail?.isCompany">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Cell Phone</span>
+                    <span id="contact-cell-phone">{{(clientSecondaryPhoneNumber) ? (clientSecondaryPhoneNumber | mask: '(000) 000-0000') : '-' }}</span></div>
+                </div>
+                <div class="col-12" *ngIf="!clientDetail?.isCompany">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Email Address</span>
+                    <a class="text-decoration font-weight-medium" href="mailto:{{clientDetail?.email}}" *ngIf="clientDetail?.email">
+                      <span id="contact-email">{{clientDetail?.email}}</span>
+                    </a>
+                    <span *ngIf="!clientDetail?.email" id="contact-email">-</span>
+                    <span class="copy-file" *ngIf='clientDetail?.email' (click)='copyEmail(clientDetail?.email)' id="copy-mail">
+                      <i class="icon icon-file-copy"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="!clientDetail?.isCompany">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Preferred Contact Method</span>
+                    <span id="contact-preffered-contact-method">{{clientDetail?.preferredContactMethod}}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="!clientDetail?.isCompany">
+                  <div class="mb-24"><span class="small helper-text d-block mb-8">Automatic Notifications</span>
+                    <span class='d-block mb-4' id="auto-notification-email">{{clientDetail?.notifyEmail?'Email':''}}</span>
+                    <span class='d-block' id="auto-notification-text">{{clientDetail?.notifySmS && userInfo?.tenantTier?.tierName != tenantTier.Emerging ?'Text':''}}</span>
+                    <span class="d-block" id="auto-notification-na" *ngIf="(clientDetail?.notifyEmail==false || !clientDetail?.notifyEmail) && (clientDetail?.notifySmS==false || !clientDetail?.notifySmS) ">N/A</span>
+                  </div>
+                </div>
+
+                <div class="col-12 mb-24" *ngIf="clientDetail?.isCompany">
+                  <span class="helper-text small font-weight-normal">The information displayed below is taken from the Primary Contact's information</span>
+                </div>
+                <div class="col-6" *ngIf="clientDetail?.isCompany">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Primary Contact</span>
+                    <span id="contact-primary-contact">{{primaryContact[0].name}}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="clientDetail?.isCompany">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Phone Number</span>
+                    <span id="contact-primary-contact-phone">{{primaryContact[0].primaryPhone | mask: '(000) 000-0000'}}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="clientDetail?.isCompany">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Email Address</span>
+                    <span id="primary-contact-email">{{primaryContact[0]?.email}}</span>
+                  </div>
+                </div>
+                <div class="col-6" *ngIf="clientDetail?.isCompany">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-6 text-nowrap">Preferred Contact Method</span>
+                    <span id="contact-primary-contact-preferred-contact">{{clientDetail?.preferredContactMethod == 'Email' ? primaryContact[0]?.email : (primaryContact[0].primaryPhone | mask: '(000) 000-0000')}}</span>
+                  </div>
+                </div>
+                <div class="col-12" *ngIf="clientDetail?.isCompany">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Automatic Notifications</span>
+                    <span class='d-block mb-4' id="auto-notification-email">{{clientDetail?.notifyEmail?'Email':''}}</span>
+                    <span class='d-block' id="auto-notification-text">{{clientDetail?.notifySmS && userInfo?.tenantTier?.tierName != tenantTier.Emerging ?'Text':''}}</span>
+                    <span class="d-block" id="auto-notification-na" *ngIf="(clientDetail?.notifyEmail==false || !clientDetail?.notifyEmail) && (clientDetail?.notifySmS==false || !clientDetail?.notifySmS) ">N/A</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card card-full-h">
+            <div class="card-body">
+                <h3 class="mb-24 d-flex align-items-center justify-content-between">Matter Details
+                    <a href="javascript:void(0);" class="ml-8 px-4 lh-20"
+                       *ngIf="!isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                       [routerLink]="['/contact/reassign-client']" [queryParams]="{clientId: clientId, matterId: clientDetail?.matterId}" id="edit-matter-info">
+                      <em class="icon icon-edit icon-color small"></em>
+                    </a>
+                  </h3>
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Consultation Law Office</span>
+                    <span id="contact-consultation-law-office">{{clientDetail?.consultationLawOffice?.name}}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Consult Attorney</span>
+                    <span id="contact-consultation-attorney">{{clientDetail?.consultAttorney?.name ? clientDetail?.consultAttorney?.name : '-'}}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Originating Attorney</span>
+                    <span id="contact-originating-attorney">{{clientDetail?.originatingAttorney?.name}}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Practice Area</span>
+                    <span id="contact-practice-area">{{clientDetail?.matterPractices?.name}}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Matter Type</span>
+                    <span *ngFor="let matter of clientDetail?.matterType;let i = index;trackBy: trackByFn" id="matter-type-index-{{i}}">{{matter.name}}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-24">
+                    <span class="small helper-text d-block mb-8">Jurisdiction of Matter</span>
+                    <span id="contact-jurisdiction-state">{{(clientDetail?.jurisdiction[0]?.name) ? clientDetail?.jurisdiction[0]?.name : '-' }}</span>
+                    <span *ngIf='clientDetail?.jurisdictionCounty' id="contact-jurisdiction-country">({{(clientDetail?.jurisdictionCounty) ? clientDetail?.jurisdictionCounty : '-' }})</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <app-add-edit-corp-contacts *ngIf="editCorporateContacts" [fromPotentialClient]="true" (returnToPC)="editCorporateContacts = !editCorporateContacts; getClientDetail();"></app-add-edit-corp-contacts>
+
+    <div *ngIf="editAssociations || editAssociations==null && !editCorporateContacts">
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist" *ngIf="!editAssociations && !editCorporateContacts">
+        <a href="javascript:void(0);" (click)="selecttabs1 = mytabs" *ngFor="let mytabs of alltabs1;trackBy: trackByFn;let i = index;" role="tab"
+          class="nav-link flex-fil"  [hidden]="'Corporate Contacts' === mytabs && !clientDetail?.isCompany" [class.active]="selecttabs1 === mytabs" id="tab-index-{{i}}">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32">
+            <div *ngIf="selecttabs1 === alltabs1[0]" class="tab-pane fade show active" role="tabpanel">
+              <app-potential-client-billing-details
+                [clientDetail]="clientDetail"
+                (isBillingInProgress)="isBillingInProgress = $event"
+                (goToLedgerHistoryTab)="selecttabs1 = 'Ledger History'"
+                (goToInvoicesTab)="selecttabs1 = 'Invoices'"
+                (refreshNotes)='getnotes()'>
+              </app-potential-client-billing-details>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[1]" class="tab-pane fade show active" role="tabpanel">
+              <app-view-potential-client-invoices [clientDetail]='clientDetail'></app-view-potential-client-invoices>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[2]" class="tab-pane fade show active" role="tabpanel">
+              <app-transaction-history
+                [clientDetails]="clientDetail"
+                [clientId]='clientDetail.id'
+                [matterId]='clientDetail.matterId'
+                (refreshNotes)='getnotes()'
+              >
+              </app-transaction-history>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[3] && clientDetail?.isCompany" class="tab-pane fade show active" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-24">
+                <h2 class="mb-0" *ngIf="!editCorporateContacts">Corporate Contacts</h2>
+                <button type="button" class="btn btn-primary"
+                  *ngIf="!editCorporateContacts  && !isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                  (click)='editCorporateContacts=true' id="add-edit-corporate-contact">Add/Edit
+                  Corporate Contacts</button>
+              </div>
+              <div class="info-block" *ngIf="!editCorporateContacts">
+                <app-corporate-contact-view [clientId]="clientId"></app-corporate-contact-view>
+              </div>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[4]" class="tab-pane fade show active" role="tabpanel">
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-24">
+                  <h2 class="mb-0">Matter Associations</h2>
+                  <button type="button" class="btn btn-primary"
+                    *ngIf="!editAssociations  && !isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                    (click)='editAssociations=true' id="add-edit-matter-associations">Add/Edit
+                    Associations</button>
+                </div>
+                <div class="info-block">
+                  <h3>Opposing Party</h3>
+                  <div class="custom-table">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-borderless" id="opposing-party-tbl">
+                        <thead>
+                          <tr>
+                            <th>Contact Number</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Email Address</th>
+                            <th>Phone Number</th>
+                            <th>Status</th>
+                            <th class="text-right" *ngIf="editAssociations &&  (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody *ngIf="opposingPartyList.length > 0;else no_data_found">
+                          <tr *ngFor="let opp of opposingPartyList;trackBy: trackByFn;let i = index;" id="opposingparty-row-index-{{i}}">
+                            <td class="cursor-default">{{opp.uniqueNumber}}</td>
+                            <td class="cursor-default"> {{ (opp.isCompany) ? opp.companyName : opp.lastName + ', ' + opp.firstName }}</td>
+                            <td class="cursor-default">{{opp.isCompany?'Corporate':'Individual'}}</td>
+                            <td class="cursor-default">{{ (opp?.email) ? opp.email : '--' }}</td>
+                            <td class="cursor-default">
+                              {{ (opp?.primaryPhone && opp.primaryPhone?.name) ? opp?.maskingName : '--'}}
+                            </td>
+                            <td class="cursor-default">{{ (opp.isActive) ? 'Active' : 'Inactive' }}</td>
+                            <td class="text-right" *ngIf="editAssociations &&  (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">
+                              <div class="icon-group d-flex justify-content-end">
+                                <span (click)='editOpposingPartyClick(opp)' id="edit-opposingparty-index-{{i}}">
+                                  <em class="icon icon-edit icon-color"></em>
+                                </span>
+                                <span
+                                  (click)="deleteMatterAssociations(errorData.opposingparty_delete_confirm,opp.id,'Opposing Party')" id="delete-opposingparty-index-{{i}}">
+                                  <em class="icon icon-remove icon-color"></em>
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <ng-template #no_data_found>
+                          <tbody>
+                            <tr>
+                              <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+                            </tr>
+                          </tbody>
+                        </ng-template>
+                      </table>
+                      <app-loader [active]="opLoading"></app-loader>
+                    </div>
+                    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16"
+                      (click)="addOpposingPartyClick()" type="button" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" id="add-opposingparty-btn">
+                      <i class="icon icon-add-circle"></i>
+                      Add Opposing Party
+                    </button>
+                  </div>
+                </div>
+                <div class="info-block pt-24">
+                  <h3>Opposing Counsel</h3>
+                  <div class="custom-table pt-5">
+                    <div class="custom-control custom-checkbox pr-8">
+                        <input class="custom-control-input" id="partyThemselves" [checked]="isOppoRepreThemselves" type="checkbox" [disabled]="!editAssociations">
+                        <label class="custom-control-label" [ngClass]="{'text-muted': !editAssociations}" for="partyThemselves">Opposing party is representing themselves.</label>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-borderless" id="opposing-conunsel-tbl">
+                        <thead>
+                        <tr>
+                          <th>Contact Number</th>
+                          <th>Name</th>
+                          <th>Company</th>
+                          <th>Email Address</th>
+                          <th>Phone Number</th>
+                          <th>Status</th>
+                          <th class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody *ngIf="opposingCounselList.length > 0;else no_data_found">
+                          <tr *ngFor="let counsel of opposingCounselList;trackBy: trackByFn;let i = index;" id="opposingconunsel-row-index-{{i}}">
+                            <td class="cursor-default">{{counsel.uniqueNumber}}</td>
+                            <td class="cursor-default">{{counsel.lastName}}{{counsel.lastName ? ', ' : '' }} {{counsel.firstName}}</td>
+                            <td class="cursor-default">{{ counsel.companyName }}</td>
+                            <td class="cursor-default">{{counsel.email}}</td>
+                            <td class="cursor-default">
+                              {{ (counsel?.primaryPhone && counsel.primaryPhone?.name) ? counsel?.maskingName : '--'}}
+                            </td>
+                            <td class="cursor-default">{{ (counsel.isActive) ? 'Active' : 'Inactive' }} </td>
+                            <td class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">
+                              <div class="icon-group d-flex justify-content-end">
+                                <span (click)='editOpposingCounselClick(counsel)' id="edit-opposingconunsel-row-index-{{i}}">
+                                  <em class="icon icon-edit icon-color"></em>
+                                </span>
+                                <span
+                                  (click)="deleteMatterAssociations(errorData.opposingcounsel_delete_confirm,counsel.id,'Opposing Counsel')" id="delete-opposingconunsel-row-index-{{i}}">
+                                  <em class="icon icon-remove icon-color"></em>
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <app-loader [active]="ocLoading"></app-loader>
+                    </div>
+                    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+                    *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" (click)='addOpposingCounselClick()' id="add-opposing-conusel-btn">
+                      <i class="icon icon-add-circle"></i>
+                      Add Opposing Counsel
+                    </button>
+                  </div>
+                </div>
+                <div class="info-block pt-24">
+                  <h3 class="mb-16">Expert Witnesses</h3>
+                  <div class="custom-table">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-borderless" id="expert-witness-tbl">
+                        <thead>
+                        <tr>
+                          <th>Contact Number</th>
+                          <th>Name</th>
+                          <th>Company</th>
+                          <th>Email Address</th>
+                          <th>Phone Number</th>
+                          <th>Status</th>
+                          <th class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody *ngIf="expertWitnessList.length > 0; else no_data_found">
+                          <tr *ngFor="let expert of expertWitnessList;trackBy: trackByFn;let i = index;" id="expert-witness-row-index-{{i}}">
+                            <td class="cursor-default">{{expert.uniqueNumber}}</td>
+                            <td class="cursor-default">{{expert.lastName}}{{expert.lastName ? ', ' : '' }} {{expert.firstName}}</td>
+                            <td class="cursor-default">{{ expert.companyName }}</td>
+                            <td class="cursor-default">{{expert.email}}</td>
+                            <td class="cursor-default">
+                              {{ (expert?.primaryPhone && expert.primaryPhone?.name) ? expert?.maskingName : '--'}}
+                            </td>
+                            <td class="cursor-default">{{ (expert.isActive) ? 'Active' : 'Inactive' }} </td>
+                            <td class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">
+                              <div class="icon-group d-flex justify-content-end">
+                                <span (click)='editExpertWitnessClick(expert)' id="edit-expert-witness-index-{{i}}">
+                                  <em class="icon icon-edit icon-color"></em>
+                                </span>
+                                <span
+                                  (click)="deleteMatterAssociations(errorData.expert_witnesses_delete_confirm,expert.id,'Expert Witnesses')" id="delete-expert-witness-index-{{i}}">
+                                  <em class="icon icon-remove icon-color"></em>
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <app-loader [active]="ewLoading"></app-loader>
+                    </div>
+                    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+                      (click)='addExpertWitnessClick()' *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly" id="add-expert-witness-btn">
+                      <i class="icon icon-add-circle"></i>
+                      Add Expert Witness
+                    </button>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-24 mt-4">
+                  <h2 class="mb-0">Client Associations</h2>
+                </div>
+                <div class="info-block">
+                  <h3 class="mb-16">Vendor</h3>
+                  <div class="custom-table">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-borderless" id="vendorlisting-tbl">
+                        <thead>
+                          <tr>
+                            <th>Contact Number</th>
+                            <th>Name</th>
+                            <th>Company</th>
+                            <th>Email Address</th>
+                            <th>Phone Number</th>
+                            <th>Status</th>
+                            <th class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody *ngIf="vendorList.length > 0; else no_data_found">
+                          <tr *ngFor="let vendor of vendorList;trackBy: trackByFn;let i = index;" id="vendor-row-index-{{i}}">
+                            <td class="cursor-default">{{vendor.uniqueNumber}}</td>
+                            <td class="cursor-default">{{vendor.lastName}}{{vendor.lastName ? ', ' : '' }} {{vendor.firstName}}</td>
+                            <td class="cursor-default">{{vendor.companyName}}</td>
+                            <td class="cursor-default">{{vendor.email}}</td>
+                            <td class="cursor-default">
+                              {{ (vendor?.primaryPhone) ? vendor?.maskingName : '--'}}
+                            </td>
+                            <td class="cursor-default">{{ vendor.status ? vendor.status : '' }}</td>
+                            <td class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">
+                              <div class="icon-group d-flex justify-content-end">
+                                <span>
+                                  <em class="icon icon-edit icon-color" (click)='editVendorClick(vendor)' id="edit-vendor-index-{{i}}"></em>
+                                </span>
+                              <span>
+                                  <em class="icon icon-remove icon-color" (click)='deleteVendorClick(vendor)' id="delete-vendor-index-{{i}}"></em>
+                                </span>
+                            </div>
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                      <app-loader [active]="subsidiaryLoading"></app-loader>
+                    </div>
+                    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+                      (click)='addVendorClick()' *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly" id="add-vendor-btn">
+                      <i class="icon icon-add-circle"></i>
+                      Add Vendor
+                    </button>
+                  </div>
+                </div>
+                <div class="info-block">
+                  <h3 class="mb-16">Subsidiary</h3>
+                  <div class="custom-table">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-borderless" id="subsidiary-tbl">
+                        <thead>
+                          <tr>
+                            <th>Contact Number</th>
+                            <th>Name</th>
+                            <th>Company</th>
+                            <th>Email Address</th>
+                            <th>Phone Number</th>
+                            <th>Status</th>
+                            <th class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody *ngIf="subsidiaryList.length > 0; else no_data_found">
+                          <tr *ngFor="let subsidiary of subsidiaryList;trackBy: trackByFn;let i = index;" id="subsidiary-row-index-{{i}}">
+                            <td class="cursor-default">{{subsidiary.uniqueNumber}}</td>
+                            <td class="cursor-default">{{subsidiary.lastName}}{{subsidiary.lastName ? ', ' : '' }} {{subsidiary.firstName}}
+                            </td>
+                            <td class="cursor-default">{{subsidiary.companyName}}</td>
+                            <td class="cursor-default">{{subsidiary.email}}</td>
+                            <td class="cursor-default">
+                              {{ (subsidiary?.primaryPhone) ? subsidiary?.maskingName : '--'}}
+                            </td>
+                            <td class="cursor-default">{{ subsidiary.status }}</td>
+                            <td class="text-right" *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly">
+                              <div class="icon-group d-flex justify-content-end">
+                                <span>
+                                  <em class="icon icon-edit icon-color" (click)='editSubsidiaryClick(subsidiary)' id="edit-subsidiary-index-{{i}}"></em>
+                                </span>
+                              <span>
+                                  <em class="icon icon-remove icon-color"
+                                      (click)='deleteSubsidiaryClick(subsidiary)' id="delete-subsidiary-index-{{i}}"></em>
+                                </span>
+                            </div>
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                      <app-loader [active]="subsidiaryLoading"></app-loader>
+                    </div>
+                    <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+                      (click)='addSubsidiaryClick()' *ngIf="editAssociations && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin) && !isViewOnly" id="add-subsidiary-btn">
+                      <i class="icon icon-add-circle"></i>
+                      Add Subsidiary
+                    </button>
+                  </div>
+                </div>
+                <div class="info-block pt-24" *ngIf="editAssociations">
+                  <div class="form-group">
+                    <label for="">You may leave change notes for the audit history (optional).</label>
+                    <textarea class="form-control" rows="4" placeholder="Enter Note Text" id="note-text"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[5]" class="tab-pane fade show active" role="tabpanel">
+              <h3 class="mb-24">Notes</h3>
+              <div class="d-flex align-items-center mb-24 w-100">
+                <div class="header-search flex-fill mr-20">
+                  <form class="table-data-search">
+                    <div class="header-search-wrapper">
+                      <input type="text" class="form-control search-input"
+                             placeholder="Search by author or note text"
+                             [formControl]='searchNotesControl' id="search-text">
+                      <button class="btn" type="submit" id="search-btn">Search</button>
+                    </div>
+                  </form>
+                </div>
+                <button class="btn btn-primary btn-icon d-flex align-items-center"
+                        *ngIf="!isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)"
+                        type="button" (click)="addEditNote(null, null)" id="create-new-note">
+                  <i class="icon icon-plus"></i>
+                  Create New Note
+                </button>
+              </div>
+              <div class="row gutter-16" [formGroup]='searchForm'>
+                <div class="col-3">
+                  <div class="form-group">
+                    <label>Author</label>
+                    <ng-select [items]="authorList" placeholder="Select an Author"
+                               formControlName='author' [bindValue]="'id'"
+                               [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'"
+                               id="authorlist-select">
+                    </ng-select>
+                  </div>
+                </div>
+                <div class="col-5">
+                  <div class="form-group">
+                    <label>Date Created Range</label>
+                    <div class="row gutter-16">
+                        <div class="col-6">
+                          <app-date-picker
+                      [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select start date'"
+                      controlName='createdStartDate' id="created-start-date"></app-date-picker>
+                        </div>
+                        <div class="col-6">
+                          <app-date-picker
+                      [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select end date'"
+                      controlName='createdEndDate' id="created-end-date"></app-date-picker>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-2">
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox mt-32 pr-0">
+                      <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                             formControlName="isVisibleToClient">
+                      <label class="custom-control-label" for="dropcheck-1">Visible To Client</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="custom-table">
+                <ngx-datatable #notesTable class="material common-table no-min-height" [rows]="noteList" [columnMode]="ColumnMode.force"
+                  [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="pageNotes.totalElements"
+                  [offset]="pageNotes.pageNumber" [limit]="pageNotes.size" id="notelisting-tbl">
+                  <ngx-datatable-column [resizeable]="false" prop="content" name="Note Text" [sortable]="true" [width]="300">
+                    <ng-template let-value="value" ngx-datatable-cell-template>
+                      <div class="note-table-text user-prof-note">
+                        <app-read-more [text]='value' [maxLines]='2'> </app-read-more>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="applicableDate" name="Applicable Date" [width]="150">
+                    <ng-template let-value="value" ngx-datatable-cell-template>
+                      <span class="d-block font-weight-medium">{{value | date}}</span>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Written Date" [width]="150">
+                    <ng-template let-value="value" ngx-datatable-cell-template>
+                      <span class="d-block font-weight-medium mb-4">{{value | date}}</span>
+                      <span class="small helper-text font-weight-regular d-block lh-20">{{value | date: 'hh:mm a'}}</span>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="createdBy.name" name="Author" [sortable]="true" [width]="180">
+                    <ng-template let-value="value" ngx-datatable-cell-template let-row='row'>
+                      <span class="d-block font-weight-medium mb-4">{{row.createdBy.name}}</span>
+                      <span class="small helper-text font-weight-regular d-block lh-20">{{row.createdBy.email}}</span>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" prop="isVisibleToClient" name=" " [width]="100" [sortable]="false">
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                      <span *ngIf="row.isVisibleToClient" class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Visible To Client</span>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false" *ngIf="!isViewOnly && (permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin)" [headerClass]="'text-right'" name="Action" [sortable]='false'>
+                    <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                      <div class="icon-group d-flex justify-content-end">
+                        <span>
+                          <em class="icon icon-edit icon-color" (click)='addEditNote(row, $event)' id="edit-note-index-{{rowIndex}}"></em>
+                        </span>
+                        <span>
+                          <em class="icon icon-remove icon-color" (click)='deleteNote(row.id, $event)' id="delete-note-index-{{rowIndex}}"></em>
+                        </span>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-footer>
+                    <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                      let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                      let-isVisible="isVisible">
+                      <div class="d-flex justify-content-between flex-fill">
+                        <div class="d-flex align-items-center">
+                          <div class="table-items d-flex align-items-center mr-36">
+                            Items per page:
+                            <div class=" ml-8">
+                              <select class="custom-select border-less" [formControl]="pageNoteSelector"
+                                (change)="changeNotePageSize()">
+                                <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                              </select>
+                            </div>
+                          </div>
+                          <span>
+                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                            {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                          </span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                          <select class="custom-select border-less" [(ngModel)]="pangeNoteSelected"  (change)="changeNotePage()">
+                            <option *ngFor='let num of pageNotes.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                              {{ i+1 }}
+                              of {{pageNotes.totalPages}}</option>
+                          </select>
+                          <div class="ml-8">
+                            <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                              [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                              [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                              [page]="curPage" [size]="pageSize" [count]="rowCount"
+                              [hidden]="!((rowCount / pageSize) > 1)"
+                              (change)="notesTable.onFooterPage($event);pageNoteChange($event)">
+                            </datatable-pager>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-footer>
+                </ngx-datatable>
+                <app-loader [active]="notesLoading"></app-loader>
+              </div>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[6]" class="tab-pane fade show active" role="tabpanel">
+              <div class="d-flex justify-content-between mb-28">
+                <h2 class="mb-0">Blocked Employees</h2>
+                <button class="btn btn-primary btn-icon" type="button" (click)="addBlockedEmployee()" *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" id="add-blocked-employee-btn">
+                  <i class="icon icon-plus"></i>Add Blocked Employee
+                </button>
+              </div>
+              <p class="mb-8">Blocked employees cannot see the matter anywhere in the system, including in detail, lists, mentions, or reports, unless otherwise specified.</p>
+              <div>
+                <div *ngIf="employeesRows?.length == 0" class="pt-24">
+                  <span class="fw-500">No employees are blocked on this potential client.</span>
+                </div>
+                <div id="blockedEmployeeTable" class="position-relative pt-24" *ngIf="employeesRows?.length > 0">
+                  <div class="custom-table matter-list corporate-contact section-area hide-datatable-footer-inner">
+                    <ngx-datatable class="material common-table matter-table" [rows]="employeesRows"
+                      [columnMode]="ColumnMode.force" [headerHeight]="50" rowHeight="auto"
+                      id="blocked-employee-tbl">
+                      <ngx-datatable-column [resizeable]="false" prop="fullName" name="Name" [sortable]="true" [width]="145">
+                        <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                          <span class="d-block lh-20 font-weight-medium mb-4">{{row.fullName}}</span>
+                          <span class="d-block lh-20 helper-text font-weight-normal">{{row.email}}</span>
+                        </ng-template>
+                      </ngx-datatable-column>
+                      <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [sortable]="true" [width]="125">
+                      </ngx-datatable-column>
+                      <ngx-datatable-column [resizeable]="false" prop="primaryOffice.name" name="Primary Office" [sortable]="true" [width]="145">
+                      </ngx-datatable-column>
+                      <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [sortable]="true" [width]="305">
+                        <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                          <div *ngIf="row.description">
+                            <app-read-more [maxLines]='2' [text]='row.description'></app-read-more>
+                          </div>
+                          <span class="d-block" *ngIf="!row.description">
+                            --
+                          </span>
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100" *ngIf="permissionList.CLIENT_CONTACT_MANAGEMENTisEdit || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" >
+                        <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                          <div class="icon-group d-flex justify-content-end">
+                            <span (click)="removeBlockedEmployee(row, RemoveBlockedEmployee)" id="remove-blocked-employee-index-{{rowIndex}}">
+                              <em class="icon icon-remove icon-color"></em>
+                            </span>
+                          </div>
+                        </ng-template>
+                      </ngx-datatable-column>
+                    </ngx-datatable>
+                  </div>
+                </div>
+                <app-loader [active]="blockedLoading"></app-loader>
+              </div>
+
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+    <div class="d-flex justify-content-end pb-24" *ngIf="editAssociations">
+      <div class="btn-group">
+        <button type="button" (click)="editAssociations=null;runConflicts=false;" class="btn btn-light" id="cancel-btn">Cancel</button>
+        <button type="button" (click)="runConflictsCheck()" class="btn btn-primary" id="run-conflict-check-btn">Run Conflict Check</button>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="isBillingInProgress"></app-loader>
+</div>
+
+<ng-container *ngIf="addOpposingParty">
+  <app-add-opposing-party [mode]='addOpposingPartyMode' [association]='selectedOpposingParty' [uniqueNumber]="uniqueContactNumber"
+    [associateOpposingParty]="associateOpposingParty" [associateFlag]="'add'" [matterId]="matterId"
+    (closeModel)="closeOpposingParty($event)"></app-add-opposing-party>
+</ng-container>
+
+
+<ng-container *ngIf='addExpertWitness'>
+  <app-add-expert-witnesses [mode]='addExpertWitnessMode' [association]='selectedExpertWitness' [matterId]="matterId"
+    [associateExpertWitness]="associateExpertWitness" [uniqueNumber]="uniqueContactNumber" (closeModel)="closeExpertWitness($event)">
+  </app-add-expert-witnesses>
+</ng-container>
+
+
+<ng-container *ngIf='addOpposingCouncel'>
+  <app-add-opposing-counsel [mode]='addOpposingCouncelMode' [association]='selectedOpposingCounsel'
+    [associateOpposingCouncil]="associateOpposingCouncil" [matterId]="matterId" [uniqueNumber]="uniqueContactNumber"
+    (closeModel)="closeOpposingCouncel($event)"></app-add-opposing-counsel>
+</ng-container>
+
+
+<ng-container *ngIf="addVendor">
+  <app-add-vendor [mode]="addVendorMode" [vendorDetails]='selectedVendor' [matterId]="matterId" [uniqueNumber]="uniqueContactNumber"
+    (closeModel)='closeVendor($event)' [pageType]="'potentialclient'" [clientId]="clientId" [associateVendor]="associateVendor" [associateFlag]="'add'" [type]="'Vendor'">
+  </app-add-vendor>
+</ng-container>
+
+
+<ng-container *ngIf="addSubsidiary">
+  <app-add-vendor [mode]="addSubsidiaryMode" [vendorDetails]='selectedSubsidiary' [matterId]="matterId" [uniqueNumber]="uniqueContactNumber"
+    (closeModel)='closeSubsidiary($event)' [pageType]="'potentialclient'" [clientId]="clientId" [associateVendor]="associateSubsidiary" [associateFlag]="'add'"
+    [type]="'Subsidiary'">
+  </app-add-vendor>
+</ng-container>
+
+
+
+<ng-template #EditGenInfo let-modal>
+  <div *ngIf="clientDetail.isCompany == false">
+    <div class="modal-header pb-24 d-block">
+      <h3 class="modal-title mb-0">Edit General Information</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <form [formGroup]="IndividualContactForm" #genInfoInd="ngForm" (ngSubmit)="updateGenInfo()">
+      <div class="modal-body pb-0">
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label>Contact Number</label>
+              <input type="text" formControlName="uniqueNumber" [readOnly]="true" class="form-control" id="contact-number">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Salutation</label>
+              <ng-select [selectOnTab]="true" [items]="salutationArr" placeholder="Select" formControlName="salutation"
+                         [bindValue]="'name'" [bindLabel]="'name'" [notFoundText]="'No record found'" id="salutation-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]='genInfoInd.submitted && IndividualContactForm.controls.firstName.errors'>
+              <label>First Name <sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="Enter First Name" formControlName="firstName" id="first-name" />
+              <span class="field-message text-danger d-flex align-items-start" *ngIf="genInfoInd.submitted && IndividualContactForm.controls.firstName.errors">
+                <em class="icon icon-error mr-4 mt-0"></em>
+                Please enter the first name.
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Middle Name</label>
+              <input type="text" class="form-control" placeholder="Enter Middle Name" formControlName="middleName" id="middle-name">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]='genInfoInd.submitted && IndividualContactForm.controls.lastName.errors'>
+              <label>Last Name <sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="Enter Last Name" formControlName="lastName" id="last-name">
+              <span class="field-message text-danger d-flex align-items-start" *ngIf="genInfoInd.submitted && IndividualContactForm.controls.lastName.errors">
+                <em class="icon icon-error mr-4 mt-0"></em>
+                Please enter the last name.
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Suffix</label>
+              <input type="text" class="form-control" placeholder="Select Suffix" formControlName="suffix" id="suffix">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Former Name</label>
+              <input type="text" class="form-control" placeholder="Enter Former Name" formControlName="formerName" id="former-name">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Gender</label>
+              <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Select" formControlName="gender"
+                [bindValue]="'val'" [bindLabel]="'text'" [notFoundText]="'No record found'" id="gender-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-12 mb-8" *ngIf="isTuckerAllenUser">
+            <div class="custom-control custom-checkbox pr-0">
+              <input type="checkbox" class="custom-control-input" formControlName="isDeceased" id="isDeceased">
+              <label class="custom-control-label" for="isDeceased">The contact is deceased.</label>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Contact Date</label>
+              <app-date-picker [isForm]='true' [dateform]='IndividualContactForm' controlName='initialContactDate' id="contact-date">
+              </app-date-picker>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Consult Date</label>
+              <app-date-picker [isNgModel]='true' [(data)]='initialConsultDate' [isDisabled]="true" id="consult-date"></app-date-picker>
+            </div>
+          </div>
+
+          <ng-container *ngIf="isTuckerAllenUser">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Spouse First Name</label>
+                <input type="text" class="form-control" formControlName="spouseFirstName"
+                  placeholder="Enter First Name" id="spouse-firstname" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Spouse Middle Name</label>
+                <input type="text" class="form-control" formControlName="spouseMiddleName"
+                  placeholder="Enter Middle Name" id="spouse-middlename" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Spouse Last Name</label>
+                <input type="text" class="form-control" formControlName="spouseLastName" placeholder="Enter Last Name" id="spouse-lastname" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Spouse Gender</label>
+                <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Select" formControlName="spouseGender"
+                  [bindValue]="'val'" [bindLabel]="'text'" [notFoundText]="'No record found'" id="spouse-gender-select">
+                </ng-select>
+              </div>
+            </div>
+            <div class="col-12 mb-8">
+              <div class="custom-control custom-checkbox pr-0">
+                <input type="checkbox" class="custom-control-input" formControlName="spouseIsDeceased"
+                  id="spouseIsDeceased">
+                <label class="custom-control-label" for="spouseIsDeceased">Spouse is deceased.</label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Other Prospect First Name</label>
+                <input type="text" class="form-control" formControlName="prospectFirstName"
+                  placeholder="Enter First Name" id="prospect-firstname" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Other Prospect Middle Name</label>
+                <input type="text" class="form-control" formControlName="prospectMiddleName"
+                  placeholder="Enter Middle Name" id="prospect-middlename" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Other Prospect Last Name</label>
+                <input type="text" class="form-control" formControlName="prospectLastName"
+                  placeholder="Enter Last Name" id="prospect-lastname" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Other Prospect Relationship</label>
+                <input type="text" class="form-control" formControlName="prospectRelationship"
+                  placeholder="Enter Relationship" id="prospect-relationship" />
+              </div>
+            </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label>Other Prospect Gender</label>
+              <ng-select [selectOnTab]="true" [items]="genderList" placeholder="Select" formControlName="prospectGender"
+                [bindValue]="'val'" [bindLabel]="'text'" [notFoundText]="'No record found'" id="prospect-gender-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-6 pt-12">
+            <div class="custom-control custom-checkbox pr-0 pt-8">
+              <input type="checkbox" class="custom-control-input" formControlName="prospectIsDeceased"
+                id="prospectdeceased">
+              <label class="custom-control-label" for="prospectdeceased">Other Prospect is deceased.</label>
+            </div>
+          </div>
+        </ng-container>
+          <div class="col-12">
+            <div class="form-group">
+              <label>Next Action</label>
+                <p class="margin-top-bottom">Are there any pending next actions on this client that the attorney needs to be aware of? </p>
+              <div class="row gutter-16">
+                <div class="col-6">
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="customRadioInline1" name="customRadioInline1" class="custom-control-input"
+                      value="no" [(ngModel)]="initialconsultations" [ngModelOptions]="{standalone: true}" (change)="setValidatorNextActionFields()">
+                    <label class="custom-control-label" for="customRadioInline1">No</label>
+                  </div>
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="customRadioInline2" name="customRadioInline1" class="custom-control-input"
+                      value="yes" [(ngModel)]="initialconsultations" [ngModelOptions]="{standalone: true}" (change)="setValidatorNextActionFields()">
+                    <label class="custom-control-label" for="customRadioInline2">Yes</label>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="initialconsultations==='yes'">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <div class="form-group mb-12 mt-8" [class.has-error]="genInfoInd.submitted && IndividualContactForm.controls.nextActionDate?.errors">
+                      <label>Next Action Date <sup>*</sup></label>
+                      <app-date-picker [isForm]='true' [dateform]='IndividualContactForm' controlName='nextActionDate' id="next-action-date">
+                      </app-date-picker>
+                      <span class="field-message text-danger d-flex align-items-start" *ngIf="genInfoInd.submitted && IndividualContactForm.controls.nextActionDate?.errors?.required">
+                        <em class="icon icon-error mr-4 mt-0"></em>
+                        Please select date.
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="form-group mb-0" [class.has-error]="genInfoInd.submitted && IndividualContactForm.controls.nextActionNote?.errors">
+                      <label>Next Action Notes <sup>*</sup></label>
+                      <textarea class="form-control" rows="4" placeholder="Enter Notes"
+                        formControlName="nextActionNote" id="next-action-note"></textarea>
+                      <span class="field-message text-danger d-flex align-items-start" *ngIf="genInfoInd.submitted && IndividualContactForm.controls.nextActionNote?.errors?.required">
+                        <em class="icon icon-error mr-4 mt-0"></em>
+                        Please enter notes.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-group">
+              <label>Change Notes</label>
+              <textarea class="form-control" rows="4" placeholder="Enter change notes (optional)"
+                formControlName="changeNotes" id="change-notes"></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <input type="submit" value="Save" class="btn btn-primary" id="save-btn">
+      </div>
+    </form>
+  </div>
+  <div *ngIf="clientDetail.isCompany == true ">
+    <div class="modal-header pb-24 d-block">
+      <h3 class="modal-title mb-0">Edit General Information</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <form [formGroup]="CorporateContactForm" #genInfoCorp="ngForm" (ngSubmit)="updateGenInfo()">
+    <div class="modal-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Contact Number</label>
+              <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+            </div>
+          </div>
+          <div class="col-9">
+            <div class="form-group" [class.has-error]="genInfoCorp.submitted && CorporateContactForm.controls.companyName.errors">
+              <label>Company Name <sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="Enter Company Name" formControlName="companyName" id="company-name">
+              <span class="field-message text-danger d-flex align-items-start" *ngIf="genInfoCorp.submitted && CorporateContactForm.controls.companyName.errors">
+                <em class="icon icon-error mr-4 mt-0"></em>
+                Please enter the company name.
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label>Initial Contact Date</label>
+              <app-date-picker [isForm]='true' [dateform]='CorporateContactForm' controlName='initialContactDate' id="intial-contact-date">
+              </app-date-picker>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label>Consult Date</label>
+              <app-date-picker [isNgModel]='true' [(data)]='initialConsultDate' [isDisabled]="true" id="consult-date"></app-date-picker>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label>Created By</label>
+              <input type="text" class="form-control" formControlName="createdBy" readonly id="created-by">
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-group">
+              <label>Change Notes</label>
+              <textarea class="form-control" rows="4" placeholder="Enter change notes (optional)"
+                formControlName="changeNotes" id="change-notes"></textarea>
+            </div>
+          </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <input type="submit" class="btn btn-primary"
+      value="Save" id="save-btn">
+    </div>
+  </form>
+  </div>
+  <app-loader [active]="contactinfoloader"></app-loader>
+</ng-template>
+
+
+<ng-template #EditConInfo let-modal>
+  <div class="modal-header pb-16 d-block">
+    <h3 class="modal-title mb-0">Edit Contact Information</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <form [formGroup]="ContactForm" (ngSubmit)="updateContactInfo()" #contInfo="ngForm">
+  <div class="modal-body pb-0">
+      <div class="row">
+        <div class="col-6">
+          <h4 class="mb-16 mt-0">Primary Address </h4>
+          <div class="row gutter-16">
+            <div class="col-12">
+              <div class="form-group" [class.has-error]="contInfo.submitted && ContactForm.controls.primaryAddress.errors">
+                <label>Primary Address <sup>*</sup></label>
+                <input type="text" class="form-control" placeholder="Enter Street Address"
+                  formControlName="primaryAddress" id="primary-address">
+                  <span class="field-message text-danger d-flex align-items-start" *ngIf="contInfo.submitted && ContactForm.controls.primaryAddress.errors">
+                    <em class="icon icon-error mr-4 mt-0"></em>
+                    {{ errorData?.potential_client_corporate_contact_address }}
+                  </span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group">
+                <label>Primary Address 2</label>
+                <input type="text" class="form-control" placeholder="Enter Unit or Suite #"
+                  formControlName="primaryAddress2" id="primary-address2">
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="(ContactForm.controls['primaryZipCode'].errors && (ContactForm.controls['primaryZipCode'].touched || contInfo.submitted) && !validZipErr) || (contInfo.submitted && validZipErr)">
+                <label>Zip Code <sup>*</sup></label>
+                <input type="text"
+                  class="form-control"
+                  placeholder=" Enter ZIP Code"
+                  maxlength="6"
+                  minlength="3"
+                  formControlName="primaryZipCode"
+                  (keypress)="checkNumber($event)"
+                  autocomplete="doNotAutoComplete"
+                  (keyup)="getCityState($event?.target?.value)"
+                  id="zip-code">
+                <small class="helper-text d-block pt-4 font-weight-normal">CDT (Central Daylight Time)</small>
+                <span class="field-message text-danger"
+                                  *ngIf="(ContactForm.controls['primaryZipCode'].errors && (ContactForm.controls['primaryZipCode'].touched || contInfo.submitted)) && !validZipErr">
+                                  <em class="icon icon-error mr-4"></em>
+                                  {{ errorData?.zip_code_required}}
+                                </span>
+                                <span class="field-message text-danger" *ngIf="contInfo.submitted && validZipErr">
+                                  <em class="icon icon-error mr-4"></em>
+                                  {{errorData?.zip_code_error}}
+                                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>State <sup>*</sup></label>
+                <ng-select *ngIf="stateList?.length > 1"
+                  [selectOnTab]="true"
+                  [items]="stateList"
+                  placeholder="State"
+                  formControlName="primaryState"
+                  [bindValue]="'code'"
+                  [bindLabel]="'name'"
+                  [clearable]="false"
+                  [notFoundText]="'No record found'"
+                  id="primary-state">
+                </ng-select>
+                <input *ngIf="stateList?.length <= 1"
+                  type="text"
+                  class="form-control"
+                  placeholder="State"
+                  [(ngModel)]="singleState"
+                  [ngModelOptions]="{standalone: true}"
+                  [readOnly]='true' id="state">
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group">
+                <label>City <sup>*</sup></label>
+                <ng-select *ngIf="cityList?.length > 1"
+                  [items]="cityList"
+                  placeholder="City"
+                  formControlName="primaryCity"
+                  [notFoundText]="'No record found'"
+                  [clearable]="false"
+                  [selectOnTab]="true" id="city">
+                </ng-select>
+                <input *ngIf="cityList?.length <= 1"
+                type="text"
+                class="form-control"
+                placeholder="City"
+                formControlName="primaryCity"
+                [readOnly]='true'
+                id="primary-city">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6"></div>
+        <div class="col-6" *ngIf='!clientDetail?.isCompany'>
+          <div
+            [ngClass]="(contInfo.submitted && ContactForm.controls.primaryPhoneNumber.errors)?'form-group has-error':'form-group'">
+            <label>Primary Phone<sup>*</sup></label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+              placeHolderCharacter=" " formControlName="primaryPhoneNumber" id="primary-phone"
+              />
+            <span class="field-message text-danger"
+              *ngIf="contInfo.submitted && ContactForm.controls.primaryPhoneNumber.errors"><em
+                class="icon icon-error mr-4"></em>
+              {{(ContactForm.controls.primaryPhoneNumber.errors.required) ? 'Please enter primary phone number.' : 'Invalid phone number.'}}
+            </span>
+          </div>
+        </div>
+        <div class="col-6" *ngIf='!clientDetail?.isCompany'>
+          <div
+            [ngClass]="(contInfo.submitted && ContactForm.controls.cellPhoneNumber.errors)?'form-group has-error':'form-group'">
+            <label>Cell Phone</label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+              placeHolderCharacter=" " formControlName="cellPhoneNumber" id="cell-phone-number"
+              />
+            <span class="field-message text-danger"
+              *ngIf="contInfo.submitted && ContactForm.controls.cellPhoneNumber.errors"><em
+                class="icon icon-error mr-4"></em>
+                {{ errorData?.invalid_phone }}
+            </span>
+          </div>
+        </div>
+        <div class="col-6" *ngIf='!clientDetail?.isCompany'>
+          <div [class.has-error]="emailExistenceForPotentialClient"
+            [ngClass]="(contInfo.submitted && ContactForm.controls.email.errors)?'form-group has-error':'form-group'">
+            <label>Email Address </label>
+            <input type="email"
+              name="email"
+              formControlName="email" class="form-control"
+              (blur)="checkEmailExistenceForPotentialClient()"
+              placeholder="Email Address"
+              value="Email Address"
+              (keyup)="enablePrefferedContact()"
+              id="email-address">
+            <span class="field-message text-danger" *ngIf="contInfo.submitted && ContactForm.controls.email.errors"><em
+                class="icon icon-error mr-4"></em>
+              {{(ContactForm.controls.email.errors.email) ? 'Please enter a email address.' : 'Invalid email address.'}}
+            </span>
+            <span class="field-message text-danger" *ngIf="emailExistenceForPotentialClient"><em
+              class="icon icon-error mr-4"></em>
+              This email address is already in use by a potential client, client, employee, or corporate contact.
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div [ngClass]="clientDetail.isCompany ? 'col-12': 'col-10'">
+          <div class="row gutter-16" *ngIf="!clientDetail.isCompany">
+            <div class="col-4">
+              <div class="form-group">
+                <div class="custom-control custom-checkbox mb-8 pr-0">
+                  <input type="checkbox" class="custom-control-input" id="doNotContact123"
+                    formControlName="doNotContact" (change)="markDoNotContact(true)">
+                  <label class="custom-control-label" for="doNotContact123">Mark as Do Not Contact</label>
+                </div>
+                <div class="form-group" [class.has-error]="contInfo.submitted && ContactForm.controls.doNotContact.value && !ContactForm.controls.doNotContactReason.value" *ngIf="ContactForm.controls.doNotContact.value">
+                  <label for="">Do Not Contact Reason <sup>*</sup></label>
+                  <ng-select [selectOnTab]="true" [items]="doNotContactReasonArr" placeholder="Select a reason"
+                    formControlName="doNotContactReason" [bindValue]="'name'" [bindLabel]="'name'"
+                    [notFoundText]="'No record found'" id="do-not-contact-reason-select">
+                  </ng-select>
+                  <span class="field-message text-danger"
+                    *ngIf="contInfo.submitted && ContactForm.controls.doNotContact.value && !ContactForm.controls.doNotContactReason.value"><em
+                     class="icon icon-error mr-4"></em>
+                        Please select a do not contact reason.
+                  </span>
+                </div>
+                <div class="form-group" *ngIf="ContactForm.controls.doNotContactReason.value =='Other'">
+                  <label>Reason</label>
+                  <input type="text" class="form-control" placeholder="Enter Do Not Contact Reason"
+                    formControlName="DoNotContactReasonOther" id="reason-text">
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group" [class.has-error]="contInfo.submitted && ContactForm.controls.preferredContactMethod.errors">
+                <label for="" class="mb-10">Preferred Contact Method <sup *ngIf="!ContactForm.controls.doNotContact.value">*</sup></label>
+                <fieldset [disabled]="ContactForm.controls.doNotContact.value">
+                  <div class="custom-control custom-radio pr-0">
+                    <input type="radio" id="customradio1" class="custom-control-input"
+                      formControlName="preferredContactMethod" value="Call">
+                    <label class="custom-control-label" for="customradio1">Call</label>
+                  </div>
+                  <div class="custom-control custom-radio pr-0">
+                    <input type="radio" id="customradi31" class="custom-control-input"
+                      formControlName="preferredContactMethod" value="Email">
+                    <label class="custom-control-label" for="customradi31">Email</label>
+                  </div>
+                  <div class="custom-control custom-radio pr-0" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                    <input type="radio" id="customradio2" class="custom-control-input"
+                      formControlName="preferredContactMethod" value="Text">
+                    <label class="custom-control-label" for="customradio2">Text</label>
+                  </div>
+                </fieldset>
+                <span class="field-message text-danger"
+                    *ngIf="contInfo.submitted && ContactForm.controls.preferredContactMethod.errors"><em
+                     class="icon icon-error mr-4"></em>
+                        Please select preferred contact method.
+                  </span>
+              </div>
+            </div>
+            <div class="col-4">
+              <!-- <fieldset [disabled]="ContactForm.controls.doNotContact.value"> -->
+                <div class="form-group">
+                  <label for="" class="mb-15">Automatic Notifications</label>
+                  <fieldset [disabled]="ContactForm.controls.doNotContact.value || !ContactForm.value.email ">
+                  <div class="custom-control custom-checkbox pr-0">
+                    <input type="checkbox" id="customcheckbox21" class="custom-control-input" value="true"
+                      formControlName="notifyEmail">
+                    <label class="custom-control-label" for="customcheckbox21">Email</label>
+                  </div>
+                </fieldset>
+                  <fieldset [disabled]="ContactForm.controls.doNotContact.value">
+                  <div class="custom-control custom-checkbox pr-0" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                    <input type="checkbox" id="customcheckbox3" class="custom-control-input"
+                      formControlName="notifySMS">
+                    <label class="custom-control-label" for="customcheckbox3">Text</label>
+                  </div>
+                </fieldset>
+                </div>
+              <!-- </fieldset> -->
+            </div>
+          </div>
+          <div class="row gutter-16" *ngIf="clientDetail.isCompany">
+            <div class="col-6">
+              <div class="custom-control custom-checkbox mb-8 pr-0">
+                <input type="checkbox" class="custom-control-input" id="doNotContact123"
+                       formControlName="doNotContact" (change)="markDoNotContact(true)">
+                <label class="custom-control-label" for="doNotContact123">Mark as Do Not Contact</label>
+              </div>
+              <div class="form-group" [class.has-error]="contInfo.submitted && ContactForm.controls.doNotContact.value && !ContactForm.controls.doNotContactReason.value" *ngIf="ContactForm.controls.doNotContact.value">
+                <ng-select [selectOnTab]="true" [items]="doNotContactReasonArr" placeholder="Select a reason"
+                           formControlName="doNotContactReason" [bindValue]="'name'" [bindLabel]="'name'"
+                           [notFoundText]="'No record found'" id="do-not-contact-reason-select">
+                </ng-select>
+                <span class="field-message text-danger"
+                      *ngIf="contInfo.submitted && ContactForm.controls.doNotContact.value && !ContactForm.controls.doNotContactReason.value"><em
+                  class="icon icon-error mr-4"></em>
+                        Please select a do not contact reason.
+                  </span>
+              </div>
+              <div class="form-group" *ngIf="ContactForm.controls.doNotContactReason.value =='Other'">
+                <label>Reason</label>
+                <input type="text" class="form-control" placeholder="Enter Do Not Contact Reason"
+                       formControlName="DoNotContactReasonOther" id="reason-text">
+              </div>
+            </div>
+            <div class="col-12 mb-24">
+              <h4 class="mb-0">Primary Corporate Contact Information</h4>
+              <div>
+                <span class="helper-text small font-weight-normal">
+                  To edit this information, you will need to go to the Primary Contact.
+                </span>
+                <a class="ml-2 font-weight-bold" href="javascript:void(0)" (click)="goToPrimaryContact()">
+                  Edit Primary Contact
+                </a>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="mb-24">
+                <span class="small helper-text d-block mb-8">Primary Phone</span>
+                <span id="contact-primary-contact-phone">{{primaryContact[0].primaryPhone | mask: '(000) 000-0000'}}</span>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="mb-24">
+                <span class="small helper-text d-block mb-8">Secondary Phone</span>
+                <span id="contact-primary-contact-phone">{{primaryContact[0].cellPhone | mask: '(000) 000-0000'}}</span>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="mb-24">
+                <span class="small helper-text d-block mb-8">Email Address</span>
+                <span id="primary-contact-email">{{primaryContact[0]?.email}}</span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group" [class.has-error]="contInfo.submitted && ContactForm.controls.preferredContactMethod.errors">
+                <label for="" class="mb-10">Preferred Contact Method <sup *ngIf="!ContactForm.controls.doNotContact.value">*</sup></label>
+                <fieldset [disabled]="ContactForm.controls.doNotContact.value">
+                  <div class="custom-control custom-radio pr-0">
+                    <input type="radio" id="customradio1" class="custom-control-input"
+                           formControlName="preferredContactMethod" value="Call">
+                    <label class="custom-control-label" for="customradio1">Call</label>
+                  </div>
+                  <div class="custom-control custom-radio pr-0">
+                    <input type="radio" id="customradi31" class="custom-control-input"
+                           formControlName="preferredContactMethod" value="Email">
+                    <label class="custom-control-label" for="customradi31">Email</label>
+                  </div>
+                  <div class="custom-control custom-radio pr-0" *ngIf="userInfo?.tenantTier?.tierName != tenantTier.Emerging">
+                    <input type="radio" id="customradio2" class="custom-control-input"
+                           formControlName="preferredContactMethod" value="Text">
+                    <label class="custom-control-label" for="customradio2">Text</label>
+                  </div>
+                </fieldset>
+                <span class="field-message text-danger"
+                      *ngIf="contInfo.submitted && ContactForm.controls.preferredContactMethod.errors"><em
+                  class="icon icon-error mr-4"></em>
+                        Please select preferred contact method.
+                  </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-group">
+            <label>Change Notes</label>
+            <textarea class="form-control" rows="4" placeholder="Enter change notes (optional)"
+              formControlName="changeNotes" id="change-notes"></textarea>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <input type="submit" class="btn btn-primary" value="Save" id="save-btn">
+  </div>
+</form>
+<app-loader [active]="contactinfoloader"></app-loader>
+</ng-template>
+
+
+
+<ng-template #EditMatterInfo let-modal>
+  <div class="modal-header pb-24 d-block">
+    <h3 class="modal-title mb-0">Edit Matter Details</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <form [formGroup]="MatterForm" (ngSubmit)="updateMatterInfo()" #mattInfo="ngForm">
+  <div class="modal-body">
+
+      <div class="row gutter-16">
+        <div class="col-4">
+          <div class="form-group">
+            <label>Consultation Law Office</label>
+            <ng-select [selectOnTab]="true" [items]="consultationLawOfficeList" placeholder="Consultation Law Office"
+              formControlName="officeId" [bindValue]="'id'" [bindLabel]="'officeName'" (change)="getPracticeAreas()"
+              [notFoundText]="'No record found'" id="consultation-law-office">
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group" [class.has-error]="mattInfo.submitted && !selectedPractice">
+            <label>Practice Area <sup>*</sup></label>
+            <ng-select [selectOnTab]="true" [items]="practiceAreaList" placeholder="Practice Area"
+              [(ngModel)]="selectedPractice" [ngModelOptions]="{standalone: true}" [bindValue]="'id'"
+              [bindLabel]="'name'" (change)="getMatterType($event)" [notFoundText]="'No record found'" [readonly]="!MatterForm.value.officeId" id="practice-area-select">
+            </ng-select>
+            <span class="field-message text-danger"
+                  *ngIf="mattInfo.submitted && !selectedPractice"><em
+              class="icon icon-error mr-4"></em>
+              Please select a practice area.
+            </span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group" [class.has-error]="mattInfo.submitted && MatterForm.controls.matterTypeId.errors && selectedPractice">
+            <label>Matter Type <sup>*</sup></label>
+            <ng-select [selectOnTab]="true" *ngIf="practiceAreaSelected" [items]="matterTypeList"
+              placeholder="Matter Type" formControlName="matterTypeId" [bindValue]="'id'" [bindLabel]="'name'"
+              [notFoundText]="'No record found'" id="matter-type-select">
+            </ng-select>
+            <select *ngIf="!practiceAreaSelected" class="custom-select" formControlName="matterTypeId" disabled id="matter-type-select">
+              <option value="">Select </option>
+            </select>
+            <span class="field-message text-danger"
+                  *ngIf="mattInfo.submitted && MatterForm.controls.matterTypeId.errors && selectedPractice"><em
+              class="icon icon-error mr-4"></em>
+              Please select a matter type.
+            </span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group" [class.has-error]="mattInfo.submitted && MatterForm.controls.jurisdictionId.errors">
+            <label>Jurisdiction of Matter - State <sup>*</sup></label>
+            <ng-select [selectOnTab]="true" [items]="stateList" placeholder="Jurisdiction"
+              formControlName="jurisdictionId" [bindValue]="'id'" [bindLabel]="'name'"
+              [notFoundText]="'No record found'" id="j-state-select">
+            </ng-select>
+            <span class="field-message text-danger"
+                    *ngIf="mattInfo.submitted && MatterForm.controls.jurisdictionId.errors"><em
+                     class="icon icon-error mr-4"></em>
+                        Please select a State.
+                  </span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group" [class.has-error]="mattInfo.submitted && MatterForm.controls.jurisdictionCounty.errors">
+            <label>Jurisdiction of Matter - County <sup>*</sup></label>
+            <input type="text" class="form-control" formControlName="jurisdictionCounty" placeholder="County" id="j-country-select">
+            <span class="field-message text-danger"
+                    *ngIf="mattInfo.submitted && MatterForm.controls.jurisdictionCounty.errors"><em
+                     class="icon icon-error mr-4"></em>
+                        Please enter a county.
+                  </span>
+          </div>
+        </div>
+      </div>
+
+
+      <h4 class="text-xlarge mt-0 mb-24">Consultation Attorney</h4>
+      <div class="header-search flex-fill d-flex mb-24">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input type="search" class="form-control search-input" name="q" id="q" autocomplete="off"
+              placeholder="Search for attorneys" [(ngModel)]="searchString" (keyup)="updateFilter($event)">
+            <button class="btn" type="submit" id="attorney-search-btn">Search</button>
+          </div>
+        </form>
+      </div>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <ngx-datatable #attornyTable class="material common-table" [rows]="attorneyList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="50" [messages]="messages"
+            rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" id="attorney-listing-tbl">
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Select" [canAutoResize]="false" [width]="60">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <label class="cust-radio">
+                  <input type="radio" name="attorneyselectfor" id="view{{row.id}}" [value]="row.id"
+                    (change)="onRadioSelected(row.id, $event)" [checked]='row.id == selected'>
+                  <span class="radio-style"></span>
+                </label>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="rank" name="Ranking" [width]="40"></ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" prop="firstName" name="Name" [width]="80"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="100"> </ngx-datatable-column>
+
+            <ngx-datatable-column [resizeable]="false" prop="office" name="Primary office" [width]="50">
+            </ngx-datatable-column>
+            <ngx-datatable-footer>
+              <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                <div class="d-flex justify-content-between flex-fill">
+                  <div class="d-flex align-items-center">
+                    <div class="table-items d-flex align-items-center mr-36">
+                      Items per page:
+                      <div class=" ml-8">
+                        <select class="custom-select border-less" (change)="changePageSize()">
+                          <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <span>
+                      {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                      {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                      {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                    </span>
+                  </div>
+                  <div class="d-flex align-items-center" *ngIf="page.totalPages > 0">
+                    <select class="custom-select border-less" [(ngModel)]="pangeSelected"
+                      [ngModelOptions]="{standalone: true}" (change)="changePage()">
+                      <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }} of
+                        {{page.totalPages}}</option>
+                    </select>
+                    <div class="ml-8">
+                      <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                        [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                        [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                        [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                        (change)="attornyTable.onFooterPage($event);pageChange($event)">
+                      </datatable-pager>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-footer>
+          </ngx-datatable>
+        </div>
+      </div>
+      <div class="form-group mb-0">
+        <label for="">You may leave change notes for the audit history (optional).</label>
+        <textarea class="form-control non-resize" rows="4" placeholder="Enter Note Text"
+          formControlName="changeNotes" id="change-note-text"></textarea>
+      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <input type="submit" class="btn btn-primary" value="Save" id="save-btn">
+  </div>
+</form>
+</ng-template>
+
+
+<ng-template #AddCorporateContact let-modal>
+  <div class="modal-header pb-32 d-block">
+    <h3 class="modal-title mb-0">New Corporate Contact</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="vendorForm">
+      <div class="row gutter-16">
+        <div class="col-6">
+          <div class="form-group">
+            <label>First Name <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="First name" formControlName="firstName" id="firstname">
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label>Last Name <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Last name" formControlName="lastName" id="lastname">
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group" [class.has-error]="emailExistenceForCorporateContact"
+            [ngClass]="(vendorForm.controls.email.invalid && vendorForm.controls.email.touched)?'has-error':''">
+            <label>Email Address <sup *ngIf="vendorForm.controls.isPrimary.value===true">*</sup></label>
+            <input type="email" name="email" formControlName="email" class="form-control"
+                   placeholder="Email Address"
+              value="Email Address" id="email-address">
+            <span class="field-message text-danger" *ngIf="vendorForm.controls.email.invalid"><em
+                class="icon icon-error mr-4"></em>
+              Invalid email address
+            </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label>Job Title</label>
+            <input type="text" class="form-control" placeholder="Job Title" formControlName="jobTitle" id="job-title">
+          </div>
+        </div>
+        <div class="col-6">
+          <div
+            [ngClass]="(vendorForm.controls.primaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+            <label>Primary Phone<sup *ngIf="vendorForm.controls.isPrimary.value===true">*</sup></label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+              placeHolderCharacter=" " formControlName="primaryPhone"
+              (blur)="onBlurMethod(vendorForm.controls.primaryPhone.value,'primaryPhone')" id="primary-phone" />
+            <span class="field-message text-danger"
+              *ngIf="vendorForm.controls.primaryPhone.invalid && primaryPhoneBlur"><em
+                class="icon icon-error mr-4"></em>
+              Invalid phone number
+            </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div [ngClass]="(vendorForm.controls.cellPhone.invalid && cellPhoneBlur)?'form-group has-error':'form-group'">
+            <label>Cell Phone</label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+              placeHolderCharacter=" " formControlName="cellPhone"
+              (blur)="onBlurMethod(vendorForm.controls.cellPhone.value,'cellPhone')" id="cellphone" />
+            <span class="field-message text-danger" *ngIf="vendorForm.controls.cellPhone.invalid && cellPhoneBlur"><em
+                class="icon icon-error mr-4"></em>
+              Invalid phone number
+            </span>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-group">
+            <label class="mb-12">Status <sup>*</sup></label>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="customRadio1" class="custom-control-input" value="true"
+                formControlName="isVisible">
+              <label class="custom-control-label" for="customRadio1">Active</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="customRadio2" class="custom-control-input" value="false"
+                formControlName="isVisible" checked>
+              <label class="custom-control-label" for="customRadio2">Inactive</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-group">
+            <div class="custom-control custom-checkbox">
+              <fieldset [disabled]="isExistPrimary">
+                <input type="checkbox" class="custom-control-input" id="customCheck1" formControlName="isPrimary">
+                <label class="custom-control-label" for="customCheck1">Primary Contact</label>
+              </fieldset>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <fieldset [disabled]="isExistBilling">
+                <input type="checkbox" class="custom-control-input" id="customCheck2" formControlName="isBilling">
+                <label class="custom-control-label" for="customCheck2">Billing Contact</label>
+              </fieldset>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="customCheck3" formControlName="isGeneral">
+              <label class="custom-control-label" for="customCheck3">General Counsel</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="form-group mb-0">
+        <label for="">You may leave change notes for the audit history (optional).</label>
+        <textarea class="form-control non-resize height-2" rows="4" placeholder="Enter Note Text" id="note-text"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveCorporateContact()"
+      [disabled]="!vendorForm.valid" id="save-btn">Save</button>
+  </div>
+</ng-template>
+
+<ng-template #RemoveBlockedEmployee let-modal class="delete-modal">
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Remove Blocked Employee</h3>
+    <button type="button" class="close" (click)="modal.close(false)" aria-label="Close" id="closeId">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start">
+      <em class="icon icon-warning text-warning fs-18 mr-16"></em>
+      <div class="lh-20">
+        <p class="m-0">Are you sure you want to remove this blocked employee?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(false)" id="cancleId">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true) " id="yesRemoveId">
+      Remove
+    </button>
+  </div>
+</ng-template>

@@ -1,0 +1,43 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item" ><a href="javascript:void(0)">Contact Directory</a></li>
+            <li class="breadcrumb-item" ><a href="javascript:void(0)">Contact Profile</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Manage Initial Consultationfdsf</li>
+        </ol>
+        <div class="profile-content d-flex align-items-center profile-client mb-32">
+            <div class="profile-heading mr-16">
+                <h2 class="mt-0 mb-2">Brian McAhn Takt</h2>
+                <span class="text-small font-weight-medium d-flex align-items-center">Individual Contact</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-24">Manage Initial Consultation</h2>
+                <div class="custom-control custom-radio">
+                    <input type="radio" id="mic-1" name="mic" class="custom-control-input">
+                    <label class="custom-control-label" for="mic-1">Record</label>
+                </div>
+                <div class="custom-control custom-radio">
+                    <input type="radio" id="mic-2" name="mic" class="custom-control-input">
+                    <label class="custom-control-label" for="mic-2">Reschedule</label>
+                </div>
+                <div class="custom-control custom-radio">
+                    <input type="radio" id="mic-3" name="mic" class="custom-control-input">
+                    <label class="custom-control-label" for="mic-3">Cancel</label>
+                </div>
+                <div class="custom-control custom-radio">
+                    <input type="radio" id="mic-4" name="mic" class="custom-control-input">
+                    <label class="custom-control-label" for="mic-4">Mark as no-show</label>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pb-24">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light">Cancel</button>
+                <button type="button" class="btn btn-primary disabled">Save</button> 
+            </div>
+        </div>
+    </div>
+</div>

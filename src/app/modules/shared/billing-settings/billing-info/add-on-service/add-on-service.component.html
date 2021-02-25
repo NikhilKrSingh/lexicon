@@ -1,0 +1,25 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0" *ngIf='!addOnService?.id'>Create Add-On Service</h3>
+  <h3 class="modal-title mb-0" *ngIf='addOnService?.id > 0'>Edit Add-On Service</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0" [formGroup]='addOnServiceForm'>
+  <div class="form-group">
+    <label>Service Name <sup>*</sup></label>
+    <input type="text" class="form-control" formControlName='serviceName' placeholder="Enter add-on service name" id="service-name">
+  </div>
+  <div class="form-group">
+    <label>Service Amount <sup>*</sup></label>
+    <input type="text" class="form-control" formControlName='serviceAmount' prefix="$" mask="separator.2"
+      thousandSeparator="," placeholder="Enter add-on service amount" id="service-amount">
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' [disabled]='addOnServiceForm.invalid' id="save-btn">
+    <span *ngIf='!addOnService?.id'>Create Add-On</span>
+    <span *ngIf='addOnService?.id > 0'>Save Changes</span>
+  </button>
+</div>

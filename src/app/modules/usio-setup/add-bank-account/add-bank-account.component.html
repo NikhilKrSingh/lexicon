@@ -1,0 +1,367 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a [routerLink]="['/dashboard']" href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Accounting Settings</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add Bank Account</li>
+        </ol>
+        <div class="heading">
+            <h1>Add Bank Account</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h3 class="mb-24">New Bank Account</h3>
+                <div class="row gutter-24">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label>Account Name <sup>*</sup></label>
+                            <input type="text" class="form-control" placeholder="Enter account name">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="custom-control custom-radio mb-12 pr-0">
+                                <input type="radio" id="abaRadio-1" name="abaRadio" class="custom-control-input" checked>
+                                <label class="custom-control-label" for="abaRadio-1">
+                                    This is a merchant processing account
+                                    <span class="helper-text font-weight-normal small lh-16 d-block">Inbound transactions on the account will be automatically processed using a payment gateway.</span>
+                                </label>
+                            </div>
+                            <div class="custom-control custom-radio mb-0 pr-0">
+                                <input type="radio" id="abaRadio-2" name="abaRadio" class="custom-control-input">
+                                <label class="custom-control-label" for="abaRadio-2">This is a non-merchant processing account</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="form-group">
+                            <label class="mb-20">Transaction Type <sup>*</sup></label>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="TT-1">
+                                <label class="custom-control-label" for="TT-1">Credit Card</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="TT-2">
+                                <label class="custom-control-label" for="TT-2">ACH</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="form-group">
+                            <label class="mb-20">Account Type <sup>*</sup></label>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="AT-1" name="AT" class="custom-control-input" disabled>
+                                <label class="custom-control-label" for="AT-1">Operating</label>
+                            </div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="AT-2" name="AT" class="custom-control-input">
+                                <label class="custom-control-label" for="AT-2">Trust</label>
+                            </div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="AT-3" name="AT" class="custom-control-input">
+                                <label class="custom-control-label" for="AT-3">Credit Card Trust</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xlarge mb-16">Business Details</h4>
+                    <div class="row gutter-16">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Busness Name (DBA) <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter business name">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Legal Business Name <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter legal business name">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Email Address <sup>*</sup></label>
+                                <input type="email" class="form-control" placeholder="Enter email address">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" class="form-control" placeholder="Enter phone number">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Website</label>
+                                <input type="text" class="form-control" placeholder="Enter website">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label> Busness Start Date</label>
+                                <input type="text" class="form-control" placeholder="Select business start date">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Ownership Type</label>
+                                <select class="custom-select form-control">
+                                    <option>Select ownership type</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Merchant Category Code</label>
+                                <input type="text" class="form-control" placeholder="Enter merchant category code">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>NAICS Code</label>
+                                <input type="text" class="form-control" placeholder="Enter NAICS code">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Federal Tax ID (or SSN if sole proprietorship)</label>
+                                <input type="text" class="form-control" placeholder="Enter federal tax ID or SSN">
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label>Business Description</label>
+                                <textarea rows="2" class="form-control non-resize" placeholder="Enter business description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-8">
+                    <h4 class="text-xlarge mb-16">Business Address</h4>
+                    <div class="row gutter-16">
+                        <div class="col-4">
+                            <div class="row gutter-16">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>Street Address <sup>*</sup></label>
+                                        <input type="text" class="form-control" placeholder="Enter street address">
+                                    </div>        
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>Apt, Suite, Unit</label>
+                                        <input type="text" class="form-control" placeholder="Enter apartment, suite, or unit number">
+                                    </div>        
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label>City <sup>*</sup></label>
+                                        <input type="text" class="form-control" placeholder="Enter city">
+                                    </div>        
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label>State <sup>*</sup></label>
+                                        <select class="form-control custom-select">
+                                            <option>Select state</option>
+                                        </select>
+                                    </div>        
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label>Zip Code <sup>*</sup></label>
+                                        <input type="text" class="form-control" placeholder="Enter zip code">
+                                    </div>        
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-8">
+                    <h4 class="text-xlarge mb-16">Settlement Account Information</h4>
+                    <div class="row gutter-16">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label class="mb-20">Account Type <sup>*</sup></label>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="ATt-1" name="ATt" class="custom-control-input">
+                                    <label class="custom-control-label" for="ATt-1">Personal</label>
+                                </div>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="ATt-2" name="ATt" class="custom-control-input">
+                                    <label class="custom-control-label" for="ATt-2">Business</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Name on Settlement Account <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter name on settlement account">
+                            </div>        
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Settlement Account Routing Number <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter account routing number">
+                            </div>        
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Settlement Account Number <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter account number">
+                            </div>        
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-8">
+                    <h4 class="text-xlarge mb-16">Fees Settlement Account Information</h4>
+                    <div class="row gutter-16">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label class="mb-20">Fees Settlement Account Type <sup>*</sup></label>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="FSAT-1" name="FSAT" class="custom-control-input">
+                                    <label class="custom-control-label" for="FSAT-1">Personal</label>
+                                </div>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="FSAT-2" name="FSAT" class="custom-control-input">
+                                    <label class="custom-control-label" for="FSAT-2">Business</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Name on Fees Account <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Name on Fees Account">
+                            </div>        
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Fees Settlement Account Routing Number <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter account routing number">
+                            </div>        
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Fees Settlement Account Number <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter account number">
+                            </div>        
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-24">
+                    <h3 class="mb-16">Owner Details <sup class="text-danger ml-4 fs-24">*</sup></h3>
+                    <p class="lh-20">Specify details about each person who owns at least a 25% stake in the company.</p>
+                    <p class="lh-20">These email addresses will receive a form to provide more information about themselves; then, after the payment gateway has approved the connection to the bank accounts, they will receive another email to e-sign and authorize the connection before it becomes active.</p>
+                    <div class="custom-table">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Email Address</th>
+                                        <th class="text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>johnbaker@lawoffice.com</td>
+                                        <td>
+                                            <div class="icon-group d-flex justify-content-end">
+                                                <span>
+                                                  <em class="icon icon-edit icon-color"></em>
+                                                </span>
+                                                <span>
+                                                  <em class="icon icon-remove icon-color"></em>
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>a.johnson@email.com</td>
+                                        <td>
+                                            <div class="icon-group d-flex justify-content-end">
+                                                <span>
+                                                  <em class="icon icon-edit icon-color"></em>
+                                                </span>
+                                                <span>
+                                                  <em class="icon icon-remove icon-color"></em>
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>smith.amy@email.com</td>
+                                        <td>
+                                            <div class="icon-group d-flex justify-content-end">
+                                                <span>
+                                                  <em class="icon icon-edit icon-color"></em>
+                                                </span>
+                                                <span>
+                                                  <em class="icon icon-remove icon-color"></em>
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-link btn-icon p-0 d-flex align-items-center" type="button" (click)="openPersonalinfo(AddOwners,'','modal-lmd')">
+                        <i class="icon icon-add-circle"></i>
+                        Add Owners
+                    </button>
+                </div>
+                <div class="pt-8">
+                    <h4 class="text-xlarge mb-16">Account Information</h4>
+                    <div class="row gutter-16">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Account Routing Number <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter account routing number">
+                            </div>        
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Account Number <sup>*</sup></label>
+                                <input type="text" class="form-control" placeholder="Enter account number">
+                            </div>        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pb-24">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light">Cancel</button>
+                <button type="button" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+    </div>
+</div>
+
+<ng-template #AddOwners let-modal>
+    <div class="modal-header pb-24">
+        <h3 class="modal-title mb-0">Add Owners</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p class="mb-12 lh-20">Enter an email address for each person who owns at least a 25% stake in the company.</p>
+        <div class="form-group">
+            <label>Owner Email Address <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Enter owner email address">
+        </div>
+        <div class="form-group">
+            <label>Owner Email Address</label>
+            <input type="text" class="form-control" placeholder="Enter owner email address">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>

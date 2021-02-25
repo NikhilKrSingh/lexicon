@@ -1,0 +1,258 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Admin Settings</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Billing Codes</li>
+    </ol>
+    <div class="heading">
+      <h1 *ngIf="selecttabs != mytab[6]">Billing Codes</h1>
+      <h1 *ngIf="selecttabs == mytab[6]">Transaction Reversal Codes</h1>
+    </div>
+    <div>
+
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <a href="javascript:void(0);" id="billCodeTabLink_{{i}}" (click)="selecttabs = mytabs" *ngFor="let mytabs of mytab; trackBy: trackByFn;let i=index" role="tab"
+          class="nav-link flex-fill" [class.active]="selecttabs === mytabs">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+
+          <div class="tab-content p-32">
+            <div *ngIf="selecttabs === mytab[0]" class="tab-pane fade show active" role="tabpanel">
+              <h3> Configure Hourly Codes</h3>
+              <app-charge-codes></app-charge-codes>
+            </div>
+            <div *ngIf="selecttabs === mytab[1]" class="tab-pane fade show active" role="tabpanel">
+              <h3> Configure Consultation Codes</h3>
+              <app-consultation-codes></app-consultation-codes>
+            </div>
+            <div *ngIf="selecttabs === mytab[2]" class="tab-pane fade show active" role="tabpanel">
+              <div>
+                <h3>Configure Disbursement Types</h3>
+                <app-disbursement-types></app-disbursement-types>
+              </div>
+            </div>
+            <div *ngIf="selecttabs === mytab[3]" class="tab-pane fade show active" role="tabpanel">
+              <div>
+                <h3>Configure Fixed Fee Services</h3>
+                <app-fixed-free-service [permission]="permission"></app-fixed-free-service>
+              </div>
+            </div>
+            <div *ngIf="selecttabs === mytab[4]" class="tab-pane fade show active" role="tabpanel">
+              <div>
+                <h3>Configure Fixed Fee Add-Ons</h3>
+                <app-fixed-fee-add-on [permission]="permission"></app-fixed-fee-add-on>
+              </div>
+            </div>
+            <div *ngIf="selecttabs === mytab[5]" class="tab-pane fade show active" role="tabpanel">
+              <div>
+                <h3>Configure Write-Off Codes</h3>
+                <app-write-off></app-write-off>
+              </div>
+            </div>
+            <div *ngIf="selecttabs === mytab[6]" class="tab-pane fade show active" role="tabpanel">
+              <div>
+                <h3>Configure Write-Down Codes</h3>
+                <app-write-down></app-write-down>
+              </div>
+            </div>
+            <div *ngIf="selecttabs === mytab[7]" class="tab-pane fade show active" role="tabpanel">
+              <div>
+                <h3>Configure Transaction Reversal Codes</h3>
+                <app-reversed-check-code></app-reversed-check-code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<ng-template #ViewRevision let-modal>
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Review Revision - 86730</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="form-group">
+      <label class="d-block mb-4">Revision Date/Time</label>
+      <div class="lh-20">09/21/2019, 2:32pm</div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Description</label>
+      <div class="lh-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua.</div>
+    </div>
+    <div class="row">
+      <div class="col-4">
+        <div class="form-group selected-row">
+          <label class="d-block mb-4">Bill Type</label>
+          <div class="lh-20">Per Unit</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="form-group">
+          <label class="d-block mb-4">Disbursement Type</label>
+          <div class="lh-20">Hard</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="form-group">
+          <label class="d-block mb-4">Billable to Client</label>
+          <div class="lh-20">Yes</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Initial Rate</label>
+      <div class="lh-20">$100.00</div>
+    </div>
+    <div class="form-group">
+      <label class="d-block mb-4">Change Note</label>
+      <div class="lh-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+        aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+        fugiat nulla pariatur.</div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Close</button>
+  </div>
+</ng-template>
+
+<ng-template #CreateBillingCode2 let-modal>
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Create Billing Code</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <select class="form-control">
+        <option>Fixed Fee Service</option>
+      </select>
+    </div>
+    <div class="form-group">
+
+      <label>Code <sup>*</sup></label>
+      <input type="text" class="form-control" value="17482">
+    </div>
+    <div class="alert alert-warning d-flex justify-content-between mb-24">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-warning text-base"></em>
+        <div class="">
+          <h4 class="mr-36 mt-0 mb-4">Warning</h4>
+          There are no available code values for the preconfigured range. Please contact your system administrator to
+          auto-assign more code values.
+        </div>
+      </div>
+    </div>
+    <div class="form-group position-relative">
+      <label>Description <sup>*</sup></label>
+      <span class="count-char">0/250</span>
+      <textarea class="form-control" maxlength='250' rows="4" placeholder="Write a description"></textarea>
+    </div>
+    <div class="form-group mb-0">
+      <label>Amount <sup>*</sup></label>
+      <input type="text" class="form-control" placeholder="Enter an amount">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light">Cancel</button>
+    <button type="button" class="btn btn-primary">Save</button>
+  </div>
+</ng-template>
+
+<ng-template #DisableFixedFeeService let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Disable Fixed Fee Service</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-8">
+        <p class="m-0">Are you sure you want to disable this Fixed Fee Service? It will not be available for use on
+          future matters, but existing matters will not be affected.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')">Yes, disable </button>
+  </div>
+</ng-template>
+
+<ng-template #EnableFixedFeeService let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Enable Fixed Fee Service</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-8">
+        <p class="m-0">Are you sure you want to re-enable this Fixed Fee Service?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')">Yes, enable</button>
+  </div>
+</ng-template>
+<ng-template #CreateBillingCode3 let-modal>
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Create Billing Code</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label>Type <sup>*</sup></label>
+      <select class="form-control">
+        <option>Fixed Fee Add-On</option>
+      </select>
+    </div>
+    <div class="form-group">
+
+      <label>Code <sup>*</sup></label>
+      <input type="text" class="form-control" value="57382">
+    </div>
+    <div class="alert alert-warning d-flex justify-content-between mb-24">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-warning text-base"></em>
+        <div class="">
+          <h4 class="mr-36 mt-0 mb-4">Warning</h4>
+          There are no available code values for the preconfigured range. Please contact your system administrator to
+          auto-assign more code values.
+        </div>
+      </div>
+    </div>
+    <div class="form-group position-relative">
+      <label>Description <sup>*</sup></label>
+      <span class="count-char">0/250</span>
+      <textarea class="form-control" maxlength='250' rows="4" placeholder="Code description"></textarea>
+    </div>
+    <div class="form-group mb-0">
+      <label>Amount <sup>*</sup></label>
+      <input type="text" class="form-control" placeholder="Enter an amount">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light">Cancel</button>
+    <button type="button" class="btn btn-primary">Save</button>
+  </div>
+</ng-template>

@@ -1,0 +1,279 @@
+<div class="container">
+    <div class="main-content search-results">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Search Results</li>
+        </ol>
+        <div class="heading">
+            <h1>Search Results</h1>
+        </div>
+        <div class="card" [class.mh-150]="isLoading" >
+            <div class="card-head">
+                <div class="search-filter">
+                    <h4 class="mb-8">Total Results: {{resultList.length}}</h4>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="dropdown dropdown-hover-table dropdown-toggle d-flex align-items-center" id="searchButtonToggler" [class.active]="currentActive" (click)="openMenu()" appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event)" data-toggle="dropdown">
+                            <h2 class="dropdown-label pr-2 text-primary mb-0">{{searchFilter}}</h2>
+                            <div class="dropdown-menu dropdown-menu-left mh-290" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" *ngFor="let filter of searchFilterList;trackBy: trackByFn" id="option-{{filter.moduleName}}" (click)="changeFilter(filter.moduleName)" href="javascript:void(0)" >{{filter.moduleName}}</a>
+                            </div>
+                        </div>
+                        
+                        <div class="d-none align-items-center ">
+                            <div class="d-flex align-items-center pr-8">
+                                <div class="custom-control custom-radio custom-control-inline pr-16 mb-0">
+                                    <input type="radio" id="customRadioInline1" name="customRadioInline1" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="customRadioInline1">Ascending</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline pr-16 mb-0">
+                                    <input type="radio" id="customRadioInline2" name="customRadioInline1" class="custom-control-input">
+                                    <label class="custom-control-label" for="customRadioInline2">Descending</label>
+                                </div>
+                            </div> 
+                            <div class="form-group m-0">
+                                <select class="form-control custom-select mw-235">
+                                    <option>Sort by: Relevance</option>
+                                </select>
+                            </div>   
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" *ngIf="resultList.length && !isLoading">
+                <ngx-datatable #table class="material common-table employee-table fix-col-right"
+                    [class.matter-no-data]="resultList?.length === 0" [rows]="resultList" [columnMode]="ColumnMode.force"
+                    [headerHeight]="0" [footerHeight]="50" [messages]="messages" rowHeight="auto" [scrollbarH]="true"
+                    [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+                    (sort)="updateDatatableFooterPage()" id="resultlisting-tbl">
+
+                        <ngx-datatable-column [resizeable]="false" name="">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                <div class="result-row d-flex p-16" (click)="redirectToPage(row)">
+                                    <div class="result-icon pr-10">
+                                        <i class="icon icon-matters" *ngIf="row.resultType == 'Matter'"></i>
+                                        <i class="icon icon-clients" *ngIf="row.resultType == 'Client'"></i>
+                                        <i class="icon icon-employees" *ngIf="row.resultType == 'Employee'"></i>
+                                        <i class="icon icon-building" *ngIf="row.resultType == 'Office'"></i>
+                                        <i class="icon icon-contacts" *ngIf="row.resultType == 'Contact'"></i>
+                                        <img [src]="row.resultName | commonService: 'getFileImage'" width="20px" *ngIf="row.resultType == 'Document'">
+                                    </div>
+                                    <div class="result-content d-flex flex-column flex-fill">
+                                        <div class="result-title mb-8">
+                                            <span> <strong>{{row.resultName}}</strong></span>
+                                            <span class="text-danger font-weight-normal small ml-8 d-inline-block" *ngIf="row.resultType == 'Contact' && row.metaData[7].name == 'True'">
+                                            <i class="icon icon-close-fill text-danger icon-small mr-4 "></i> Do Not Contact
+                                          </span>
+                                        </div>
+                                        
+                                        <div class="result-content-row " *ngIf="row.resultType=='Matter'">
+                                            <div class="row w-100">
+                                                <div class="w-25">
+                                                    <span class="small helper-text d-block mb-8">Client Name</span>
+                                                    <span [innerHTML]="row.metaData[2].name | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span class="small helper-text d-block mb-8">Opposing Party</span><span [innerHTML]="row.metaData[6].name | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span class="small helper-text d-block mb-8">Attorney</span><span [innerHTML]="row.metaData[5].name | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-15">
+                                                    <span class="small helper-text d-block mb-8">Matter Number</span><span [innerHTML]="row.metaData[4].name | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span class="small helper-text d-block mb-8">Matter Office</span><span [innerHTML]="row.metaData[3].name | highlightText : searchString"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="result-content-row " *ngIf="row.resultType=='Client'">
+                                            <div class="row w-100">
+                                                <div class="w-25" *ngIf="row.metaData[5].name=='True'">
+                                                <span class="small helper-text d-block mb-8">Primary Contact</span><span [innerHTML]="row.metaData[9].name | highlightText : searchString"></span>
+                                            </div>
+                                            <div class="w-25" *ngIf="row.metaData && row.metaData[8] && row.metaData[8].name != '' && row.metaData[8].name != '--'">
+                                                <span class="small helper-text d-block mb-8">Phone</span><span [innerHTML]="row.metaData[8].name | phoneFormatter | highlightText : searchString"></span>
+                                            </div>
+                                            <div class="w-50" *ngIf="row.metaData && row.metaData[2] && row.metaData[2].name != '' && row.metaData[2].name != '--'">
+                                                <span class="small helper-text d-block mb-8">Email</span><span [innerHTML]="row.metaData[2].name | highlightText : searchString"></span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="result-content-row " *ngIf="row.resultType=='Employee'">
+                                            <div class="row w-100">
+                                                <div class="w-25">
+                                                    <span class="small helper-text d-block mb-8">Email Address</span>
+                                                    <span [innerHTML]="row.metaData[2].name | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span class="small helper-text d-block mb-8">Primary Phone
+                                            </span><span [innerHTML]="row.metaData[8].name | phoneFormatter | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span class="small helper-text d-block mb-8">Primary
+                                                        Office</span><span [innerHTML]="row.metaData[9].name | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span
+                                                        class="small helper-text d-block mb-8">Status</span><span [innerHTML]="row.metaData[10].name | highlightText : searchString"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="result-content-row " *ngIf="row.resultType=='Contact'">
+                                            <div class="row w-100">
+                                                <div class="w-25">
+                                                <span class="small helper-text d-block mb-8">Contact Number</span>
+                                                <span [innerHTML]="row.metaData[13].name | highlightText : searchString"></span>
+                                              </div>
+                  
+                                            <div class="w-25">
+                                              <span class="small helper-text d-block mb-8">Contact Type</span>
+                                              <span [innerHTML]="row | contactType | highlightText : searchString"></span>
+                                            </div>
+
+                                            <div class="w-25" *ngIf="row.metaData[12].name == 'True' && row.metaData[7].name != 'True'">
+                                              <span class="small helper-text d-block mb-8">Preferred Contact</span>
+                                              <span *ngIf="row.metaData && row.metaData[14]" [innerHTML]="(row.metaData[14].name == 'Email' ? row.metaData[2].name : row.metaData[8].name | phoneFormatter) | highlightText : searchString"></span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="result-content-row " *ngIf="row.resultType=='Office'">
+                                            <div class="row w-100">
+                                                <div class="w-25">
+                                                    <span
+                                                        class="small helper-text d-block mb-8">Address</span><span [innerHTML]="row.metaData[9].name | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span class="small helper-text d-block mb-8">Phone
+                                                        Number</span><span [innerHTML]="row.metaData[10].name | phoneFormatter | highlightText : searchString"></span>
+                                                </div>
+                                                <div class="w-20">
+                                                    <span
+                                                        class="small helper-text d-block mb-8">Status</span><span [innerHTML]="row.metaData[8].name | highlightText : searchString"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="result-content-row " *ngIf="row.resultType=='Document'">
+                                            <div class="row w-100">
+                                                <div class="w-25">
+                                                <span class="small helper-text d-block mb-8">Document Path</span> 
+                                                <ul class="list-unstyled searchcrumb d-flex align-items-center small mb-12 flex-wrap">
+                                                    <li *ngFor="let path of row.metaData[3].name | commonService: 'splitPath';trackBy: trackByFn;let i=index">{{path}}
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="w-20">
+                                                <span class="small helper-text d-block mb-8">Owner</span>
+                                                <span [innerHTML]="row.metaData[4].name | highlightText : searchString"></span>
+                                            </div>
+                                            
+                                            <div class="w-20 overflow-visible">
+                                                <div class="info-hover position-relative d-inline-block">
+                                                  <span class="small helper-text d-block mb-8">Category</span> 
+                                                  <span  id="categoryHeading_{{row.id}}" (mouseenter)="addClassCategory(true, row, $event)" (mouseleave)="addClassCategory(false, row, $event)"
+                                                    [innerHTML]="(row.metaData[10].name && row.metaData[10].name.length > 19) ? (row.metaData[10].name | slice:0:19) + '...' : row.metaData[10].name | highlightText : searchString"></span>
+                                                  <div class="tooltip center bs-tooltip-bottom custom-tooltip" role="tooltip" *ngIf="row.metaData[10] && row.metaData[10].name.length > 19"
+                                                    data-placement="bottom">
+                                                    <div class="arrow custom-tooltip-arrow custom-arrow"></div>
+                                                    <div class="tooltip-inner tooltip-lg">
+                                                      <p>{{ row.metaData[10].name }} </p>
+                                                    </div>
+                                                  </div>  
+                                                </div>
+                                            </div>
+                                            <div class="w-20">
+                                                <span class="small helper-text d-block mb-8">Last Updated</span> <span *ngIf="row.lastUpdated">{{ row.lastUpdated | date: 'MMM dd, yyyy hh:mm a'}}</span><span *ngIf="!row.lastUpdated">--</span>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="w-10 text-right mt-24">
+                                        <a class="btn-txt" href="javascript:void(0)"
+                                            [routerLink]="['/matter/dashboard']" [queryParams]="{matterId: row.id}"
+                                            *ngIf="row.resultType=='Matter'">View Matter</a>
+                                        <a class="btn-txt" [routerLink]="['/client-view/individual']"
+                                            [queryParams]="{clientId: row.id}" href="javascript:void(0)"
+                                            *ngIf="row.resultType=='Client'">View Client</a>
+                                        <a class="btn-txt" [routerLink]="['/employee/profile']"
+                                            [queryParams]="{employeeId: row.id}" href="javascript:void(0)"
+                                            *ngIf="row.resultType=='Employee'">View Employee</a>
+                                        <a class="btn-txt" href="javascript:void(0)"
+                                            *ngIf="row.resultType=='Contact'" (click)="redirecttoContact(row)">View Contact</a>
+                                        <a class="btn-txt" [routerLink]="['/office/detail']"
+                                            [queryParams]="{officeId: row.id,state:'view'}" href="javascript:void(0)"
+                                            *ngIf="row.resultType=='Office'">View Office</a>
+                                        <a class="btn-txt" (click)="redirecttoDMS(row)" href="javascript:void(0)"
+                                            *ngIf="row.resultType=='Document'">View Document</a>
+                                    </div>
+
+                                </div>
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-footer>
+                            <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                                let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                                let-isVisible="isVisible">
+                                <div class="d-flex justify-content-between flex-fill">
+                                    <div class="d-flex align-items-center">
+                                        <div class="table-items d-flex align-items-center mr-36">
+                                            Items per page:
+                                            <div class=" ml-8">
+                                                <select class="custom-select border-less" [formControl]="pageSelector"
+                                                    (change)="changePageSize()">
+                                                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <span>
+                                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                                            {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <select class="custom-select border-less" [(ngModel)]="pangeSelected"
+                                            (change)="changePage()">
+                                            <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                                                [value]="i+1">Page {{ i+1 }} of {{page.totalPages}}</option>
+                                        </select>
+                                        <div class="ml-8">
+                                            <datatable-pager
+                                                [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                                [pagerPreviousIcon]="'datatable-icon-prev'"
+                                                [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                                                [size]="pageSize" [count]="rowCount"
+                                                [hidden]="!((rowCount / pageSize) > 1)"
+                                                (change)="table.onFooterPage($event);pageChange($event)">
+                                            </datatable-pager>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </ngx-datatable-footer>
+                    </ngx-datatable>
+
+            </div>
+            <div *ngIf="!resultList.length && !isLoading" class="card-body">
+                <div class="no-search text-center">
+                        <img src="assets/images/no_search_results_icon.svg" alt="" class="mb-24 mx-auto d-block">
+                        <h4 class="mb-8">We couldn’t find anything matching your search</h4>
+                        <p>Try again with a different filter option</p>
+                    </div>
+            </div>
+            <app-search-loader  [active]="isLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+        </div>
+    </div>
+</div>

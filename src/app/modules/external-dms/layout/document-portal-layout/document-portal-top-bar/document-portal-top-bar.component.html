@@ -1,0 +1,28 @@
+<div class="top-bar">
+  <div class="d-flex align-items-center justify-content-end">
+    
+    <div class="right-nav ml-md-12 ml-0">
+      <ul class="d-flex align-items-center justify-content-end">
+        <li class="prfile">
+          <div class="dropdown dropdown-hover dropdown-toggle d-flex justify-content-end align-items-center"
+            data-toggle="dropdown">
+            <span class="user-img">
+              <img *ngIf='!profileImage' src="assets/images/user.png" class="prfile-img">
+              <img *ngIf='profileImage' [src]="profileImage" class="prfile-img">
+            </span>
+            <div class="text-left">
+              <span class="dropdown-label">{{ userDetails?.name }}</span>
+              <span class="d-block small lh-20 helper-text font-weight-normal">{{ userDetails?.type ? userDetails?.type : 'External'}}</span>
+            </div>
+
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="javascript:void(0)"
+                [routerLink]="['/dmsportal/settings']" id="settings-btn">Settings</a>
+              <a class="dropdown-item" href="javascript:void(0)" (click)="doLogout()" id="logout-btn">Log Out</a>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,46 @@
+<div class="container transfer-queue-custom">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Accounting</li>
+        </ol>
+        <div class="d-flex align-items-end justify-content-between mb-32">
+            <div class="heading">
+                <h1 class="mb-0">Accounting</h1>
+            </div>
+            <button *ngIf="isTrustAccountEnabled" type="button" id="actqueue-newtrusttransfer" [routerLink]="['/accounting/new-trust-transfer']" class="btn btn-primary btn-icon">
+              <em class="icon icon-plus"></em> New Bank Transfer
+            </button>
+        </div>
+        <div>
+            <div>
+                <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+                    <a href="javascript:void(0);" (click)="selectTabs = mytabs;changeTab();"
+                        *ngFor="let mytabs of allTabs; trackBy: trackByFn ;let i = index;" role="tab" class="nav-link flex-fill"
+                        [class.active]="selectTabs === mytabs" id="actquesu-tab-{{i}}">{{ mytabs }}</a>
+                </div>
+            </div>
+
+            <div class="card tlr-0">
+                <div class="card-body p-0">
+                    <div class="tab-content p-32 transfer-queue-tables">
+                        <div *ngIf="selectTabs === allTabs[0]" class="tab-pane fade show active" role="tabpanel" id="bank-transfers-tab">
+                            <app-accounting-manual-bank-tarnsfer [trustAccountTime]="trustAccountTime" [firmAccountList] = "firmAccountList" [statusIdList]="statusIdList"></app-accounting-manual-bank-tarnsfer>
+                        </div>
+                        <div *ngIf="selectTabs === allTabs[1]" class="tab-pane fade show active" role="tabpanel" id="case-paper-check-transactions-tab">
+                            <app-accounting-paper-check-transaction [trustAccountTime]="trustAccountTime" [firmAccountList] = "firmAccountList" [statusIdList]="statusIdList"></app-accounting-paper-check-transaction>
+                        </div>
+                        <div *ngIf="selectTabs === allTabs[2]" class="tab-pane fade show active" role="tabpanel" id="credit-card-transactions-tab">
+                            <app-accounting-credit-card-transaction [trustAccountTime]="trustAccountTime" [firmAccountList] = "firmAccountList" [statusIdList]="statusIdList"></app-accounting-credit-card-transaction>
+                        </div>
+                        <div *ngIf="selectTabs === allTabs[3]" class="tab-pane fade show active" role="tabpanel" id="e-check-transactions-tab">
+                            <app-accounting-echeck-transaction [trustAccountTime]="trustAccountTime" [firmAccountList] = "firmAccountList" [statusIdList]="statusIdList"></app-accounting-echeck-transaction>
+                        </div>
+                    </div>
+                </div>
+                <app-loader [active]="loading"></app-loader>
+            </div>
+        </div>
+
+    </div>
+</div>

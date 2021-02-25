@@ -1,0 +1,139 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Admin Settings</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" routerLink="/firm/document-setting">Document
+          Management</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Upload Document</li>
+    </ol>
+    <div class="heading">
+      <h1>Upload Document</h1>
+    </div>
+    <div class="card">
+      <form>
+        <div class="card-body">
+          <h2 class="mb-8">Select Files</h2>
+          <p>Select one or more files from your local system to upload.</p>
+          <div class=""></div>
+          <div class="upload-check d-inline-block position-relative">
+            <form id="fileForm">
+              <input #file type="file" (change)="selectedFile(file.files)" id="inpuFile" multiple>
+            </form>
+            <span class="btn btn-primary"> Select Files</span>
+          </div>
+          <p class="pt-12 pb-2 fs-11">Maximum upload file size: 25 MB</p>
+          <div class="fprogress-bar mt-24 select-file-up progress-error max-width-fit" *ngIf="fileErrorMsg">
+            <div class="d-flex mt-4">
+              <span class="prog-close mr-8">
+                <em class="icon icon-close"></em>
+              </span>
+              <div class="lh-20">
+                <span class="d-block font-weight-medium">File upload error! </span>
+                {{fileErrorMsg}}
+              </div>
+            </div>
+          </div>
+          <div class="upload-file-group d-block mb-2" *ngIf="fileArray.length > 0">
+            <div class="px-16 pb-8">
+              <div class="row gutter-16">
+                <div class="col-3">
+                  <span class="label mb-0 d-block">File Name</span>
+                </div>
+                <div class="col-3">
+                  <span class="label mb-0 d-block">Document Name</span>
+                </div>
+                <div class="col-3">
+                  <span class="label mb-0 d-block">Document Attribute</span>
+                </div>
+              </div>
+            </div>
+            <div class="upload-file-block" [ngClass]="(file.isFileSizeError) ? 'upload-file-error d-flex justify-content-between align-items-center p-16' :''" *ngFor="let file of fileArray;trackBy: trackByFn;let i=index">
+              <div class="row gutter-16" *ngIf="!file.isFileSizeError">
+                <div class="col-3">
+                  <div class="uploaded-file-name py-8 px-0">
+                    <div class="d-flex align-items-center font-weight-medium small lh-24">
+                      <img [src]="file.name | commonService: 'getFileImage'" width="20px">
+                      <span class="pl-12">{{file | truncateFileName}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="form-group mb-0" [class.has-error]="file.isExistError">
+                    <input type="text" class="form-control white-form-control"
+                           (ngModelChange)="onNameChanged(i)" [(ngModel)]="file.nameOfFile"
+                           [ngModelOptions]="{standalone: true}" placeholder="Provide name" id="file-name-index-{{i}}">
+                    <span class="field-message text-danger d-flex align-items-start" *ngIf="file.isExistError">
+                      <em class="icon icon-error mr-4 mt-0"></em>
+                      {{file.isExistError}}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="form-group mb-0">
+                    <app-multiselect-dropdown [showSearch]="false" [unsort]="true" [title]="file.title" [selections]="file.selectedAttArr" [displaySubItem]="file.attributesArray" [filterName]="'Apply Attributes'" [selectedMessage]="'attributes selected'" (onSelectionChanged)="getAttributeSelected($event, i)" (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clrAttributes(i)" (applyFilter)="applyFilter($event)" id="file-attribute-index-{{i}}"></app-multiselect-dropdown>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="d-flex align-items-center justify-content-between pt-12 badge-dots-block">
+                    <div class="d-flex align-items-center pr-8">
+                      <!-- <span *ngIf="!file.isScanFailed && !file.isScanPassed" class="sh-badge text-nowrap font-weight-medium sh-badge-primary" id="scan-progree-index-{{i}}">Security Scan In Progress</span>
+                      <span *ngIf="file.isScanPassed" class="sh-badge text-nowrap font-weight-medium sh-badge-success" id="scan-passed-index-{{i}}">Security Scan Passed</span>
+                      <span *ngIf="file.isScanFailed" class="sh-badge text-nowrap font-weight-medium sh-badge-danger" id="scan-failed-index-{{i}}">Security Scan Failed</span>
+                      <div *ngIf="file.isScanFailed" class="info-hover position-relative ml-8 d-inline-block">
+                        <em class="icon icon-info"></em>
+                        <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                          <div class="arrow"></div>
+                          <div class="tooltip-inner">
+                            <h6 class="font-weight-medium my-0">Security Scan Failed</h6>
+                            <p>{{file.virusDetails+' detected'}}</p>
+                          </div>
+                        </div>
+                      </div> -->
+                    </div>
+                    <div class="dropdown dropdown-hover-table" [class.active]="currentIndex==i" appAutoCloseOutsideClick (outsideClick)="onClickedOutside(i)" (click)="openSubMenu(i)">
+                      <span class="icon-area">
+                        <em class="icon icon-dot-verti"></em>
+                      </span>
+                      <div *ngIf="currentIndex==i" class="dropdown-menu dropdown-menu-right mt-8">
+                        <!-- <a *ngIf="file.isScanFailed || file.isExistError" href="javascript:void(0);" class="dropdown-item" (click)="currentIndex=null;onNameChanged(i);" id="scan-retry-index-{{i}}">
+                          Retry Scan
+                        </a> -->
+                        <a href="javascript:void(0);" class="dropdown-item" (click)="currentIndex=null;removeImage(i);" id="remove-doc-index-{{i}}">
+                          Remove document
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="d-flex align-items-center font-weight-medium small helper-text" *ngIf="file.isFileSizeError">
+                  <img [src]="file.name | commonService: 'getFileImage'" width="20px">
+                  <span class="ml-12">{{file | truncateFileName}}</span>
+                </div>
+                <div class="d-flex align-items-center" *ngIf="file.isFileSizeError">
+                  <div class="d-flex align-items-center">
+                    <em class="icon icon-error text-danger mr-8"></em>
+                    <span class="small lh-16">Files must be no larger than 25 MB in size</span>
+                  </div>
+                  <span class="ml-24">
+                    <em class="icon icon-close-fill text-large cursor-pointer icon-color" (click)="removeImage(i)" id="remove-img-index-{{i}}"></em>
+                  </span>
+                </div>
+
+            </div>
+            <app-loader [active]="fileLoading"></app-loader>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)="redirect()" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary"
+          [disabled]="!fileArray.length || shouldButtonEnable || anyFileSizeError" (click)="sendFilesForUploading()" id="upload-doc" >Upload Document</button>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>

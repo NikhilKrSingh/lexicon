@@ -1,0 +1,127 @@
+<ng-container *ngIf="templateType== 'Invoice Template'">
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">{{isEdit ? 'Edit' : 'New'}} {{templateType}}</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group" [class.has-error]="formSubmitted && templatename.invalid">
+      <label>Template Name <sup>*</sup></label>
+      <input type="text" maxlength='100' class="form-control" required [(ngModel)]='templateName' name="templateName"
+        id="template-name" #templatename="ngModel">
+      <span class="field-message text-danger" *ngIf="formSubmitted && templatename.errors">
+        <span *ngIf="templatename.errors.required">
+          <em class="icon icon-error mr-4"></em>
+          Please enter template name.
+        </span>
+      </span>
+    </div>
+    <button type="button" class="btn btn-primary" (click)='selectTemplateFile()' id="select-file">Select File</button>
+    <form><input type="file" hidden [accept]='acceptedType' #templateFile
+        (change)='uploadTemplateFile(templateFile.files)' id="hidden-file"></form>
+    <div class="form-group" [class.has-error]="formSubmitted && !selectedFile">
+      <span class="field-message text-danger" *ngIf="formSubmitted && !selectedFile">
+        <em class="icon icon-error mr-4"></em>
+        Please select template file.
+      </span>
+    </div>
+    <div class="fprogress-bar mt-24 select-file-up pb-0" *ngIf='selectedFile'>
+      <p class="file-name" [title]='selectedFile?.name'>{{selectedFile?.name | truncate : 30}}
+        <strong>{{uploadPercent}}%</strong>
+      </p>
+      <em class="fprogress-line"><i [style.width.%]='uploadPercent'></i></em>
+      <p class="text-right" *ngIf='uploadPercent < 100'> 1/1 file uploading</p>
+      <p class="text-right" *ngIf='uploadPercent == 100'> 1/1 file completed</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">
+      Save
+    </button>
+  </div>
+
+</ng-container>
+
+<ng-container *ngIf="templateType== 'Receipt Template'">
+
+  <div class="modal-header d-block pb-12">
+    <h3 class="modal-title mb-0">{{isEdit ? 'Edit' : 'Add'}} {{templateType}}</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body add-receipt-template-body">
+    <p class="mb-16" *ngIf="isEdit">
+      You can replace <strong>{{selectedTemplate?.templateName}}</strong>, and upload a new file template.
+    </p>
+    <p class="mb-16" *ngIf="!isEdit">
+      To add a new receipt template, select and upload a file and give <br /> your new template a name.
+    </p>
+    <div class="alert alert-danger d-flex justify-content-between mt-24 mb-24"
+      *ngIf="formSubmitted && !selectedFile && !fileName && !showInvalidFormatFile">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-error text-large"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h5 class="mr-16 mt-0 mb-0">Error</h5>
+          Please select a file to upload.
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-danger d-flex justify-content-between mt-24 mb-24"
+      *ngIf="showInvalidFormatFile">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-error text-large"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h5 class="mr-16 mt-0 mb-0">Error</h5>
+          Template must be in .html format.
+        </div>
+      </div>
+    </div>
+    <div class="form-group mb-16" [class.has-error]="formSubmitted && templatename.invalid">
+      <label>Template Name <sup>*</sup></label>
+      <div class="row gutters-16">
+        <div class="col-auto flex-fill">
+          <input type="text" maxlength='100' class="form-control" required [(ngModel)]='templateName'
+            name="templateName" id="template-name" #templatename="ngModel" placeholder="Enter a template name">
+          <span class="field-message text-danger" *ngIf="formSubmitted && templatename.errors">
+            <span *ngIf="templatename.errors.required">
+              <em class="icon icon-error mr-4"></em>
+              Please enter a template name.
+            </span>
+          </span>
+        </div>
+        <div class="col-auto">
+          <button type="button" [disabled]="selectedFile" class="btn btn-primary" (click)='selectTemplateFile()'
+            id="select-file">Select File</button>
+        </div>
+      </div>
+    </div>
+    <form>
+      <input type="file" hidden [accept]='acceptedType' #templateFile (change)='uploadTemplateFile(templateFile.files)'
+        id="hidden-file">
+    </form>
+
+    <div class="fprogress-bar select-file-up pb-0" *ngIf='selectedFile'>
+      <p class="file-name" [title]='selectedFile?.name'>{{selectedFile?.name | truncate : 30}}
+        <strong>{{uploadPercent}}%</strong>
+      </p>
+      <em class="fprogress-line"><i [style.width.%]='uploadPercent'></i></em>
+      <p class="text-right" *ngIf='uploadPercent < 100'> 1/1 file uploading</p>
+      <p class="text-right" *ngIf='uploadPercent == 100'> 1/1 file completed</p>
+      <span class="template-close"><em (click)="onCancel()" class="icon icon-close icon-color small"></em></span>
+    </div>
+    <div *ngIf="isEdit && !selectedFile && fileName">
+      <a href="javascript:void(0)" (click)='downloadTemplate()' class="font-weight-medium d-inline-block">{{fileName}}</a>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">
+      Save
+    </button>
+  </div>
+
+</ng-container>

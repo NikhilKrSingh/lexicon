@@ -1,0 +1,59 @@
+<div class="modal-header pb-24 d-block">
+  <h3 class="modal-title mb-0" *ngIf="!noteDetails">Create New Note</h3>
+  <h3 class="modal-title mb-0" *ngIf="noteDetails">Edit Note</h3>
+  <button type="button" class="close" [disabled]="loading" (click)="close(null)" aria-label="Close">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body" [formGroup]="noteForm">
+  <div class="row gutter-16">
+    <div class="col-4">
+      <div class="form-group" [class.has-error]="formSubmitted && f.applicableDate.errors">
+        <label>Applicable Date <sup>*</sup></label>
+        <app-date-picker [isForm]='true' [dateform]='noteForm' [controlName]="'applicableDate'" id="application-date"></app-date-picker>
+        <input type="hidden" class="form-control" formControlName="id" id="id-hidden">
+        <span class="field-message text-danger" *ngIf="formSubmitted && f.applicableDate.errors">
+          <span *ngIf="f.applicableDate.errors.required">
+            <em class="icon icon-error mr-4"></em>
+            Please select applicable date
+          </span>
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group position-relative" [class.has-error]="formSubmitted && f.content.errors">
+        <label for="">Note Text <sup>*</sup></label>
+        <span class="count-char">{{noteForm?.controls['content']?.value?.length || 0}}/1000</span>
+        <textarea class="form-control height-2" maxlength='1000' rows="4" [placeholder]="placeholder" formControlName="content" id="note-text"></textarea>
+        <span class="field-message text-danger" *ngIf="formSubmitted && f.content.errors">
+          <span *ngIf="f.content.errors.required">
+            <em class="icon icon-error mr-4"></em>
+            Please enter note text
+          </span>
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group mb-0">
+        <label class="mb-12">Visible to Client</label>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="invoiceAddress1" name="isVisibleToClient" class="custom-control-input"
+                 formControlName="isVisibleToClient" [value]='true'>
+          <label class="custom-control-label" for="invoiceAddress1">Yes</label>
+        </div>
+        <div class="custom-control custom-radio pr-0 mb-0">
+          <input type="radio" id="invoiceAddress2" name="isVisibleToClient" class="custom-control-input"
+                 formControlName="isVisibleToClient" [value]='false'>
+          <label class="custom-control-label" for="invoiceAddress2">No</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close(null)" [disabled]="loading" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' [disabled]="loading" id="save-btn">
+    Save
+  </button>
+</div>
+<app-loader [active]="loading"></app-loader>

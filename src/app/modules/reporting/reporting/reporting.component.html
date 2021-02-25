@@ -1,0 +1,250 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Reporting</li>
+    </ol>
+    <div class="heading">
+      <h1>Reporting</h1>
+    </div>
+    <div class="section-area">
+      <div class="card">
+        <div class="card-body" [ngClass]="(isOpenTransactionReport)?'report-open':''">
+          <div class="report-head d-flex align-items-center" (click)="collapseTransactionClick()">
+            <span class="cursor-pointer mr-16 repo-arrow"><em class="icon icon-angle-down"></em></span>
+            <h4 class="m-0">Transaction Reports</h4>
+            <span class="sh-badge sh-badge-primary ml-24 font-weight-medium py-4">{{transactionReportCount}}
+              reports</span>
+          </div>
+          <div class="report-body">
+            <div class="custom-table">
+              <div class="table-responsive">
+                <table class="table reporting-table">
+                  <tbody>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">AR/Account Ledger History</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['account-ledger-history']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Billing Activity</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['billing-activity-report']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isAccountingFlag">
+                      <td class="pl-56">Cash Transfer Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['cash-transfer-report']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isAccountingFlag">
+                      <td class="pl-56">Check Request Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['check-request-report']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Credit Card Transaction</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['credit-card-transaction']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag || isBillingOrResponsibleAttorney">
+                        <td class="pl-56">Disbursements Journal Report</td>
+                        <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                            [routerLink]="['disbursements-journal']">Generate Report</a></td>
+                      </tr>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag">
+                      <td class="pl-56">Payment History</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['payment-history']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="consultAttorneyFlag">
+                      <td class="pl-56">Potential Client Status/Retention</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['potential-client']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="timeKeepingFlag">
+                      <td class="pl-56">Time Entries by Attorney</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['time-entries-attorney']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag">
+                      <td class="pl-56">Trust Ledger History</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['trust-ledger-history']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isWipDetailFlag">
+                      <td class="pl-56">WIP Detail Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['wip-detail']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="writeOffDownPermission">
+                      <td class="pl-56">Write-Downs Journal Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['write-downs']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="writeOffDownPermission">
+                      <td class="pl-56">Write-Offs Journal Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['write-offs']">Generate Report</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" [ngClass]="(isOpenSummaryReport)?'report-open':''">
+          <div class="report-head d-flex align-items-center" (click)="collapseSummaryClick()">
+            <span class="cursor-pointer mr-16 repo-arrow"><em class="icon icon-angle-down"></em></span>
+            <h4 class="m-0">Summary Reports</h4>
+            <span class="sh-badge sh-badge-primary ml-24 font-weight-medium py-4">{{summaryReportCount}}
+              reports</span>
+          </div>
+          <div class="report-body">
+            <div class="custom-table">
+              <div class="table-responsive">
+                <table class="table reporting-table">
+                  <tbody>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag">
+                      <td class="pl-56">AR Aging</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['ar-aging']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag">
+                      <td class="pl-56">AR by Criteria</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['ar-criteria']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="timeKeepingFlag">
+                      <td class="pl-56">Base Hours</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['base-hours']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag">
+                      <td class="pl-56">Billable Hours Detail</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['billable-hours-detail']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Billable Hours Rollup</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['billable-hours-rollup']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isAccountingFlag">
+                      <td class="pl-56">Cash Requirement Rollup</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['cash-requirement-rollup']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isClientDetailFlag">
+                        <td class="pl-56">Client Details Report</td>
+                        <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                            [routerLink]="['client-details']">Generate Report</a></td>
+                      </tr>
+                    <tr *ngIf="consultAttorneyFlag">
+                      <td class="pl-56">Consultation Activity Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['consultation-activity']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isAccountingFlag">
+                      <td class="pl-56">Daily Deposit Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['daily-deposit']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Insufficient Funds Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['insufficient-funds-report']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Matter Paid vs. Total Detail</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['matter-paid']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Matter Paid vs. Total Rollup</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['matter-paid-total-rollup']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag">
+                      <td class="pl-56">Matter Status</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['matter-status']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag">
+                      <td class="pl-56">Net Credit Balance</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['net-credit-balance']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isTrustVsArFlag">
+                      <td class="pl-56">No Recent Trust Transactions</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['no-recent-trust-transactions']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="outstandingARwCC">
+                      <td class="pl-56">Outstanding AR with Credit Card Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          (click)="generateOutstandingARwCC()">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Total Amount Billed/WIP</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['total-amount-billed']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="permissionFlag">
+                      <td class="pl-56">Total Realization</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['total-realization']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isTrustVsArFlag">
+                      <td class="pl-56">Trust Replenishment</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['trust-replenishment']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isTrustVsArFlag">
+                      <td class="pl-56">Trust vs. AR</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['trust-vs-ar']">Generate Report</a></td>
+                    </tr>
+                    <tr *ngIf="isBillingOrResponsibleAttorneyFlag || permissionFlag">
+                      <td class="pl-56">WIP Aging Report</td>
+                      <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                          [routerLink]="['wip-aging-report']">Generate Report</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+          <div class="card-body" [ngClass]="(isOpenUserReport)?'report-open':''">
+            <div class="report-head d-flex align-items-center" (click)="collapseUserClick()">
+              <span class="cursor-pointer mr-16 repo-arrow"><em class="icon icon-angle-down"></em></span>
+              <h4 class="m-0">User Reports</h4>
+              <span class="sh-badge sh-badge-primary ml-24 font-weight-medium py-4">{{userReportCount}}
+                reports</span>
+            </div>
+            <div class="report-body">
+              <div class="custom-table">
+                <div class="table-responsive">
+                  <table class="table reporting-table">
+                    <tbody>
+                      <tr *ngIf="isUserAccountDetailFlag">
+                        <td class="pl-56">User Account Details Report</td>
+                        <td class="text-right"><a href="javascript:void(0);" class="font-weight-medium"
+                            [routerLink]="['user-account-details']">Generate Report</a></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+
+  </div>
+</div>

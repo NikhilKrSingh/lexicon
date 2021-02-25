@@ -1,0 +1,139 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Set Disbursement Exception Rates</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="header-search flex-fill d-flex mb-24 col-9 px-0">
+    <form action="#">
+      <div class="header-search-wrapper">
+        <input type="text" class="form-control search-input" name="searchinput" [(ngModel)]="searchinput"
+          (keyup)="searchFilter()" id="setdisbratinputserach" placeholder="Search by code or name">
+        <button class="btn" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+  <div class="row gutter-16">
+    <div class="col-3">
+      <div class="form-group">
+        <label>Hard/Soft</label>
+        <div class="dropdown-matter">
+          <ng-select
+            [items]="statusList"
+            placeholder="Select status"
+            (change)='searchFilter()'
+            [(ngModel)]="type"
+            [selectOnTab]="true"
+            [bindValue]="'id'"
+            [bindLabel]="'name'"
+            [clearable]="false"
+            [notFoundText]="'No record found'">
+          </ng-select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="position-relative">
+    <div class="custom-table">
+      <ngx-datatable #jobfamilynametable class="material common-table custom-hr-table tltoophover datatable-auto-height no-min-height"
+        id="disbursratetableslisttabls"
+        [class.matter-no-data]="disbursementTypes?.length === 0"
+        [rows]="disbursementTypes"
+        [columnMode]="ColumnMode.force"
+        [headerHeight]="50"
+        [footerHeight]="footerHeight"
+        [messages]="messages"
+        rowHeight="auto"
+        [count]="page.totalElements"
+        [offset]="page.pageNumber"
+        [limit]="page.size"
+        [scrollbarH]="false"
+        [sorts]="[{prop: 'code', dir: 'asc'}]"
+        (sort)="updateDatatableFooterPage()"
+        [selectionType]="SelectionType.checkbox">
+
+        <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [sortable]="true" [width]="140" [canAutoResize]="false">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="description" name="Name" [sortable]="true" [width]="305" [canAutoResize]="false">
+          <ng-template let-rowIndex="rowIndex"  let-row="row" let-value="value" ngx-datatable-cell-template>
+            <span class="text-break">
+              {{value}}
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="type.name" [width]="200" [canAutoResize]="false">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            <div class="d-flex hard-soft-header align-items-center">
+              <div>Hard/Soft</div>
+                <span class="cursor-pointer ml-12" placement="bottom" container="body" tooltipClass="d-block auto-position"
+                  ngbTooltip="Hard costs are expenses incurred on behalf of a client that require a direct payment by
+                  the firm to a vendor. For example, if a firm writes a check for a court filing fee, it
+                  is considered a hard cost. Soft costs are expenses that are charged to the client but a
+                  direct payment is not made to a vendor.">
+                  <em class="icon icon-info icon-color text-large"></em>
+                </span>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="rate" name="Initial Rate" [sortable]="true" [width]="200" [canAutoResize]="false">
+          <ng-template let-rowIndex="rowIndex"  let-row="row" let-value="value" ngx-datatable-cell-template>
+            {{value  | currency : 'USD' : 'symbol': '1.2-2'}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="customRate" name="Exception Rate" [sortable]="true" [width]="230" [canAutoResize]="false">
+          <ng-template let-rowIndex="rowIndex"  let-row="row" let-value="value" ngx-datatable-cell-template>
+            <div class="" [class.has-error]="row.error">
+              <input id="setdisbursratetbl_{{rowIndex}}" type="text" class="form-control bordred" placeholder=""
+                prefix="$" mask="separator.2" thousandSeparator="," [(ngModel)]='row.customRate' (blur)="formatRate(row)">
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-footer>
+          <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+            let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+            <div class="d-flex justify-content-between flex-fill">
+              <div class="d-flex align-items-center">
+                <div class="table-items d-flex align-items-center mr-36">
+                  Items per page:
+                  <div class=" ml-8">
+                    <select class="custom-select border-less" [formControl]="pageSelector"
+                      (change)="changePageSize()">
+                      <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                    </select>
+                  </div>
+                </div>
+                <span>
+                  {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                  {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                  {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                </span>
+              </div>
+              <div class="d-flex align-items-center">
+                <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                  <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                    of {{page.totalPages}}</option>
+                </select>
+                <div class="ml-8">
+                  <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                    [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                    [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                    (change)="jobfamilynametable.onFooterPage($event);pageChange($event)">
+                  </datatable-pager>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-footer>
+      </ngx-datatable>
+    </div>
+  </div>
+
+</div>
+<app-loader [active]="isLoading"></app-loader>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" id="ratetblssetratetblscancelbtn" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn-primary" id="ratetblssetratetblssavelbtn" (click)="setrates()">Save</button>
+</div>

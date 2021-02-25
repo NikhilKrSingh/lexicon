@@ -1,0 +1,248 @@
+.full-cal-wraps {
+  width: 100%;
+  height: auto;
+  margin: 0;
+
+  .main-full-cal {
+    -webkit-flex: 1;
+    -moz-flex: 1;
+    -ms-flex: 1;
+    -o-flex: 1;
+    flex: 1;
+  }
+
+  .sidebar-row {
+    padding: 0;
+    width: 100%;
+    max-width: 238px;
+    min-width: 238px;
+    background: #fff;
+    border-left: 1px solid #c4ccd4;
+  }
+
+  .sidebar-stripe {
+    width: 100%;
+    max-width: 64px;
+    min-width: 64px;
+    background-color: #fff;
+    padding: 16px;
+    border-left: 1px solid #c4ccd4;
+  }
+}
+
+.dropdown-menu {
+  overflow: hidden;
+}
+
+.cal-aside-button {
+  .btn {
+    border-radius: 0;
+  }
+}
+
+.cal-aside-content-scroll {
+  height: calc(100vh - 235px);
+}
+
+.cal-aside-content {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.button-right {
+  position: relative;
+  margin-left: 161px;
+}
+
+.popup-heading-center {
+  margin-left: 24px;
+}
+
+.bottomZero {
+  bottom: 0;
+  height: auto;
+}
+
+.advance-search {
+  border-radius: 16px;
+}
+
+.color-cate-list.cate-list {
+  padding: 8px 0 0;
+
+  li {
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 14px;
+    color: #353B4B;
+
+    .icon {
+      font-size: 8px;
+    }
+
+    .tooltip {
+      width: 100%;
+
+      .tooltip-inner {
+        max-width: 100%;
+      }
+    }
+
+    &.cu_F44436 {
+      border-color: #F44436;
+      background-color: #fbc6c2;
+    }
+
+    &.cu_EA1E63 {
+      border-color: #EA1E63;
+      background-color: #f8bbd0;
+    }
+
+    &.cu_9C27B0 {
+      border-color: #9C27B0;
+      background-color: #e1bee7;
+    }
+
+    &.cu_673AB7 {
+      border-color: #673AB7;
+      background-color: #d1c3e9;
+    }
+
+    &.cu_3F51B5 {
+      border-color: #3F51B5;
+      background-color: #c5cae8;
+    }
+
+    &.cu_2096F3 {
+      border-color: #2096F3;
+      background-color: #BCDFFB;
+    }
+
+    &.cu_05A9F4 {
+      border-color: #05A9F4;
+      background-color: #b4e5fb;
+    }
+
+    &.cu_02BCD4 {
+      border-color: #02BCD4;
+      background-color: #b3eaf2;
+    }
+
+    &.cu_009688 {
+      border-color: #009688;
+      background-color: #b2dfdb;
+    }
+
+    &.cu_4CAF50 {
+      border-color: #4CAF50;
+      background-color: #c9e7ca;
+    }
+
+    &.cu_8BC34A {
+      border-color: #8BC34A;
+      background-color: #dcedc8;
+    }
+
+    &.cu_CDDC39 {
+      border-color: #CDDC39;
+      background-color: #F0F4C3;
+    }
+
+    &.cu_FFEB3B {
+      border-color: #FFEB3B;
+      background-color: #FFF9C4;
+    }
+
+    &.cu_FFC108 {
+      border-color: #FFC108;
+      background-color: #FFECB4;
+    }
+
+    &.cu_FF9800 {
+      border-color: #FF9800;
+      background-color: #FFE0B2;
+    }
+
+    &.cu_FF5821 {
+      border-color: #FF5821;
+      background-color: #FFCCBC;
+    }
+  }
+}
+
+.search-result-box {
+  z-index: 2;
+}
+
+.sidecal-button {
+  border-radius: 100%;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+}
+
+.apply-cal-btn {
+  background-color: transparent;
+  border: none;
+  padding: 0 17px 0 0;
+  font-weight: 500;
+}
+
+.applied-cal-list {
+  background-color: #fff;
+  border-top: 1px solid #C4CCD4;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.applied-cal-name {
+  max-width: fit-content;
+}
+
+.applied-calendar-list-item {
+  display: inline-block;
+  width: fit-content !important;
+  margin-right: 5px;
+}
+.subscription-plus{
+  margin-right: 10px !important;
+    background: #ECEBF4;
+    padding: 7px;
+    border-radius: 50%;
+    color: #4E5F7B;
+    width: 23px;
+    height: 23px;
+    margin-top: -2px !important;
+}
+.subscription-minus{
+   margin-right: 10px !important;
+    background: #ECEBF4;
+    padding: 7px;
+    border-radius: 50%;
+    color: #4E5F7B;
+    width: 23px;
+    height: 23px;
+    margin-top: -2px !important;
+}
+
+.search-min-height{
+  min-height: 65px;
+}
+
+.name-hover:hover {
+  text-decoration: underline;
+}
+
+.calendar-tooltip {
+  min-width: 270px;
+}
+.fc-bgevent-skeleton{
+  display: none !important
+}
+.ct-max-text{max-width: 230px;}
+.max-name-w{max-width: 115px;}
+.fc-axis.fc-widget-content {
+  span {
+    display: none;
+  }
+}

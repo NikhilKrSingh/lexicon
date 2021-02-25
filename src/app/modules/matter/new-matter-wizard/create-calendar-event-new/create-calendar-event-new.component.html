@@ -1,0 +1,102 @@
+
+<div class="npc-block pb-0">
+  <div class="cust-card">
+    <div class="cust-card-head d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <h3 class="m-0">Create Calendar Event</h3>
+        <i class="lh-20 ml-8">Optional</i>
+      </div>
+    </div>
+    <div class="cust-card-body">
+      <p class="lh-20">Enter as many events as needed</p>
+      <button class="btn btn-primary btn-icon" type="button" (click)="addEvent('add')" id="addEventId">
+        <i class="icon icon-plus"></i> Add Event
+      </button>
+      <div class="consult-meet-wrap pt-24" *ngIf="eventList?.length > 0">
+        <div class="consult-meet-block p-16" *ngFor="let event of eventList; let i=index;" id="event-{{i}}">
+          <div class="d-flex align-items-center justify-content-between mb-16">
+            <h4 class="m-0">{{event.title}}</h4>
+            <div class="icon-group d-flex justify-content-end">
+              <span>
+                <em class="icon icon-edit icon-color" (click)="editEvent(i)" id="editEvent-{{i}}"></em>
+              </span>
+              <span>
+                <em class="icon icon-remove icon-color" (click)="deleteEvent(i)" id="deleteEvent-{{i}}"></em>
+              </span>
+            </div>
+          </div>
+          <div class="conmeet-table d-flex mb-16 justify-content-between">
+            <div>
+              <label class="d-block">Event Type</label>
+              <div class="lh-20">{{event?.eventType?.name}}</div>
+            </div>
+            <div class="pl-48">
+              <label class="d-block">Start/End Date</label>
+              <div class="lh-20">{{event?.startDateTime | date : 'MM/dd/yyyy'}} - {{event?.endDateTime | date : 'MM/dd/yyyy'}}</div>
+            </div>
+            <div class="pl-48">
+              <label class="d-block">Start/End Time</label>
+              <div class="lh-20" *ngIf="event?.isAllDayEvent">All Day</div>
+              <div class="lh-20" *ngIf="!event?.isAllDayEvent">{{event?.startDateTime | date : 'h:mma'}} - {{event?.endDateTime | date : 'h:mma'}}</div>
+            </div>
+            <div class="pl-48">
+              <label class="d-block">Recurring Event</label>
+              <div class="lh-20" *ngIf="!event?.isRecurringEvent">No</div>
+              <div class="lh-20" *ngIf="event?.isRecurringEvent">{{event?.displayRecurringEvent}}</div>
+            </div>
+            <div class="pl-48">
+              <label class="d-block">Location</label>
+              <div class="lh-20 con-location">
+                <div class="info-hover position-relative">
+                  <a href="javascript:void(0)" class="font-weight-medium text-decoration">{{event?.eventLocation}}</a>
+                  <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                    <div class="arrow"></div>
+                    <div class="tooltip-inner">
+                      <p class="lh-20">{{event?.eventLocation}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="pl-48">
+              <label class="d-block">Invitees</label>
+              <div class="lh-20 d-flex align-items-center" >
+                <span class="invite-icon mr-8">
+                  <img src="../../../../../assets/images/Calendar/invitees.svg" alt="">
+                </span>
+                <div class="info-hover position-relative cos-invitee">
+                  <a href="javascript:void(0)" class="text-decoration font-weight-medium">{{event?.invitees?.length}}</a>
+                  <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                    <div class="arrow"></div>
+                    <div class="tooltip-inner" *ngIf="event?.invitees?.length > 0">
+                      <ng-container *ngFor="let invt of event?.invitees;trackBy :trackByFn;">
+                        <h5 class="m-0" *ngIf="invt?.person?.id > 0">{{invt?.person?.lastName}}, {{invt?.person?.firstName}}</h5>
+                        <p class="lh-20 mb-8" *ngIf="invt?.person?.email">{{invt?.person?.email}}</p>
+                      </ng-container>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-5">
+              <div>
+                <label class="d-block">Description</label>
+                <div class="lh-20 see-block">
+                  <span *ngIf="!event?.displayDescription"
+                    [innerHTML]="event?.description && event?.description?.length > 110 ? event?.description?.substring(0,110) + '...' : event?.description">
+                  </span>
+                  <a *ngIf="!event?.displayDescription && event?.description?.length > 110" href="javascript:void(0)" (click)="event.displayDescription = true"  class="font-weight-medium text-decoration"> Show More</a>
+                  <span *ngIf="event?.displayDescription"  [innerHTML]="event?.description">
+                  </span>
+                  <a *ngIf="event?.displayDescription" href="javascript:void(0)" (click)="event.displayDescription = false"  class="font-weight-medium text-decoration"> Show Less</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

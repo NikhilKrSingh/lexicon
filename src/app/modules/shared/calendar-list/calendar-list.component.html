@@ -1,0 +1,1091 @@
+<div class="d-flex full-cal-wraps align-items-stretch ">
+  <div>
+    <div class="full-cal-wraper">
+      <ng-container *ngIf="options && options.length">
+        <div class="fc-toolbar fc-header-toolbar row">
+          <div class="col-md-12 row pr-0">
+            <div class="fc-left" [class.col-md-8]="!sideBar" [class.col-md-9]="sideBar">
+              <button type="button" (click)="goToPrevious()"
+                      class="fc-prev-button fc-button fc-button-primary" aria-label="prev" id="goto-preview-btn">
+                <span class="fc-icon fc-icon-chevron-left"></span>
+              </button>
+              <h3>{{calendarTitle}}</h3>
+              <button type="button" class="fc-button" [owlDateTimeTrigger]="datePicker"
+                      (click)="openDatePicker()"
+                      [class.fc-datePickerOpenButton-button]="!isDatePickerOpen"
+                      [class.fc-datePickerCloseButton-button]="isDatePickerOpen">
+                <input [owlDateTime]="datePicker" #datePickerInput [id]="'fixed-date-picker'"
+                       (ngModelChange)="setCalendarView($event)"
+                       [hidden]="true" [(ngModel)]="selectedMoment">
+                <owl-date-time [pickerType]="'calendar'" [panelClass]="'fixed-date-picker'" #datePicker
+                               [id]="'calendarDatePicker'"
+                               (afterPickerClosed)="closeDatePicker()">
+                </owl-date-time>
+              </button>
+              <div class="fc-button-group">
+                <button type="button" (click)="goToNext()"
+                        class="fc-next-button fc-button fc-button-primary" aria-label="next" id="goto-next-btn">
+                  <span class="fc-icon fc-icon-chevron-right"></span>
+                </button>
+                <button type="button" class="fc-timeGridDay-button fc-button fc-button-primary"
+                        [class.fc-button-active]="calendarViewType === 'timeGridDay' || calendarViewType === 'resourceTimeGridDay'"
+                        (click)="changeCalendarView(isResourceViewMode ? 'resourceTimeGridDay' :'timeGridDay')" id="day-btn">day</button>
+                <button type="button" class="fc-agendaFiveDay-button fc-button fc-button-primary"
+                        [class.fc-button-active]="calendarViewType === 'agendaFiveDay' || calendarViewType === 'agendaFiveResourceDay'"
+                        (click)="changeCalendarView(isResourceViewMode ? 'agendaFiveResourceDay' :'agendaFiveDay')" id="five-day-btn">5 day</button>
+                <button type="button" class="fc-timeGridWeek-button fc-button fc-button-primary"
+                        [class.fc-button-active]="calendarViewType === 'timeGridWeek' || calendarViewType === 'resourceTimeGridWeek'"
+                        (click)="changeCalendarView(isResourceViewMode ? 'resourceTimeGridWeek' :'timeGridWeek')" id="week-btn">
+                  week
+                </button>
+                <button type="button" class="fc-dayGridMonth-button fc-button fc-button-primary"
+                        [class.fc-button-active]="calendarViewType === 'dayGridMonth'"
+                        (click)="changeCalendarView('dayGridMonth')" id="month-btn">
+                  month
+                </button>
+              </div>
+              <button type="button" class="fc-today-button fc-button fc-button-primary" (click)="setCalendarView(null, 'today')">Today</button>
+            </div>
+            <div class="fc-right pl-0 ml-0" [class.col-md-4]="!sideBar" [class.col-md-3]="sideBar">
+              <button id="create-new-calendar-event" type="button" class="fc-createEventButton-button fc-button float-right" (click)="createEvent()" id="create-event-btn">
+                <span class="font-weight-medium">+ Create New Event</span>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-12 row pr-0 applied-cal-list" *ngIf="sideBar && selectedFilterUser.length">
+            <div class="col-md-1 pl-0 ml-0 applied-cal-name mt-12">
+              <span class="font-weight-medium lh-18 mt-12 text-nowrap">{{selectedFilterUser.length > 1 ? 'Applied Calendars:' : 'Applied Calendar:'}}</span>
+            </div>
+            <div class="pb-2 pl-0 ml-0" [class.col-md-10]='selectedFilterUser.length <= 5'
+                 [class.col-md-9]="selectedFilterUser.length > 5">
+              <ul class="list-unstyled color-cate-list cate-list m-0 pt-0 d-flex flex-wrap" *ngIf="selectedFilterUser?.length > 0">
+                <li class="applied-calendar-list-item info-hover position-relative justify-content-between d-flex
+                align-items-center helper-text py-4 px-8 cu_{{user.colorCode}}"
+                    *ngFor="let user of selectedFilterUser | slice:0: showMoreFilters ? selectedFilterUser.length : 5;trackBy: trackByFn">
+                  <div class="d-flex align-items-center">
+                    <em *ngIf="user.role === 'Client'" class="text-large icon icon-clients icon-color"></em>
+                    <em *ngIf="user.role == 'Matter'" class="text-large icon icon-matters icon-color"></em>
+                    <em *ngIf="user.role !== 'Employee' && user.role !== 'Matter' && user.role !== 'Client' && user.associatedWithClient"
+                        class="text-large icon icon-clients icon-color"></em>
+                    <em *ngIf="user.role !== 'Employee' && user.role !== 'Matter' && user.role !== 'Client' && !user.associatedWithClient"
+                        class="text-large icon icon-contacts icon-color"></em>
+                    <em *ngIf="user.role == 'Employee'" class="text-large icon icon-employees icon-color"></em>
+                    <span class="ml-8">
+                      {{(user.name && user.name.length > 23) ? (user.name | slice:0:23) + '...' :  user.name}}
+                    </span>
+                  </div>
+                  <div class="ml-12">
+                    <span>{{user.timezone}}</span>
+                    <span class="cursor-pointer px-4" (click)="deleteSearchUser(user)">
+                      <em class="icon icon-close icon-color icon-small"></em>
+                    </span>
+                  </div>
+                  <div class="tooltip center bs-tooltip-bottom" role="tooltip">
+                    <div class="arrow"></div>
+                    <div class="tooltip-inner">
+                      <p class="m-0">{{user.name}}</p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-1" *ngIf="selectedFilterUser.length > 5">
+              <button type="button" class="dropdown-toggle apply-cal-btn mt-12 float-right"
+                      (click)="showMoreFilters = !showMoreFilters">
+                Show More ({{selectedFilterUser.length - 5}})
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+        <full-calendar class="main-full-cal" plugins=[interactionPlugin]
+                       *ngIf="!isResourceViewMode && options[0] && options[0].scrollTime!=''"
+                       [schedulerLicenseKey]='calendar_key'
+                       [defaultView]="defaultView" [events]="calendarEvents"
+                       [class.cal-close]="sideBar" #calendar [nowIndicator]="options[0].now"
+                       [now]="options[0].now"
+                       [plugins]="calendarPlugins"
+                       [allDayText]= "''"
+                       [allDaySlot]="true" [editable]="false" [views]="options[0].views" [slotDuration]="'00:30:00'"
+                       [customButtons]="options[0].customButtons" [resources]="options[0].resources"
+                       [header]="options[0].header"
+                       [businessHours]="options[0].businessHours" [scrollTime]="options[0].scrollTime"
+                       (dateClick)="dateClick($event)"
+                       (eventDragStop)="eventDragStop($event)" (eventClick)="eventClick($event)" aspectRatio="0.95"
+                       deepChangeDetection="true" (eventRender)="changeHeight($event)"
+                       (datesRender)="changeView($event)" selectable="true"
+                       (select)="calendarClickSelect($event)"
+                       [slotEventOverlap]="false"
+                       (eventMouseEnter)="mouseEnter($event)"
+                       (eventMouseLeave)="mouseLeave($event)"
+                       (eventRender)='eventRenderFn($event)'>
+        </full-calendar>
+        <full-calendar class="main-full-cal remove-highlight" plugins=[interactionPlugin] *ngIf="isResourceViewMode"
+                       [schedulerLicenseKey]='calendar_key'
+                       defaultView="resourceTimeGridDay"
+                       [events]="resourceviewEventsArray"
+                       [class.cal-close]="sideBar" #calendar [nowIndicator]="options[0].nowIndicator"
+                       [now]="options[0].now"
+                       [plugins]="calendarPlugins"
+                       [allDaySlot]="true" [editable]="false" [views]="options[1].views" [slotDuration]="'00:30:00'"
+                       [customButtons]="options[0].customButtons" [resources]="resourceArray"
+                       [header]="options[1].header"
+                       [businessHours]="options[1].businessHours" [scrollTime]="08.00.00"
+                       (dateClick)="dateClick($event)"
+                       (eventDragStop)="eventDragStop($event)" (eventClick)="eventClick($event)" aspectRatio=" 0.95"
+                       deepChangeDetection="true" (datesRender)="changeView($event)" selectable="true"
+                       (select)="calendarClickSelect($event)"
+                       [slotEventOverlap]="false"
+                       (eventRender)='eventRenderFn($event)'
+                      >
+        </full-calendar>
+      </ng-container>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+  <div class="sidebar-stripe" *ngIf="sideBar" id="sidebar-open">
+    <span class="btn btn-primary sidecal-button p-0" type="button" (click)="openSideBar();" >
+      <em class="icon icon-arrow-long-left"></em>
+    </span>
+  </div>
+  <div class="sidebar-row" [class.d-none]="sideBar">
+    <div class="d-flex justify-content-between flex-column h-100">
+      <div>
+        <div class="d-flex align-items-center p-16 cursor-pointer" (click)="openSideBar();">
+          <span class="btn btn-primary sidecal-button p-0" type="button" id="close-menu">
+            <em class="icon icon-arrow-long-right"></em>
+          </span>
+          <span class="ml-8 small font-weight-medium">Close Menu</span>
+        </div>
+        <div class="cal-side-header pt-0">
+          <div class="advance-search">
+            <div class="advance-search-wrapper">
+
+              <div class="dropdown dropdown-toggle d-flex align-items-center" [ngClass]="{'arrow-rotate': displayDrpDwn}" data-toggle="dropdown"
+                appAutoCloseOutsideClick (click)="displayDrpDwn = !displayDrpDwn" (outsideClick)="onClickedOutside($event)">
+                <div class="dropdown-menu dropdown-menu-left" [ngClass]="{'show':displayDrpDwn}" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" [class.active]="filterSelected === 'all'" (click)="changeSearchType('all')"
+                     href="javascript:void(0)" id="all-anchor-tag">All</a>
+                  <a class="dropdown-item" [class.active]="filterSelected === 'client'"
+                     (click)="changeSearchType('client')" href="javascript:void(0)" id="client-anchor-tag">Client</a>
+                  <a class="dropdown-item" [class.active]="filterSelected === 'potentialClient'"
+                     (click)="changeSearchType('potentialClient')" href="javascript:void(0)" id="p-client-anchor-tag">Potential Client</a>
+                  <a class="dropdown-item" [class.active]="filterSelected === 'employees'"
+                     (click)="changeSearchType('employees')" href="javascript:void(0)" id="employee-anchor-tag">Employees</a>
+                  <a *ngIf="!permissionList.MATTER_MANAGEMENTisNoVisibility" class="dropdown-item" [class.active]="filterSelected === 'matter'"
+                     (click)="changeSearchType('matter')" href="javascript:void(0)" id="matter-anchor-tag">Matters</a>
+                </div>
+              </div>
+              <input type="text" class="form-control search-input calendar-top-search" name="q1" id="q1"
+                     placeholder="Search"
+                     autocomplete="off" [formControl]='searchControl'>
+              <div class="search-result-box pt-8 pb-8 pr-8" [class.d-none]='!showResults' appAutoCloseOutsideClick
+                   (outsideClick)='outsideClick($event)'>
+                <div class="search-result" *ngIf="searchUserList && searchUserList?.length > 0" slimScroll
+                     [options]="opts" [scrollEvents]="scrollEvents" (scrollChanged)="scrollChanged($event)">
+
+                  <div class="d-flex justify-content-between px-16 py-8">
+                    <p class="m-0 font-weight-medium">{{searchCategory}}</p>
+                    <p class="m-0 font-weight-medium">{{(searchUserList && searchUserList.length > 1) ? searchUserList.length + ' results' : searchUserList.length + ' result'}} found</p>
+                  </div>
+                  <div>
+                    <div class="result-item search-min-height " *ngFor='let res of searchUserList;trackBy: trackByFn'>
+                      <div class="result-title d-flex justify-content-between align-items-start">
+                        <em *ngIf="res.role === 'Client'" class="icon icon-clients icon-color"></em>
+                        <em *ngIf="res.role == 'Matter'" class="icon icon-matters icon-color"></em>
+                        <em *ngIf="res.role !== 'Employee' && res.role !== 'Matter' && res.role !== 'Client' && res.associatedWithClient"
+                            class="icon icon-clients icon-color"></em>
+                        <em *ngIf="res.role !== 'Employee' && res.role !== 'Matter' && res.role !== 'Client' && !res.associatedWithClient"
+                            class="icon icon-contacts icon-color"></em>
+                        <em *ngIf="res.role == 'Employee'" class="icon icon-employees icon-color"></em>
+                        <h4 class="flex-fill d-flex" (click)='selectUser(res)'>
+                          <label class="cursor-pointer d-inline-block font-weight-normal m-0">
+                            <div class="d-flex">
+                              <div class="info-hover">
+                                <span class="text pl-0 mb-0 d-block lh-16" [class.name-hover]="res?.name?.length > 35"
+                                      [innerHTML]='res?.name | highlightText : searchControl.value'></span>
+                                <div class="tooltip center bs-tooltip-bottom position-relative" role="tooltip"
+                                     *ngIf="res?.name && res?.name?.length > 35">
+                                  <div class="arrow"></div>
+                                  <div class="tooltip-inner calendar-tooltip">
+                                    <p class="m-0">{{res.name}}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <span class="reason" *ngIf='(res.doNotSchedule || res.doNotContact) && res.role !== "Matter"'>
+                                <i class="icon icon-close-fill mr-4"></i>
+                                <ng-container *ngIf="res.doNotContact">Do Not Contact</ng-container>
+                                <ng-container *ngIf="res.doNotSchedule">Do Not Schedule</ng-container>
+                              </span>
+                            </div>
+                            <small class="lh-16 d-block" *ngIf="res.role == 'Matter' || res.role === 'Client'">{{res.role}} Number: {{ res.matterNumber}}</small>
+                            <small class="lh-16 d-block" *ngIf="res.role === 'Employee'">{{res.role}}</small>
+                            <small class="lh-16 d-block" *ngIf="res.role == 'Corporate Contact'">Corporate Contact: {{res.clientNumber}}</small>
+                            <small class="lh-16 d-block" *ngIf="res.role !== 'Employee' && res.role !== 'Matter'
+                             && res.role !== 'Client' && res.role !== 'Corporate Contact'">{{res.role}}: {{res.id}}</small>
+                          </label>
+                        </h4>
+
+
+                        <div class="info-hover position-relative res-plus mr-8" (click)="subscribed(res);" *ngIf="!res.subId">
+                          <span class="plus-circle mt-n4 cursor-pointer">
+                            <em class="icon icon-plus mr-0"></em>
+                          </span>
+                          <div class="tooltip bs-tooltip-bottom mt-4" role="tooltip">
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner">
+                              <p>Subscribe to calendar</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="info-hover position-relative res-plus mr-8" (click)="unSubscribed(res);deleteSearchUser(res)" *ngIf="res.subId">
+                          <span class="plus-circle mt-n4 cursor-pointer">
+                            <em class="icon icon-minus mr-0"></em>
+                          </span>
+                          <div class="tooltip bs-tooltip-bottom mt-4" role="tooltip">
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner">
+                              <p>Unsubscribe to calendar</p>
+                            </div>
+                          </div>
+                        </div>
+
+
+                        <i class="icon icon-color" [class.icon-angle-down]="!res['expanded']"
+                          [class.icon-angle-up]="res['expanded']" (click)="toggleRow(res)"></i>
+                      </div>
+                      <div class="result-detail show" *ngIf="res['expanded']">
+                        <ng-container  *ngIf="res.role !== 'Employee' && res.role !== 'Matter' && res.role !== 'Client'
+                        && res.role !== 'Corporate Contact'">
+                          <ng-container *ngIf="res?.isCompany && res?.companyName">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Company Name</span>
+                              <span class="d-block small lh-16" [innerHTML]="res['companyName'] | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                          <ng-container *ngIf="res?.email">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Email</span>
+                              <span class="d-block small lh-16" [innerHTML]="res?.email | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                        <ng-container  *ngIf="res.role === 'Corporate Contact'">
+                          <ng-container *ngIf="res?.clientName && res?.clientName">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Company Name</span>
+                              <span class="d-block small lh-16" [innerHTML]="res['clientName'] | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                          <ng-container *ngIf="res?.email">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Email</span>
+                              <span class="d-block small lh-16" [innerHTML]="res?.email | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                        <ng-container  *ngIf="res.role === 'Client'">
+                          <ng-container *ngIf="res?.email">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Email</span>
+                              <span class="d-block small lh-16" [innerHTML]="res?.email | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="res.role === 'Employee'">
+                          <ng-container *ngIf="res?.email">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Email</span>
+                              <span class="d-block small lh-16" [innerHTML]="res?.email | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                          <ng-container *ngIf="res?.primaryOfficeName">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Primary Office</span>
+                              <span class="d-block small lh-16" [innerHTML]="res?.primaryOfficeName | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="res.role === 'Matter'">
+                          <ng-container *ngIf="res?.clientName">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Client Name</span>
+                              <span class="d-block small lh-16" [innerHTML]="res?.clientName | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                          <ng-container *ngIf="res?.responsibleAttorney">
+                            <div class="mb-8">
+                              <span class="helper-text small d-block mb-4 lh-16">Attorney</span>
+                              <span class="d-block small lh-16" [innerHTML]="res?.responsibleAttorney | highlightText : searchControl.value"></span>
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="search-result" *ngIf="searchUserList && searchUserList?.length === 0">
+                  <div class="d-flex justify-content-between px-16 py-8">
+                    <p class="m-0 font-weight-medium">{{searchCategory}}</p>
+                    <p class="m-0 font-weight-medium">{{(searchUserList && searchUserList.length > 1) ? searchUserList.length + ' results' : searchUserList.length + ' result'}} found</p>
+                  </div>
+                  <div class="py-8 px-16">
+                    <h5 class="mb-8 mt-0">We couldn’t find anything matching your search</h5>
+                    <p class="m-0">Try again with a different term</p>
+                  </div>
+                </div>
+              </div>
+              <app-loader [active]="searchLoading && currentSearchPageNumber % 5 <= 3"></app-loader>
+            </div>
+            <ul class="list-unstyled color-cate-list cate-list m-0" *ngIf="selectedFilterUser?.length > 0">
+              <li class="info-hover position-relative d-flex justify-content-between align-items-center helper-text py-4 px-8 cu_{{user.colorCode}}"
+                *ngFor="let user of selectedFilterUser; trackBy: trackByFn;let i = index;" id="selected-user-index-{{i}}">
+                <div class="d-flex align-items-center">
+                  <em *ngIf="user.role === 'Client'" class="text-large icon icon-clients icon-color"></em>
+                  <em *ngIf="user.role == 'Matter'" class="text-large icon icon-matters icon-color"></em>
+                  <em *ngIf="user.role !== 'Employee' && user.role !== 'Matter' && user.role !== 'Client' && user.associatedWithClient"
+                      class="text-large icon icon-clients icon-color"></em>
+                  <em *ngIf="user.role !== 'Employee' && user.role !== 'Matter' && user.role !== 'Client' && !user.associatedWithClient"
+                      class="text-large icon icon-contacts icon-color"></em>
+                  <em *ngIf="user.role == 'Employee'" class="text-large icon icon-employees icon-color"></em>
+                  <span class="ml-8">
+                    {{(user.name && user.name.length > 23) ? (user.name | slice:0:23) + '...' :  user.name}}
+                  </span>
+                </div>
+                <div class="ml-12">
+                  <span>{{user.timezone}}</span>
+                  <span class="cursor-pointer px-4" (click)="deleteSearchUser(user)" id="delete-user-index-{{i}}">
+                    <em class="icon icon-close icon-color icon-small"></em>
+                  </span>
+                </div>
+                <div class="tooltip center bs-tooltip-bottom" role="tooltip">
+                  <div class="arrow"></div>
+                  <div class="tooltip-inner">
+                    <p class="m-0">{{user.name}}</p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+
+        <div class="cal-aside-content-scroll">
+          <div class="cal-aside-content">
+            <div class="cal-aside-heding">
+              <div class="custom-control custom-checkbox pr-0 mb-0">
+                <input class="custom-control-input" id="Joe" type="checkbox" [(ngModel)]="myCalendar"
+                       (ngModelChange)="myCalendarSelect()">
+                <label class="custom-control-label" for="Joe">My Calendar</label>
+              </div>
+            </div>
+            <div class="cal-short-row">
+              <div class="cal-short-item">
+                <h5 [class.arrow-rotate]="showFilterOptions.eventType" (click)='showFilterOptions.eventType = !showFilterOptions.eventType'>Event Type</h5>
+                <div class="cal-short-details show" *ngIf="showFilterOptions.eventType">
+                  <div class="cal-short-checklist cal-short-item">
+                    <div class="custom-control custom-checkbox pr-0 mb-12" *ngFor="let type of eventTypeList;trackBy :trackByFn;">
+                      <input class="custom-control-input" id="chk_event_type_{{type.id}}" type="checkbox"
+                             (change)='toggleItem(calendarFilter.eventTypes, type, $event)' [checked]="type.checked">
+                        <label class="custom-control-label lh-18" [class.cal-info-overlap]="type?.name.length>16"
+                             for="chk_event_type_{{type.id}}">
+                        <span class="info-hover">{{type.name}}
+                          <em class="tooltip bs-tooltip-bottom" *ngIf="type?.name.length>16" role="tooltip">
+                            <i class="arrow"></i>
+                            <b class="tooltip-inner">
+                              <i>{{type.name}}</i>
+                            </b>
+                          </em>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+              <div class="cal-short-item">
+                <h5 class="d-flex align-items-center justify-content-between" [class.arrow-rotate]="showFilterOptions.matter" *ngIf="subscribedMatterList.length ==  0" (click)='showFilterOptions.matter = !showFilterOptions.matter'>Matters</h5>
+                <h5 class="d-flex align-items-center justify-content-between" [class.arrow-rotate]="showFilterOptions.matter" *ngIf="subscribedMatterList.length > 0" (click)='showFilterOptions.matter = !showFilterOptions.matter'>Matters
+                  <span class="helper-text small font-weight-normal" >{{subscribedMatterList.length}} subscribed</span>
+                </h5>
+                <div class="cal-short-details" [ngClass]="showFilterOptions.matter ? 'show' : ''">
+                  <div class="cal-short-checklist cal-short-item">
+                    <div class="checkbx-hvr d-flex align-items-start justify-content-between" *ngFor="let matter of subscribedMatterList;trackBy :trackByFn;let i = index">
+                      <div class="custom-control custom-checkbox pr-0">
+                        <input class="custom-control-input" id="chk_matter_type_{{matter.id}}" type="checkbox"
+                              (change)='toggleItem(calendarFilter.matters, matter, $event);mangeColorOnCheckbox(matter.id, matter.colorCode)' [checked]='matter.checked'>
+                        <label class="custom-control-label add_color_{{matter.id}}" [class.cal-info-overlap]="matter.name?.length>20"
+                              for="chk_matter_type_{{matter.id}}">
+                          <span class="info-hover position-relative">
+                            <span class="text-ellipsis max-name-w">{{matter.name}}</span>
+                            <em class="tooltip bs-tooltip-bottom" *ngIf="matter.name?.length>20" role="tooltip">
+                              <i class="arrow"></i>
+                              <b class="tooltip-inner">
+                                <i>{{matter.name}}</i>
+                              </b>
+                            </em>
+                          </span>
+                          <span class="small helper-text lh-16">Matter Number: {{matter.id}}</span>
+                        </label>
+                      </div>
+
+                      <div class="dropdown dropdown-hover-table" [class.active]="currentActive == i" (click)="openMenu(i, $event)">
+                        <span class="icon-area">
+                          <em class="icon icon-dot-verti"></em>
+                        </span>
+                        <div class="dropdown-menu dropdown-menu-right mt-4">
+                          <a class="dropdown-item" (click)="unSubscribed(matter);deleteSearchUser(matter)" id="remove-calendar-{{i}}">Remove Calender</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cal-short-item">
+                <h5 class="d-flex align-items-center justify-content-between" [class.arrow-rotate]="showFilterOptions.people" *ngIf="subscribedPeopleList.length == 0" (click)='showFilterOptions.people = !showFilterOptions.people'>People</h5>
+                <h5 class="d-flex align-items-center justify-content-between" [class.arrow-rotate]="showFilterOptions.people" (click)='showFilterOptions.people = !showFilterOptions.people' *ngIf="subscribedPeopleList.length > 0">People
+                  <span class="helper-text small font-weight-normal" >{{subscribedPeopleList.length}} subscribed</span>
+                </h5>
+                <div class="cal-short-details" [ngClass]="showFilterOptions.people ? 'show' : ''">
+                  <div class="cal-short-checklist cal-short-item">
+
+                    <div class="form-group" *ngIf="subscribedPeopleList.length > 0">
+                      <label for="exampl1">Filter By</label>
+                      <ng-select [items]="peopleRole" placeholder="All" (change)='applyFilter2()'
+                      [(ngModel)]="selectedRole" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'"
+                      [notFoundText]="'No record found'" id="people-role-filter">
+                    </ng-select>
+                    </div>
+                    <div class="checkbx-hvr d-flex align-items-start justify-content-between" *ngFor="let people of subscribedPeopleList;trackBy :trackByFn;let i = index;">
+                      <div class="custom-control custom-checkbox pr-0">
+                        <input class="custom-control-input" id="chk_matter_type_{{people.id}}" type="checkbox"
+                             (change)='toggleItem(calendarFilter.client.clients, people, $event)'
+                              [checked]='people.checked'>
+                        <label class="custom-control-label add_color_{{people.id}}" [class.cal-info-overlap]="people.name?.length>20"
+                              for="chk_matter_type_{{people.id}}">
+                          <span class="info-hover position-relative">
+                            <span class="text-ellipsis max-name-w">{{people.clientName}}</span>
+                            <em class="tooltip bs-tooltip-bottom" *ngIf="people.name?.length>20" role="tooltip">
+                              <i class="arrow"></i>
+                              <b class="tooltip-inner">
+                                <i>{{people.clientName}}</i>
+                              </b>
+                            </em>
+                          </span>
+                          <span class="small helper-text lh-16" *ngIf="people.role == 'Client'">Client Number: {{people.uniqueNumber || people.id}}</span>
+                          <span class="small helper-text lh-16" *ngIf="people.role == 'Employee'">Employee</span>
+                          <span class="small helper-text lh-16" *ngIf="people.role == 'Potential Client'">Potential Client</span>
+                          <span class="small helper-text lh-16" *ngIf="people.role == 'Corporate Contact'">Corporate Contact: {{people.uniqueNumber || people.id}} </span>
+                        </label>
+                      </div>
+                      <div class="pt-1">
+                        {{people.timezone}}
+                      </div>
+                      <!-- add class "active" in below div -->
+                      <div class="dropdown dropdown-hover-table" [class.active]="currentActive == i" (click)="openMenu(i, $event)">
+                        <span class="icon-area pt-1">
+                          <em class="icon icon-dot-verti"></em>
+                        </span>
+                        <div class="dropdown-menu dropdown-menu-right mt-4">
+                          <a class="dropdown-item" (click)="unSubscribed(people);deleteSearchUser(people)" id="remove-calendar-people-{{i}}">Remove Calender</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade d-none in show " tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header d-block">
+        <h3 class="modal-title">Customize Hours</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-center">Data-Table code here...</p>
+        <div class="form-group position-relative mb-0">
+          <label>Change Note (optional)</label>
+          <span class="count-char">0/1000</span>
+          <textarea class="form-control" maxlength="1000" rows="4"
+                    placeholder="Change Note (optional)">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="cmodal fade cmodal-event open" [ngClass]="{'event-modal-right': eventmodRight}" *ngIf="openEditModelPopup">
+  <div class="cmodal-contain d-flex flex-column">
+    <span class="arrow-point"></span>
+    <div class="right-btn-row">
+      <a href="javascript:void(0)"
+         class="event-edit" (click)="redirectEditEvent()" id="redirect-edit-event">
+        <em class="icon icon-edit"></em>
+      </a>
+      <a href="javascript:void(0)" *ngIf="inviteeType === 'hostorganiser'" class="event-delete"
+         (click)="removeEvent();" id="remove-event">
+        <em class="icon icon-remove"></em>
+      </a>
+      <a href="javascript:void(0)" class="event-close close" (click)="closeCmodal()" id="closemodel">
+        <em class="icon icon-close"></em>
+      </a>
+    </div>
+    <div class="cmodal-scroll" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+      <div class="cmodal-header">
+        <div class="cal-profile d-flex justify-content-start align-items-center">
+          <figure>
+            <img *ngIf="eventOrganizerDetls?.personPhoto" [src]="eventOrganizerDetls?.personPhoto" alt="">
+            <img *ngIf="!eventOrganizerDetls?.personPhoto" [src]="'assets/images/user.png'" alt="">
+
+          </figure>
+          <h6>{{(eventOrganizerDetls?.person?.firstName) ? eventOrganizerDetls?.person?.firstName + " " + eventOrganizerDetls?.person?.lastName : eventOrganizerDetls?.personEmail}}
+            <span>Organizer</span>
+          </h6>
+        </div>
+        <h3 class="modal-title">{{eventDetails.title}}
+          <span>{{eventDetails.eventType.name}}</span>
+        </h3>
+      </div>
+      <div class="cmodal-body">
+
+        <div class="icon-form-item">
+          <em class="icon icon-clock icon-color"></em>
+          <div class="flex-fill">
+            <label for="">
+              <strong *ngIf="eventDetails?.isAllDayEvent">
+                <ng-container *ngIf="eventDetails?.eventType?.code !== 'OUT_OF_OFFICE'">
+                  {{eventDetails.startDateTime | date : 'EEEE, MMMM d'}} - All Day
+                </ng-container>
+                <ng-container *ngIf="eventDetails?.eventType?.code === 'OUT_OF_OFFICE'">
+                <ng-container *ngIf="eventDetails?.isOutOfOfficeAllDay">
+                  {{eventDetails.startDateTime | date : 'EEEE, MMMM d'}} - All Day
+                </ng-container>
+                <ng-container *ngIf="!eventDetails?.isOutOfOfficeAllDay">
+                  {{eventDetails.startDateTime | date : 'EEEE, MMMM d, yyyy - h:mm'}}{{ eventDetails.startDateTime | date : 'a' | lowercase }} - {{eventDetails.endDateTime | date : 'h:mm'}}{{ eventDetails.endDateTime | date : 'a' | lowercase }}
+                </ng-container>
+                </ng-container>
+              </strong>
+              <strong *ngIf="!eventDetails?.isAllDayEvent">
+                <ng-container *ngIf="multiDayEvent; else singleDayDisplay">
+                  {{eventDetails.startDateTime | date : 'EEEE, MMMM d, yyyy, h:mm'}}{{ eventDetails.startDateTime | date : 'a' | lowercase }} - {{eventDetails.endDateTime | date : 'EEEE, MMMM d, yyyy, h:mm'}}{{ eventDetails.endDateTime | date : 'a' | lowercase }}
+                </ng-container>
+                <ng-template #singleDayDisplay>
+                  {{eventDetails.startDateTime | date : 'EEEE, MMMM d, yyyy - h:mm'}}{{ eventDetails.startDateTime | date : 'a' | lowercase }} - {{eventDetails.endDateTime | date : 'h:mm'}}{{ eventDetails.endDateTime | date : 'a' | lowercase }}
+                </ng-template>
+              </strong>
+            </label>
+            <div *ngIf="eventDetails?.recurringEvent?.recurringType === 10">
+              <ng-container *ngIf="eventDetails?.recurringEvent?.recurringEveryUnit === 'Daily'">
+                Daily
+              </ng-container>
+              <ng-container *ngIf="eventDetails?.recurringEvent?.recurringEveryUnit !== 'Daily'">
+                Every {{eventDetails?.recurringEvent?.recurringEveryNumber}} {{((eventDetails?.recurringEvent?.recurringEveryNumber === 1) ? eventDetails?.recurringEvent?.recurringEveryUnit : eventDetails?.recurringEvent?.recurringEveryUnit + 's') | lowercase}} on {{daysList[eventDetails.recurringEvent?.daysOfWeek[0]]}}
+              </ng-container>
+            </div>
+            <div *ngIf="eventDetails?.recurringEvent?.recurringType === 1">
+              Daily
+            </div>
+            <div *ngIf="eventDetails?.eventType?.code === 'OUT_OF_OFFICE'">
+              Out of office
+            </div>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-travel icon-color"></em>
+          <div class="flex-fill">
+            <div class="row">
+              <div class="col-4">
+                <label for=""><strong> Travel To</strong></label>
+                <p>{{(eventDetails.beforeTravelTimeHours * 60) + eventDetails.beforeTravelTimeMinutes}}
+                  {{((eventDetails.beforeTravelTimeHours * 60) + eventDetails.beforeTravelTimeMinutes) > 1 ? 'minutes' : "minute"}}
+                </p>
+              </div>
+              <div class="col-5">
+                <label for=""><strong>Travel From</strong></label>
+                <p>{{(eventDetails.afterTravelTimeHours * 60) + eventDetails.afterTravelTimeMinutes}}
+                  {{((eventDetails.afterTravelTimeHours * 60) + eventDetails.afterTravelTimeMinutes) > 1 ? 'minutes' : "minute"}}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-building icon-color"></em>
+          <div class="flex-fill">
+            <label for="">{{eventDetails.eventLocation}}</label>
+          </div>
+        </div>
+        <div class="icon-form-item" *ngIf="eventDetails?.matter?.name">
+          <em class="icon icon-matters icon-color"></em>
+          <div class="flex-fill">
+            <label for="">Matter: {{eventDetails?.matter?.name}}</label>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-clients icon-color"></em>
+          <div class="flex-fill">
+            <label
+              for="">Client: {{ eventDetails && eventDetails.client ? eventDetails?.client?.firstName : ''}} {{eventDetails && eventDetails.client ? eventDetails?.client?.lastName : ''}} {{eventDetails && eventDetails.client && !(eventDetails.client.firstName || eventDetails.client.lastName) ? eventDetails?.client?.companyName : ''}}</label>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-user icon-color"></em>
+          <div class="flex-fill">
+            <label for=""><b>{{eventDetails.invitees.length - 1}}
+              {{(eventDetails.invitees.length - 1) > 1 ? 'guests' : 'guest'}}</b>
+              <span *ngIf="!eventTypeConsultation">{{acceptedUser.yes}} yes, {{acceptedUser.maybe}} maybe,
+                {{acceptedUser.declined}} declined, {{acceptedUser.awaiting}} awaiting</span></label>
+            <div class="guests-row">
+              <div class="guests-list">
+                <ng-container *ngFor="let invt of eventDetails.invitees;trackBy: trackByFn">
+                  <div class="guests-item d-flex justify-content-between align-items-start">
+                    <div class="guests-profile">
+                      <figure>
+                        <img *ngIf="invt.personPhoto" [src]="invt.personPhoto" alt="">
+                        <img *ngIf="!invt.personPhoto" [src]="'assets/images/user.png'" alt="">
+                      </figure>
+                      <em class="icon icon-check-circle icon-success"
+                          *ngIf="invt.acceptStatus && invt.acceptStatus.code === 'ACCEPTED'"></em>
+                      <em class="icon icon-close-fill icon-danger"
+                          *ngIf="invt.acceptStatus && invt.acceptStatus.code === 'REJECTED'"></em>
+                      <em class="icon icon-question-circle"
+                          *ngIf="invt.acceptStatus && invt.acceptStatus.code === 'TENTATIVE'"></em>
+                    </div>
+                    <div class="flex-fill" *ngIf="invt.personEmail">
+                      <h5>{{invt.personEmail}}
+                        <span><i *ngIf="invt.isOrganiser"> Organizer</i><i *ngIf="invt.isHost">Host</i><i
+                          *ngIf="invt.isOptional">Optional</i><i *ngIf="invt?.personEmail">External</i><i
+                          *ngIf="invt.doNotContact">Do Not Contact</i><i
+                          *ngIf="invt.doNotSchedule">Do Not Schedule</i></span>
+                      </h5>
+                      <div class="pt-4 pb-8" *ngIf="invt?.proposedTime">
+                        <span class="d-block small lh-16 font-weight-medium mb-4">Proposal: {{invt.proposalTimeString}}</span>
+                        <a href="javascript:void(0);" class="font-weight-medium d-flex align-items-center" (click)="redirectEditEvent()" id="redirect-edit-event-proposal-email">
+                          <em class="icon icon-alarm mr-8"></em>
+                          Review Proposal
+                        </a>
+                      </div>
+                    </div>
+                    <div class="flex-fill" *ngIf="!invt?.personEmail && (invt?.person?.firstName || invt?.person?.lastName)">
+                      <h5
+                        >{{invt?.person?.firstName}}
+                        {{invt?.person?.lastName}}<span><i *ngIf="invt?.isOrganiser"> Organizer</i><i
+                          *ngIf="invt?.isHost">Host</i><i *ngIf="invt.isOptional">Optional</i><i
+                          *ngIf="invt?.personEmail">External</i><i *ngIf="invt.doNotContact">Do Not Contact</i><i
+                          *ngIf="invt.doNotSchedule">Do Not Schedule</i></span>
+                      </h5>
+                      <div class="pt-4 pb-8" *ngIf="invt?.proposedTime">
+                        <span class="d-block small lh-16 font-weight-medium mb-4">Proposal: {{invt.proposalTimeString}}</span>
+                        <a href="javascript:void(0);" class="font-weight-medium d-flex align-items-center" (click)="redirectEditEvent()" id="redirect-edit-event-proposal-name">
+                          <em class="icon icon-alarm mr-8"></em>
+                          Review Proposal
+                        </a>
+                      </div>
+                    </div>
+                    <div class="flex-fill" *ngIf="!invt?.personEmail && !invt?.person?.firstName && !invt?.person?.lastName">
+                      <h5
+                        >{{invt?.person?.companyName}}
+                        <span><i *ngIf="invt.isOrganiser"> Organizer</i><i *ngIf="invt.isHost">Host</i><i
+                          *ngIf="invt.isOptional">Optional</i><i *ngIf="invt?.personEmail">External</i><i
+                          *ngIf="invt.doNotContact">Do Not Contact</i><i
+                          *ngIf="invt.doNotSchedule">Do Not Schedule</i></span>
+                      </h5>
+                      <div class="pt-4 pb-8" *ngIf="invt?.proposedTime">
+                        <span class="d-block small lh-16 font-weight-medium mb-4">Proposal: {{invt.proposalTimeString}}</span>
+                        <a href="javascript:void(0);" class="font-weight-medium d-flex align-items-center" (click)="redirectEditEvent()" id="redirect-edit-event-proposal-company">
+                          <em class="icon icon-alarm mr-8"></em>
+                          Review Proposal
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-private icon-color"></em>
+          <div class="flex-fill">
+            <label for="" *ngIf="eventDetails.privacy">{{eventDetails.privacy.name}}</label>
+            <label for="" *ngIf="!eventDetails.privacy">-</label>
+          </div>
+        </div>
+        <div class="icon-form-item" *ngIf="!eventTypeConsultation && fileName.length">
+          <em class="icon icon-attachment icon-color"></em>
+          <div class="flex-fill">
+            <div class="row gutter-8">
+              <div class="col-6" *ngFor="let file of fileName;trackBy: trackByFn; let i = index">
+                <label class="lbl-file d-flex align-items-start" for="">
+                  <img class="doc-icons mr-4" [src]="file | getDocIcon" alt="" id="doc-icon-{{i}}">
+                  {{file}}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="icon-form-item" *ngIf="!eventTypeConsultation && eventDetails?.description">
+          <em class="icon icon-description icon-color"></em>
+          <div class="flex-fill">
+            <label for="" [innerHTML]="eventDetails?.description"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cmodal-footer">
+      <div class="d-flex justify-content-between align-items-center">
+        <label for="">Going?</label>
+        <div class="btn-group align-items-center">
+          <a class="btn-link" [class.active]="eventOrganizerDetls?.acceptStatus?.code === 'ACCEPTED'"
+             href="javascript:void(0);" (click)="replay('ACCEPTED')" id="going-yes">Yes</a>
+          <a class="btn-link" [class.active]="eventOrganizerDetls?.acceptStatus?.code === 'REJECTED'"
+             href="javascript:void(0);" (click)="replay('REJECTED')" id="going-no">No</a>
+          <a class="btn-link" [class.active]="eventOrganizerDetls?.acceptStatus?.code === 'TENTATIVE'"
+             href="javascript:void(0);" (click)="replay('TENTATIVE')" id="going-maybe">Maybe</a>
+          <a class="btn-link" *ngIf="eventTypeConsultation && userDetails.id == eventOrganizerDetls?.person?.id"
+             href="javascript:void(0);"
+             (click)="cancelConsultationClicked(userDetails)" id="cancle-intial-consult">Cancel Initial Consultation</a>
+        </div>
+      </div>
+      <div class="propose-new-time d-flex justify-content-end pt-12 px-32 mx-n20 mt-12 border-top"
+           *ngIf="isInviteeOnly">
+        <a href="javascript:void(0);" class="d-flex align-items-center helper-text" (click)="proposeNewTime()" id="propose-new-time">
+          <em class="icon icon-alarm mr-8"></em>Propose New Time
+        </a>
+      </div>
+    </div>
+    <app-loader [active]="eventLoading"></app-loader>
+  </div>
+</div>
+
+
+
+<div class="cmodal fade cmodal-event open" style="left: 38%; top: auto; bottom: 0px;"  [ngClass]="{'event-modal-right': eventmodRight}" *ngIf="openEditModelPopupNotification">
+  <div class="cmodal-contain d-flex flex-column">
+    <span class="arrow-point"></span>
+    <div class="right-btn-row">
+      <a href="javascript:void(0)"
+         class="event-edit" (click)="redirectEditEventFromNotification()" id="notification-edit-event">
+        <em class="icon icon-edit"></em>
+      </a>
+      <a href="javascript:void(0)" *ngIf="userDetails.id == eventOrganizerDetls?.person?.id" class="event-delete"
+         (click)="removeEvent();" id="notification-delete-event">
+        <em class="icon icon-remove"></em>
+      </a>
+      <a href="javascript:void(0)" class="event-close close" (click)="closeCmodalNotification()" id="notification-close-event">
+        <em class="icon icon-close"></em>
+      </a>
+    </div>
+    <div class="cmodal-scroll" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+      <div class="cmodal-header">
+        <div class="cal-profile d-flex justify-content-start align-items-center">
+          <figure>
+            <img *ngIf="eventOrganizerDetls?.personPhoto" [src]="eventOrganizerDetls?.personPhoto" alt="">
+            <img *ngIf="!eventOrganizerDetls?.personPhoto" [src]="'assets/images/user.png'" alt="">
+
+          </figure>
+          <h6>{{(eventOrganizerDetls?.person?.firstName) ? eventOrganizerDetls?.person?.firstName + " " + eventOrganizerDetls?.person?.lastName : eventOrganizerDetls?.personEmail}}
+            <span>Organizer</span>
+          </h6>
+        </div>
+        <h3 class="modal-title">{{eventDetails.title}}
+          <span>{{eventDetails.eventType.name}}</span>
+        </h3>
+      </div>
+      <div class="cmodal-body">
+
+        <div class="icon-form-item">
+          <em class="icon icon-clock icon-color"></em>
+          <div class="flex-fill">
+            <label>
+              <strong>{{eventDetails.startDateTime | date : 'EEEE, MMMM d - h:mm a'}} - {{eventDetails['isSameDay'] ? (eventDetails.endDateTime | date : 'h:mm a') : (eventDetails.endDateTime | date : 'EEEE, MMMM d - h:mm a')}}
+              </strong>
+            </label>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-travel icon-color"></em>
+          <div class="flex-fill">
+            <div class="row">
+              <div class="col-4">
+                <label for=""><strong> Travel To</strong></label>
+                <p>{{(eventDetails.beforeTravelTimeHours * 60) + eventDetails.beforeTravelTimeMinutes}}
+                  {{((eventDetails.beforeTravelTimeHours * 60) + eventDetails.beforeTravelTimeMinutes) > 1 ? 'minutes' : "minute"}}
+                </p>
+              </div>
+              <div class="col-5">
+                <label for=""><strong>Travel From</strong></label>
+                <p>{{(eventDetails.afterTravelTimeHours * 60) + eventDetails.afterTravelTimeMinutes}}
+                  {{((eventDetails.afterTravelTimeHours * 60) + eventDetails.afterTravelTimeMinutes) > 1 ? 'minutes' : "minute"}}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-building icon-color"></em>
+          <div class="flex-fill">
+            <label for="">{{eventDetails.eventLocation}}</label>
+          </div>
+        </div>
+        <div class="icon-form-item" *ngIf="eventDetails?.matter?.name">
+          <em class="icon icon-matters icon-color"></em>
+          <div class="flex-fill">
+            <label for="">Matter: {{eventDetails?.matter?.name}}</label>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-clients icon-color"></em>
+          <div class="flex-fill">
+            <label
+              for="">Client: {{ eventDetails && eventDetails.client ? eventDetails?.client?.firstName : ''}} {{eventDetails && eventDetails.client ? eventDetails?.client?.lastName : ''}} {{eventDetails && eventDetails.client && !(eventDetails.client.firstName || eventDetails.client.lastName) ? eventDetails?.client?.companyName : ''}}</label>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-user icon-color"></em>
+          <div class="flex-fill">
+            <label for=""><b>{{eventDetails.invitees.length - 1}}
+              {{(eventDetails.invitees.length - 1) > 1 ? 'guests' : 'guest'}}</b>
+              <span *ngIf="!eventTypeConsultation">{{acceptedUser.yes}} yes, {{acceptedUser.maybe}} maybe,
+                {{acceptedUser.declined}} declined, {{acceptedUser.awaiting}} awaiting</span></label>
+            <div class="guests-row">
+              <div class="guests-list">
+                <ng-container *ngFor="let invt of eventDetails.invitees;trackBy: trackByFn">
+                  <div class="guests-item d-flex justify-content-between align-items-start">
+                    <div class="guests-profile">
+                      <figure>
+                        <img *ngIf="invt.personPhoto" [src]="invt.personPhoto" alt="">
+                        <img *ngIf="!invt.personPhoto" [src]="'assets/images/user.png'" alt="">
+                      </figure>
+                      <em class="icon icon-check-circle icon-success"
+                          *ngIf="invt.acceptStatus && invt.acceptStatus.code === 'ACCEPTED'"></em>
+                      <em class="icon icon-close-fill icon-danger"
+                          *ngIf="invt.acceptStatus && invt.acceptStatus.code === 'REJECTED'"></em>
+                      <em class="icon icon-question-circle"
+                          *ngIf="invt.acceptStatus && invt.acceptStatus.code === 'TENTATIVE'"></em>
+                    </div>
+                    <div class="flex-fill">
+                      <h5 *ngIf="invt.personEmail">{{invt.personEmail}}
+                        <span><i *ngIf="invt.isOrganiser"> Organizer</i><i *ngIf="invt.isHost">Host</i><i
+                          *ngIf="invt.isOptional">Optional</i><i *ngIf="invt?.personEmail">External</i><i
+                          *ngIf="invt.doNotContact">Do Not Contact</i><i
+                          *ngIf="invt.doNotSchedule">Do Not Schedule</i></span>
+                      </h5>
+                      <h5
+                        *ngIf="!invt?.personEmail && (invt?.person?.firstName || invt?.person?.lastName)">{{invt?.person?.firstName}}
+                        {{invt?.person?.lastName}}<span><i *ngIf="invt?.isOrganiser"> Organizer</i><i
+                          *ngIf="invt?.isHost">Host</i><i *ngIf="invt.isOptional">Optional</i><i
+                          *ngIf="invt?.personEmail">External</i><i *ngIf="invt.doNotContact">Do Not Contact</i><i
+                          *ngIf="invt.doNotSchedule">Do Not Schedule</i></span>
+                      </h5>
+                      <h5
+                        *ngIf="!invt?.personEmail && !invt?.person?.firstName && !invt?.person?.lastName">{{invt?.person?.companyName}}
+                        <span><i *ngIf="invt.isOrganiser"> Organizer</i><i *ngIf="invt.isHost">Host</i><i
+                          *ngIf="invt.isOptional">Optional</i><i *ngIf="invt?.personEmail">External</i><i
+                          *ngIf="invt.doNotContact">Do Not Contact</i><i
+                          *ngIf="invt.doNotSchedule">Do Not Schedule</i></span>
+                      </h5>
+                      <div class="pt-4 pb-8" *ngIf="invt?.proposedTime">
+                        <span class="d-block small lh-16 font-weight-medium mb-4">Proposal: {{invt.proposalTimeString}}</span>
+                        <a href="javascript:void(0);" class="font-weight-medium d-flex align-items-center" (click)="redirectEditEvent()" id="redirect-edit-event-proposal-name">
+                          <em class="icon icon-alarm mr-8"></em>
+                          Review Proposal
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="icon-form-item">
+          <em class="icon icon-private icon-color"></em>
+          <div class="flex-fill">
+            <label for="" *ngIf="eventDetails.privacy">{{eventDetails.privacy.name}}</label>
+            <label for="" *ngIf="!eventDetails.privacy">-</label>
+          </div>
+        </div>
+        <div class="icon-form-item" *ngIf="!eventTypeConsultation && fileName.length">
+          <em class="icon icon-attachment icon-color"></em>
+          <div class="flex-fill">
+            <div class="row gutter-8">
+              <div class="col-6" *ngFor="let file of fileName; trackBy: trackByFn;let i = index;">
+                <label class="lbl-file d-flex align-items-start" for="">
+                  <img class="doc-icons mr-4" [src]="file.docIcon" alt="" id="icon-notification-{{i}}">
+                  {{file}}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="icon-form-item" *ngIf="!eventTypeConsultation && eventDetails?.description">
+          <em class="icon icon-description icon-color"></em>
+          <div class="flex-fill">
+            <label for="" [innerHTML]="eventDetails?.description"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cmodal-footer">
+      <div class="d-flex justify-content-between align-items-center">
+        <label for="">Going?</label>
+        <div class="btn-group align-items-center">
+          <a class="btn-link" [class.active]="eventOrganizerDetls?.acceptStatus?.code === 'ACCEPTED'"
+             href="javascript:void(0);" (click)="replay('ACCEPTED')" id="notification-yes">Yes</a>
+          <a class="btn-link" [class.active]="eventOrganizerDetls?.acceptStatus?.code === 'REJECTED'"
+             href="javascript:void(0);" (click)="replay('REJECTED')" id="notification-no">No</a>
+          <a class="btn-link" [class.active]="eventOrganizerDetls?.acceptStatus?.code === 'TENTATIVE'"
+             href="javascript:void(0);" (click)="replay('TENTATIVE')" id="notification-maybe">Maybe</a>
+          <a class="btn-link" *ngIf="eventTypeConsultation && userDetails.id == eventOrganizerDetls?.person?.id"
+             href="javascript:void(0);"
+             (click)="cancelConsultationClicked(userDetails)" id="notification-cancel-intial">Cancel Initial Consultation</a>
+        </div>
+      </div>
+      <div class="propose-new-time d-flex justify-content-end pt-12 px-32 mx-n20 mt-12 border-top"
+           *ngIf="isInviteeOnly">
+        <a href="javascript:void(0);" class="d-flex align-items-center helper-text" (click)="proposeNewTime()" id="propose-new-time">
+          <em class="icon icon-alarm mr-8"></em>Propose New Time
+        </a>
+      </div>
+    </div>
+    <app-loader [active]="eventLoading"></app-loader>
+  </div>
+</div><br>
+
+
+<div class="cmodal cmodal-event open private-cmodal" [ngClass]="{'event-modal-right': eventmodRight}" *ngIf="busyPrivacyPopup">
+  <div class="cmodal-contain d-flex flex-column">
+    <span class="arrow-point"></span>
+    <div class="right-btn-row">
+      <a href="javascript:void(0)" class="event-close close"
+         (click)="closePrivacyPopup()" id="close-busy-anchor"><em
+        class="icon icon-close"></em></a>
+    </div>
+    <div class="cmodal-scroll">
+      <div class="cmodal-header">
+        <h3 class="m-0">Busy</h3>
+      </div>
+      <div class="cmodal-body">
+        <p class="mb-16"><em
+          class="icon  icon-timekeeping mr-8"></em>{{eventDetails.startDateTime | date : 'EEEE, MMMM d - h:mm a'}} -
+          {{eventDetails['isSameDay'] ? (eventDetails.endDateTime | date : 'h:mm a') : (eventDetails.endDateTime | date : 'EEEE, MMMM d - h:mm a')}}</p>
+        <p class="mb-0"><em class="icon icon-private icon-color mr-8"></em>Private</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="cmodal fade cmodal-event open bottomZero" [ngClass]="{'event-modal-right': eventmodRight}"
+     *ngIf="cancelConsultationPopup">
+  <div class="cmodal-contain d-flex flex-column">
+    <span class="arrow-point"></span>
+    <div class="right-btn-row">
+      <a href="javascript:void(0)" class="event-close close" (click)="closeCancelConsulationPopup()" id="close-cancel-consult"><em
+        class="icon icon-close"></em></a>
+    </div>
+    <h2 class="popup-heading-center">Cancel Initial Consultation</h2>
+    <div class="cmodal-body">
+      <label><strong>Change Notes(Optional)</strong></label>
+      <textarea [(ngModel)]="cancelConsultationContent" name="content" cols="40" rows="8" class="form-control"
+                placeholder="Enter Change notes (Optional)"></textarea>
+    </div>
+    <div class="btn btn-group button-right">
+      <button type="button" (click)="closeCancelConsulationPopup()" class="btn btn-light" id="cancel-cancel-consult">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="cancelInitialConsultation()" id="ok-cancel-consult">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between pt-24" *ngIf="pageType=='potentialClient'">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="back('cancel')" id="potential-cancel">Cancel</button>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" *ngIf="pageType=='potentialClient'" (click)="back('previous')" id="potential-back">
+      Previous
+    </button>
+    <button type="button" class="btn btn-primary" (click)='next()' id="potential-next">Next</button>
+  </div>
+</div>
+
+<div *ngIf="pageType=='matter' ||  pageType=='clientconversion'"
+     class="d-flex justify-content-end pt-24">
+  <div class="btn-group right-btn-row">
+    <button type="button" class="btn btn-light" *ngIf="pageType=='matter' ||  this.pageType=='clientconversion'"
+            (click)="prev()" id="client-conversion-cancel">Cancel
+    </button>
+
+    <button type="button" class="btn btn-primary" (click)='next()' id="client-conversion-next">Next</button>
+  </div>
+</div>
+
+<div id="allDayHtmlSmallContainer" class="ct-absolute" (click)='setUserTimeZoneDetail()' *ngIf='!showTimeZoneDetail && calendarViewType != "dayGridMonth"'>
+  <div class="all-day cursor-pointer" id="employee-timezone-small">
+    <div class="d-flex align-items-center" id="time-zone-div-small">
+      <span class="small mr-4 helper-text font-weight-normal" id="time-zone-name-small">{{userTimezone}}</span>
+      <em class="icon icon-arrow-down font-10" id="timezone-down-arrow"></em>
+    </div>
+  </div>
+</div>
+
+<div id="allDayHtmlDetailContainer" class="ct-absolute"
+     (click)='setUserTimeZoneSmall()' *ngIf='showTimeZoneDetail'>
+  <div class="all-day" id="employee-timezone-detail">
+    <div class="d-flex align-items-center cursor-pointer">
+      <span class="small mr-4 helper-text font-weight-normal" id="time-zone-name-detail">{{userTimezone}}</span>
+      <em class="icon icon-arrow-up font-10" id="timezone-up-arrow"></em>
+    </div>
+    <div class="ct-dropdown text-left custom-style-scroll cursor-default" id="employee-timezone-list">
+        <div class="emp-zone small lh-16 p-16 font-weight-medium">
+          Employee Timezones
+        </div>
+        <ul class="list-unstyled time-list-ul">
+          <li class="d-flex justify-content-between pt-8 pb-8 pr-24 pl-16"
+              *ngFor="let empTimezoneData of empTimezoneList;trackBy : trackByFn;let i=index">
+            <div class="d-flex">
+              <span class="tm-circle mt-4" [style.background-color]="empTimezoneData.colorCode"></span>
+              <div class="small ml-8 ct-max-text">
+                <span class="d-block font-weight-medium lh-16 text-wrap text-break">{{empTimezoneData.name}}</span>
+                <span class="d-block font-weight-normal lh-16 helper-text">{{empTimezoneData.primaryLawOffice}}</span>
+              </div>
+            </div>
+            <div class="small">
+              <span class="d-block font-weight-medium lh-16">{{empTimezoneData.currentTime}}</span>
+              <span class="d-block font-weight-normal lh-16 helper-text">{{empTimezoneData.timezoneName}}</span>
+            </div>
+          </li>
+        </ul>
+    </div>
+  </div>
+</div>

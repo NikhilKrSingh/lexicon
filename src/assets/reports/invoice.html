@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Invoice</title>
+  <style>
+    @page {
+      margin: 1in;
+      size: 8.27in 11.69;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    .trust-accounting-section {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+    <table
+      style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+      <tr>
+        <td style="text-align: left;vertical-align: top;">
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="text-align: center;vertical-align: top;"> <img src="[TenantLogo]"
+                  style="max-width: 200px;max-height: 70px; display: inline-block;vertical-align: middle;" alt=""> </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 25px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="vertical-align: top;text-align: center;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 65%;padding-right: 20px;">
+                EMPLOYER IDENTIFICATION NUMBER: [EIN] </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 20px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="text-align: left;vertical-align: top;">
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td
+                      style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 65%;padding-right: 20px;">
+                      [ClientName] <br> [Address1] <br> [Address2] <br> [City], [State] [Zip] </td>
+                    <td
+                      style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 35%;">
+                      [CurrentDate] <br> Invoice #[InvoiceID] <br> Client #[ClientID] <br> Matter #[MatterID] </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 25px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: center;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                REMITTANCE ADVICE </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 25px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                BALANCE FORWARD: </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;">
+                Balance per Last Statement </td>
+              <td
+                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                      [BalanceAmount]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;">
+                Payments and Other Credits </td>
+              <td
+                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                      [PaymentAmount]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="text-align: center;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;padding-right: 10px;padding-left: 10px;">
+                BALANCE FORWARD </td>
+              <td
+                style="text-align: right;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                      [TotalBalance]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 25px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                CURRENT CHARGES FOR MATTER: </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;">
+                Matter #[MatterID] </td>
+            </tr>
+            <tr>
+              <td
+                style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;">
+                [MatterName] </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 25px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                Total Fees for Legal Service this bill </td>
+              <td
+                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                      [TotalFees]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                Total Disbursements this bill </td>
+              <td
+                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                      [TotalDisbursements]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                Total this bill </td>
+              <td
+                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                      [TotalFeesAndDisbursements]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="text-align: right;vertical-align: middle;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 24px;padding-right: 10px;padding-left: 10px;width: 50%;font-weight: bold;border-left: 3px double #000;border-top: 3px double #000; border-bottom: 3px double #000;">
+                TOTAL CHARGES THIS INVOICE </td>
+              <td
+                style="text-align: right;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;border-right: 3px double #000;border-top: 3px double #000; border-bottom: 3px double #000;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;font-weight: bold;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;font-weight: bold;">
+                      [TotalFeesAndDisbursements]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="height: 25px;vertical-align: top;"></td>
+            </tr>
+            <tr>
+              <td
+                style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                Statement Total Including Balance Forward </td>
+              <td
+                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                      $</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                      [TotalBalancePaymentAndFeesAndDisbursements]</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          <div class="trust-accounting-section">
+            [TrustAccountingSummary]
+          </div>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 20px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 12px;line-height: 18px;">
+                [DISCLAIMERTEXT] </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 20px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td> [PAYMENT INSTRUCTIONS] </td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="height: 20px;vertical-align: top;"></td>
+            </tr>
+          </table>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td
+                style="text-align: center;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 12px;line-height: 18px;font-weight: bold;">
+                Please include the Client, Matter, or Invoice Number with all payments. </td>
+            </tr>
+          </table> [MainContent]
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

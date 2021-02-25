@@ -1,0 +1,1870 @@
+<div class="container dms">
+  <div class="main-content" [ngClass]="{'no-padding':!visibleHtmlComponent.header}">
+    <ol class="breadcrumb" *ngIf="visibleHtmlComponent.header">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [ngClass]="{'active': !isDocumentListing, 'cursor-pointer': isDocumentListing}"
+        aria-current="page" (click)="isDocumentListing && back()">Document Management</li>
+      <li class="breadcrumb-item active" *ngIf="isDocumentListing">View Version History</li>
+    </ol>
+    <div class="heading" *ngIf="visibleHtmlComponent.header">
+      <h1>Document Management</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24"
+      *ngIf="!isCheckInListing && !commonFromMatterDetails && !viewEsignHistoryFlag">
+      <!-- Search Bar -->
+      <div class="header-search flex-fill d-flex">
+        <form [formGroup]='searchForm' (outsideClick)="showSearchList=false; isScrollSearch=false; searchLoading=false;"
+          appAutoCloseOutsideClick *ngIf="visibleHtmlComponent.search && !isDocumentListing">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" autocomplete="off"
+              (focus)="searchForm.get('searchInput').value?.length && searchFolderOrDoc(searchForm.get('searchInput').value)"
+              placeholder="Search by folder name, document name, etc..." formControlName='searchInput'
+              id="search-by-text">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+            <div class="search-result-box pt-8 pb-8 pr-8" *ngIf="showSearchList || isScrollSearch">
+              <div class="search-result" slimScroll [options]="opts" (scroll)="onScroll($event)"
+                [scrollEvents]="scrollEvents">
+                <h4 class="d-inline-block mt-8 mb-8 pr-16 pl-16">
+                  {{totalResultCount > 0 ? totalResultCount + ' results' : '0 results found' }}</h4>
+                <div class="mt-6 mb-6 pr-16 pl-16" *ngIf="(searchList?.length == 0)">
+                  <h5><b>We couldn't find anything matching your search.</b></h5>
+                  <p>Try again with a different term.</p>
+                </div>
+
+                <div class="result-row d-flex p-16 cursor-pointer"
+                  *ngFor="let list of searchList; trackBy :trackByFn;let i=index" (click)="redirecttoDMS(list)">
+                  <div class="result-icon pr-16">
+                    <i *ngIf="list.isFolder" class="icon icon-folder"></i>
+                    <img [src]="list.fileImage" width="20px" *ngIf="!list.isFolder">
+                  </div>
+                  <div class="result-content d-flex flex-column flex-fill">
+                    <div class="result-title mb-8">
+                      <span *ngIf="list.isFolder" [innerHTML]="list?.name | highlightText : searchHighlight"><strong>
+                          {{ list.name  }}
+                        </strong></span>
+                      <span *ngIf="!list.isFolder"
+                        [innerHTML]="list?.fileName | highlightText : searchHighlight"><strong>
+                          {{ list.fileName  }} </strong></span>
+                    </div>
+                    <ul class="list-unstyled searchcrumb align-items-center small mb-12"
+                      *ngIf="list.isFolder && list.dmsPath">
+                      <li *ngFor="let path of list  | commonService: 'splitPath';trackBy: trackByFn">
+                        <span [innerHTML]="path | highlightText : searchHighlight"></span>
+                      </li>
+                    </ul>
+                    <ul class="list-unstyled searchcrumb align-items-center small mb-12"
+                      *ngIf="!list.isFolder && list.fullFilePath">
+                      <li
+                        *ngFor="let path of list  | commonService: 'splitPath';trackBy: trackByFn; let i = index; let first = first"
+                        [class.notFirst]="first && ((path | indexfinder : 'tenant-') > -1 )">
+                        <span [innerHTML]="path | highlightText : searchHighlight"></span>
+                      </li>
+                    </ul>
+                    <div class="result-content-row" *ngIf="!list.folder && list.fileName">
+                      <div class="row w-100">
+                        <div class="w-20">
+                          <span class="small helper-text d-block mb-4">Client Name</span>
+                          <span
+                            [innerHTML]="list?.clientName | highlightText : searchHighlight">{{ list.clientName != ""? list.clientName: "--" }}</span>
+                        </div>
+                        <div class="w-20">
+                          <span class="small helper-text d-block mb-4">Matter Name</span>
+                          <span
+                            [innerHTML]="list?.matterName | highlightText : searchHighlight">{{ list.matterName != ""? list.matterName: "--"}}</span>
+                        </div>
+                        <div class="w-20">
+                          <span class="small helper-text d-block mb-4" *ngIf="list?.owner">Owner</span>
+                          {{ (list?.owner && list.owner?.firstName) ? list.owner.firstName: '' }}
+                          {{ (list?.owner && list.owner?.lastName) ? list.owner.lastName: '' }}
+                        </div>
+                        <div class="w-20 overflow-visible">
+                          <div class="info-hover position-relative d-inline-block">
+                            <span class="small helper-text d-block mb-4">Category</span>
+                            <span id="categoryHeading_{{list.id}}" (mouseenter)="addClassCategory(true, list, $event)"
+                              (mouseleave)="addClassCategory(false, list, $event)"
+                              [innerHTML]="list.getTruncatedCategoryName | highlightText : searchHighlight "></span>
+                            <div class="tooltip center bs-tooltip-bottom" role="tooltip"
+                              *ngIf="list.fileCategories && list.fileCategories.length > 19" data-placement="bottom">
+                              <div class="arrow custom-tooltip-arrow"></div>
+                              <div class="tooltip-inner tooltip-lg">
+                                <p>{{ list.fileCategories }} </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="w-20">
+                          <span class="small helper-text d-block mb-4" *ngIf="list.lastUpdated">Last Updated</span>
+                          {{ list.lastUpdated | date: 'MMM. dd yyyy, hh:mm a' }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="search-result-box px-0 mt-4 " *ngIf="searchLoading && !isScrollSearch">
+              <app-search-loader [active]="searchLoading" [loaderMessage]="'Loading Search Results'">
+              </app-search-loader>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!-- Side buttons -->
+      <div class="btn-group ml-md-24 ml-0" [ngClass]="{'float-right':commonComponent}"
+        *ngIf="uploadAndCreateActionVisible">
+        <button class="btn  btn-icon"
+          *ngIf="!isDocumentListing && isdmsAdmin && visibleHtmlComponent.createNewFolder && firmInfo.length != 2 && firmInfo.length != 3"
+          type="button" [ngClass]="(commonComponent || commonFromMatterDetails) ? 'btn-outline-primary' : 'btn-primary'"
+          (click)="openPersonalinfo(NewFolder,'','')" id="create-new-folder-btn">
+          <i class="icon icon-plus"></i> Create New Folder
+        </button>
+        <button (click)="uploadDocument()" class="btn btn-outline-primary btn-icon"
+          *ngIf="!isDocumentListing && visibleHtmlComponent.uploadDocument" [disabled]="!firmInfo?.length"
+          id="upload-documents-btn">
+          <i class="icon icon-upload"></i> Upload Document
+        </button>
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-body" [ngClass]="{'no-padding':commonFromMatterDetails}">
+        <div class="info-block">
+          <div class="d-flex justify-content-between align-items-center mb-24">
+            <ul class="list-unstyled d-flex dms-bredcumb mb-0 text-xlarge align-items-center flex-wrap"
+              *ngIf="visibleHtmlComponent.breadcrumb">
+              <li *ngFor="let item of firmInfo;trackBy: trackByFn;let last = last;let i=index;"
+                [ngClass]="(last) && !isViewerHistory ?'active':''">
+                <a href="JavaScript:void(0);" (click)="onSelect(item, 'folder', i)" *ngIf="!last">{{item.name}}</a>
+                <span *ngIf="last && item && item.name && !item.fileName">{{item.name}}</span>
+                <span *ngIf="last && item && item.fileName">
+                  <span class="file-icon mr-8" *ngIf="last && item.fileName">
+                    <img width="20px" [src]="item.fileName | commonService: 'getFileImage'">
+                  </span>{{item.fileName}} - <span *ngIf="!isCheckInListing && !viewEsignHistoryFlag">Version
+                    History</span>
+                  <span *ngIf="isCheckInListing">Check-Out History</span>
+                </span>
+              </li>
+              <li class="active" *ngIf="!isCheckInListing && isViewerHistory">Viewers History</li>
+              <li class="active" *ngIf="!isCheckInListing && !isViewerHistory && viewEsignHistoryFlag ">E-Signature
+                History</li>
+            </ul>
+            <span *ngIf="!isDocumentListing && !isCheckInListing && viewEsignHistoryFlag"
+              class="justify-content-end"><button class="btn btn-primary" (click)="resendESignRequest()"
+                [disabled]="selected && selected.documentSigningStatus == 2">Resend E-Signature Request</button>
+            </span>
+          </div>
+
+          <div class="row gutter-16"
+            *ngIf="!isDocumentListing && !isCheckInListing && visibleHtmlComponent.filter && !viewEsignHistoryFlag">
+            <div [class]="commonFromMatterDetails ? 'col-12' : 'col-8'">
+              <div class="row gutter-16">
+                <div class="col-4">
+                  <div class="form-group">
+                    <label>Owner</label>
+                    <app-multiselect-dropdown [title]="titleOwner" [selections]="selectedOwner"
+                      [displaySubItem]="filterOwnerArray" [filterName]="filterName"
+                      (onSelectionChanged)="selectOwnerDropDown($event)" [disableEvent]="loading"
+                      (clearFilter)="clearOwnerFilter()" (applyFilter)="applyFilterOwnerStatus()"
+                      [disableSelection]="loading" id="owner-multi-dropdown">
+                    </app-multiselect-dropdown>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label>Category</label>
+                    <app-multiselect-dropdown [title]="titleCategory" [selections]="selectedCategory"
+                      [displaySubItem]="filterCategoryArray" [filterName]="filterName"
+                      (onSelectionChanged)="selectCategoryDropDown($event)" (clearFilter)="clearCategoryFilter()"
+                      (applyFilter)="applyFilterOwnerStatus()" [disableEvent]="loading" [disableSelection]="loading"
+                      id="category-multi-dropdown">
+                    </app-multiselect-dropdown>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label>Status</label>
+                    <app-multiselect-dropdown [title]="titleStatus" [selections]="selectedStatus"
+                      [displaySubItem]="filterStatusArray" [filterName]="filterName"
+                      (onSelectionChanged)="selectStatusDropDown($event)" (clearFilter)="clearStatusFilter()"
+                      (applyFilter)="applyFilterOwnerStatus()" [disableSelection]="loading" [disableEvent]="loading"
+                      id="status-multi-dropdown">
+                    </app-multiselect-dropdown>
+                  </div>
+                </div>
+              </div>
+              <div class="row gutter-16" *ngIf="!isDocumentListing">
+                <div class="col-4 noMargin">
+                  <ng-select class="bulk-button" [items]="bulkActions" [selectOnTab]="true" placeholder="Bulk Action"
+                    [(ngModel)]="selectedBulkAction" (clear)="clearSelectionsAndResetBulk();" [clearable]="true"
+                    [bindValue]="'name'" [bindLabel]="'name'" [notFoundText]="'No record found'"
+                    [disabled]="(firmInfo && firmInfo.length < 0) || isDocumentListing || !selectedRowLength || loading"
+                    (change)='selectBulkAction(BulkArchiveFolder, BulkUnarchiveFolder,MultipleDocumentDownloadNoCheckout, MultipleDocumentDownloadCheckout, ShareDocument ,RevokeAccess, noFileShared, RejectReason, ApproveDocument)'
+                    [searchable]="false" id="bulk-selection">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="custom-table ">
+                <ngx-datatable *ngIf="!isViewerHistory" #table
+                  class="table-fileview folderview-table material common-table dmsDatatable expandable ngtable-align-top"
+                  [class.matter-no-data]="folderList?.length === 0" [rows]="folderList" [columnMode]="ColumnMode.force"
+                  [headerHeight]="50" [footerHeight]="footerHeightFn" [messages]="messages" rowHeight="auto"
+                  [selected]="selectedTablerow" [selectionType]="SelectionType.checkbox" [count]="page.totalElements"
+                  [offset]="page.pageNumber" [limit]="page.size" [scrollbarH]="true" (sort)="mySortingFunction()"
+                  [externalSorting]="true" (activate)="onActivate($event)"
+                  [sorts]="!isDocumentListing && !isCheckInListing && !viewEsignHistoryFlag ? [{prop: 'name', dir: 'asc'}] : [{prop: 'version', dir: 'desc'}]"
+                  id="folder-list-ngx-table">
+
+                  <!-- Row Detail Template -->
+                  <ngx-datatable-row-detail [rowHeight]="'auto'" #myDetailRow (toggle)="onDetailToggle($event)">
+                    <ng-template let-row="row" ngx-datatable-row-detail-template>
+                      <div class="table-responsive">
+                        <table class="table table-borderless">
+                          <thead>
+                            <tr>
+                              <th class="text-left description width-1">
+                                {{(row?.categories.length === 1) ? 'Category' : 'Categories'}}</th>
+                              <th class="text-left width-2">Owner</th>
+                              <th class="space width-3">File Size</th>
+                              <th class="space">&nbsp;</th>
+                              <th class="space">&nbsp;</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td class="text-left description sub-data width-1">
+                                <div class="d-flex align-items-center">
+                                  <ng-container *ngIf="row.categories && row.categories.length">
+                                    <span> {{ row.categories[0].name }}<span *ngIf="row.categories.length > 1">..</span>
+                                    </span>
+                                  </ng-container>
+                                  <div class="d-inline-flex justify-content-between"
+                                    *ngIf="row.categories && row.categories.length">
+                                    <div class="info-hover position-relative">
+                                      <a href="javascript:void(0)" class="text-decoration">
+                                        <span *ngIf="row.categories.length > 1">... + {{row.categories.length -1}}
+                                          more</span>
+                                      </a>
+                                      <div class="tooltip bs-tooltip-top left" role="tooltip">
+                                        <div class="arrow"></div>
+                                        <div class="tooltip-inner tooltip-lg">
+                                          <p *ngFor="let cat of row.categories | orderBy;trackBy: trackByFn">
+                                            {{ cat.name}} </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td class="text-left sub-data width-2">
+                                <div class="d-flex align-items-center">
+                                  {{(row.owner.firstName && row.owner.lastName)? row.owner.firstName+' '+row.owner.lastName : row.owner.firstName }}
+                                </div>
+                              </td>
+                              <td class="space width-3">{{ row.fileSizeInKB | commonService: 'formatKiloBytes' }}</td>
+                              <td class="space">&nbsp;</td>
+                              <td class="space">&nbsp;</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-row-detail>
+
+                  <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'tbl-arrow-class'"
+                    [cellClass]="'tbl-arrow-class'" [width]="30"
+                    *ngIf="!isDocumentListing && !isCheckInListing && !viewEsignHistoryFlag">
+                    <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                      <div class="d-flex align-items-center" *ngIf="row.fileName">
+                        <a href="javascript:void(0)" class="icon font-10 expand-button"
+                          [class.icon-angle-down]="!expanded" [class.icon-angle-up]="expanded"
+                          title="Expand/Collapse Row" (click)="toggleExpandRow(row)">
+                        </a>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <!-- For checkbox start -->
+                  <ngx-datatable-column [resizeable]="false" *ngIf="!isCheckInListing && !viewEsignHistoryFlag"
+                    [headerClass]="'tbl-check-class'" [cellClass]="'tbl-check-class'" [width]="34" [sortable]="false"
+                    [canAutoResize]="false" [draggable]="false">
+                    <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                      let-selectFn="selectFn">
+                      <label class="cust-check cursor-pointer">
+                        <input type="checkbox" [checked]="allSelected" (change)="selectDeselectRecords()" />
+                        <span class="check-style"></span>
+                      </label>
+                    </ng-template>
+                    <ng-template ngx-datatable-cell-template let-row="row" let-isSelected="isSelected"
+                      let-onCheckboxChangeFn="onCheckboxChangeFn">
+                      <label class="cust-check cursor-pointer">
+                        <input [disabled]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile' && row.fileName" type="checkbox" [checked]="row.selected" (change)="changeChildSelection(row)" />
+                        <span class="check-style"></span>
+                      </label>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <!-- For checkbox end -->
+                  <!-- Columns for Normal Listing -->
+                  <ngx-datatable-column [resizeable]="false"
+                    *ngIf="!isDocumentListing && !isCheckInListing && !viewEsignHistoryFlag" name="Name" [width]="350"
+                    [sortable]="true" [headerClass]="'checkbox-header'">
+                    <ng-template ngx-datatable-header-template let-value="value">
+                      <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                        <span class="datatable-header-cell-label">Name</span>
+                      </span>
+                    </ng-template>
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                      <div *ngIf="!row.fileName" class="d-flex align-items-center">
+                        <div class="info-hover position-relative d-flex align-items-start">
+                          <span class="file-icon file-folder-icon d-inline-block mr-8 text-large"><em
+                              class="icon icon-folder"
+                              [ngClass]="(row.status==='Archived')?'text-secondary':''"></em></span>
+                          <div>
+                            <span class="cursor-pointer" *ngIf="row.status!=='Archived'">
+                              {{ (row.name && row.name.length > 30) ? (row.name| slice:0:30) +'...' :  row.name}}</span>
+                            <span class="text-ellipsis text-secondary" *ngIf="row.status==='Archived'">
+                              {{ (row.name &&  row.name.length > 30) ? (row.name| slice:0:30) +'...' :  row.name}}</span>
+                            <div class="tooltip bs-tooltip-top left" role="tooltip"
+                              *ngIf="row.name && row.name.length > 30" data-placement="right">
+                              <div class="arrow"></div>
+                              <div class="tooltip-inner tooltip-lg">
+                                <p>{{ row.name }} </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                      <div *ngIf="row.fileName" class="d-flex align-items-center"
+                        [class.text-muted]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile'">
+                        <div class="info-hover position-relative d-flex align-items-start" *ngIf="!row.checkedOutTo"
+                          (dblclick)="row.dmsFileStatus==='UploadDone' && openDownload(DownloadDocument,row,false)">
+                          <span class="file-icon mr-8">
+                            <img width="20px" [src]="row.fileName | commonService: 'getFileImage'" class=""
+                              [class.opacity-5]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile'"></span>
+                          <div>
+                            <span
+                              *ngIf="row.fileName === highLightFile"><b>{{ row.fileName | commonService: 'getTruncatedName' }}</b></span>
+                            <span
+                              *ngIf="row.fileName !== highLightFile">{{ row.fileName | commonService: 'getTruncatedName' }}</span>
+                            <div class="tooltip bs-tooltip-top left" role="tooltip" *ngIf="row.fileName.length > 30"
+                              data-placement="right">
+                              <div class="arrow"></div>
+                              <div class="tooltip-inner tooltip-lg">
+                                <p>{{ row.fileName }}</p>
+                              </div>
+                            </div>
+                            <br>
+                            <small class="font-weight-medium" *ngIf="row.version">(V{{ row.version }}) </small>
+                            <small class="font-weight-medium" *ngIf="row.status === 'Archived'">(Archived)</small>
+                          </div>
+                        </div>
+
+                        <div [class.text-muted]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile'"
+                          class="info-hover position-relative d-flex align-items-start" *ngIf="row.checkedOutTo"
+                          (dblclick)="openDownload(null,row,false, true)">
+                          <span class="file-icon mr-8"><img width="20px"
+                              [src]="row.fileName | commonService: 'getFileImage'"></span>
+                          <div>
+                            <span class="">
+                              {{ (row.fileName.length > 30) ? (row.fileName | slice:0:30) +'...' :  row.fileName}}</span>
+                            <div class="tooltip bs-tooltip-top left" role="tooltip" *ngIf="row.fileName.length > 30"
+                              data-placement="right">
+                              <div class="arrow"></div>
+                              <div class="tooltip-inner tooltip-lg">
+                                <p>{{ row.fileName }} </p>
+                              </div>
+                            </div>
+                            <br>
+                            <small class="font-weight-medium" *ngIf="row.version">(V{{ row.version }}) </small>
+                            <small class="font-weight-medium" *ngIf="row.status === 'Archived'">(Archived)</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="pl-28 small font-weight-medium" *ngIf="row.status==='Archived' && !row.fileName">
+                        (Archived)</div>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column [resizeable]="false"
+                    *ngIf="!isDocumentListing && !isCheckInListing && !viewEsignHistoryFlag" [sortable]="true"
+                    name="Attributes" [width]="210">
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                      <span *ngIf="row.fileName">
+                        <label class="lbl-tag d-block mb-4"
+                          [class.text-muted]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile'"
+                          for="" *ngIf="row.isFillableTemplate">Fillable Template</label>
+                        <label class="lbl-tag d-block mb-4"
+                          [class.text-muted]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile'"
+                          for="" *ngIf="row.isDraftingTemplate">Drafting Template</label>
+                        <label class="lbl-tag d-block mb-4"
+                          [class.text-muted]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile'"
+                          for="" *ngIf="row.containsESignatureFields && eSignEnabled">Contains E-Signature
+                          Tokens</label>
+                      </span>
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false"
+                    *ngIf="!isDocumentListing && !isCheckInListing  && !viewEsignHistoryFlag" [sortable]="true"
+                    prop="lastUpdated" name="Last Updated" [width]="150">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <div *ngIf="row.lastUpdated" class=""
+                        [class.text-muted]="row.dmsFileStatus!='UploadDone' && row.dmsFileStatus!='GeneratedFile'">
+                        <span
+                          class="d-block font-weight-medium lh-20">{{ (row.dmsFileStatus=='UploadDone' || row.dmsFileStatus == 'GeneratedFile') ? (value | getMomentDateFormat: 'MMM DD, YYYY' : false) : '-' }}</span>
+                        {{ (row.dmsFileStatus=='UploadDone' || row.dmsFileStatus == 'GeneratedFile') ? (value | getMomentDateFormat: 'hh:mm a' : false) : '' }}
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false"
+                    *ngIf="!isDocumentListing && !isCheckInListing && !viewEsignHistoryFlag" [sortable]="false"
+                    name="Status" [width]="180">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <div class="lbl-wraps d-flex  align-items-center justify-content-start" *ngIf="row.fileName">
+                        <span *ngIf="row.dmsFileStatus && row.dmsFileStatus == 'SecurityScanPassed'"
+                          class="sh-badge text-nowrap font-weight-medium sh-badge-success">Security Scan Passed</span>
+                        <span
+                          *ngIf="(row.dmsFileStatus === 'UploadInProgress' || row.dmsFileStatus  === 'UploadFailed') ? true : false"
+                          class="sh-badge text-nowrap font-weight-medium"
+                          [class.sh-badge-primary]="row.dmsFileStatus == 'UploadInProgress'"
+                          [class.sh-badge-danger]="row.dmsFileStatus == 'UploadFailed'">
+                          {{row.dmsFileStatus === 'UploadInProgress' ? 'Upload In Progress' : (row.dmsFileStatus === 'UploadFailed' ? 'Upload Failed' : '')}}
+                        </span>
+                        <span
+                          *ngIf="row.dmsFileStatus && row.dmsFileStatus == 'SecurityScanFailedVirus' || row.dmsFileStatus == 'SecurityScanFailedError'"
+                          class="sh-badge text-nowrap font-weight-medium sh-badge-danger">Security Scan Failed</span>
+                        <div
+                          *ngIf="row.dmsFileStatus && (row.dmsFileStatus == 'SecurityScanFailedVirus' || row.dmsFileStatus == 'SecurityScanFailedError')"
+                          class="info-hover position-relative ml-8">
+                          <em class="icon icon-info text-large dms-tooltip-icon"></em>
+                          <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner">
+                              <h6 class="font-weight-medium my-0">Security Scan Failed</h6>
+                              <p>
+                                {{(row.dmsFileStatus == 'SecurityScanFailedVirus') ? row.dmsFileStatusDetails+' detected' : (row.dmsFileStatusDetails && row.dmsFileStatusDetails !='') ? row.dmsFileStatusDetails : 'Error Detected'}}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <span *ngIf="row.dmsFileStatus && row.dmsFileStatus == 'SecurityScanInProgress'"
+                          class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Security Scan In
+                          Progress</span>
+                        <span
+                          *ngIf="!row?.documentSigningStatus && eSignEnabled && row.containsESignatureFields && row.isSentForProcessing && !row.isEsignProcessingFailed"
+                          class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Sending for
+                          E-Signature</span>
+                        <div class="d-flex align-items-center">
+                          <span
+                            *ngIf="!row?.documentSigningStatus && eSignEnabled && row.containsESignatureFields && !row.isSentForProcessing && row.isEsignProcessingFailed"
+                            class="sh-badge text-nowrap font-weight-medium sh-badge-danger">Failed to send for
+                            E-Signature</span>
+                          <div
+                            *ngIf="!row?.documentSigningStatus && eSignEnabled && row.containsESignatureFields && !row.isSentForProcessing && row.isEsignProcessingFailed"
+                            class="info-hover position-relative ml-8">
+                            <em class="icon icon-info text-large dms-tooltip-icon"></em>
+                            <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                              <div class="arrow"></div>
+                              <div class="tooltip-inner">
+                                <h6 class="font-weight-medium my-0">Failed to send for E-Signature</h6>
+                                <p>
+                                  {{row.sentForEsignFailedMessage}}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <span
+                          *ngIf="(row.dmsFileStatus =='UploadDone' || row.dmsFileStatus == 'GeneratedFile') && row?.documentSigningStatus == 1 && eSignEnabled && !row.isSentForProcessing"
+                          class="sh-badge text-nowrap font-weight-medium sh-badge-warning">Pending Signatures</span>
+                        <span
+                          *ngIf="(row.dmsFileStatus =='UploadDone' || row.dmsFileStatus == 'GeneratedFile') && row?.documentSigningStatus == 2 && eSignEnabled"
+                          class="sh-badge text-nowrap font-weight-medium sh-badge-success ">Document Signed</span>
+                        <label class="lbl-tag" for=""
+                          *ngIf="(row.checkedOutDateTime && (!row.checkedInDateTime || (!row.isForcedCheckIn && row.checkedInDateTime))) || ((checkoutList | indexfinder : row.id) > -1 )">Checked
+                          Out</label>
+                        <label class="lbl-tag" for="" *ngIf="row.status === 'Client Pending Review'">Pending
+                          Review</label>
+                        <div class="info-hover position-relative pt-4"
+                          *ngIf="(row.checkedOutDateTime && !row.checkedInDateTime) || row.status === 'Client Pending Review'">
+                          <em class="icon icon-info text-large dms-tooltip-icon"></em>
+                          <div class="tooltip bs-tooltip-top" role="tooltip"
+                            *ngIf="(row.checkedOutDateTime && !row.checkedInDateTime) || row.status === 'Client Pending Review'">
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner" *ngIf="row.status !== 'Client Pending Review'">
+                              <h6>Checked Out By:</h6>
+                              <p>
+                                {{ (row?.checkedOutTo && row.checkedOutTo?.firstName) ? row.checkedOutTo?.firstName: ''}}
+                                {{ (row?.checkedOutTo && row.checkedOutTo?.lastName) ? row.checkedOutTo?.lastName: ''}}
+                              </p>
+                              <p class="mb-8">
+                                {{ (row.checkedOutTo && row.checkedOutTo.email) ? row.checkedOutTo.email : '' }}</p>
+                              <h6>Date/Time</h6>
+                              <p>{{ row.checkedOutDateTime | date: 'MMM dd, yyyy hh:mm a'}}</p>
+                            </div>
+                            <div class="tooltip-inner" *ngIf="row.status === 'Client Pending Review'">
+                              <h6>Uploaded By:</h6>
+                              <p class="mb-8">
+                                {{ (row?.owner) ? row.owner.firstName+' '+row.owner.lastName: ''}}
+                              </p>
+                              <h6>Date/Time</h6>
+                              <p>{{ row?.lastUpdated | date: 'MMM dd, yyyy hh:mm a'}}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+
+
+
+                  <ngx-datatable-column [resizeable]="false" name="Version" prop="version" [sortable]=true [width]="100"
+                    *ngIf="isDocumentListing">
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" name="Document Name" [sortable]="true" prop="fileName"
+                    [width]="300" *ngIf="isDocumentListing">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <div class="d-flex align-items-start">
+                        <span class="file-icon mr-8">
+                          <img width="20px" [src]="value | commonService: 'getFileImage'">
+                        </span>
+                        <div>
+                          <span class="d-block lh-20 mb-4">{{row?.fileName}}</span>
+                          <span class="d-block helper-text font-weight-normal lh-20">{{ row?.originalFileName }}</span>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" name="File Size" prop="fileSizeInKB" [sortable]="true"
+                    [width]="100" *ngIf="isDocumentListing">
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                      {{ row.fileSizeInKB | commonService: 'formatKiloBytes' }}
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" name="Upload Date/Time" [sortable]="true" prop="uploadTime"
+                    *ngIf="isDocumentListing">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <strong>{{ (value | getMomentDateFormat: 'MMM DD, YYYY' : true) }}</strong><br>
+                      {{ (value | getMomentDateFormat: 'hh:mm A' : true) }}
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" name="Modified By" prop="modifiedBy"
+                    *ngIf="isDocumentListing" [width]="150">
+                  </ngx-datatable-column>
+
+
+
+                  <ngx-datatable-column [resizeable]="false" name="Action" prop="action" [width]="100"
+                    *ngIf="isCheckInListing" [sortable]=true>
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                      {{row.action}}
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" name="Date/Time" prop="date" [width]="20"
+                    *ngIf="isCheckInListing" [sortable]=true>
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <strong>{{value | date: 'MMM.  dd, yyyy'}}</strong><br>
+                      {{value | date:'hh:mm'}}{{ value | date : 'a' | lowercase }}
+
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" name="Performed By" prop="performedBy" [width]="20"
+                    *ngIf="isCheckInListing" [sortable]=true>
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                      {{row.performedBy}}
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <!-- For E-Signature History -->
+                  <ngx-datatable-column name="Number" prop="number" *ngIf="viewEsignHistoryFlag">
+                  </ngx-datatable-column>
+                  <ngx-datatable-column *ngIf="viewEsignHistoryFlag" prop="name" name="Name"></ngx-datatable-column>
+                  <ngx-datatable-column *ngIf="viewEsignHistoryFlag" prop="email" name="Email"></ngx-datatable-column>
+                  <ngx-datatable-column *ngIf="viewEsignHistoryFlag" prop="sentDateTime" name="Date/Time Sent">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <span *ngIf="value">
+                        <strong>{{value | date: 'MM/dd/yy'}}</strong><br>
+                        {{value | date:'hh:mm'}} {{ value | date : 'a' | lowercase }}
+                      </span>
+                      <span *ngIf="!value">-</span>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-column *ngIf="viewEsignHistoryFlag" prop="signedDateTime" name="Date/Time Signed">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <span *ngIf="value">
+                        <strong>{{value | date: 'MM/dd/yy'}}</strong><br>
+                        {{value | date:'hh:mm'}} {{ value | date : 'a' | lowercase }}
+                      </span>
+                      <span *ngIf="!value">-</span>
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column *ngIf="!isCheckInListing && !viewEsignHistoryFlag" [headerClass]="'text-right'"
+                    [sortable]="false" name="Action" [width]="100" prop='id'>
+                    <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                      <div class="d-flex justify-content-end">
+                        <span
+                          *ngIf="row.dmsFileStatus=='SecurityScanInProgress' || row.dmsFileStatus=='UploadInProgress'"
+                          (click)="retry_cancelScan(row, 'remove')"><i class="icon icon-remove icon-color"></i></span>
+                        <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                          [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)"
+                          appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)"
+                          *ngIf="row.dmsFileStatus!='SecurityScanInProgress' && row.dmsFileStatus!='UploadInProgress' && row.dmsFileStatus != 'UploadFailed'">
+                          <em class="icon icon-dot-verti"></em>
+                          <div class="dropdown-menu dropdown-menu-right overflow-hide custom-height"
+                            aria-labelledby="dropdownMenuButton">
+                            <div class="dropdown-slimscrol"
+                              *ngIf="row.dmsFileStatus=='SecurityScanFailedError' || row.dmsFileStatus=='SecurityScanFailedVirus'">
+                              <a href="javascript:void(0)" class="dropdown-item"
+                                (click)="retry_cancelScan(row, 'retry')">Retry Scan</a>
+                              <a href="javascript:void(0)" class="dropdown-item"
+                                (click)="retry_cancelScan(row, 'remove')">Delete Document</a>
+                            </div>
+                            <div class="dropdown-slimscrol" *ngIf="row.dmsFileStatus=='SecurityScanPassed'">
+                              <a href="javascript:void(0)" class="dropdown-item"
+                                (click)="retry_cancelScan(row, 'remove')">Delete Document</a>
+                            </div>
+                            <div class="dropdown-slimscrol">
+
+
+                              <div *ngIf="!row.fileName">
+                                <a href="javascript:void(0)" class="dropdown-item" (click)="onSelect(row,'folder')"
+                                  *ngIf="row.status!='Archived'">Open Folder</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="isdmsAdmin && row.status!='Archived' &&  ((notEditableFolders | indexfinder : row.name) == -1 )"
+                                  (click)="editFolder(EditFolder,row)">Edit Folder</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="isdmsAdmin && row.status!=='Archived' && row?.isSystemFolder == false && ((notEditableFolders | indexfinder : row.name) == -1 ) "
+                                  (click)="moveFolderOrDoc(MoveFolder,row)">Move
+                                  Folder</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="(row?.canGrantSharingRight || row?.hasSharingRight) && documentPortalAccess && row?.isSystemFolder && row?.isGenerated"
+                                  (click)="RevokeAccessModalManage(row?.id, RevokeAccess, noFileShared)">Revoke
+                                  Access</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  (click)="downloadFolder(row?.id, row?.name)">Download
+                                  Folder</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  (click)="getarchiveId(ArchiveFolder,row)"
+                                  *ngIf="isdmsAdmin && row.status!=='Archived' &&  ((notEditableFolders | indexfinder : row.name) == -1 )">Archive
+                                  Folder</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="isdmsAdmin && row.status==='Archived'"
+                                  (click)="getunarchiveId(UnarchiveFolder,row)">Unarchive Folder</a>
+
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row?.status!='Archived' && firmInfo.length > 1 && row?.canGrantSharingRight && row?.isSystemFolder && documentPortalAccess"
+                                  (click)="openGrantShareRightsModal(GrantShareRights,row)">Manage Share Rights</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="firmInfo.length > 1 && (row?.canGrantSharingRight || row?.hasSharingRight) && row?.isSystemFolder && documentPortalAccess"
+                                  (click)="openShareDocumentModal(ShareDocument, row)">Share Documents</a>
+
+                              </div>
+
+
+                              <font
+                                *ngIf="(row.dmsFileStatus=='GeneratedFile' || row.dmsFileStatus=='UploadDone') && row.fileName && !isDocumentListing && !isCheckInListing">
+
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="(!row.checkedOutTo || row.isForcedCheckIn) && isdmsAdmin"
+                                  (click)="openDownload(DownloadDocument,row,false)">Download
+                                  Document </a>
+                                <a href="javascript:void(0)" class="dropdown-item" *ngIf="!isdmsAdmin"
+                                  (click)="openDownload(null,row,false, true)">Download
+                                  Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.checkedOutTo && !row.isForcedCheckIn && isdmsAdmin"
+                                  (click)="openDownload(DownloadcheckOutDocument,row,false, false)">Download Document
+                                </a>
+                                <a class="dropdown-item"
+                                  *ngIf="row.lexiconAppOpenDocLink && profile.tenantTier.tierName !='Emerging'"
+                                  [href]="row.lexiconAppOpenDocLink | getSanitizeUrl"
+                                  (click)="editDocument(rowIndex)">Edit
+                                  Document </a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="firmInfo.length > 2 && firmInfo[1]?.name === 'Clients' && firmInfo[1]?.isSystemFolder && row.status === 'Client Pending Review'"
+                                  (click)="openApproveAndMovePopup(approveDocument, row)">Approve
+                                  Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.status === 'Client Pending Review'"
+                                  (click)="rejectDocument(RejectReason, 'reject', row)">Reject
+                                  Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  (click)="moveFolderOrDoc(MoveDocument,row)">Move
+                                  Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.status!='Archived' && firmInfo.length > 2 && firmInfo[firmInfo.length - 1].isSystemFolder && isValidTenantTier && (row?.canGrantSharingRight || row?.hasSharingRight) && documentPortalAccess"
+                                  (click)="openDocumentAccessModal(DocumentAccess, row)">Manage Document Access
+                                </a>
+                                <a class="dropdown-item"
+                                  *ngIf="row.status!='Archived' && row.containsESignatureFields && eSignEnabled"
+                                  href="javascript:void(0)"
+                                  (click)="openESignComponent(row, sendEsign, SendForESignature, DocumentAlreadyOutForsignature, true)">Send
+                                  For E-Signature </a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="(row?.documentSigningStatus == 1 || row?.documentSigningStatus == 2) && eSignEnabled"
+                                  (click)="onSelect(row, 'esign')">View E-Signature History</a>
+
+
+
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row?.isGenerated && row.status !== 'Client Pending Review'"
+                                  (click)="generateDocument(row)">Generate
+                                  Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.status !== 'Client Pending Review'" (click)="gotoEditDocument(row)">Modify
+                                  Document Properties</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  [class.disabled]=" row.checkedOutTo && row.checkedOutTo.id != currentUserInfo.id"
+                                  [class.disable-greyedout]="row.checkedOutTo && row.checkedOutTo.id != currentUserInfo.id"
+                                  *ngIf="row.status !== 'Client Pending Review'" (click)="replaceDocument(row)">Replace
+                                  Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.status!=='Archived' && isdmsAdmin && row.status !== 'Client Pending Review'"
+                                  (click)="getarchiveId(ArchiveFolder,row)">Archive Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.status==='Archived' && isdmsAdmin && row.status !== 'Client Pending Review'"
+                                  (click)="getunarchiveId(UnarchiveFolder,row)">Unarchive Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item" (click)="onSelect(row, 'file')"
+                                  *ngIf="row.status !== 'Client Pending Review'">View Version History </a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.checkedOutDateTime !== null && row.status !== 'Client Pending Review'"
+                                  (click)="checkInDocument(CheckInDocument,row)">Check-In
+                                  Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.checkedOutDateTime!=null && row.status !== 'Client Pending Review'"
+                                  (click)="forceCheckInDocument(ForceCheckInDocument,row)">Force
+                                  Check-in</a>
+                                <a href="javascript:void(0)" class="dropdown-item" (click)="onSelect(row, 'checkout')"
+                                  *ngIf="row.status !== 'Client Pending Review'">View Check-Out History </a>
+                              </font>
+
+                              <font *ngIf="isDocumentListing">
+
+                                <a href="javascript:void(0)" class="dropdown-item" *ngIf="row.fileFullPath"
+                                  (click)="downloadVersion(row)">
+                                  Download Document</a>
+                                <a href="javascript:void(0)" class="dropdown-item"
+                                  *ngIf="row.version < fileCurrentVersion && folderList && folderList.length > 1 && isIconicTenant"
+                                  (click)="revertVersion(row)">
+                                  Revert to Version
+                                </a>
+                                <a href="javascript:void(0)" class="dropdown-item" (click)="showViewerHistory(row)">
+                                  Viewer History
+                                </a>
+                              </font>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-footer>
+                    <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                      let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                      let-isVisible="isVisible">
+                      <div class="d-flex justify-content-between flex-fill">
+                        <div class="d-flex align-items-center">
+                          <div class="table-items d-flex align-items-center mr-36">
+                            Items per page:
+                            <div class=" ml-8">
+                              <select class="custom-select border-less" [formControl]="pageSelector"
+                                (change)="changePageSize()">
+                                <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                          <span>
+                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                            {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                          </span>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                          <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                            <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                              [value]="i+1">Page
+                              {{ i+1 }} of {{page.totalPages}}</option>
+                          </select>
+                          <div class="ml-8">
+                            <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                              [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                              [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                              [page]="curPage" [size]="pageSize" [count]="rowCount"
+                              [hidden]="!((rowCount / pageSize) > 1)"
+                              (change)="table.onFooterPage($event);pageChange($event)">
+                            </datatable-pager>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-footer>
+                </ngx-datatable>
+                <ngx-datatable *ngIf="isViewerHistory" #table
+                  class="table table-striped table-borderless table-fileview folderview-table material common-table office-table dmsDatatable"
+                  [class.matter-no-data]="folderList?.length === 0" [rows]="folderList" [columnMode]="ColumnMode.force"
+                  [headerHeight]="50" [footerHeight]="footerHeightFn" [messages]="messages" rowHeight="auto"
+                  [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" [scrollbarH]="true"
+                  (sort)="updateDatatableFooterPage()" id="folder-list-ngx-table">
+
+                  <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="viewDateTime"
+                    name="View Date/Time">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <strong>{{ value ? (value | getMomentDateFormat: 'MMM[.] D, YYYY' : true) : '--' }}</strong><br>
+                      {{ value ? (value | getMomentDateFormat: 'hh:mm a' : true) : '--'}}
+                    </ng-template>
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" [sortable]="true" name="Viewed By" prop="viewedByName">
+                  </ngx-datatable-column>
+
+                  <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="action" name="Action">
+                    <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                      <span>{{ value | titlecase }}</span>
+                    </ng-template>
+                  </ngx-datatable-column>
+                  <ngx-datatable-footer>
+                    <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                      let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                      let-isVisible="isVisible">
+                      <div class="d-flex justify-content-between flex-fill">
+                        <div class="d-flex align-items-center">
+                          <div class="table-items d-flex align-items-center mr-36">
+                            Items per page:
+                            <div class=" ml-8">
+                              <select class="custom-select border-less" [formControl]="pageSelector"
+                                (change)="changePageSize()">
+                                <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                          <span>
+                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                            {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                          </span>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                          <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                            <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                              [value]="i+1">Page
+                              {{ i+1 }} of {{page.totalPages}}</option>
+                          </select>
+                          <div class="ml-8">
+                            <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                              [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                              [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                              [page]="curPage" [size]="pageSize" [count]="rowCount"
+                              [hidden]="!((rowCount / pageSize) > 1)"
+                              (change)="table.onFooterPage($event);pageChange($event)">
+                            </datatable-pager>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </ngx-datatable-footer>
+                </ngx-datatable>
+              </div>
+              <app-loader [active]="loading"></app-loader>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<ng-template #NewFolder let-modal>
+  <form [formGroup]="createFolderForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">New Folder</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group" [class.has-error]="isExist || (f.folderName.errors && createFolderFormSubmitted)">
+        <label>Folder Name <sup>*</sup></label>
+        <input type="text" class="form-control" (ngModelChange)="onFolderNameChange()" placeholder="Enter folder name"
+          formControlName="folderName" id="folder-name-text">
+        <span class="field-message text-danger" *ngIf="isExist && !!f.folderName.value"><em
+            class="icon icon-error mr-4"></em> {{ isExistErr }}
+        </span>
+        <span class="field-message text-danger" *ngIf="f.folderName.errors && createFolderFormSubmitted">
+          <span *ngIf="f.folderName.errors.required && createFolderFormSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            {{errorData.create_folder_name_error}}
+          </span>
+        </span>
+      </div>
+      <div class="custom-control custom-checkbox mb-4">
+        <input type="checkbox" class="custom-control-input" id="customCheck1">
+        <label class="custom-control-label" for="customCheck1">Restrict Access</label>
+      </div>
+      <div class="small text-secondary pl-24">Restrict access to Document Management System Administrators</div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <button type="submit" class="btn btn-primary" (click)='createFolder()' id="create-btn">Create
+        Folder</button>
+    </div>
+    <app-loader [active]="newFolderLoading"></app-loader>
+  </form>
+</ng-template>
+
+
+<ng-template #EditFolder let-modal>
+  <form [formGroup]="editFolderForm" #editF="ngForm" (submit)='updateFolder()'>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Edit Folder</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div [ngClass]="(isExist) || editF.submitted && ef.targetName.errors ? 'form-group has-error':'form-group'">
+        <label>Folder Name <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="Enter folder name" formControlName="targetName"
+          id="folder-name-text">
+        <span class="field-message text-danger" *ngIf="isExist"><em class="icon icon-error mr-4"></em> {{ isExistErr }}
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="editF.submitted && ef.targetName.errors && ef.targetName.errors.required"><em
+            class="icon icon-error mr-4"></em> Please enter a folder name.
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="editF.submitted && ef.targetName.errors && ef.targetName.errors.maxlength"><em
+            class="icon icon-error mr-4"></em> Maximum 100 characters allowed.
+        </span>
+        <span class="field-message text-danger"
+          *ngIf="editF.submitted && ef.targetName.errors && ef.targetName.errors.pattern"><em
+            class="icon icon-error mr-4"></em>
+          Only alphanumeric characters are allowed.
+        </span>
+      </div>
+      <div class="custom-control custom-checkbox mb-4">
+        <input type="checkbox" class="custom-control-input" id="customCheck1">
+        <label class="custom-control-label" for="customCheck1">Restrict Access</label>
+      </div>
+      <div class="small text-secondary pl-24">Restrict access to Document Management System Administrators</div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+      <button type="submit" class="btn btn-primary" id="save-changes-btn">Save
+        Changes</button>
+    </div>
+    <app-loader [active]="editLoading"></app-loader>
+  </form>
+</ng-template>
+
+
+<ng-template #MoveFolder let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Move Folder</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div [ngClass]="(isExist)?'form-group has-error':'form-group'">
+      <label>Folder Name <sup>*</sup></label>
+      <app-multilevel-folder-dropdown [folderId]="firmData?.id"
+        (onSelectionChanged)="onSelectionChanged($event, false)">
+      </app-multilevel-folder-dropdown>
+      <span class="field-message text-danger" *ngIf="isExist"><em class="icon icon-error mr-4"></em>
+        {{ errorData.same_folder_name }}
+      </span>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="!selectFolder || isExist"
+      (click)="saveMoveFolderOrDoc('folder')" id="move-folder-btn">Move
+      Folder</button>
+  </div>
+  <app-loader [active]="moveLoading"></app-loader>
+</ng-template>
+
+
+<ng-template #ArchiveFolder let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!archiveFileName">Archive Folder</h3>
+    <h3 class="modal-title mb-0" *ngIf="archiveFileName">Archive Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body" *ngIf="!archiveFileName">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Are you sure you want to archive this folder? This will hide the
+      folder by default. After 30 days, clients will not be able to access it.
+    </div>
+  </div>
+  <div class="modal-body" *ngIf="archiveFileName">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Are you sure you want to archive this document? This will hide the
+      document by default. After 30 days, clients will not be able to access it.
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-brn">No</button>
+    <button type="button" class="btn btn-primary" *ngIf="!archiveFileName" (click)="archiveFolder()"
+      id="yes-archive-btn">Yes,
+      archive</button>
+    <button type="button" class="btn btn-primary" *ngIf="archiveFileName" (click)="archiveFolder('file')"
+      id="yes-archive-btn">Yes,
+      archive</button>
+  </div>
+</ng-template>
+
+
+<ng-template #MoveDocument let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Move Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div [ngClass]="(isExist)?'form-group has-error':'form-group'">
+      <label>Folder Name <sup>*</sup></label>
+      <app-multilevel-folder-dropdown [folderId]="folderId" (onSelectionChanged)="onSelectionChanged($event, true)">
+      </app-multilevel-folder-dropdown>
+      <span class="field-message text-danger" *ngIf="isExist"><em class="icon icon-error mr-4"></em>
+        {{ isExistErr }}</span>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="!selectFolder || isExist"
+      (click)="saveMoveFolderOrDoc('document')" id="move-btn">Move
+      Document</button>
+  </div>
+  <app-loader [active]="moveLoading"></app-loader>
+</ng-template>
+
+<ng-template #DownloadDocument let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Download Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <p>You are about to download this document. Would you also like to check the document out?</p>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="downloadDocument(true)" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="downloadDocument(false)" id="yes-checkout-btn">Yes, check-out
+      document</button>
+  </div>
+</ng-template>
+
+<ng-template #DownloadcheckOutDocument let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Check Out</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <p>This document is already checked out by {{selectedRowForDownload.checkedOutTo.firstName}}
+      {{selectedRowForDownload.checkedOutTo.lastName}}. What do you want to do?</p>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="downloadDocument(true)" id="keep-checkout-btn">Keep
+      Check-Out</button>
+    <button type="button" class="btn btn-primary" (click)="singleOverrideCheckout()"
+      id="override-check-out-btn">Override Check-Out</button>
+  </div>
+</ng-template>
+
+<ng-template #CheckInDocument let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Check-In Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    You are about to check-in this document. Do you want to continue?
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="documentCheckIn()" id="yes-check-in-document-btn">Yes,
+      check-in document</button>
+  </div>
+</ng-template>
+
+<ng-template #ForceCheckInDocument let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Force Check-In Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    You are about to force check-in this document. Do you want to continue?
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="documentForceCheckIn()" id="yes-force-checkin-btn">Yes, force
+      check-in document</button>
+  </div>
+</ng-template>
+
+<ng-template #UnarchiveFolder let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!unarchiveFileName">Unarchive Folder</h3>
+    <h3 class="modal-title mb-0" *ngIf="unarchiveFileName">Unarchive Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex lh-20" *ngIf="!unarchiveFileName">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Are you sure you want to unarchive this folder and all its documents and subfolders? This will show these
+      folders/documents by default. If external access had been granted to any of these files before archival, that
+      access will be restored.
+    </div>
+    <div class="d-flex lh-20" *ngIf="unarchiveFileName">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Are you sure you want to unarchive this document? This will show this document by default. If external access had
+      been granted to this file before archival, that access will be restored.
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" *ngIf="!unarchiveFileName" (click)="unArchiveFolder()"
+      id="yes-unarchie-btn">Yes,
+      Unarchive</button>
+    <button type="button" class="btn btn-primary" *ngIf="unarchiveFileName" (click)="unArchiveFolder('file')"
+      id="yes-unarchie-btn">Yes,
+      Unarchive</button>
+  </div>
+</ng-template>
+
+<ng-template #BulkArchiveFolder let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Archive</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Are you sure you want to archive these folders and/or documents? This will hide them
+      by default. After 30 days, and clients will not be able to access them.
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="archiveBulkData()" id="yes-btn">Yes,
+      archive</button>
+  </div>
+</ng-template>
+
+<ng-template #noFileShared let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Revoke Access ({{selectedDocumentsId.length}}
+      {{selectedDocumentsId.length > 1 ? ' Items' : ' Item'}})
+    </h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <h4 class="mb-8 text-xlarge mt-0">No shared users</h4>
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      The documents selected are not being shared with any external users.
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')"
+      id="close-model-bottom">Close</button>
+  </div>
+</ng-template>
+
+<ng-template #BulkUnarchiveFolder let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Unarchive</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Are you sure you want to unarchive these folders and/or documents?
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="unarchiveBulkData()" id="yes-unarchive-btn">Yes,
+      Unarchive</button>
+  </div>
+</ng-template>
+
+<ng-template #MultipleDocumentDownloadNoCheckout let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Check Out Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Do you want to check out your downloaded documents?
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="multipleDocumentCheckout(false)" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="multipleDocumentCheckout(true)" id="yes-checkout-btn">Yes,
+      check out</button>
+  </div>
+</ng-template>
+
+<ng-template #MultipleDocumentDownloadCheckout let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Check Out</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex lh-20" *ngIf="isdmsAdmin">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      At least one of these documents is already checked out. what do you want to do?
+    </div>
+    <div class="d-flex lh-20" *ngIf="!isdmsAdmin">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      At least one of these documents is already checked out, so you cannot check those out. What do you want to do with
+      the other files?
+    </div>
+    <br>
+    <div class="d-flex align-items-center">
+      <label class="cust-radio">
+        <input type="radio" id="check1" [ngModelOptions]="{standalone: true}" [(ngModel)]="downloadChoiceOption"
+          name="downloadChoice" value="Available">
+        <span class="radio-style"></span>
+      </label>
+      <span class="ml-16" for="check1">Only check out available documents</span>
+    </div><br>
+    <div class="d-flex align-items-center" *ngIf="isdmsAdmin">
+      <label class="cust-radio">
+        <input type="radio" id="check2" [ngModelOptions]="{standalone: true}" [(ngModel)]="downloadChoiceOption"
+          value="All" name="downloadChoice">
+        <span class="radio-style"></span>
+      </label>
+      <span class="ml-16" for="check2">Check out all documents</span>
+    </div><br>
+    <div class="d-flex align-items-center">
+      <label class="cust-radio">
+        <input type="radio" id="check3" [ngModelOptions]="{standalone: true}" [(ngModel)]="downloadChoiceOption"
+          value="No" name="downloadChoice">
+        <span class="radio-style"></span>
+      </label>
+      <span class="ml-16" for="check3">Do not check out any documents</span>
+    </div>
+  </div>
+  <div class="modal-footer">
+
+    <button type="button" class="btn btn-primary" (click)="submitDownloadOption()" id="submit-btn">Submit</button>
+  </div>
+</ng-template>
+
+
+<ng-template #DocumentAccess let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-4">Document Access
+      ({{ (shareDocumentLength == 1) ? '1 item': shareDocumentLength+ ' items'}})</h3>
+    <span
+      class="helper-text d-block font-weight-normal">{{ extraUsers.length + selectedClients.length + selectedClientsAssoc.length }}
+      members</span>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <h4 class="mb-8 text-xlarge mt-0">Share with others</h4>
+    <p class="helper-text font-weight-normal lh-20">Select to share documents with clients, client associations, and
+      other individuals</p>
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="form-group">
+          <label>Client (optional)</label>
+          <app-multiselect-dropdown [title]="titleClient" [clientDropdown]="true" [selections]="selectedClients"
+            [selectedMessage]="'clients selected'" [placeholder]="'Search for a client'" [displaySubItem]="clientsArray"
+            [filterName]="clientsFilterName" (onSelectionChanged)="selectClientsDropDown($event)"
+            (clearFilter)="clearClientsSelections()" (applyFilter)="applyClients()" id="multi-select-client-selection">
+          </app-multiselect-dropdown>
+          <div class="cate-scroll" slimScroll [options]="opts">
+            <ul class="list-unstyled cate-list cate-ownerlist m-0" *ngIf="selectedClientsArr?.length">
+              <li class="d-flex justify-content-between align-items-center"
+                *ngFor="let obj of selectedClientsArr;trackBy: trackByFn">
+                <div>
+                  <strong class="font-weight-medium">{{ obj.name }}</strong>
+                  <p class="m-0">{{ obj.email }}</p>
+                </div>
+                <span class="cursor-pointer" (click)="removeSelectedClient(obj)"><em
+                    class="icon icon-close icon-color icon-xsmall"></em></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label>Client Association (optional)</label>
+          <app-multiselect-dropdown [title]="titleClientAssoc" [clientDropdown]="true"
+            [selections]="selectedClientsAssoc" [selectedMessage]="'client associations selected'"
+            [placeholder]="'Search for a client association'" [displaySubItem]="clientsAssocArray"
+            [filterName]="clientsAssocFilterName" (onSelectionChanged)="selectClientsDropDown($event, true)"
+            (clearFilter)="clearClientsSelections(true)" (applyFilter)="applyClients()"
+            [isDisabled]="!selectedClients?.length" id="multi-select-client-asscociation">
+          </app-multiselect-dropdown>
+          <div class="cate-scroll" slimScroll [options]="opts">
+            <ul class="list-unstyled cate-list cate-ownerlist m-0 client-asso" *ngIf="selectedClientsAssocArr?.length">
+              <li class="d-flex justify-content-between align-items-center"
+                *ngFor="let obj of selectedClientsAssocArr;trackBy: trackByFn">
+                <div>
+                  {{ obj.name }}
+                </div>
+                <span class="cursor-pointer" (click)="removeSelectedClient(obj, true)"><em
+                    class="icon icon-close icon-color icon-xsmall"></em></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group">
+          <label>Other (optional)</label>
+          <input type="text" class="form-control" placeholder="Enter name" [(ngModel)]="otherUserName"
+            (keyup.enter)="addOtherUser()" id="enter-name-text">
+          <div class="cate-scroll" slimScroll [options]="opts">
+            <div *ngFor="let user of otherUsersArr; trackBy: trackByFn;let i = index;">
+              <div class="row gutter-16 pt-8">
+                <div class="col-6">
+                  <ul class="list-unstyled cate-list cate-ownerlist m-0 h-100">
+                    <li class="d-flex justify-content-between align-items-center m-0 h-100">
+                      <div>
+                        <strong class="font-weight-medium">{{ user.name }} </strong>
+                      </div>
+                      <span class="cursor-pointer" (click)="removeOtherUser(i)" id="remove-other-user-{{i}}"><em
+                          class="icon icon-close icon-color icon-xsmall"></em></span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="col-6" [ngClass]="{'email-exist has-error': user.emailError}">
+                  <input type="email" class="form-control" [(ngModel)]="user.email" placeholder="Enter email address"
+                    (blur)="checkEmailUnique($event, i)" id="enter-user-email-{{i}}">
+                  <span class="field-message text-danger" *ngIf="user.emailError"><em class="icon icon-error mr-4"></em>
+                    {{ user.emailError }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h4 class="mb-8 text-xlarge mt-0">Share access</h4>
+    <p class="helper-text font-weight-normal lh-20">External users that this document is currently shared with.</p>
+    <p *ngIf="!extraUsers.length"><em class="icon icon-info text-primary text-large mr-3"></em> This document has not
+      been shared yet.</p>
+    <div class="owner-scroll" *ngIf="extraUsers.length">
+      <ul class="list-unstyled cate-list cate-ownerlist mb-24">
+        <li class="d-flex justify-content-between align-items-center"
+          *ngFor="let obj of extraUsers;trackBy: trackByFn;let i = index">
+          <div>
+            <strong class="font-weight-medium"
+              style="text-transform: capitalize;">{{ (obj.lastName) ? obj.lastName: '' }}
+              {{ (obj.firstName) ? obj.firstName: '' }} <span
+                class="helper-text d-inline-block ml-8 small">{{ obj?.securityGroup }}</span></strong>
+            <p class="m-0">{{ obj?.email }}</p>
+          </div>
+          <a href="javascript:void(0);" class="font-weight-medium" (click)="setRevokeUsers(obj, i)"
+            id="revoke-access-{{i}}">Revoke Access</a>
+        </li>
+      </ul>
+    </div>
+    <h4 class="mb-16 text-xlarge mt-0">Share Link</h4>
+    <div class="form-group">
+      <label>Share Link</label>
+      <div class="row gutter-16">
+        <div class="col-6">
+          <input type="text" class="form-control" [(ngModel)]="shareLink" readonly>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-primary btn-icon btn-block py-8" type="button" (click)="copyToClipboard()"
+            id="copy-clipboard"><i class="icon icon-plus"></i> Copy Link</button>
+        </div>
+      </div>
+    </div>
+    <h4 class="mb-16 text-xlarge mt-0">Share Expiration Date</h4>
+    <div class="form-group">
+      <label>Expiration Date (optional)</label>
+      <div class="row gutter-16">
+        <div class="col-6">
+          <app-date-picker [isNgModel]='true' placeholderText="Select an expiration date" [(data)]='linkExpirationDate'
+            (dataChange)='applyFilter()' id="expiration-date"></app-date-picker>
+          <span class="field-message text-danger" [style.display]="(expirationDateErrMsg) ? 'block': 'none'"
+            *ngIf="expirationDateErrMsg">
+            <em class="icon icon-error mr-4"></em>
+            {{ expirationDateErrMsg }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-model">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="disableDocAccess" (click)="updateAccess()"
+      id="update-access">Update
+      Access</button>
+  </div>
+  <app-loader [active]="shareDocLoading"></app-loader>
+</ng-template>
+
+
+<ng-template #RejectReason let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Reject {{singleReviewPendingDocId ? 'Document' : 'Documents'}}</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group position-relative mb-0">
+      <label>Provide Reason <sup>*</sup></label>
+      <span class="count-char">{{rejectReason.length}}/250</span>
+      <textarea class="form-control" [(ngModel)]="rejectReason" maxlength="250" id="reject-reason"></textarea>
+      <span class="field-message text-danger" *ngIf="!rejectReason  && rejectFormSubmitted"><em
+          class="icon icon-error mr-4"></em>
+        Please enter a reason.
+      </span>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="rejectDocWithReason('reject')"
+      id="reject-btn">Reject</button>
+  </div>
+</ng-template>
+
+<ng-template #ApproveDocument let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Approve {{singleReviewPendingDocId ? 'Document' : 'Documents'}}</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      Are you sure you want to approve {{singleReviewPendingDocId ? 'this' : 'these' }}
+      {{singleReviewPendingDocId ? 'document' : 'documents'}}?
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="rejectDocWithReason('approve')" id="yes-approve-btn">Yes,
+      Approve</button>
+  </div>
+</ng-template>
+
+
+<ng-template #ShareDocument let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Share Document
+      ({{ (shareDocumentLength == 1) ? '1 item':  shareDocumentLength+ ' items'}})</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="row gutter-16">
+      <div class="col-9">
+        <h4 class="mb-8 text-xlarge mt-0">Share with others</h4>
+        <p class="helper-text font-weight-normal lh-20">This will share the document with the selected users. Users with
+          whom the document is already shared with will not be affected.</p>
+      </div>
+    </div>
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="form-group">
+          <label>Client (optional)</label>
+          <app-multiselect-dropdown [title]="titleClient" [clientDropdown]="true" [selections]="selectedClients"
+            [selectedMessage]="'clients selected'" [placeholder]="'Search for a client'" [displaySubItem]="clientsArray"
+            [filterName]="clientsFilterName" (onSelectionChanged)="selectClientsDropDown($event)"
+            (clearFilter)="clearClientsSelections()" (applyFilter)="applyClients()" id="selected-clients-multi">
+          </app-multiselect-dropdown>
+          <div class="cate-scroll">
+            <ul class="list-unstyled cate-list cate-ownerlist m-0" *ngIf="selectedClientsArr?.length">
+              <li class="d-flex justify-content-between align-items-center"
+                *ngFor="let obj of selectedClientsArr;trackBy: trackByFn; let i = index;" id="client-info-{{i}}">
+                <div>
+                  <strong class="font-weight-medium">{{ obj.name }}</strong>
+                  <p class="m-0">{{ obj.email }}</p>
+                </div>
+                <span class="cursor-pointer" (click)="removeSelectedClient(obj.clientId)"
+                  id="remove-selected-client-{{i}}"><em class="icon icon-close icon-color icon-xsmall"></em></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label>Client Association (optional)</label>
+          <app-multiselect-dropdown [title]="titleClientAssoc" [clientDropdown]="true"
+            [selections]="selectedClientsAssoc" [selectedMessage]="'client associations selected'"
+            [placeholder]="'Search for a client association'" [displaySubItem]="clientsAssocArray"
+            [filterName]="clientsAssocFilterName" (onSelectionChanged)="selectClientsDropDown($event, true)"
+            (clearFilter)="clearClientsSelections(true)" (applyFilter)="applyClients()"
+            [isDisabled]="!selectedClients?.length" id="client-association-optional">
+          </app-multiselect-dropdown>
+          <div class="cate-scroll">
+            <ul class="list-unstyled cate-list cate-ownerlist m-0 client-asso" *ngIf="selectedClientsAssocArr?.length">
+              <li class="d-flex justify-content-between align-items-center"
+                *ngFor="let obj of selectedClientsAssocArr; trackBy: trackByFn;let i = index;"
+                id="client-asso-info-{{i}}">
+                <div>
+                  {{ obj.name }}
+                </div>
+                <span class="cursor-pointer" (click)="removeSelectedClient(obj.clientId, true)"
+                  id="remove-client-asso-{{i}}"><em class="icon icon-close icon-color icon-xsmall"></em></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group">
+          <label>Other (optional)</label>
+          <input type="text" class="form-control" placeholder="Enter name" [(ngModel)]="otherUserName"
+            (keyup.enter)="addOtherUser()" id="other-name-optional">
+          <div *ngFor="let user of otherUsersArr;trackBy: trackByFn ;let i = index;" id="user-info-{{i}}">
+            <div class="row gutter-16 pt-8">
+              <div class="col-6">
+                <ul class="list-unstyled cate-list cate-ownerlist m-0 h-100">
+                  <li class="d-flex justify-content-between align-items-center m-0 h-100">
+                    <div>
+                      <strong class="font-weight-medium">{{ user.name }} </strong>
+                    </div>
+                    <span class="cursor-pointer" (click)="removeOtherUser(i)" id="remove-o-{{i}}"><em
+                        class="icon icon-close icon-color icon-xsmall"></em></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-6" [ngClass]="(user.emailError) ? 'email-exist has-error' : ''">
+                <input type="email" class="form-control" [(ngModel)]="user.email" placeholder="Enter email address"
+                  (blur)="checkEmailUnique($event, i)" id="user-em-{{i}}">
+                <span class="field-message text-danger" *ngIf="user.emailError"><em class="icon icon-error mr-4"></em>
+                  {{ user.emailError }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="mb-16 text-xlarge mt-0">Share Expiration Date</h4>
+    <div class="form-group">
+      <label>Expiration Date (optional)</label>
+      <div class="row gutter-16">
+        <div class="col-6">
+          <app-date-picker [isNgModel]='true' placeholderText="Select an expiration date" [(data)]='linkExpirationDate'
+            (dataChange)='applyFilter()' id="ex-date"></app-date-picker>
+          <span class="field-message text-danger" [style.display]="(expirationDateErrMsg) ? 'block': 'none'"
+            *ngIf="expirationDateErrMsg"><em class="icon icon-error mr-4"></em>
+            {{ expirationDateErrMsg }}
+          </span>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="expirationDateErrMsg" (click)="shareDocument()"
+      id="share-document-btn">Share
+      Document</button>
+  </div>
+  <app-loader [active]="shareDocLoading"></app-loader>
+</ng-template>
+
+
+<ng-template #GrantShareRights let-modal>
+  <div class="modal-header d-block pb-8">
+    <h3 class="modal-title mb-0">Grant Share Rights</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p class="helper-text font-weight-normal lh-20">Select employees to grant them rights to the share the document to
+      their users.</p>
+    <div class="form-group">
+      <label>Employees <sup>*</sup></label>
+      <app-multiselect-dropdown [title]="titleEmployee" [selections]="selectedEmployeeArray"
+        [displaySubItem]="employeeArray" [filterName]="employeeFilterName"
+        (onSelectionChanged)="employeesSelectionChanged($event)" (clearFilter)="clearEmployess()"
+        (applyFilter)="applyEmployess()" [selectedMessage]="'employees selected'" id="multi-employees">
+      </app-multiselect-dropdown>
+    </div>
+    <h4 class="my-0" *ngIf="selectedEmployeeArray?.length">Who Has Access</h4>
+    <div class="grant-share-block" slimScroll [options]="opts" *ngIf="selectedEmployeeArray?.length">
+      <ul class="list-unstyled cate-list cate-ownerlist m-0">
+        <li class="d-flex justify-content-between align-items-center"
+          *ngFor="let emp of selectedEmployeeArray; trackBy: trackByFn;let i = index;" id="selected-emp-{{i}}">
+          <div class="d-flex">
+            <div class="owner-pic">
+              <img [src]="emp.image" onerror="this.src='assets/images/user.png'" alt="">
+            </div>
+            <div>
+              <strong class="font-weight-medium">{{ emp.name }}</strong>
+              <p class="m-0">{{ emp.email }}</p>
+            </div>
+          </div>
+          <a href="javascript:void(0);" *ngIf="emp.checkRevoke" class="font-weight-medium"
+            (click)="removeLocalEmployee(emp, i)" id="remove-emp-{{i}}">Revoke
+            Access</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="updateShareRights()"
+      [disabled]="!selectedEmployeeArray?.length && !oriEmployeeShareRights.length" id="update-share-rights-btn">Update
+      Share
+      Rights</button>
+  </div>
+</ng-template>
+
+
+
+<ng-template #RevokeAccess let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Revoke Access ({{selectedDocumentsId.length}}
+      {{selectedDocumentsId.length > 1 ? ' Items' : ' Item'}})
+    </h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p class="helper-text font-weight-normal lh-20">Revoke document share access from the list of users below.
+      Each user listed has access to at least one selected document (or document in the selected folder)</p>
+    <ul class="list-unstyled cate-list cate-ownerlist m-0">
+      <li class="d-flex justify-content-between align-items-center"
+        *ngFor="let rUser of sharedFileClients;trackBy: trackByFn;let i = index" id="revoke-user-{{i}}">
+        <div>
+          <strong class="font-weight-medium" style="text-transform: capitalize;">{{ rUser.fullName }}</strong>
+          <p class="m-0">{{ rUser.clientEmail }}</p>
+          <span class="small font-weight-medium d-block">
+            <div *ngFor="let client of rUser.clientTypes;trackBy: trackByFn"> {{client?.name}} </div>
+          </span>
+        </div>
+        <a href="javascript:void(0);" class="font-weight-medium" (click)="setRevokeUsers(rUser, i, true)"
+          id="set-revoke-{{i}}">Revoke
+          Access</a>
+      </li>
+    </ul>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="updateRevokeFiles()" id="update-access-btn">Update
+      Access</button>
+  </div>
+</ng-template>
+
+
+<ng-template #sendEsign let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-4">Send For E-Signature</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row gutter-16">
+      <div class="col-7">
+        <app-send-for-esign #eSign (initialised)="eSignInit($event)" [listOfSigners]="signersList"
+          [documentData]="selectedRowForDownload">
+        </app-send-for-esign>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="eSign.loading" (click)="sendForESign(null,toManyTokens,insufficientTokens)"
+      id="send-for-e-btn">Send For
+      E-Signature</button>
+  </div>
+  <app-loader [active]="sendEsignLoading"></app-loader>
+</ng-template>
+
+
+<ng-template #SendForESignature let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Send For E-Signature</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">You can only send a document for E-Signature if it is in a matter folder.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="ok-btn">Ok </button>
+  </div>
+</ng-template>
+
+
+<ng-template #approveDocument let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Approve Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <label class="mb-20">Do you want to move this document from its current location?</label>
+    <div class="custom-control custom-radio pr-0">
+      <input type="radio" id="yes" name="approveAndMoveDoc" [value]="true" [(ngModel)]="approveAndMoveDoc"
+        class="custom-control-input">
+      <label class="custom-control-label" for="yes">Yes, move document</label>
+    </div>
+    <div *ngIf="approveAndMoveDoc" class="mt-20 pl-12" [ngClass]="(isExist)?'form-group has-error':'form-group'">
+      <label>Folder Name</label>
+      <app-multilevel-folder-dropdown [folderId]="clientFolder"
+        (onSelectionChanged)="onSelectionChanged($event, true, true)" [isClientFolder]="true">
+      </app-multilevel-folder-dropdown>
+      <span class="field-message text-danger" *ngIf="isExist"><em class="icon icon-error mr-4"></em>
+        {{ isExistErr }}</span>
+    </div>
+
+    <div class="custom-control custom-radio pr-0">
+      <input type="radio" id="no" name="approveAndMoveDoc" [value]="false" [(ngModel)]="approveAndMoveDoc"
+        class="custom-control-input">
+      <label class="custom-control-label" for="no">No, do not move document</label>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="isExist || (approveAndMoveDoc && !selectFolder)"
+      (click)="approveAndMoveDocument()" id="submit-document-btn">Submit Document </button>
+  </div>
+  <app-loader [active]="approveLoading"></app-loader>
+</ng-template>
+
+<ng-template #DocumentAlreadyOutForsignature let-modal>
+  <div class="modal-header d-block pb-12">
+    <h3 class="modal-title mb-0">Send for E-Signature</h3>
+    <button type="button" class="close mt-12 mr-16" (click)="modal.dismiss('Cross click')" aria-label="Close"
+      id="no-event-close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      <p>This document is already out for signature. To re-send the document for signatures, the document will need to
+        be reverted to its pre-signature state before re-sending. Are you sure you want to do this?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary"
+      (click)="acceptESignForDocument(selectedRowForDownload, sendEsign, SendForESignature)">Accept</button>
+  </div>
+</ng-template>
+
+<ng-template #toManyTokens let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Missing Signers</h3>
+    <button type="button" class="close" (click)="forcedProceedEsign(selectedRowForDownload, sendEsign, SendForESignature)" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">At least one specified signer does not have a signature token in the provided document. The document will not be sent to these signers. Do you want to proceed?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="forcedProceedEsign(selectedRowForDownload, sendEsign, SendForESignature)" id="cancel-btn">Back</button>
+    <button type="button" class="btn btn-primary" (click)="sendForESign(null,toManyTokens,insufficientTokens,true)" id="ok-btn">Yes, Send Document</button>
+  </div>
+</ng-template>
+
+<ng-template #insufficientTokens let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Missing Signers</h3>
+    <button type="button" class="close" (click)="forcedProceedEsign(selectedRowForDownload, sendEsign, SendForESignature)" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">The provided document contains signature lines for at least one signer you have not specified. The document will not be sent to these signers, and their signature tokens will be removed. Do you want to proceed?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="forcedProceedEsign(selectedRowForDownload, sendEsign, SendForESignature)" id="cancel-btn">Back</button>
+    <button type="button" class="btn btn-primary" (click)="sendForESign(null,toManyTokens,insufficientTokens,true)" id="ok-btn">Yes, Send Document</button>
+  </div>
+</ng-template>

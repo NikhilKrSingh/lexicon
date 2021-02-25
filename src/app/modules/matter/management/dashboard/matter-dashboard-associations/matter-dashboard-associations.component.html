@@ -1,0 +1,257 @@
+
+      
+      <div class="d-flex justify-content-between align-items-start">
+        <h2 class="mb-32">Matter Associations</h2>
+        <button type="button" class="btn btn-primary"
+          (click)="editAssociations()" *ngIf="!isEditMode" id="add-edit-associations-btn">
+          Add/Edit Associations
+        </button>
+      </div>
+      <div class="matter-assoc">
+        <div class="info-block">
+          <h3>Opposing Party</h3>
+          <div class="custom-table">
+            <div class="table-responsive">
+              <table class="table table-striped table-borderless" id="opposing-party-tbl">
+                <thead>
+                  <tr>
+                    <th>Contact Number</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                    <th class="text-right" *ngIf="isEditMode">Action</th>
+                  </tr>
+                </thead>
+                <tbody *ngIf="opposingPartyList.length > 0 ; else no_data_found">
+                  <ng-container *ngFor="let party of opposingPartyList; trackBy :trackByFn;let i = index;">
+                    <tr id="opposing-party-index-{{i}}">
+                      <td>{{party?.uniqueNumber}}</td>
+                      <td>
+                        <span *ngIf='!party?.isCompany'>{{party.lastName}}, {{party.firstName}}</span>
+                        <span *ngIf='party?.isCompany'>{{party.companyName}}</span>
+                      </td>
+                      <td> {{party.isCompany ? 'Corprate' : 'Personal'}} </td>
+                      <td>{{ (party?.email) ? party.email : '--' }}</td>
+                      <td>{{(party?.primaryPhone && party.primaryPhone?.name) ? (party.primaryPhone?.name | phoneFormatter) : '--'}}</td>
+                      <td>{{party.isActive ? 'Active' : 'Inactive'}} </td>
+                      <td class="text-right" *ngIf="isEditMode">
+                        <div class="icon-group d-flex justify-content-end">
+                          <span (click)='editOpposingPartyClick(party)' id="edit-opposing-party-index-{{i}}">
+                            <em class="icon icon-edit"></em>
+                          </span>
+                          <span
+                            (click)="deleteMatterAssociations(error_data.opposingparty_delete_confirm, party.id,'Opposing Party')" id="delete-opposing-party-index-{{i}}">
+                            <em class="icon icon-remove icon-color"></em>
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+            <button *ngIf="isEditMode" class="btn btn-link btn-icon px-0 d-flex align-items-center mb-16" type="button"
+              (click)='addOpposingPartyClick()' id="add-opposing-party-btn">
+              <i class="icon icon-add-circle"></i>Add Opposing Party
+            </button>
+          </div>
+        </div>
+        <div class="info-block pt-24">
+          <h3>Opposing Counsel</h3>
+          <div class="custom-control custom-checkbox mb-24 pr-0">
+            <input type="checkbox" class="custom-control-input" id="td-check-101" [disabled]="!isEditMode" [(ngModel)]="sameAsOpposingParty">
+            <label class="custom-control-label" [ngClass]="{'text-muted': !isEditMode}" for="td-check-101"> Opposing Party is Representing
+              Themselves</label>
+          </div>
+          <div class="custom-table" *ngIf="!sameAsOpposingParty">
+            <div class="table-responsive">
+              <table class="table table-striped table-borderless" id="opposing-counsel-tbl">
+                <thead>
+                  <tr>
+                    <th>Contact Number</th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                    <th class="text-right" *ngIf="isEditMode">Action</th>
+                  </tr>
+                </thead>
+                <tbody *ngIf="opposingCounselList.length > 0 ; else no_data_found">
+                  <tr *ngFor="let counsel of opposingCounselList; trackBy :trackByFn;let i = index;" id="opposing-counsel-index-{{i}}">
+                    <td>{{counsel.uniqueNumber}}</td>
+                  <td> {{(counsel?.lastName && counsel?.firstName) ? counsel?.lastName+', '+counsel?.firstName : (counsel?.firstName) ? counsel?.firstName : '--'}}</td>
+                  <td>{{counsel?.companyName}}</td>
+                  <td> {{counsel?.email}} </td>
+                  <td>{{(counsel?.primaryPhone && counsel.primaryPhone?.name) ? (counsel.primaryPhone?.name | phoneFormatter) : '--'}}</td>
+                  <td>{{counsel?.isActive ? 'Active' : 'Inactive'}} </td>
+                    <td class="text-right" *ngIf="isEditMode">
+                      <div class="icon-group d-flex justify-content-end">
+                        <span (click)='editOpposingCounselClick(counsel)' id="edit-opposing-counsel-index-{{i}}">
+                          <em class="icon icon-edit icon-color"></em>
+                        </span>
+                        <span
+                        (click)="deleteMatterAssociations(error_data.opposingcounsel_delete_confirm, counsel.id,'Opposing Counsel')" id="delete-opposing-counsel-index-{{i}}">
+                        <em class="icon icon-remove icon-color"></em>
+                      </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+            </table>
+          </div>
+          <button *ngIf="isEditMode" class="btn btn-link btn-icon px-0 d-flex align-items-center mb-16" type="button"
+            (click)='addOpposingCounselClick()' id="add-opposing-counsel-btn">
+            <i class="icon icon-add-circle"></i>Add Opposing Counsel
+          </button>
+        </div>
+      </div>
+      <div class="info-block pt-24">
+        <h3 class="mb-16">Expert Witnesses</h3>
+        <div class="custom-table">
+          <div class="table-responsive">
+            <table class="table table-striped table-borderless" id="expert-witness-tbl">
+              <thead>
+                <tr>
+                  <th>Contact Number</th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                  <th class="text-right" *ngIf="isEditMode">Action</th>
+                </tr>
+              </thead>
+              <tbody *ngIf="expertWitnessList.length > 0 ; else no_data_found">
+                <tr *ngFor="let witness of expertWitnessList; trackBy :trackByFn;let i = index;" id="expert-witness-index-{{i}}">
+                  <td>{{witness?.uniqueNumber}}</td>
+                  <td> {{witness?.lastName+', '+witness?.firstName}}</td>
+                  <td>{{witness?.companyName}}</td>
+                  <td> {{witness?.email}} </td>
+                  <td>{{(witness?.primaryPhone && witness.primaryPhone?.name) ? (witness.primaryPhone?.name | phoneFormatter) : '--'}}</td>
+                  
+                  <td>{{witness?.isActive ? 'Active' : 'Inactive'}} </td>
+                  <td class="text-right" *ngIf="isEditMode">
+                    <div class="icon-group d-flex justify-content-end">
+                      <span (click)='editExpertWitnessClick(witness)' id="edit-expert-witness-index-{{i}}">
+                        <em class="icon icon-edit icon-color"></em>
+                      </span>
+                      <span
+                        (click)="deleteMatterAssociations(error_data.expert_witnesses_delete_confirm, witness.id,'Expert Witnesses')" id="delete-expert-witness-index-{{i}}">
+                        <em class="icon icon-remove icon-color"></em>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button *ngIf="isEditMode" class="btn btn-link btn-icon px-0 d-flex align-items-center mb-16" type="button"
+            (click)='addExpertWitnessClick()' id="add-exprt-witness-btn">
+            <i class="icon icon-add-circle"></i>Add Expert Witness
+          </button>
+        </div>
+      </div>
+      <div class="info-block pt-24">
+        <h2 class="mb-12">Blocked Employees</h2>
+        <p>Blocked employees cannot see the matter anywhere in the system, including in detail, lists,
+          mentions, or
+          reports, unless otherwise specified.</p>
+          
+        <div class="custom-table">
+          <div>
+            <table class="table table-striped table-borderless" *ngIf='originalBlockedUserList?.length == 0'>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-center" colspan="5">No Data Found.</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="table-responsive" *ngIf='originalBlockedUserList?.length > 0'>
+              <ngx-datatable #blockedUserTable class="material common-table datatable-auto datatable-auto-height" [rows]="blockedUserList"
+                [columnMode]="ColumnMode.force" [headerHeight]="50" [messages]="messages"
+                rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+                [scrollbarH]="true" id="blocked-employee-tbl">
+                <ngx-datatable-column [resizeable]="false" prop='lastName' name="Name" [width]="200">
+                  <ng-template ngx-datatable-cell-template let-row='row'>
+                    <div>
+                      {{row.lastName}} {{row.lastName ? ', ' : ''}} {{row.firstName}}
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="200"> </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [width]="540"> </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" *ngIf="isEditMode" name="Action" [width]="100" [sortable]="false">
+                  <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                    <div class="icon-group d-flex justify-content-end">
+                      <span>
+                        <em class="icon icon-remove icon-color" (click)='deleteBlockedEmployee(row , $event)' id="delete-blocked-employee-index-{{rowIndex}}"></em>
+                      </span>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                </ngx-datatable>
+              </div>
+            </div>
+            <button *ngIf="isEditMode" class="btn btn-link btn-icon px-0 d-flex align-items-center mb-16" type="button"
+              (click)='addBlockedEmployee()' id="add-blocked-employee-btn">
+              <i class="icon icon-add-circle"></i>Add Blocked Employee
+            </button>
+          </div>
+        </div>
+      <app-loader [active]="matterAssocLoading"></app-loader>
+    </div>
+    <div class="info-block pt-24" *ngIf="isEditMode">
+      <div class="form-group">
+        <label for="">You may leave change notes for the audit history (optional).</label>
+        <textarea class="form-control" rows="4" placeholder="Enter Note Text" id="edit-note-textarea"></textarea>
+      </div>
+    </div>
+
+  <div *ngIf="isEditMode" class="d-flex justify-content-end">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="cancel()" id="cancle-btn"
+      >Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="cancel()" id="save-btn">Save</button>
+  </div>
+  </div>
+
+  <ng-template #no_data_found>
+    <tbody>
+    <tr>
+      <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+    </tr>
+    </tbody>
+  </ng-template>
+
+
+<ng-container *ngIf="addOpposingParty">
+    <app-add-opposing-party [uniqueNumber]="uniqueNumber" [mode]='addOpposingPartyMode' [association]='selectedOpposingParty'
+      [associateOpposingParty]="associateOpposingParty" [associateFlag]="'add'" [matterId]="matterId"
+      (closeModel)="closeOpposingParty($event)">
+    </app-add-opposing-party>
+  </ng-container>
+
+  
+  <ng-container *ngIf='addExpertWitness'>
+    <app-add-expert-witnesses [uniqueNumber]="uniqueNumber" [mode]='addExpertWitnessMode' [association]='selectedExpertWitness' [matterId]="matterId"
+      [associateExpertWitness]="associateExpertWitness" (closeModel)="closeExpertWitness($event)">
+    </app-add-expert-witnesses>
+  </ng-container>
+
+  
+  <ng-container *ngIf='addOpposingCouncel'>
+    <app-add-opposing-counsel [uniqueNumber]="uniqueNumber" [mode]='addOpposingCouncelMode' [association]='selectedOpposingCounsel'
+      [associateOpposingCouncil]="associateOpposingCouncil" [matterId]="matterId"
+      (closeModel)='closeOpposingCounsel($event)' [uniqueNumber]="councelUniqueNumber">
+    </app-add-opposing-counsel>
+  </ng-container>

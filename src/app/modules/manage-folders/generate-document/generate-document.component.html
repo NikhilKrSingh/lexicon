@@ -1,0 +1,475 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/manage-folders/document']"><a href="javascript:void(0)">Document Management</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {{(actionTaken === 'preview') ? 'Preview' : 'Generate'}} Document - Document Title</li>
+    </ol>
+    <div class="heading">
+      <h1>{{(actionTaken === 'preview') ? 'Preview' : 'Generate'}} Document</h1>
+    </div>
+    <div class="card" *ngIf="(actionTaken !== 'preview') || !pdfUrl">
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <h3 class="mb-24">Generate Document</h3>
+          <div class="section-area">
+            <div class="row gutter-16">
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Document Name</label>
+                  <input type="text" class="form-control" placeholder="Document Title" disabled [value]="docName" id="document-name">
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Name <sup>*</sup></label>
+                  <input type="text" class="form-control" placeholder="Provide a name" [(ngModel)]="name" id="name">
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16">
+              <div class="col-4">
+                <div class="form-group">
+                  <label>Target Folder <sup>*</sup></label>
+                  <ng-select [items]="folderList" [placeholder]="'Select Target Folder'" [bindValue]="'folderId'"
+                    [(ngModel)]="selectedTargetFolderId" [bindLabel]="'folderName'" [notFoundText]="'No record found'"
+                    (change)="targetFolderChange($event)" [clearable]="true" id="target-folder">
+                  </ng-select>
+
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16">
+              <div class="col-12">
+                <div class="form-group">
+                  <div class="row gutter-16">
+                    <div class="col-4">
+                      <label>Clients <sup>*</sup></label>
+                      <app-multiselect-dropdown [title]="title" [selections]="selectedClients" [displaySubItem]="clients"
+                        [filterName]="'Apply'" [selectedMessage]="'Clients selected'"
+                        (onSelectionChanged)="getClientsSelected($event)"
+                        (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                        (clearFilter)="clrFiltercategory()" (applyFilter)="applyFilter($event)" id="clients-multi"></app-multiselect-dropdown>
+                    </div>
+                  </div>
+                  <div class="row gutter-16 pt-8" *ngFor="let client of displayClients; trackBy :trackByFn;let i = index">
+                    <div class="col-4">
+                      <ul class="list-unstyled cate-list m-0">
+                        <li class="d-flex justify-content-between align-items-center helper-text clnt-pad">
+                          <div>
+                            <strong class="font-weight-medium">{{ client?.name }}</strong>
+                          </div>
+                          <span class="cursor-pointer" (click)="removeClient(client.id, i)"><em
+                              class="icon icon-close icon-color icon-xsmall"></em></span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="col-8">
+                      <div class="row">
+                        <div class="col-6">
+                          <div class="form-group mt-8 mb-0">
+                            <app-multiselect-dropdown [title]="matterTitle" [selections]="selectedMatters[i]"
+                              [displaySubItem]="matters[i]" [filterName]="'Apply'" [selectedMessage]="'Select Matter'"
+                              (onSelectionChanged)="getMattersSelected($event, i)"
+                              (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                              (clearFilter)="clrFiltercategory()" (applyFilter)="applyFilter($event)">
+                            </app-multiselect-dropdown>
+
+                          </div>
+                        </div>
+                        <div class="col-5">
+                          <div class="d-flex align-items-start folder-alert pt-8"
+                            *ngIf="(selectedMatters[i] && !displayMatters[i]) || (displayMatters[i] && !displayMatters[i].length)">
+                            <em class="icon icon-info text-primary mt-4"></em>
+                            <div class="lh-20 ml-8">
+                              <p class="m-0">If a matter is not selected, the file will be sent into the <strong>root
+                                  client</strong> folder</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row" *ngFor="let mat of displayMatters[i];trackBy :trackByFn;">
+                        <div class="col-6">
+                          <ul class="list-unstyled cate-list" *ngIf="displayMatters[i] && displayMatters[i].length">
+                            <li class="d-flex justify-content-between align-items-center clnt-pad">
+                              <div>
+                                <strong
+                                  class="font-weight-medium">{{ (mat.name | titleCase) }}</strong>
+                              </div>
+                              <span class="cursor-pointer" (click)="removemMatter(mat.id, i)"><em
+                                  class="icon icon-close icon-color icon-xsmall"></em></span>
+
+                            </li>
+                          </ul>
+                        </div>
+                        <div class="col-6">
+                          <div>
+                            <div class="d-flex align-items-start folder-alert">
+                              <em class="icon icon-warning text-warning mt-4" *ngIf="!mat?.matterHasTargetFolder"></em>
+                              <div class="lh-20 ml-8" *ngIf="!mat?.matterHasTargetFolder && getTargetFolderName">
+                                <strong>Matter folder {{ getTargetFolderName | titleCase}} Does Not
+                                  Exist</strong>
+                                <p class="m-0 font-13">The generated document will be sent to the Misc. folder</p>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <app-loader [active]="infoLoading"></app-loader>
+          </div>
+        </div>
+        <div class="info-block pt-24" *ngIf="displayClients && displayClients.length && !documentData?.containsESignatureFields">
+          <h3 class="mb-24">Share With Client</h3>
+          <div class="row gutter-16 mt-8" *ngFor="let client of displayClients; trackBy :trackByFn;let i = index" id="shared-client-{{i}}">
+            <div class="col-4">
+              <ul class="list-unstyled cate-list cate-ownerlist m-0">
+                <li class="d-flex justify-content-between align-items-center m-0">
+                  <div>
+                    <strong class="font-weight-medium">{{ client?.name }}</strong>
+                  </div>
+                  <span class="cursor-pointer" (click)="removeClient(client?.id)"><em
+                      class="icon icon-close icon-color icon-xsmall"></em></span>
+                </li>
+              </ul>
+            </div>
+            <div class="col-4">
+              <div class="pt-8">
+                <div class="custom-control custom-radio custom-control-inline pr-20">
+                  <input type="radio" id="share-radio-{{i}}" name="shareradio-{{i}}" class="custom-control-input"
+                    (change)="onShareSelected(client.id, i , true)" [checked]="docShare[i]?.checked">
+                  <label class="custom-control-label" for="share-radio-{{i}}">Share</label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline pr-20">
+                  <input type="radio" id="share-radio--{{i}}" name="shareradio-{{i}}" class="custom-control-input"
+                    (change)="onShareSelected(client.id, i , false)" [checked]="!docShare[i]?.checked">
+                  <label class="custom-control-label" for="share-radio--{{i}}">Do not share</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-48">
+          <h3 class="mb-8">Additional Criteria</h3>
+          <div class="row gutter-16">
+            <div class="col-lg-7">
+              <p class="lh-20">If the file includes employee, office, or event related variables (not directly related
+                to the client or matter), select them here to populate their information.</p>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group">
+                <label>Employee (optional)</label>
+                <ng-select [items]="employeeList" placeholder="Select Employee" [bindValue]="'id'"
+                  [bindLabel]="'fullName'" [selectOnTab]="true" [(ngModel)]="selectedEmployee"
+                  [notFoundText]="'No record found'" id="employee-optional">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group">
+                <label>Office (optional)</label>
+                <ng-select [items]="officeList" placeholder="Select Office" [bindValue]="'id'" [selectOnTab]="true"
+                  [bindLabel]="'officeName'" [selectOnTab]="true" [(ngModel)]="selectedOffice"
+                  [notFoundText]="'No record found'" id="office-optional">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-xl-2 col-lg-3 col-md-6">
+              <div class="form-group">
+                <label>Start Date (optional)</label>
+                <app-date-picker [isForm]='false' [isNgModel]="true" [(data)]='startDate' id="start-date-optional"></app-date-picker>
+              </div>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-6">
+              <div class="form-group">
+                <label>Start Time (optional)</label>
+                <ng-select [items]="timeList" placeholder="Select time" [bindValue]="'value'" [selectOnTab]="true"
+                  [bindLabel]="'key'" [(ngModel)]="startTime" [notFoundText]="'No record found'" id="starttime-optional">
+                </ng-select>
+                
+              </div>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-6">
+              <div class="form-group">
+                <label>End Time (optional)</label>
+                <ng-select [items]="timeList" placeholder="Select time" [bindValue]="'value'" [selectOnTab]="true"
+                  [bindLabel]="'key'" [(ngModel)]="endTime" [notFoundText]="'No record found'" id="end-time-optional">
+                </ng-select>
+                
+              </div>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-6">
+              <div class="form-group">
+                <label>End Date (optional)</label>
+                <app-date-picker [isForm]='false' [isNgModel]="true" [(data)]='endDate' id="end-date-optional"></app-date-picker>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <button class="btn btn-primary" (click)="getEvents()"
+              type="button" id="view-events-btn">View Events</button>
+            <a href="javascript:void(0)" (click)="clearFields()" class="font-weight-medium ml-16" id="clear-field-btn">Clear</a>
+          </div>
+          <div class="row gutter-16" *ngIf="showEvents">
+            <div class="col-8">
+              <div class="view-event-wrap">
+                <div class="view-event-scroll" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+                  <ul class="list-unstyled cate-list m-0">
+                    <li class="d-flex justify-content-between align-items-start" *ngFor="let event of eventList; trackBy :trackByFn;let i = index;" id="event-{{i}}">
+                      <div class="d-flex align-items-start">
+                        <label class="cust-radio mr-8 mt-4">
+                          <input type="radio" [value]="event.id" [(ngModel)]="selectedEventId" name="view-event"
+                            checked>
+                          <span class="radio-style"></span>
+                        </label>
+                        <div>
+                          <strong class="font-weight-medium d-block">{{event.title}}</strong>
+                          <ul class="mb-0 d-flex list-attend helper-text font-weight-normal list-unstyled">
+                            <li>{{event.startDateTime |  date: 'MMMM. dd, yyyy'}}</li>
+                            <li>{{event.startDateTime | date: 'hh:mm a'}} - {{event.endDateTime| date: 'hh:mm a'}}</li>
+                            <li>
+                              <em class="icon icon-user mr-4"></em>
+                              {{event.numberOfAttendees+' attendees'}}
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <a href="javascript:void(0);" (click)="eventClick(event)" class="font-weight-medium" id="view-details-{{i}}">View
+                        Details</a>
+                    </li>
+                    
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-48" *ngIf="clientNotifyArray && clientNotifyArray.length && !documentData?.containsESignatureFields">
+          <h3 class="mb-8">Notification Preferences</h3>
+          <div class="row gutter-16">
+            <div class="col-lg-6">
+              <p class="lh-20 pr-xl-24">Clients marked as <strong>Do Not Email</strong> have indicated that they do not want to receive case-related notifications through email
+                , and will not be sent the generated document. You will need to send it them individually via another method.</p>
+            </div>
+          </div>
+          <div class="row gutter-16" *ngFor="let client of clientNotifyArray; trackBy: trackByFn;let i = index;" id="notification-{{i}}">
+            <div class="col-lg-4 col-md-6">
+              <ul class="list-unstyled cate-list cate-ownerlist m-0">
+                <li class="d-flex justify-content-between align-items-center m-0 mb-8">
+                  <div>
+                    <strong class="font-weight-medium">{{client?.clientName}}</strong>
+                  </div>
+                  <span
+                    class="notify-badge font-weight-medium small">{{client?.notifyByEmail && client?.email ? client?.isShared ? 'Email' : 'Do Not Email' : 'Do Not Email'}}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-40" *ngIf="emailClients.length > 0 && !documentData?.containsESignatureFields">
+          <h3 class="mb-24">Email Notification</h3>
+          <div class="email-controls">
+            <div class="custom-control custom-radio pb-8">
+              <input type="radio" id="default-email" name="defaultemail" class="custom-control-input"
+                (change)="defaultEmailTemplate()" [checked]="defaultEmail">
+              <label class="custom-control-label" for="default-email">Default Email</label>
+            </div>
+            <div class="custom-control custom-radio pb-20">
+              <input type="radio" id="no-default-email" name="defaultemail" class="custom-control-input"
+                (change)="onEmailTemplateSelected()" [checked]="!defaultEmail">
+              <label class="custom-control-label" for="no-default-email">Custom Email</label>
+            </div>
+          </div>
+
+          
+          
+          
+          
+          
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group">
+                <label>Subject <sup *ngIf="!defaultEmail">*</sup></label>
+                <input type="text" class="form-control" [readonly]="defaultEmail" placeholder="Subject_name_example"
+                  [(ngModel)]="emailNotification.subject" id="subject">
+              </div>
+            </div>
+            <div class="col-10">
+              <div class="form-group mb-0">
+                <label>Body <sup *ngIf="!defaultEmail">*</sup></label>
+                <ejs-richtexteditor #toolsRTE id='alltoolRTE' [(ngModel)]="emailNotification.description"
+                  [toolbarSettings]="tools" [readonly]="defaultEmail"></ejs-richtexteditor>
+                <button type="button" class="btn btn-primary mt-16" (click)="insertDocLink()"
+                  [disabled]="defaultEmail">Insert Document Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="info-block pt-40" *ngIf="documentData && documentData.containsESignatureFields">
+          <h3 class="mb-16">E-Signature</h3>
+          <div class="form-group">
+            <label class="d-block mb-20">Send document for e-signature?</label>
+            <div class="custom-control custom-radio pb-8">
+              <input type="radio" id="send-doc-yes" [(ngModel)]="sendESign" class="custom-control-input" (change)="checkDocumentAlreadySent(DocumentAlreadyOutForsignature)" [value]="true">
+              <label class="custom-control-label" for="send-doc-yes">Yes</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="send-doc-no" [(ngModel)]="sendESign" class="custom-control-input" [value]="false" (change)="clearSigners()">
+              <label class="custom-control-label" for="send-doc-no">No</label>
+            </div>
+          </div>
+          <div class="row gutter-16" *ngIf="sendESign && documentData && acceptedSendForSignFlag">
+            <div class="col-5">
+              <app-send-for-esign (initialised)="eSignInit($event)" [isMattersSelected]="isMatterSelected" [selectedClients]="displayClients" [documentData]="documentData" [type]="'generate'"></app-send-for-esign>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card preview-pdf" *ngIf="(actionTaken === 'preview' && pdfUrl)">
+      <iframe width="100%" height="100%" [src]="urlSafe"></iframe>
+    </div>
+    <div class="d-flex justify-content-end mt-24">
+      <div class="btn-group">
+        
+        <button type="button" class="btn btn-light" (click)="submitForm('cancel')" id="cancel-btn">Cancel</button>
+
+        <button type="button" class="btn btn-outline-primary" *ngIf="(actionTaken !== 'preview' || !pdfUrl)" [disabled]="loading || isOfficeTypeFile"
+          (click)="actionHandle('preview');submitDocumentValid(MissingData,'','modal-lmd', 'preview')" id="pre-document-btn"
+          >Preview
+          Document</button>
+        <button type="button" class="btn btn-outline-primary" *ngIf="(actionTaken === 'preview' && pdfUrl)"
+          (click)="actionHandle('back');" id="back-btn">Back</button>
+        <button type="button" class="btn btn-primary" [disabled]="loading"
+          (click)="actionHandle('generate');submitDocumentValid(MissingData,'','modal-lmd', 'generate',false,toManyTokens,insufficientTokens)" id="generate-document">Generate
+          Document</button>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #MissingData let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-4">Missing Data</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');missingPopup.popupShow=false"
+      aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <strong class="font-weight-medium mb-16 d-block">You are missing information in the following:</strong>
+        <ul class="list-unstyled missing-list pl-28 mb-16">
+          <li *ngFor="let warning of warningsList;trackBy: trackByFn">{{warning}}</li>
+          
+        </ul>
+        <p class="m-0">Are you sure you want to continue?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light"
+      (click)="modal.dismiss('Cross click');missingPopup.popupShow=false;checkPdfExist()" id="cancle-btn">Cancel</button>
+    <button type="button" class="btn btn-primary"
+      (click)="submitForm(actionTaken, false);modal.dismiss('Cross click')" id="confirm-btn">{{actionConfirmMessage}}</button>
+  </div>
+</ng-template>
+
+
+<ng-template #cancelConfirm let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-4">Warning</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to cancel?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary"
+      (click)="submitForm('cancel');modal.dismiss('Cross click')" id="yes-btn">Yes</button>
+  </div>
+</ng-template>
+
+<ng-template #DocumentAlreadyOutForsignature let-modal>
+  <div class="modal-header d-block pb-12">
+    <h3 class="modal-title mb-0">Send for E-Signature</h3>
+    <button type="button" class="close mt-12 mr-16" (click)="sendESign=false;modal.dismiss('Cross click')" aria-label="Close" id="no-event-close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <div class="d-flex lh-20">
+      <em class="icon icon-warning icon-size-20 my-0 text-warning mr-16"></em>
+      <p>This document is already out for signature. To re-send the document for signatures, the document will need to be reverted to its pre-signature state before re-sending. Are you sure you want to do this?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="sendESign=false;modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="acceptSendForEsign()">Accept</button>
+  </div>
+</ng-template>
+<ng-template #toManyTokens let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Missing Signers</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');loading=false" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">At least one specified signer does not have a signature token in the provided document. The document will not be sent to these signers. Do you want to proceed?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');loading=false" id="cancel-btn">Back</button>
+    <button type="button" class="btn btn-primary" (click)="submitDocumentValid(MissingData,'','modal-lmd', 'generate',true)" id="ok-btn">Yes, Send Document</button>
+  </div>
+</ng-template>
+
+<ng-template #insufficientTokens let-modal>
+  <div class="modal-header d-block pb-16">
+    <h3 class="modal-title mb-0">Missing Signers</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');loading=false" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">The provided document contains signature lines for at least one signer you have not specified. The document will not be sent to these signers, and their signature tokens will be removed. Do you want to proceed?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');loading=false" id="cancel-btn">Back</button>
+    <button type="button" class="btn btn-primary" (click)="submitDocumentValid(MissingData,'','modal-lmd', 'generate',true)" id="ok-btn">Yes, Send Document</button>
+  </div>
+</ng-template>

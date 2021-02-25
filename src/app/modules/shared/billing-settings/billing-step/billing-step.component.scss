@@ -1,0 +1,14 @@
+.c-table {
+    &.ngx-datatable .datatable-body {
+        min-height: auto !important;
+    }
+}
+.close-abs{
+  position: absolute;
+  right: 15px;
+  top: 11px;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  line-height: 18px;
+}

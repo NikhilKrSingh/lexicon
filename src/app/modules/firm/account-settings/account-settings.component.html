@@ -1,0 +1,614 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a [routerLink]="['/dashboard']" href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Accounting Settings</li>
+        </ol>
+        <div class="heading">
+            <h1>Accounting Settings</h1>
+        </div>
+        <div>
+            <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+                <a href="javascript:void(0);" onclick="this.blur()" (click)="tabChange(mytabs)" *ngFor="let mytabs of alltabs;let i = index;" role="tab"
+                    class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs" id="tab-index-{{i}}">{{ mytabs }}</a>
+            </div>
+
+            <div class="card tlr-0">
+                <div class="card-body p-0">
+                    <div [ngClass]="!trustAccountingFlag || !enableTrustAccounting  ? 'tab-content p-32 min-h-0' : 'tab-content p-32 min-h-380'">
+                        <div *ngIf="selecttabs1 === alltabs[0]" class="tab-pane fade show active" role="tabpanel">
+                            <h3>Manage Bank Accounts</h3>
+
+                            <div class="d-flex align-items-center justify-content-between mb-32">
+                                <div class="header-search flex-fill d-flex">
+                                    <form action="#">
+                                        <div class="header-search-wrapper">
+                                            <input type="text" class="form-control search-input" name='description'
+                                                placeholder="Search by account name or account number"
+                                                [(ngModel)]='searchText' (keyup)='applyFilter()' [disabled]="loading" id="search-text">
+
+                                            <button class="btn" type="button" (click)='applyFilter()'
+                                                [disabled]="loading" id="search-btn">Search</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="btn-group ml-md-24 ml-0"
+                                    *ngIf="permissionList?.BANK_ACCOUNT_CONFIGURATIONisAdmin">
+                                    <button class="btn  btn-icon" type="button" [ngClass]="'btn-primary'"
+                                        [routerLink]="['/firm/add-account']" id="add-account">
+                                        <i class="icon icon-plus"></i> Add Account
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="row gutter-16">
+                                <div class="col-11">
+                                    <div class="row gutter-16">
+                                        <div class="col-3">
+                                            <label>Status</label>
+                                            <div class="form-group">
+                                                <ng-select [items]="statusFilterList" [(ngModel)]="statusFilterName"
+                                                    placeholder="Choose an option" [notFoundText]="'No record found'"
+                                                    (change)="applyFilter()" [selectOnTab]="true" id="status-select">
+                                                </ng-select>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <label>Merchant Account</label>
+                                            <div class="form-group">
+                                                <ng-select [items]="merchantAccountFilterList"
+                                                    [(ngModel)]="merchantAccountFilterId" placeholder="Choose an option"
+                                                    [bindValue]="'id'" [bindLabel]="'name'"
+                                                    [notFoundText]="'No record found'" (change)="applyFilter()"
+                                                    [selectOnTab]="true" id="merchant-ac-select">
+                                                </ng-select>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <label>Account Type</label>
+                                            <div class="form-group">
+                                                <ng-select [items]="accounTypeFilterList"
+                                                    [(ngModel)]="accounTypeFilterId" placeholder="Choose an option"
+                                                    [bindValue]="'id'" [bindLabel]="'name'"
+                                                    [notFoundText]="'No record found'" (change)="applyFilter()"
+                                                    [selectOnTab]="true"
+                                                    id="ac-type-select">
+                                                </ng-select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <label>Transaction Type</label>
+                                            <div class="form-group">
+                                                <ng-select [items]="transactionTypeFilterList"
+                                                    [(ngModel)]="transactionTypeFilterId" placeholder="Choose an option"
+                                                    [bindValue]="'id'" [bindLabel]="'name'"
+                                                    [notFoundText]="'No record found'" (change)="applyFilter()"
+                                                    [selectOnTab]="true"
+                                                    id="transaction-type-select">
+                                                </ng-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+
+                            <div class="custom-table matter-list">
+                                <ngx-datatable #table class="material common-table fix-col-right fix-col-left"
+                                            [class.matter-no-data]="usioAccountList?.length === 0"
+                                            [rows]="usioAccountList" [columnMode]="ColumnMode.force"
+                                            [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+                                            [count]="page.totalElements" [offset]="page.pageNumber"
+                                            [limit]="page.size" (sort)="getTotalPages()" [scrollbarH]='true' id="usio-ac-listing-tbl">
+
+                                    <ngx-datatable-column [resizeable]="false" prop="name" name="Name" [width]="210"
+                                        [frozenLeft]='true'>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-column [resizeable]="false" prop="internalAccountStatus" name="Status"
+                                        [width]="150">
+                                        <ng-template let-value="value" let-row="row"
+                                            ngx-datatable-cell-template>
+                                            <div class="d-flex align-items-center">
+                                                <span *ngIf="(value == 'failure') || (value == 'Error')"
+                                                    class="text-danger">Error</span>
+                                                <span
+                                                    *ngIf="!((value == 'failure') || (value == 'Error'))">{{ value }}</span>
+                                                <div *ngIf="(value == 'failure') || (value == 'Error')"
+                                                    class="info-hover position-relative ml-8">
+                                                    <em class="icon icon-info text-large"></em>
+                                                    <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                                                        <div class="arrow"></div>
+                                                        <div class="tooltip-inner">
+                                                            <h6>{{ row?.internalAccountStatus }}</h6>
+                                                            <p><span>{{ row?.accountUsioStatusReason }}</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-template>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-column [resizeable]="false" prop="isMerchantAccount" name="Merchant Account"
+                                        [width]="160">
+                                        <ng-template let-value="value" ngx-datatable-cell-template>
+                                            <div *ngIf="value" class="ml-48">
+                                                <em class="icon icon-check fs-10 icon-color"></em>
+                                            </div>
+                                        </ng-template>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-column [resizeable]="false" prop="usioAccountTypeId" name="Account Type"
+                                        [width]="140">
+                                        <ng-template let-value="value" ngx-datatable-cell-template>
+                                            <span>{{ value == 1 ? 'Operating' : value == 2 ? 'Trust' : value == 3 ? 'Credit Card Trust ' : ''}}</span>
+                                        </ng-template>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-column [resizeable]="false" prop="isCreditCardAccount" name="Credit Card"
+                                        [width]="135">
+                                        <ng-template let-value="value" ngx-datatable-cell-template>
+                                            <div *ngIf="value" class="ml-32">
+                                                <em class="icon icon-check fs-10 icon-color"></em>
+                                            </div>
+                                        </ng-template>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-column [resizeable]="false" prop="isAchAccount" name="ACH" [width]="90">
+                                        <ng-template let-value="value" ngx-datatable-cell-template>
+                                            <div *ngIf="value" class="ml-12">
+                                                <em class="icon icon-check fs-10 icon-color"></em>
+                                            </div>
+                                        </ng-template>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-column [resizeable]="false" prop="nonMerchantAccountNumber" [sortable]="true"
+                                        name="Account Number" [width]="160">
+                                        <ng-template let-row="row" let-value="value"
+                                            ngx-datatable-cell-template>
+                                            <span
+                                                *ngIf='value'>{{ permissionList?.BANK_ACCOUNT_CONFIGURATIONisAdmin ? value : permissionList?.ACCOUNTINGisAdmin ? ('---- ---- ---- ' + value?.substr(value?.length - 4)) : '' }}</span>
+                                        </ng-template>
+                                    </ngx-datatable-column>
+                                    <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Last Transaction Date"
+                                        [width]="190">
+                                        <ng-template let-row='row' let-value="value"
+                                            ngx-datatable-cell-template>
+                                            {{value | date: 'MM/dd/yyyy'}}
+                                        </ng-template>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false"
+                                        name="Action" [frozenRight]='true' [width]="100">
+                                        <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex"
+                                            ngx-datatable-cell-template>
+                                            <div class="d-flex justify-content-end">
+                                                <div appAutoCloseOutsideClick
+                                                    class="dropdown dropdown-hover-table"
+                                                    [class.active]="currentActive == rowIndex"
+                                                    (click)="openMenu(rowIndex, $event)"
+                                                    (outsideClick)="onClickedOutside(rowIndex)">
+                                                    <em class="icon icon-dot-verti"></em>
+                                                    <div *ngIf="(((row?.internalAccountStatus === 'failure') || (row?.internalAccountStatus === 'Error')) && ((row?.usioAccountTypeId === 1) || (row?.usioAccountTypeId === 2))) && permissionList?.BANK_ACCOUNT_CONFIGURATIONisAdmin; else notError"
+                                                        class="dropdown-menu dropdown-menu-right"
+                                                        aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item"
+                                                            (click)="changeStatus(row, null,'retry', $event)" id="retry-connection-index-{{rowIndex}}">Retry
+                                                            Connection</a>
+                                                    </div>
+                                                    <ng-template #notError>
+                                                        <div *ngIf="!((row?.internalAccountStatus === 'failure') || (row?.internalAccountStatus === 'Error'))" class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                            <a class="dropdown-item" (click)="viewAccountDetails(row)" id="view-ac-details-index-{{rowIndex}}">View Account Details</a>
+                                                            <a class="dropdown-item" (click)="resendInfoEmail(row,ResendOwnerInfo,'', $event)" href="javascript:void(0)" *ngIf="permissionList?.BANK_ACCOUNT_CONFIGURATIONisAdmin && (row?.internalAccountStatus == 'PendingSignatory' || row?.internalAccountStatus == 'Pending Signatory')" id="resend-owner-info-email-index-{{rowIndex}}">Resend Owner Information Email</a>
+                                                            <a class="dropdown-item" (click)="changeStatus(row,DiableAccount,'disable', $event)" *ngIf="row?.internalAccountStatus == 'Active'" id="disable-index-{{rowIndex}}">Disable</a>
+                                                            <a class="dropdown-item"   (click)="changeStatus(row,EnableAccount,'enable', $event)" *ngIf="row?.internalAccountStatus == 'Disabled'" id="enable-index-{{rowIndex}}">Enable</a>
+                                                        </div>
+                                                    </ng-template>
+                                                </div>
+                                            </div>
+                                        </ng-template>
+                                    </ngx-datatable-column>
+
+                                    <ngx-datatable-footer>
+                                        <ng-template let-rowCount="rowCount" ngx-datatable-footer-template
+                                            let-pageSize="pageSize" let-selectedCount="selectedCount"
+                                            let-curPage="curPage" let-offset="offset"
+                                            let-isVisible="isVisible">
+                                            <div class="d-flex justify-content-between flex-fill">
+                                                <div class="d-flex align-items-center">
+                                                    <div
+                                                        class="table-items d-flex align-items-center mr-36">
+                                                        Items per page:
+                                                        <div class=" ml-8">
+                                                            <select class="custom-select border-less"
+                                                                [formControl]="selectPageSize"
+                                                                (change)="pageSizeChange()">
+                                                                <option *ngFor="let limit of limitArray;trackBy: trackByFn"
+                                                                    [value]="limit">
+                                                                    {{ limit }}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <span>
+                                                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}}
+                                                        -
+                                                        {{(rowCount > (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}}
+                                                        of {{(rowCount)}} item(s)
+                                                    </span>
+                                                </div>
+
+                                                <div class="d-flex align-items-center">
+                                                    <select class="custom-select border-less"
+                                                        [(ngModel)]="pageSelected"
+                                                        (change)="changePageAccount()">
+                                                        <option
+                                                            *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                                                            [value]="i+1">
+                                                            Page {{ i+1 }} of {{page.totalPages}}
+                                                        </option>
+                                                    </select>
+                                                    <div class="ml-8">
+                                                        <datatable-pager
+                                                            [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                                            [pagerPreviousIcon]="'datatable-icon-prev'"
+                                                            [pagerNextIcon]="'datatable-icon-skip'"
+                                                            [page]="curPage" [size]="pageSize"
+                                                            [count]="rowCount"
+                                                            [hidden]="!((rowCount / pageSize) > 1)"
+                                                            (change)="table.onFooterPage($event);changePageAccountDropDown($event)">
+                                                        </datatable-pager>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-template>
+                                    </ngx-datatable-footer>
+                                </ngx-datatable>
+                                <app-loader [active]="loading || accountLoader"></app-loader>
+                            </div>
+
+
+                        </div>
+                        <div *ngIf="selecttabs1 === alltabs[1]" class="tab-pane fade show active" role="tabpanel">
+                            <h3 class="mb-24">Same-Day ACH Processing</h3>
+                            <div class="d-flex align-items-center mb-8">
+                                <h5 class="m-0 font-weight-bold">Enable Same-Day ACH Processing</h5>
+                                <div class="toggle-switch ml-28">
+                                    <label>
+                                        <input type="checkbox" name="trustAccountingFlag"
+                                        [(ngModel)]="trustAccountingFlag" id="trust-ac-flag">
+                                        <span class="switch-style"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <app-loader [active]="loading || accountLoader"></app-loader>
+                            <p class="lh-16 p-0">Allow users to select to submit ACH payments for
+                                end-of-business-day processing if they<br> are submitted before 12 p.m. CT. Otherwise,
+                                the payment will be processed overnight.</p>
+                            <p class=" lh-16 mb-0 p-0 col-6">The firm will incur a fee for each such transaction.
+                            </p>
+                        </div>
+                        <div *ngIf="selecttabs1 === alltabs[2]" class="tab-pane fade show active" role="tabpanel">
+
+
+                            <div class="d-flex align-items-center mb-8">
+                                <h5 class="m-0 font-weight-bold">Enable Trust Accounting</h5>
+                                <div class="toggle-switch ml-28">
+                                    <label>
+                                        <input type="checkbox" name="trustAccountingFlag"
+                                            [attr.disabled]="!isShowTrustAccountingFlagSection ? '' : null"
+                                            [(ngModel)]="trustAccountingFlag"
+                                            (click)="changeAccountStatusCheck($event, trustAccountingFlag)" id="trust-ac-flag">
+                                        <span class="switch-style"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <p [ngClass]="enableTrustAccounting && trustAccountingFlag? 'small mb-24 lh-16' : 'small mb-0 lh-16'">Enable or disable for the entire system. <br>
+                                Must set up at least one Trust-type account to use Trust Accounting.</p>
+                            <div class="info-block pt-12" *ngIf="isValidTenantTier && enableTrustAccounting && trustAccountingFlag">
+                                <h5 class="mb-8 mt-0 font-weight-bold">Trust Payment Grace Period</h5>
+                                <p class="mb-16 small lh-16">Specifies number of days after an invoice is due before client’s
+                                    bill
+                                    is <br>automatically paid from their primary trust account. </p>
+
+                                    <div class="d-flex align-items-center form-group">
+                                        <form [formGroup]="trustPaymentGracePeriodForm">
+                                            <div class="position-relative cust-spinner">
+                                                <input onkeypress="return (event.charCode == 8 || event.charCode == 0 || event.charCode == 13) ? null : event.charCode >= 48 && event.charCode <= 57" formControlName="trustPaymentGracePeriod" type="text" class="form-control white-form-control" id="trust-ac-grace-period">
+                                                <div class="cust-spinn-arrow">
+                                                    <span class="up-spin" (click)="change('up')">
+                                                    <em class="icon icon-angle-up"></em>
+                                                    </span>
+                                                    <span class="down-spin" (click)="change('down')">
+                                                    <em class="icon icon-angle-down"></em>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <span class="ml-8">days</span>
+                                    </div>
+
+                            </div>
+                            <div class="info-block" *ngIf="enableTrustAccounting && trustAccountingFlag">
+                                <h5 class="mb-8 mt-0 font-weight-bold">Target Account for Overpayments</h5>
+                                <p class="mb-16 small lh-16">Sets which account receives overpayment funds by default.<br>
+                                    Payment
+                                    into Accounts Receivable Balance will appear as a negative balance due.</p>
+                                <div>
+                                    <div class="custom-control custom-radio pr-0 mb-12">
+                                        <input type="radio" id="TAO-1" (click)="overPaymentCheck()" name="TAO"
+                                            class="custom-control-input" [checked]="overPaymentOption">
+                                        <label class="custom-control-label" for="TAO-1">Accounts Receivable
+                                            Balance</label>
+                                    </div>
+                                    <div class="custom-control custom-radio pr-0 mb-0">
+                                        <input type="radio" id="TAO-2" name="TAO" class="custom-control-input"
+                                            (click)="overPaymentCheck()" [checked]="!overPaymentOption">
+                                        <label class="custom-control-label" for="TAO-2">Primary Retainer Trust
+                                            Account</label>
+                                    </div>
+
+                                </div>
+                            </div>
+                                <app-loader [active]="loading"></app-loader>
+                            </div>
+                        <div *ngIf="alltabs[3] && selecttabs1 === alltabs[3]" class="tab-pane fade show active"
+                            role="tabpanel">
+                            <div class="col-6">
+                                <h3 class="mb-24">Processing Time</h3>
+                                <div class="info-block">
+
+                                    <p class="mb-16 lh-20">Transactions marked as <em>Approved</em> will process daily at the
+                                        time shown below. <br>Be sure to verify that your bank supports your selected
+                                        transfer time.</p>
+                                    <form [formGroup]="queueTimeForm">
+                                        <div class="row">
+                                            <div class="col-auto queue-time">
+                                                <div class="position-relative cust-spinner">
+                                                <input
+                                                    formControlName="queueTimeHour" maxlength="2"
+                                                    (keypress)="checkNumber($event)"
+                                                    (keyup)="validateInputqueueTimeHour()"
+                                                    placeholder="00" type="text"
+                                                    class="form-control number-control" id="queue-time-hour">
+                                                    <div class="cust-spinn-arrow">
+                                                        <span class="up-spin" (click)="changeQueueTimeHour('up')">
+                                                        <em class="icon icon-angle-up"></em>
+                                                        </span>
+                                                        <span class="down-spin" (click)="changeQueueTimeHour('down')">
+                                                        <em class="icon icon-angle-down"></em>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto colon-dot queue-time">
+                                                <div class="position-relative cust-spinner">
+                                                <input
+                                                    formControlName="queueTimeSecond" maxlength="2"
+                                                    (keypress)="checkNumber($event)"
+                                                    (keyup)="validateInputqueueTimeSecond()"
+                                                    min="0" max="59" step="1" placeholder="00" type="text"
+                                                    class="form-control number-control" id="queue-time-second">
+                                                    <div class="cust-spinn-arrow">
+                                                        <span class="up-spin" (click)="changeQueueTimeSecond('up')">
+                                                        <em class="icon icon-angle-up"></em>
+                                                        </span>
+                                                        <span class="down-spin" (click)="changeQueueTimeSecond('down')">
+                                                        <em class="icon icon-angle-down"></em>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto queue-time">
+                                                <ul class="time-switch d-flex list-unstyled m-0">
+                                                    <li><a (click)="setAmPm(true)" [ngClass]="{'active' : isAM}"
+                                                            href="javascript:void(0);" id="set-am">AM</a></li>
+                                                    <li><a (click)="setAmPm(false)" [ngClass]="{'active' : !isAM}"
+                                                            href="javascript:void(0);" id="set-pm">PM</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <app-loader [active]="loading"></app-loader>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end"
+            *ngIf="selecttabs1 === alltabs[2] || (alltabs[3] && selecttabs1 === alltabs[3])">
+            <div class="btn-group">
+                <button type="button" [disabled]="loading" class="btn btn-light" (click)="redirectTo()" id="cancel-btn">Cancel</button>
+                <button type="button" [disabled]="loading" class="btn btn-primary"
+                    (click)="selecttabs1 === alltabs[2] ? saveBtn('trustAccounting') : saveBtn('accountingQueue')" id="save-changes-btn">Save Changes</button>
+            </div>
+        </div>
+
+        <ng-template #EditTrustAccount let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Edit Trust Account</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body pb-0">
+                <div class="form-group">
+                    <label>Account Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="Bank Account 1 Nickname" id="ac-name">
+                </div>
+                <div class="form-group">
+                    <label>Routing Number <sup>*</sup></label>
+                    <input type="text" class="form-control" value="123456789" id="routing-number">
+                </div>
+                <div class="form-group">
+                    <label>Bank Account Number <sup>*</sup></label>
+                    <input type="text" class="form-control" value="1234 4567 8344 4459" id="bank-ac-number">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-changes-btn">Save Changes</button>
+            </div>
+        </ng-template>
+
+
+        <ng-template #CreateTrustAccount let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Create Trust Account</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body pb-0">
+                <div class="form-group">
+                    <label>Account Name <sup>*</sup></label>
+                    <input type="text" class="form-control" placeholder="Enter Bank Account (Nick)Name" id="ac-name">
+                </div>
+                <div class="form-group">
+                    <label>Routing Number <sup>*</sup></label>
+                    <input type="text" class="form-control" placeholder="Enter Routing Number" id="routing-number">
+                </div>
+                <div class="form-group">
+                    <label>Bank Account Number <sup>*</sup></label>
+                    <input type="text" class="form-control" placeholder="Enter Bank Account Number" id="bank-ac-number">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="create-trust-ac">Create Trust Account</button>
+            </div>
+        </ng-template>
+
+
+
+        <ng-template #DeleteTrustAccount let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Delete Trust Account</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this trust account? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="delete-trust-ac">Delete Trust Account</button>
+            </div>
+        </ng-template>
+
+
+        <ng-template #DeactivateTrustAccount let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Deactivate Trust Account</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to deactivate this trust account? You can always <strong>Reactivate</strong> the
+                account
+                at a future date if it’s not <strong>Deleted</strong>.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="deactivate-trust-ac">Deactivate Trust Account</button>
+            </div>
+        </ng-template>
+
+
+        <ng-template #ReactivateTrustAccount let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Reactivate Trust Account</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="lh-20 mb-0">
+                    Are you sure you want to reactivate this trust account?
+
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="reactivate-trust-ac">Reactivate Trust Account</button>
+            </div>
+        </ng-template>
+        <ng-template #EnableAccount let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Enable Bank Account</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="lh-20">Are you sure you want to enable this bank account?</p>
+                <p class="lh-20 mb-0">
+                    Note that bank accounts that have not seen
+                    activity in about 6 months or more may have been disconnected from the payment gateway.
+                    If you receive a connection error when enabling, please contact Lexicon for assistance.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary"
+                    (click)="enabledAccount();modal.dismiss('Cross click')" id="yes-enable-bank-ac">Yes, Enable Bank Account</button>
+            </div>
+        </ng-template>
+        <ng-template #DiableAccount let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Disable Account</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="lh-20" *ngIf="listOffice != 0"> You cannot disable this bank account, because it is being used by the
+                    following offices.
+                    Update the bank account used by the office first from the office profile: </p>
+                <ul *ngIf="listOffice != 0">
+                    <li *ngFor="let office of listOffice;trackBy: trackByFn">{{office}}</li>
+                </ul>
+                <p class="lh-20 mb-0" *ngIf="listOffice == 0">Are you sure you want to disable this bank account?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" *ngIf="listOffice == 0"
+                    (click)="disabledAccount();modal.dismiss('Cross click')" id="confirm-btn">Confirm</button>
+            </div>
+        </ng-template>
+        <ng-template #ResendOwnerInfo let-modal>
+            <div class="modal-header d-block pb-24">
+                <h3 class="modal-title mb-0">Resend Owner Information Email</h3>
+                <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body" [formGroup]="resendOwnerEmailForm">
+                <div class="form-group" [class.has-error]="f['email']?.errors">
+                    <label>Owner Email Address<sup>*</sup></label>
+                    <input type="text" class="form-control" placeholder="Enter Owner Email Address" id="ac-name" formControlName="email">
+                    <span class="field-message text-danger"  *ngIf="f['email'].errors?.pattern || f['email'].errors?.maxlength">
+                        <em class="icon icon-error mr-4"></em>
+                        {{ errorData?.email_not_valid }}
+                    </span>
+                    <span class="field-message text-danger"  *ngIf="f['email'].errors?.required">
+                        <em class="icon icon-error mr-4"></em>
+                        Please enter an email address.
+                    </span>
+                </div>                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="resendEmailToOwners();" id="confirm-btn">Send</button>
+            </div>
+        </ng-template>

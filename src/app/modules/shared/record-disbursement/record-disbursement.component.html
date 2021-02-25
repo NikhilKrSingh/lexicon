@@ -1,0 +1,425 @@
+<div class="modal-header pb-32">
+  <h3 class="modal-title mb-0" *ngIf='!recordDisbursement?.id'> {{ common ? 'Add New Disbursement' : 'Record Disbursement'}}</h3>
+  <h3 class="modal-title mb-0" *ngIf='recordDisbursement?.id > 0'>Edit Disbursement</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="closeId">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="alert alert-warning d-flex justify-content-between mb-24" *ngIf='showWarning'>
+    <div class="d-flex">
+      <em class="alert-icon icon icon-warning"></em>
+      <div class="d-flex align-items-center flex-wrap" id="warning-message-show">
+        <h4 class="mr-36 mt-0 mb-0">Warning</h4>
+        {{dis_check_warn}}
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="row gutter-16" *ngIf="recordDisbursement?.id && common">
+    <div class="col-6">
+      <div class="form-group" [class.has-error]="(clientError && formSubmitted) || incorrectClient">
+        <label>Client <sup>*</sup></label>
+        <div class="search-group position-relative">
+          <form select="#" (click)="setClientList()" (outsideClick)="clearDropDown('clientListPopUp')"
+            appAutoCloseOutsideClick>
+            <span class="search-icn"></span>
+            <input #clientFilterPopup type="text" class="form-control border-radius-20" id="client"
+              placeholder="Search clients or select as overhead" [(ngModel)]="searchclient" (ngModelChange)="incorrectClient = false;" [ngModelOptions]="{standalone: true}" (keyup)="updateClientFilter($event,'2')" (keydown.tab)="actionDropDown()" (keydown.enter)="actionDropDown()"  autocomplete="off">
+            <div class="search-group-result px-0 mt-4 " *ngIf="clientListPopUp?.length>0">
+
+              <div>
+                <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{clientListPopUp.length}}
+                  results</h5>
+              </div>
+              <div class="search-collapse">
+                <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                  *ngFor="let item of clientListPopUp;trackBy :trackByFn; let i = index; let first = first"
+                  [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}">
+                  <div class="search-panel-head">
+                    <em class="search-res-icon icon icon-clients"></em>
+                    <div (click)="selectClient(item)">
+                      <span *ngIf='item.isCompany'>
+                        <span [innerHTML]="item.companyName | highlightText : clientFilterPopup?.value"></span>
+                      </span>
+                      <span *ngIf='!item.isCompany'>
+                        <span
+                          [innerHTML]="((!item.firstName) ? item.lastName : item.lastName+', '+item.firstName) | highlightText : clientFilterPopup?.value"></span>
+                      </span>
+                    </div>
+                    <span class="small helper-text font-weight-medium d-block mt-4">Client</span>
+                    <span class="arrow" (click)="item.showGrid=!item.showGrid">
+                      <em class="icon icon-angle-down"></em></span>
+                  </div>
+                  <div class="search-panel-body">
+                    <div class="mt-12">
+                      <span class="small helper-text d-block mb-4 font-weight-medium">
+                        Phone Number
+                      </span>
+                      {{item.preferredPhone}}
+                    </div>
+                  </div>
+                  <div class="top-border-search-panel pt-16"></div>
+                </div>
+
+              </div>
+
+            </div>
+            <div class="search-group-result px-0 mt-4 " *ngIf="isSearchLoading">
+              <app-search-loader [active]="isSearchLoading" [loaderMessage]="'Loading Search Results'">
+              </app-search-loader>
+            </div>
+            <span class="field-message text-danger" *ngIf="clientError && formSubmitted">
+              <em class="icon icon-error mr-4"></em>
+              Please select client
+            </span>
+            <span class="field-message text-danger" *ngIf="incorrectClient">
+              <em class="icon icon-error mr-4"></em>
+              Please enter a valid client.
+            </span>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-6" >
+      <div class="form-group" [class.has-error]="(matterError && formSubmitted) || incorrectMatter">
+        <label>Matter <sup>*</sup></label>
+        <div class="search-group position-relative">
+          <form selectMatter="#" (click)="setMatterList()" (outsideClick)="clearDropDown('matterListPopUp')"
+            appAutoCloseOutsideClick>
+            <span class="search-icn"></span>
+            <input id="metterFilterPopupp" #metterFilterPopup type="text" class="form-control border-radius-20" (ngModelChange)="incorrectMatter = false;"
+              placeholder="Search matters" [(ngModel)]="searchMatter" [ngModelOptions]="{standalone: true}" (keyup)="updateMatterFilter($event,'2')" (keydown.tab)="actionDropDown()" (keydown.enter)="actionDropDown()"  autocomplete="off">
+            <div class="search-group-result px-0 mt-4" *ngIf="matterListPopUp?.length>0">
+              <div>
+                <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{matterListPopUp.length}}
+                  results</h5>
+              </div>
+              <div class="search-collapse">
+                <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                  [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}"
+                  *ngFor="let item of matterListPopUp; trackBy :trackByFn;let i = index; let first=first">
+                  <div class="search-panel-head">
+                    <em class="search-res-icon icon icon-matters"></em>
+                    <div (click)="selectMatter(item);">
+                      <span [innerHTML]="item.matterName | highlightText : metterFilterPopup?.value"></span>
+                      <span *ngIf="item.id">-</span>
+                      <span *ngIf="item.id"
+                        [innerHTML]="item.matterNumber | highlightText : metterFilterPopup?.value"></span>
+                    </div>
+                    <span class="arrow" (click)="item.showGrid=!item.showGrid">
+                      <em class="icon icon-angle-down"></em></span>
+                  </div>
+                  <div class="search-panel-body">
+                    <div class="mt-12">
+                      <span class="small helper-text d-block mb-4 font-weight-medium">
+                        Client Name
+                      </span>
+                      {{item.client != null ? (item.client.isCompany ? item.client.companyName : (item.client.firstName + ', ' + item.client.lastName)) : searchclient }}
+                    </div>
+                    <div class="mt-12">
+                      <span class="small helper-text d-block mb-4 font-weight-medium">
+                        Attorney
+                      </span>
+                      <span *ngFor="let att of item.responsibleAttorny;trackBy: trackByFn">
+                        {{att.name}}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="top-border-search-panel pt-16"></div>
+                </div>
+              </div>
+            </div>
+            <div class="search-group-result px-0 mt-4 " *ngIf="isMatterSearchLoading">
+              <app-search-loader [active]="isMatterSearchLoading" [loaderMessage]="'Loading Search Results'">
+              </app-search-loader>
+            </div>
+            <span class="field-message text-danger" *ngIf="matterError && formSubmitted">
+              <em class="icon icon-error mr-4"></em>
+              Please select matter
+            </span>
+            <span class="field-message text-danger" *ngIf="incorrectMatter">
+              <em class="icon icon-error mr-4"></em>
+                Please enter a valid matter.
+            </span>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row gutter-16" *ngIf="!recordDisbursement?.id">
+    <div class="col-6">
+      <div class="form-group">
+        <span class="small helper-text d-block mb-8">Client Name</span>
+        <span *ngIf='!matterDetails?.clientName?.isCompany'>{{matterDetails?.clientName?.lastName}},
+          {{matterDetails?.clientName?.firstName}}</span>
+        <span *ngIf='matterDetails?.clientName?.isCompany'>{{matterDetails?.clientName?.company}}</span>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="form-group">
+        <span class="small helper-text d-block mb-8">Matter Name</span>
+        <span>{{matterDetails?.matterName}}</span>
+      </div>
+    </div>
+  </div>
+
+
+    <div class="row gutter-16">
+      <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+        <div class="form-group" [class.has-error]="!disbursementType && formSubmitted">
+          <label>Disbursement Type <sup>*</sup></label>
+          <ng-select [items]="disbursementTypes" placeholder="Select Disbursement Type "
+            id="create-disbursement-type"
+            [(ngModel)]="disbursementType" [bindValue]="'id'" [bindLabel]="'name'" (change)="disbursementErr()" [notFoundText]="'No record found'"
+            (change)='changeDisbursementType()' [selectOnTab]="true">
+          </ng-select>
+          <span class="field-message text-danger" *ngIf="!disbursementType">
+            <em class="icon icon-error mr-4"></em>
+            {{ error_data?.disbursement_type_error }}
+          </span>
+        </div>
+      </div>
+      <ng-container *ngIf='disbursementType'>
+
+        <ng-container *ngIf='recordDisbursement?.disbursementType?.billType?.code == "PER_UNIT"'>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="(!recordDisbursement.hoursBilled) && formSubmitted">
+              <label>Quantity <sup>*</sup></label>
+              <input type="text" class="form-control" mask="separator.2" thousandSeparator="," allowNegativeNumbers='true' placeholder="Enter Quantity"
+                [(ngModel)]='recordDisbursement.hoursBilled' (ngModelChange)='changeHours()' (keypress)="checkNumber($event)"
+                id="create-quantity">
+                <span class="field-message text-danger" *ngIf="!recordDisbursement.hoursBilled">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ error_data?.disbursement_type_error_quantity }}
+                </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Rate Per Unit <sup>*</sup></label>
+              <input type="text" class="form-control" prefix="$" mask="separator.2" thousandSeparator=","
+                [(ngModel)]='recordDisbursement.rateAmount' disabled id="create-rate-per-unit">
+            </div>
+          </div>
+          <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+            <div class="form-group">
+              <label>Amount <sup>*</sup></label>
+              <input type="text" class="form-control" id="create-amount" [value]="recordDisbursement.finalBilledAmount | currency : 'USD' : 'symbol': '1.2-2'" disabled>
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf='recordDisbursement?.disbursementType?.billType?.code == "FIXED"'>
+          <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+            <div class="form-group">
+              <label>Amount <sup>*</sup></label>
+              <input type="text" class="form-control" prefix="$" mask="separator.2" thousandSeparator=","
+                [(ngModel)]='recordDisbursement.finalBilledAmount' disabled id="create-amount-fixed">
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf='recordDisbursement?.disbursementType?.billType?.code == "OPEN"'>
+          <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+            <div class="form-group" [class.has-error]="(recordDisbursement.finalBilledAmount == null) && formSubmitted">
+              <label>Amount <sup>*</sup></label>
+              <input
+                type="text" class="form-control" [prefix]="amountPrefix"
+                mask="separator.2" thousandSeparator="," [allowNegativeNumbers]='allowNegative'
+                [(ngModel)]='recordDisbursement.finalBilledAmount' (keypress)='amountKeyPress($event)'
+                (keydown)='amountKeyDown($event)' (blur)='blurAmount()'
+                placeholder="Enter Amount" id="create-amount-open">
+                <span class="field-message text-danger" *ngIf="recordDisbursement.finalBilledAmount == null">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ error_data?.disbursement_type_error_amount }}
+                </span>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+    <div class="row gutter-16">
+      <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="form-group date-picker" [class.has-error]="(recordDisbursement.dateOfService == null) && formSubmitted">
+              <label>Date of Service <sup>*</sup></label>
+              <app-date-picker placeholderText="Select open date of service" [id]="'create-date-of-service'" [isNgModel]='true' [(data)]='recordDisbursement.dateOfService'></app-date-picker>
+              <span class="field-message text-danger" *ngIf="recordDisbursement.dateOfService == null">
+                <em class="icon icon-error mr-4"></em>
+                {{ error_data?.disbursement_type_error_date_service }}
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Billed to Client <sup>*</sup></label>
+              <input type="text" class="form-control" id="create-billed-to-client"
+                [value]='recordDisbursement?.disbursementType?.isBillableToClient ? "Yes": "No"' disabled>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="mb-12">Vendor was Paid <sup>*</sup></label>
+              <div class="custom-control custom-radio pr-0">
+                <input type="radio" id="vendor-1" name="vendor" class="custom-control-input"
+                [(ngModel)]='recordDisbursement.isVendorPaid' [value]='true' value='true' (change)="onChangeVendor($event.target.value)">
+                <label class="custom-control-label" for="vendor-1">Yes</label>
+              </div>
+              <div class="custom-control custom-radio pr-0 mb-0">
+                <input type="radio" id="vendor-2" name="vendor" class="custom-control-input"
+                [(ngModel)]='recordDisbursement.isVendorPaid' [value]='false' value='false' (change)="onChangeVendor($event.target.value)">
+                <label class="custom-control-label" for="vendor-2">No</label>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="mb-12">Upload Documentation</label>
+              <div class="position-relative upload-receipt mt-4" *ngIf="!fileDetails?.name && !selectFileFlag">
+                <form id="fileForm">
+                  <input type="file" (change)="selectedFile($event)"  id="inpuFile">
+                </form>
+                <div class="d-inline-block" [ngClass]="{'selected-row py-8': displayWarningMsg}"><span class="btn btn-primary" id="uploadButtonId">{{uploadButtonText}} </span></div>
+                <span class="d-block pt-12 font-12">
+                  File Types: jpg, jpeg, tiff, pdf, doc, docx, png
+                </span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center" *ngIf="fileDetails?.name || selectFileFlag">
+                <div class="position-relative uploaded-file pr-8 text-ellipsis" title="{{fileDetails?.name || recordDisbursement?.receiptFile?.name}}">
+                  <em class="icon icon-template"></em>
+                  {{fileDetails?.name || recordDisbursement?.receiptFile?.name}}
+                </div>
+                <span class="cls"><em class="icon icon-close" (click)="removeImage()" id="removeImageId"></em></span>
+              </div>
+              <div [class.has-error]="fileDetails.isExistError" *ngIf="fileDetails?.isExistError" class="pt-12">
+                <span class="field-message text-danger d-flex align-items-start" id="errorId">
+                  <em class="icon icon-error mr-4 mt-0"></em>
+                  {{fileDetails.isExistError}}
+                </span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center pt-12 badge-dots-block" *ngIf="fileDetails">
+                <!-- <div class="d-flex align-items-center pr-8" *ngIf="fileDetails">
+                  <span *ngIf="!fileDetails.isScanFailed && !fileDetails.isScanPassed" class="sh-badge text-nowrap font-weight-medium sh-badge-primary" id="progressId">Security Scan In Progress</span>
+                  <span *ngIf="fileDetails.isScanPassed" class="sh-badge text-nowrap font-weight-medium sh-badge-success" id="scanPassedId">Security Scan Passed</span>
+                  <span *ngIf="fileDetails.isScanFailed && !fileDetails.isExistError" class="sh-badge text-nowrap font-weight-medium sh-badge-danger" id="failedId">Security Scan Failed</span>
+                  <div *ngIf="fileDetails.isScanFailed && !fileDetails.isExistError" class="info-hover position-relative ml-8 d-inline-block" id="failedReasonId">
+                    <em class="icon icon-info"></em>
+                    <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                      <div class="arrow"></div>
+                      <div class="tooltip-inner">
+                        <h6 class="font-weight-medium my-0">Security Scan Failed</h6>
+                        <p>{{fileDetails.virusDetails+' detected'}}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
+              <span class="field-message text-danger" [style.display]="fileErrorMsg ? 'flex': 'none'">
+                <em class="icon icon-error mr-4 mt-0"></em>
+                <span class="d-block" id="fileErrorMessageId">{{ fileErrorMsg }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="row gutter-16">
+      <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+        <div class="form-group position-relative" [class.has-error]='(!recordDisbursement.billingNarrative || billingNarrativeError) && formSubmitted'>
+          <label>Billing Narrative <sup>*</sup></label>
+          <span class="count-char">{{recordDisbursement?.billingNarrative?.length || 0}}/1000</span>
+          <textarea class="form-control" maxlength="1000" rows="4" placeholder="Billing Narrative"
+            [(ngModel)]='recordDisbursement.billingNarrative'
+            (blur)="copytoNote()" (keydown.tab)="copytoNote()" id="create-billing-narrative"></textarea>
+          <span class="field-message text-danger"
+            *ngIf="!recordDisbursement.billingNarrative && formSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            Please enter billing narrative.
+          </span>
+          <app-validation-message [errorMessage]='createNoteError.noteMessage' *ngIf='billingNarrativeError && formSubmitted'>
+          </app-validation-message>
+        </div>
+      </div>
+      <div *ngIf="!recordDisbursement?.id" [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+        <div class="form-group position-relative" [class.has-error]='(!recordDisbursement.note.content || noteError) && formSubmitted'>
+          <label>Note to File <sup>*</sup></label>
+          <span class="count-char">{{recordDisbursement?.note?.content?.length || 0}}/1000</span>
+          <textarea class="form-control" maxlength="1000" rows="4" placeholder="Note text" (blur)="copytoNote()" (keydown.tab)="copytoNote()" [(ngModel)]='recordDisbursement.note.content' id="create-note-to-file"></textarea>
+          <span class="field-message text-danger" *ngIf="!recordDisbursement.note.content && formSubmitted">
+            <em class="icon icon-error mr-4"></em>
+            Please enter note to file.
+          </span>
+          <app-validation-message [errorMessage]='createNoteError.noteMessage' *ngIf='noteError && formSubmitted'>
+          </app-validation-message>
+        </div>
+      </div>
+      <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+        <ng-container *ngIf='recordDisbursement?.id > 0'>
+          <div class="form-group position-relative" [class.has-error]='changeNotesError && formSubmitted'>
+            <label>Change Notes (optional)</label>
+            <span class="count-char">{{recordDisbursement.changeNotes?.length || 0}}/1000</span>
+            <textarea class="form-control" maxlength="1000" rows="4" placeholder="Enter change notes" [(ngModel)]='recordDisbursement.changeNotes'
+              id="create-change-notes"></textarea>
+            <app-validation-message [errorMessage]='createNoteError.noteMessage' *ngIf='changeNotesError && formSubmitted'>
+            </app-validation-message>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+    <div class="row gutter-16">
+      <div [ngClass]="recordDisbursement?.id ? 'col-6' : 'col-12'">
+        <div class="row gutter-16">
+          <div class="col-8">
+            <div class="form-group date-picker" [class.has-error]="(recordDisbursement.note.applicableDate == null) && formSubmitted">
+              <label>Applicable Date <sup>*</sup></label>
+              <app-date-picker placeholderText="Select Applicable date" [id]="'create-applicable-date'" [isNgModel]='true' [(data)]='recordDisbursement.note.applicableDate'></app-date-picker>
+              <span class="field-message text-danger" *ngIf="recordDisbursement.note.applicableDate == null">
+                <em class="icon icon-error mr-4"></em>
+                {{ error_data?.disbursement_type_error_applicable_date }}
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label class="mb-12">Visible to Client</label>
+              <div class="custom-control custom-radio pr-0">
+                <input type="radio" id="create-visible-to-client" name="invoiceAddress" class="custom-control-input"
+                  [(ngModel)]='recordDisbursement.note.isVisibleToClient' [value]='true'>
+                <label class="custom-control-label" for="create-visible-to-client">Yes</label>
+              </div>
+              <div class="custom-control custom-radio pr-0 mb-0">
+                <input type="radio" id="create-visible-to-client-no" name="invoiceAddress" class="custom-control-input"
+                  [(ngModel)]='recordDisbursement.note.isVisibleToClient' [value]='false'>
+                <label class="custom-control-label" for="create-visible-to-client-no">No</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <div class="alert alert-warning d-flex justify-content-between mb-24 mt-32 no-shadow" *ngIf="displayWarningMsg">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-warning"></em>
+      <div class="d-flex align-items-center flex-wrap" id="display-warning-message">
+          <h4 class="mr-16 mt-0 mb-4">Warning</h4>
+          You have not uploaded supporting documentation for<br *ngIf="!recordDisbursement?.id" /> this disbursement.
+          Are you sure you want to continue?
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="create-cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' *ngIf='!recordDisbursement?.id && common' id="create-record-btn">{{ displayWarningMsg ? 'Yes, Continue' : 'Save Disbursement' }}</button>
+  <button type="button" class="btn btn-primary" (click)='save()' *ngIf='!recordDisbursement?.id && !common' id="create-record-btn">{{ displayWarningMsg ? 'Yes, Continue' : 'Record Disbursement' }}</button>
+  <button type="button" class="btn btn-primary" (click)='save()' *ngIf='recordDisbursement?.id > 0' id="edit-record-btn">{{ displayWarningMsg ? 'Yes, Continue' : 'Save Changes' }}</button>
+</div>
+<app-loader [active]="loading"></app-loader>
+

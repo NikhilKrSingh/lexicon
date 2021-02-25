@@ -1,0 +1,26 @@
+<ng-container *ngIf='row'>
+  <ng-container *ngIf='!isPaymentMethod'>
+    <span class="font-weight-medium d-block">{{row?.accountInfo?.accountName}}</span>
+    <span class="helper-text font-weight-normal" *ngIf='row?.accountInfo?.accountNumber'>
+      Account ending in {{row?.accountInfo?.accountNumber | slice : -4}}
+    </span>
+  </ng-container>
+
+  <ng-container *ngIf='isPaymentMethod'>
+    <span class="font-weight-medium d-block">{{row?.paymentMethodType}}</span>
+    <span class="helper-text font-weight-normal" *ngIf="row.paymentMethodType === 'Check' && row.checkNumber">
+      Check ending in {{row.checkNumber | slice : -4}}
+    </span>
+    <span class="helper-text font-weight-normal" *ngIf="row.paymentMethodType === 'E-Check' && row.eCheck.name">
+      Account ending in {{row.eCheck.name | slice : -4}}
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.paymentMethodType === 'Credit Card' && row?.creditCard?.name">
+      Card ending in {{row?.creditCard?.name}}
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.paymentMethodType === 'Primary Retainer Trust' && row?.primaryRetainerTrustBankAccount">
+      Account ending in {{row.primaryRetainerTrustBankAccount?.accountNumber | slice : -4}}
+    </span>
+  </ng-container>
+</ng-container>

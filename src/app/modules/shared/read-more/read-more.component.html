@@ -1,0 +1,13 @@
+<div *ngIf="showEllipsis; else noEllipsis" class="read-more-container">
+  <div [ellipsis]="showMoreLabel"
+       [ellipsis-content]="text" (ellipsis-click-more)="showEllipsis = false;"
+       [style.max-height]="elementHeight + 'px'" class="text-break text-wrap"></div>
+</div>
+
+<ng-template #noEllipsis>
+  <div class="longText text-break text-wrap">
+    {{text}}
+    <a href="javascript:void(0)" class="ngx-ellipsis-more" (click)="showEllipsis = true">{{showLessLabel}}</a>
+  </div>
+</ng-template>
+

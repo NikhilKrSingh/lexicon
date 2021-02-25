@@ -1,0 +1,513 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb mb-32">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="#">Contact Directory</a></li>
+            <li class="breadcrumb-item"><a href="#">Contact Profile</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Potential Client Associations</li>
+        </ol>
+        <div class="heading">
+            <h1>Edit Potential Client Associations</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div>
+                    <h2 class="mb-24">Matter Associations</h2>
+                    <div class="info-block">
+                        <h3 class="mb-16">Opposing Party</h3>
+                        <div class="custom-table">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Email Address</th>
+                                            <th>Phone Number</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Hall, Marylin</td>
+                                            <td>Individual</td>
+                                            <td>duncan_raymond@email.com</td>
+                                            <td>(312) 867-5309</td>
+                                            <td>Active</td>
+                                            <td class="text-right">
+                                                <div class="icon-group d-flex justify-content-end">
+                                                    <span (click)="openPersonalinfo(EditOppoParty,'lg','')">
+                                                        <em class="icon icon-edit icon-color"></em>
+                                                    </span>
+                                                    <span>
+                                                        <em class="icon icon-remove icon-color"></em>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button" (click)="openPersonalinfo(AddOppoParty,'lg','')">
+                                <i class="icon icon-add-circle"></i>Add Opposing Party
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info-block pt-32">
+                        <h3 class="mb-24">Opposing Counsel</h3>
+                        <div class="custom-control custom-checkbox mb-16">
+                            <input type="checkbox" class="custom-control-input" id="oppo">
+                            <label class="custom-control-label" for="oppo">Opposing Party is Representing Themselves</label>
+                        </div>
+                        <div class="custom-table">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Company</th>
+                                            <th>Email Address</th>
+                                            <th>Phone Number</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Duncan, Raymond</td>
+                                            <td>Law Office Name</td>
+                                            <td>duncan_raymond@email.com</td>
+                                            <td>(312) 867-5309</td>
+                                            <td>Active</td>
+                                            <td class="text-right">
+                                                <div class="icon-group d-flex justify-content-end">
+                                                    <span (click)="openPersonalinfo(EditOppoCounsel,'lg','')">
+                                                        <em class="icon icon-edit icon-color"></em>
+                                                    </span>
+                                                    <span>
+                                                        <em class="icon icon-remove icon-color"></em>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button"  (click)="openPersonalinfo(AddOppoCounsel,'lg','')">
+                                <i class="icon icon-add-circle"></i>Add Opposing Counsel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info-block pt-32">
+                        <h3 class="mb-16">Expert Witness</h3>
+                        <div class="custom-table">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Company</th>
+                                            <th>Email Address</th>
+                                            <th>Phone Number</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Duncan, Raymond</td>
+                                            <td>Law Office Name</td>
+                                            <td>duncan_raymond@email.com</td>
+                                            <td>(312) 867-5309</td>
+                                            <td>Active</td>
+                                            <td class="text-right">
+                                                <div class="icon-group d-flex justify-content-end">
+                                                    <span>
+                                                        <em class="icon icon-edit icon-color"></em>
+                                                    </span>
+                                                    <span>
+                                                        <em class="icon icon-remove icon-color"></em>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button">
+                                <i class="icon icon-add-circle"></i>Add Expert Witness
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-48">
+                    <h2 class="mb-24">Client Associations</h2>
+                    <div class="info-block">
+                        <h3 class="mb-16">Vendor</h3>
+                        <div class="custom-table">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Company</th>
+                                            <th>Email Address</th>
+                                            <th>Phone Number</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Law Office Name</td>
+                                            <td>Law Office Name</td>
+                                            <td>duncan_raymond@email.com</td>
+                                            <td>(312) 867-5309</td>
+                                            <td>Active</td>
+                                            <td class="text-right">
+                                                <div class="icon-group d-flex justify-content-end">
+                                                    <span>
+                                                        <em class="icon icon-edit icon-color"></em>
+                                                    </span>
+                                                    <span>
+                                                        <em class="icon icon-remove icon-color"></em>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button">
+                                <i class="icon icon-add-circle"></i>Add Vendor
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info-block">
+                        <h3 class="mb-16">Subsidiary</h3>
+                        <div class="custom-table">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Company</th>
+                                            <th>Email Address</th>
+                                            <th>Phone Number</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Law Office Name</td>
+                                            <td>Law Office Name</td>
+                                            <td>duncan_raymond@email.com</td>
+                                            <td>(312) 867-5309</td>
+                                            <td>Active</td>
+                                            <td class="text-right">
+                                                <div class="icon-group d-flex justify-content-end">
+                                                    <span>
+                                                        <em class="icon icon-edit icon-color"></em>
+                                                    </span>
+                                                    <span>
+                                                        <em class="icon icon-remove icon-color"></em>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button">
+                                <i class="icon icon-add-circle"></i>Add Subsidiary
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info-block">
+                        <div class="form-group mb-0">
+                            <label for="">You may leave change notes for the audit history (optional).</label>
+                            <textarea class="form-control non-resize" rows="4" placeholder="Enter Note Text"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pb-24">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light">Cancel</button>
+                <button type="button" class="btn btn-primary">Run Conflict Check</button>
+            </div>
+        </div>
+    </div>
+</div>
+    
+
+<ng-template #AddOppoParty let-modal>
+    <div class="modal-header pb-24 d-block">
+        <h3 class="modal-title mb-0">Add Opposing Party</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input" checked>
+                <label class="custom-control-label" for="customRadio1">Create new Opposing Party</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
+                <label class="custom-control-label" for="customRadio2">Select from existing Associations</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <h4 class="text-xlarge mb-12 pt-12 mt-0">Type of Opposing Party</h4>
+            <div class="custom-control custom-radio">
+                <input type="radio" id="TypeOppo1" name="TypeOppo" class="custom-control-input">
+                <label class="custom-control-label" for="TypeOppo1">Individual</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" id="TypeOppo2" name="TypeOppo" class="custom-control-input" checked>
+                <label class="custom-control-label" for="TypeOppo2">Corporate</label>
+            </div>
+        </div>
+        
+        <div class="row gutter-16">
+            <div class="col-12">
+                <div class="form-group">
+                    <label>Company Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="ABC Company">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" value="marylin.hall@email.com">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control" value="(312) 867-5309">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row gutter-16">
+            <div class="col-6">
+                <div class="form-group">
+                    <label>First Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="First Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Last Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="Hall">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" value="marylin.hall@email.com">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control" value="(312) 867-5309">
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="text-xlarge mt-0 mb-24">Associations</h4>
+        <div class="header-search flex-fill d-flex mb-24">
+            <form action="#">
+                <div class="header-search-wrapper">
+                <input type="text" class="form-control search-input" placeholder="Search attorneys">
+                <button class="btn" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <h4 class="text-center">  DATA-Table space</h4>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>
+
+
+<ng-template #EditOppoParty let-modal>
+    <div class="modal-header pb-24 d-block">
+        <h3 class="modal-title mb-0">Edit Opposing Party</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <h4 class="text-xlarge mb-12 pt-12 mt-0">Type of Opposing Party</h4>
+            <div class="custom-control custom-radio">
+                <input type="radio" id="TypeOppo1" name="TypeOppo" class="custom-control-input" disabled checked>
+                <label class="custom-control-label" for="TypeOppo1">Individual</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" id="TypeOppo2" name="TypeOppo" class="custom-control-input" disabled>
+                <label class="custom-control-label" for="TypeOppo2">Corporate</label>
+            </div>
+        </div>
+        
+        <div class="row gutter-16">
+            <div class="col-6">
+                <div class="form-group">
+                    <label>First Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="First Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Last Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="Hall">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" value="marylin.hall@email.com">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control" value="(312) 867-5309">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>
+
+
+<ng-template #AddOppoCounsel let-modal>
+    <div class="modal-header pb-24 d-block">
+        <h3 class="modal-title mb-0">Add Opposing Counsel</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio1Counsel" name="customRadioCounsel" class="custom-control-input" checked>
+                <label class="custom-control-label" for="customRadio1Counsel">Create new Opposing Counsel</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio2Counsel" name="customRadioCounsel" class="custom-control-input">
+                <label class="custom-control-label" for="customRadio2Counsel">Select from existing Associations</label>
+            </div>
+        </div>
+        
+        <div class="row gutter-16">
+            <div class="col-6">
+                <div class="form-group">
+                    <label>First Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="First Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Last Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="Hall">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" value="marylin.hall@email.com">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" class="form-control" value="ABC Company">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control" value="(312) 867-5309">
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="text-xlarge mt-0 mb-24">Associations</h4>
+        <div class="header-search flex-fill d-flex mb-24">
+            <form action="#">
+                <div class="header-search-wrapper">
+                <input type="text" class="form-control search-input" placeholder="Search attorneys">
+                <button class="btn" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <h4 class="text-center">  DATA-Table space</h4>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>
+
+
+<ng-template #EditOppoCounsel let-modal>
+    <div class="modal-header pb-24 d-block">
+        <h3 class="modal-title mb-0">Edit Opposing Counsel</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="row gutter-16">
+            <div class="col-6">
+                <div class="form-group">
+                    <label>First Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="First Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Last Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="Hall">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" value="marylin.hall@email.com">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" class="form-control" value="ABC Company">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" class="form-control" value="(312) 867-5309">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>

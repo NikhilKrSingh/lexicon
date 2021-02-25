@@ -1,0 +1,94 @@
+<form>
+  <div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/reporting']">Reporting</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Daily Deposit Report</li>
+      </ol>
+      <div class="heading">
+        <h1>Daily Deposit Report</h1>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="mb-8">Generate Report</h2>
+          <p class="lh-20">Generate your report by selecting the options below.</p>
+          <div class="row gutter-16">
+            <div class="col-5">
+
+              <div class="form-group" [class.has-error]='submitted && postingDateMsg'>
+                <label>Posting Date <sup>*</sup></label>
+                <app-date-picker [isNgModel]='true' [(data)]="postingDate" [dateTimeFilter]='dateFilter' id="as-of-date"
+                  (dataChange)='validatePostingDate()'>
+                </app-date-picker>
+
+                <app-validation-message *ngIf='submitted && postingDateMsg' [errorMessage]='postingDateMsg'>
+                </app-validation-message>
+              </div>
+              <div class="form-group" [class.has-error]='submitted && officeErrorMsg'>
+                <label>Office <sup>*</sup></label>
+                <app-multiselect-dropdown [title]="officeTitle" backgroundColor="#fff" [selections]="selectedOffice"
+                  [displaySubItem]="officeList" [filterName]="filterName" [selectedMessage]="officeMessage"
+                  (onSelectionChanged)="getOfficesSelected($event)"
+                  (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" id="primary-office-multi"
+                  [showAll]="true" (clearFilter)="clearFilterPrimaryOffice()">
+                </app-multiselect-dropdown>
+
+                <app-validation-message *ngIf='submitted && officeErrorMsg' [errorMessage]='officeErrorMsg'>
+                </app-validation-message>
+              </div>
+              <div class="form-group" [class.has-error]='accountErrorMsg && submitted'>
+                <label>Bank Accounts <sup>*</sup></label>
+                <app-custom-cash-multiselect-dropdown [title]="title" [placeholder]="placeholder"
+                  [selections]="selectedAccountList" [displaySubItem]="bankAccountList" [filterName]="filterName"
+                  [showAll]="true" [selectedMessage]="selectedMessage" (selectionChanged)="getBanksSelected($event)"
+                  (multiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clrBankList()"
+                  (applyFilter)="applyBankFilter($event)" [loading]="loading">
+                </app-custom-cash-multiselect-dropdown>
+
+                <app-validation-message *ngIf='submitted && accountErrorMsg' [errorMessage]='accountErrorMsg'>
+                </app-validation-message>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-loader [active]='loading'></app-loader>
+
+      <div class="d-flex justify-content-end pt-8">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" [routerLink]="['/reporting']" id="cancel-btn" *ngIf='!fromAccounting'>Cancel</button>
+          <button type="button" class="btn btn-light" [routerLink]="['/dashboard']" id="cancel-btn" *ngIf='fromAccounting'>Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="submitDailyDepositReport(noResults)"
+            id="export-to-pdf">
+            Export to PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+`
+<ng-template #noResults let-modal>
+  <div class="modal-header d-block pb-8">
+    <h3 class="modal-title mb-0">No Results</h3>
+    <button type="button" class="close" (click)="modal.close(true);" aria-label="Close" id="no-results">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <br>
+  <div class="modal-body pb-0">
+    <div class="d-flex align-items-start pt-8">
+      <em class="icon icon-error text-danger fs-24 warning-popup"></em>
+      <div class="pl-16">
+        <p>There are no cash receipts to export for the dates, offices, and bank accounts you have selected.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="ok-btn">
+      Okay
+    </button>
+  </div>
+</ng-template>

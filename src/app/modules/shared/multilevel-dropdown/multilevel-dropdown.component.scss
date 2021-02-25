@@ -1,0 +1,71 @@
+.icon-arrow-down:before{
+    line-height: 10px;
+    vertical-align: middle;
+}
+.drop-up{
+  .multiselect-dropdown-menu{
+    top: auto;
+    bottom: 100%;
+  }
+}
+.multiselect-dropdown-menu{
+  overflow: hidden;
+}
+.multiselect-dropdown-scroll{
+  max-height: 250px;
+  min-height: 170px;
+  overflow: auto;
+  .multiselect-dropdown-list{
+    overflow: hidden;
+    max-height: none;
+  }
+}
+
+.sub-list{
+  position: absolute;
+  left: 100%;
+  top: 0;
+  bottom: 40px;
+  z-index: 11;
+  width: 100%;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  background-color: #fff;
+  .sub-list{
+    bottom: 0;
+  }
+}
+
+.open{
+  >.sub-list{
+    left: 0;
+  }
+}
+.filt-arrow{
+  display: none;
+  cursor: pointer;
+  font-size: 9px;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  margin-right: -9px;
+}
+.has-dropdown{
+  >.filt-arrow{
+    display: block;
+  }
+}
+
+.back-arrow{
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 5px;
+  .icon{
+    font-size: 9px;
+  }
+}
+
+.check-sub-list{
+  overflow: auto;
+}

@@ -1,0 +1,175 @@
+<div>
+  <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Receipt</title>
+    <style>
+      body.receipt-template-body {
+        position: relative;
+        margin: 0;
+        color: #000;
+        background: #FFFFFF;
+        font-size: 14px;
+        line-height: 18px;
+      }
+
+      .block-record {
+        text-align: center;
+      }
+
+      .style-ui-table th {
+        text-align: right;
+        font-weight: 600;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        font-size: 14px;
+        line-height: 27px;
+      }
+
+      .style-ui-table td {
+        text-align: left;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 15px;
+        font-size: 14px;
+        line-height: 27px;
+      }
+
+      .total-block th {
+        text-align: right;
+        font-weight: 600;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        font-size: 14px;
+        line-height: 27px;
+      }
+
+      .total-block td {
+        text-align: left;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 15px;
+        font-size: 14px;
+        line-height: 27px;
+      }
+
+      .d-none {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body style="font-family: 'Open Sans', sans-serif;" class="receipt-template-body">
+    <div class="date" style="padding-top: 10px;">
+      <strong>Date:</strong> [PaymentDate]
+    </div>
+    <div class="block-record">
+      <h3 style="margin-top: 0px;padding-top: 50px;padding-bottom: 15px;margin-bottom: 0px;" align="center">
+        [FirmName]
+      </h3>
+      <div style="margin-top: 0px;margin-bottom: 0px;padding-bottom: 20px;font-weight: 700;font-style: italic;"
+        align="center">
+        [Address1] [Address2], [City] <br>
+        [State], [Zip]
+      </div>
+      <table class="style-ui-table" cellspacing="0" cellpadding="5"
+        style="width: 600px;margin:0 auto;padding-top: 20px;">
+        <tr class="[PaymentModeClass]">
+          <th align="right">Payment Mode:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[PaymentMode]</td>
+        </tr>
+        <tr class="[CreditCardClass]">
+          <th align="right">Cardholder:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[CardHolderName]</td>
+        </tr>
+        <tr class="[CreditCardClass]">
+          <th align="right">Card Number:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[CardNumber]</td>
+        </tr>
+        <tr class="[CheckClass]">
+          <th align="right">Cheque Number:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[CheckNumber]</td>
+        </tr>
+        <tr class="[E-CheckClass]">
+          <th align="right">Name:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[ECheckName]</td>
+        </tr>
+        <tr class="[E-CheckClass]">
+          <th align="right">Routing Number:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[RoutingNumber]</td>
+        </tr>
+        <tr class="[E-CheckClass]">
+          <th align="right">Account Number:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[AccountNumber]</td>
+        </tr>
+        <tr>
+          <th align="right">Reference #:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[ReferenceNumber]</td>
+        </tr>
+        <tr class="[AuthCodeClass]">
+          <th align="right">Auth Code:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[AuthCode]</td>
+        </tr>
+        <tr>
+          <th align="right">Target Account:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[TargetAccount]</td>
+        </tr>
+        <tr>
+          <th align="right">Customer ID:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[ClientID]</td>
+        </tr>
+        <tr>
+          <th align="right">Remaning Balance:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>
+            [RemainingBalance]
+          </td>
+        </tr>
+        <tr class="[DueDateClass]">
+          <th align="right">Due Date for Remaning Balance:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[DueDate]</td>
+        </tr>
+      </table>
+    </div>
+    <div class="total-block" style="display: inline-block;width: 100%;padding-top: 50px;">
+      <table cellspacing="0" cellpadding="5" style="width: 300px;margin:0 0 0  auto;float: right;">
+        <tr>
+          <th align="right">AMOUNT:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[AmountToPay]</td>
+        </tr>
+        <tr>
+          <th align="right">TAX:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[Tax]</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div style="height: 10px;border-top:1px solid #000000;border-bottom:1px solid #000000;"></div>
+          </td>
+        </tr>
+        <tr>
+          <th align="right">TOTAL:</th>
+          <td style="width:10px;padding:0px;"></td>
+          <td>[TotalAmount]</td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+</div>

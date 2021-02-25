@@ -1,0 +1,36 @@
+<h3 class="mb-8">Configure Time Rounding Interval</h3>
+<div class="row gutter-16">
+  <div class="col-6">
+    <p class="lh-20">Set the interval to which time entries should round up to.</p>
+  </div>
+</div>
+
+<div class="custom-control custom-radio pr-0">
+  <input type="radio" id="Minute1" name="timeRoundingInterval" class="custom-control-input" [value]='5'
+    [(ngModel)]='billingSettings.timeRoundingInterval' (change)="timeChange()">
+  <label class="custom-control-label" for="Minute1">5 minutes</label>
+</div>
+
+<div class="custom-control custom-radio pr-0">
+  <input type="radio" id="Minute2" name="timeRoundingInterval" class="custom-control-input" [value]='6'
+    [(ngModel)]='billingSettings.timeRoundingInterval' (change)="timeChange()">
+  <label class="custom-control-label" for="Minute2">6 minutes</label>
+</div>
+
+<div class="custom-control custom-radio pr-0">
+  <input type="radio" id="Minute3" name="timeRoundingInterval" class="custom-control-input" [value]='7'
+    [(ngModel)]='billingSettings.timeRoundingInterval' (change)="timeChange()">
+  <label class="custom-control-label" for="Minute3">7 minutes</label>
+</div>
+
+<div class="custom-control custom-radio pr-0">
+  <input type="radio" id="Minute4" name="timeRoundingInterval" class="custom-control-input" [value]='10'
+    [(ngModel)]='billingSettings.timeRoundingInterval' (change)="timeChange()">
+  <label class="custom-control-label" for="Minute4">10 minutes</label>
+</div>
+
+<div class="custom-control custom-radio pr-0">
+  <input type="radio" id="Minute5" name="timeRoundingInterval" class="custom-control-input" [value]='15'
+    [(ngModel)]='billingSettings.timeRoundingInterval' (change)="timeChange()">
+  <label class="custom-control-label" for="Minute5">15 minutes</label>
+</div>

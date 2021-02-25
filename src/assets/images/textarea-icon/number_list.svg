@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>UI/Icon/text editor/number list</title>
+    <defs>
+        <path d="M0,8.125 L1.26315789,8.125 L1.26315789,8.4375 L0.631578947,8.4375 L0.631578947,9.0625 L1.26315789,9.0625 L1.26315789,9.375 L0,9.375 L0,10 L1.89473684,10 L1.89473684,7.5 L0,7.5 L0,8.125 Z M0.631578947,2.5 L1.26315789,2.5 L1.26315789,0 L0,0 L0,0.625 L0.631578947,0.625 L0.631578947,2.5 Z M0,4.375 L1.13684211,4.375 L0,5.6875 L0,6.25 L1.89473684,6.25 L1.89473684,5.625 L0.757894737,5.625 L1.89473684,4.3125 L1.89473684,3.75 L0,3.75 L0,4.375 Z M3.15789474,0.625 L3.15789474,1.875 L12,1.875 L12,0.625 L3.15789474,0.625 Z M3.15789474,9.375 L12,9.375 L12,8.125 L3.15789474,8.125 L3.15789474,9.375 Z M3.15789474,5.625 L12,5.625 L12,4.375 L3.15789474,4.375 L3.15789474,5.625 Z" id="path-1"></path>
+    </defs>
+    <g id="UI/Icon/text-editor/number-list" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Rectangle" transform="translate(2.000000, 3.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <!-- <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use> -->
+            <rect fill="#4E5F7B" mask="url(#mask-2)" x="-2" y="-3" width="16" height="16"></rect>
+        </g>
+    </g>
+</svg>

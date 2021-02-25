@@ -1,0 +1,243 @@
+
+
+
+
+
+<div class="row">
+  <div class="col-3">
+    <div class="form-group">
+      <label>Service Date - Start</label>
+      <app-date-picker [id]="'pre-bill-service-date-start'" [isNgModel]="true" placeholderText="Select service date" [(data)]="startServiceDate"
+        (dataChange)="applyFilter()"></app-date-picker>
+    </div>
+  </div>
+
+  <div class="col-3">
+    <div class="form-group">
+      <label>Service Date - End</label>
+      <app-date-picker [id]="'pre-bill-service-date-end'" [isNgModel]="true" placeholderText="Select service date" [(data)]="endServiceDate"
+        (dataChange)="applyFilter()"></app-date-picker>
+    </div>
+  </div>
+
+  <div class="col-3">
+    <div class="form-group">
+      <label>Status</label>
+      <app-multiselect-dropdown
+        [title]="titleStatus"
+        id="'pre-bill-status-drp-dwn'"
+        [selections]="selectedStatus" [displaySubItem]="preBillStatusList"
+        (onSelectionChanged)="selectStatus($event)" [filterName]="filterName" (clearFilter)="clearFilter('status')"
+        (applyFilter)="applyFilter()">
+      </app-multiselect-dropdown>
+    </div>
+  </div>
+</div>
+<div class="position-relative pt-8">
+  <div class="custom-table matter-list">
+    <ngx-datatable #table class="material common-table matter-table fix-col-right"
+      [class.matter-no-data]="prebillingList?.length === 0"
+      id="pre-bill-list-tabel"
+      [rows]="prebillingList" [columnMode]="ColumnMode.force"
+      [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+      [limit]="page.size" (sort)="calcTotalPages()" [scrollbarH]='true' [sorts]="[{prop: 'matter.id', dir: 'asc'}]">
+
+      <ngx-datatable-column [resizeable]="false" prop="matter.matterNumber" name="Matter Number" [width]="150">
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="matter.name" name="Matter Name" [width]="251" >
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <ng-container *ngIf='value?.length <= 20'>
+            <span> {{value}} </span>
+          </ng-container>
+          <div class="d-inline-flex justify-content-between" *ngIf='value?.length > 20'>
+            <div class="info-hover position-relative">
+              <a href="javascript:void(0)" class="text-decoration">
+                <span> {{value?.slice(0, 20)}}... </span>
+              </a>
+              <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                <div class="arrow"></div>
+                <div class="tooltip-inner tooltip-lg">
+                  <p>{{value}} </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" prop="person.name" name="Client Name" [width]="200">
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" prop="billedAmount" name="Billable Amount" [width]="200">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span> {{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" prop="createdAt" name="Service Date" [width]="200">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span *ngIf='value'> {{value  | date : 'MM/dd/yyyy'}} </span>
+        </ng-template>
+      </ngx-datatable-column>
+
+      
+
+      <ngx-datatable-column [resizeable]="false" prop="concernedPerson.name" name="Assignee" [width]="200">
+        <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+          <ng-container *ngIf="!row.billingPerson">
+            <span> {{ (row.concernedPerson && row.concernedPerson.name) ? row.concernedPerson.name: '' }} </span>
+          </ng-container>
+          <div class="d-inline-flex justify-content-between" *ngIf="row.billingPerson">
+            <div class="info-hover position-relative">
+              <a href="javascript:void(0)" class="text-decoration color-none">
+                <span> {{ (row.concernedPerson && row.concernedPerson.name) ? row.concernedPerson.name: '' }} </span>
+              </a>
+              <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                <div class="arrow"></div>
+                <div class="tooltip-inner tooltip-md">
+                  <p>
+                    <span>Assigned Reviewers</span><br>
+                    <span>{{ (row.concernedPerson && row.concernedPerson.name) ? row.concernedPerson.name: '' }}</span><br>
+                    <span>{{ (row.billingPerson && row.billingPerson.name) ? row.billingPerson.name: '' }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+        
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" prop="preBillStatus.name" name="Status" [width]="200">
+      </ngx-datatable-column>
+
+      <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right'" name="Action" [frozenRight]='true'
+        [width]="147">
+        <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <div class="d-flex justify-content-end">
+            <div class="dropdown dropdown-hover-table" *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+              (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+              (outsideClick)="onClickedOutside($event, rowIndex)" id="pre-bill-acion-menu-{{rowIndex}}">
+              <em class="icon icon-dot-verti"></em>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" routerLink='/billing/pre-bills/view'
+                  *ngIf="(row.matter && row.matter.id && row.preBillStatus && (row.preBillStatus.code === 'PENDING_APPROVAL' || row.preBillStatus.code === 'APPROVED')) && permissionList.BILLING_MANAGEMENTisEdit && row?.concernedPerson?.id !== loggedInUser.id && row.billingPerson?.id !== loggedInUser.id "
+                  [queryParams]='{prebillingId: row.id,viewmode: 1,matterId: row.matter.id}' id="pre-bill-view-pre-bill-{{rowIndex}}">
+                  View Pre-Bill
+                </a>
+                <a class="dropdown-item" routerLink='/billing/pre-bills/view'
+                  *ngIf="row.matter && row.matter.id && row.preBillStatus && row.preBillStatus.code === 'PENDING_APPROVAL' && (permissionList.BILLING_MANAGEMENTisAdmin || ((row.concernedPerson && row.concernedPerson.id == loggedInUser.id) || (row.billingPerson && row.billingPerson.id == loggedInUser.id)))"
+                  [queryParams]='{prebillingId: row.id,matterId: row.matter.id}' id="pre-bill-review-pre-bill-{{rowIndex}}">
+                  Review Pre-Bill
+                </a>
+                <a class="dropdown-item"
+                  *ngIf="row.preBillStatus && row.preBillStatus.code === 'PENDING_APPROVAL' && ((row.concernedPerson && row.concernedPerson.id == loggedInUser.id) || (row.billingPerson && row.billingPerson.id == loggedInUser.id))"
+                  href="javascript:void(0)" (click)='approveInvoice(row)' id="pre-bill-approve-pre-bill-{{rowIndex}}">
+                  Approve
+                </a>
+                <a class="dropdown-item"
+                  *ngIf="row.preBillStatus && row.preBillStatus.code === 'APPROVED' && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin)"
+                  href="javascript:void(0)" (click)='forceGenerateInvoice(row, billClient)' id="pre-bill-force-genert-inv-{{rowIndex}}">
+                  Force Generate Invoice
+                </a>
+                <a class="dropdown-item"
+                  *ngIf="row.preBillStatus && row.preBillStatus.code === 'PENDING_APPROVAL' && permissionList.BILLING_MANAGEMENTisAdmin"
+                  href="javascript:void(0)" (click)='forceApprovePreBill(row)' id="pre-bill-force-approve-prebill-{{rowIndex}}">
+                  Force Approve Pre-Bill
+                </a>
+              </div>
+            </div>
+            <div class="dropdown dropdown-hover-table d-flex justify-content-end" *ngIf='currentActive != rowIndex'
+                          (click)="openMenu(rowIndex, $event)">
+                          <em class="icon icon-dot-verti"></em>
+                        </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                    <option *ngFor="let limit of limitArray; trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                <option *ngFor='let num of page.totalPages | counterPipe; trackBy: trackByFn ;let i= index' [value]="i+1">Page
+                  {{ i+1 }} of {{page.totalPages}}</option>
+              </select>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="table.onFooterPage($event);pageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice'
+    [invoiceTemplateDetails]='invoiceTemplateDetails'
+    [matterBillingSettings]='billToClientResponse.matterBillingSettings' [tenantDetails]='tenantDetails'
+    [loggedinuserId]='loginUser.id' [default_logo_url]='default_logo_url' [checkTrustAccountStatus]='false'
+    [trustAccountEnabled]='trustAccountStatus' (invoiceHTMLDetails)='sendEmailAndPrint($event)'>
+  </app-invoice-extended-pdf>
+</div>
+
+
+<ng-template #billClient let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Bill to Client</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data mb-24">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to bill
+          <strong>{{selectedPrebill?.matter?.name}}</strong> for
+          <strong>{{selectedPrebill.billedAmount | currency : 'USD' : 'symbol': '1.2-2'}}</strong>?
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="custom-control custom-checkbox mb-12 pr-0"
+        *ngIf='selectedPrebill?.invoicePreference?.id == electronicInvoice?.id || selectedPrebill?.invoicePreference?.id == paperAndElectronicInvoice?.id'>
+        <input type="checkbox" class="custom-control-input" id="customCheck1_email" [value]='true'
+          [(ngModel)]='sendEmail'>
+        <label class="custom-control-label" for="customCheck1_email">Email invoice to client</label>
+      </div>
+      <div class="custom-control custom-checkbox mb-0 pr-0"
+        *ngIf='selectedPrebill?.invoicePreference?.id == paperInvoice?.id  || selectedPrebill?.invoicePreference?.id == paperAndElectronicInvoice?.id'>
+        <input type="checkbox" class="custom-control-input" id="customCheck2_print" [value]='true' [(ngModel)]='print'>
+        <label class="custom-control-label" for="customCheck2_print">Print invoice</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancle-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="yes-bill-to-client">Yes, bill to client</button>
+  </div>
+</ng-template>

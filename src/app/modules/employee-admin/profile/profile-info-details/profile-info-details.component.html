@@ -1,0 +1,31 @@
+<div>
+  <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+    <a href="javascript:void(0);" (click)="selecttabs1 = mytabs" *ngFor="let mytabs of alltabs1; trackBy: trackByFn;let i = index;" role="tab"
+      class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs" id="tab-index-{{i}}">{{ mytabs }}</a>
+  </div>
+  <div class="card tlr-0">
+    <div class="card-body p-0">
+      <div class="tab-content p-32">
+        <div *ngIf="selecttabs1 === 'Matters' && !permissionList?.MATTER_MANAGEMENTisNoVisibility" class="tab-pane fade show active" role="tabpanel">
+          <app-employee-profile-matters [employee]='employee'></app-employee-profile-matters>
+        </div>
+
+        <div *ngIf="selecttabs1 === 'Base Rate'" class="tab-pane fade show active" role="tabpanel">
+          <app-employee-profile-base-rate [employee]='employee' [permissionList]="permissionList"
+                                          (reloadEmployee)="reloadEmployeeDetails()">
+          </app-employee-profile-base-rate>
+        </div>
+
+        <div *ngIf="selecttabs1 === 'Reporting Relations'" class="tab-pane fade show active" role="tabpanel">
+          <app-employee-profile-reporting-relations [employee]='employee'></app-employee-profile-reporting-relations>
+        </div>
+        <div *ngIf="selecttabs1 === 'Groups'" class="tab-pane fade show active" role="tabpanel">
+          <app-employee-groups [employeeId]='employee.id'></app-employee-groups>
+        </div>
+        <div *ngIf="selecttabs1 === 'Notes'" class="tab-pane fade show active" role="tabpanel">
+          <app-employee-profile-notes [employee]='employee'></app-employee-profile-notes>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

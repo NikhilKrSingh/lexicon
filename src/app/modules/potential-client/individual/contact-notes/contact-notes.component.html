@@ -1,0 +1,129 @@
+<div class="card">
+  <div class="card-body">
+    <h2>Notes</h2>
+    <div class="section-area">
+      <div *ngIf="!showThis && noteList.length">
+        <div class="custom-table">
+          <div class="table-responsive">
+            <table class="table table-striped table-borderless" id="notelisting-tbl">
+              <thead>
+                <tr>
+                  <th>Created By</th>
+                  <th>Note Text</th>
+                  <th>Applicable Date</th>
+                  <th>Last Update</th>
+                  <th>Visible To Client</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody *ngIf="noteList.length > 0;else no_data_found">
+                <tr *ngFor="let opp of noteList;trackBy: trackByFn; let i = index;" id="note-row-index-{{i}}">
+                  <td>
+                    <strong> {{opp.createdBy.name}}</strong><br>
+                    <span class="small helper-text d-block">{{opp.createdBy.email}}</span>
+                  </td>
+                  <td>
+                    <div class="note-table-text user-prof-note">
+                      <app-read-more [text]='opp.content' [maxLines]='2'> </app-read-more>
+                    </div>
+                  </td>
+                  <td>{{opp.applicableDate | date: 'MM/dd/yyyy'}}</td>
+                  <td>{{opp.lastUpdated | date: 'MM/dd/yyyy'}} <br>
+                    <span class="small helper-text d-block">{{opp.lastUpdated | date: 'hh:mm a'}}</span>
+
+                  </td>
+                  <td>
+                    <div class="custom-control custom-checkbox m-0 pr-0">
+                      <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                        [(ngModel)]="opp.isVisibleToClient" disabled>
+                      <label class="custom-control-label" for="dropcheck-1"></label>
+                    </div>
+                  </td>
+                  <td class="text-right">
+                    <div class="icon-group d-flex justify-content-end">
+                      <span (click)='editNote(opp)' id="edit-note-row-index-{{i}}">
+                        <em class="icon icon-edit icon-color"></em>
+                      </span>
+                      <span (click)="deleteNote(opp.id)" id="delete-note-row-index-{{i}}">
+                        <em class="icon icon-remove icon-color"></em>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+              <ng-template #no_data_found>
+                <tbody>
+                  <tr>
+                    <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+                  </tr>
+                </tbody>
+              </ng-template>
+            </table>
+          </div>
+        </div>
+      </div>
+      <app-loader [active]="getNotesLoading"></app-loader>
+    </div>
+    <button *ngIf="!showThis" class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button"
+          (click)="showNoteForm()" id="add-note"><i class="icon icon-add-circle"></i>Add Note</button>
+    <div class="info-block" *ngIf="showThis">
+      <form [formGroup]="noteForm">
+        <div class="row gutter-16">
+          <div class="col-8">
+            <div class="row gutter-16">
+              <div class="col-12">
+                <h3>Add New Note</h3>
+              </div>
+
+              <div class="col-3">
+                  <div class="form-group">
+                    <label>Applicable Date</label>
+                    <app-date-picker [isForm]='true' [dateform]='noteForm' controlName='applicableDate' id="application-date"></app-date-picker>
+                    <input type="hidden" class="form-control" formControlName="id" id="hidden-id">
+                  </div>
+                </div>
+              <div class="col-12">
+                <div class="form-group">
+                  <div class="custom-control custom-checkbox m-0 pr-0">
+                    <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                      formControlName="isVisibleToClient">
+                    <label class="custom-control-label" for="dropcheck-1">Visible to
+                      Client</label>
+                  </div>
+
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="">Note Text <sup>*</sup></label>
+                  <textarea class="form-control" rows="4" placeholder="Enter Note Text"
+                    formControlName="content" id="note-text"></textarea>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="d-flex justify-content-end pb-24">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-light" (click)="showThis=false" id="cance-btn">Cancel</button>
+                    <button type="button" class="btn btn-primary" [disabled]='noteForm.invalid' (click)='save()' id="save-btn">Save</button>
+                  </div>
+                </div>
+              </div>
+              <app-loader [active]="addNoteLoading"></app-loader>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+<div class="d-flex justify-content-between pb-24">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='cancel()' id="cancel-btn">Cancel</button>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='prev()' id="previous-btn">Previous</button>
+    <button type="button" class="btn btn-primary" (click)="redirectToList()" id="done-btn">Done</button>
+  </div>
+</div>
+<app-loader [active]="loading"></app-loader>

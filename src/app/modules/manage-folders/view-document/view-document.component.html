@@ -1,0 +1,482 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Document Management</li>
+        </ol>
+        <div class="heading">
+            <h1>Document Management</h1>
+        </div>
+        <div class="d-flex align-items-center justify-content-between mb-24">
+            <div class="header-search flex-fill d-flex">
+                <form action="#">
+                    <div class="header-search-wrapper">
+                        <input type="text" class="form-control search-input" placeholder="Search by document name" id="search-dc-name">
+                        <button class="btn" type="submit" id="search-btn">Search</button>
+                    </div>
+                </form>
+            </div>
+            <div class="btn-group ml-md-24 ml-0">
+                <button class="btn btn-outline-primary btn-icon" type="button" id="create-new-folder">
+                    <i class="icon icon-plus"></i> Create New Folder
+                </button>
+                <button class="btn btn-outline-primary btn-icon" type="button" id="upload-documents">
+                    <i class="icon icon-upload"></i> Upload Document
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="info-block">
+                    <ul class="list-unstyled d-flex dms-bredcumb mb-24 text-xlarge align-items-center flex-wrap">
+                        <li><a href="#">Firm Name</a></li>
+                        <li class="active">Folder name 123</li>
+                    </ul>
+                    <div class="row gutter-16">
+                        <div class="col-8">
+                            <div class="row gutter-16">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Owner</label>
+                                        <ng-select [items]="testlist"
+                                        placeholder="Direct Manager"
+                                        [(ngModel)]="dselected"
+                                        [selectOnTab]="true"
+                                        [notFoundText]="'No record found'"
+                                        id="owner-list">
+                                      </ng-select>
+
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Category</label>
+                                        <select class="custom-select">
+                                            <option>Select a category</option>
+                                            <option>Select a category 1</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <select class="custom-select">
+                                            <option>Status</option>
+                                            <option>Status 1</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-borderless  table-fileview" id="tbl-files">
+                            <thead>
+                                <tr>
+                                    <th class="has-short">Name</th>
+                                    <th class="has-short" width="136px">Owner</th>
+                                    <th class="has-short" width="140px">Category</th>
+                                    <th class="has-short" width="115px">File Size</th>
+                                    <th class="has-short" width="140px">Last Updated</th>
+                                    <th class="has-short" width="140px"></th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <span class="file-icon"><img src="assets/images/dms/pdffilled.svg" alt=""></span>
+                                            <p> Matter Name 01  <small>(Version 1) (Archived)</small>
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td>Me</td>
+                                    <td>
+                                        <p class="categry-wraps"><b>Auto-Pay Agre...</b>
+                                            <strong>… +2 more</strong>
+                                        </p>
+                                    </td>
+                                    <td>10 MB</td>
+                                    <td>
+                                        <p class="update-date"><strong>Dec. 9, 2019</strong>11:59pm</p>
+                                    </td>
+                                    <td>
+                                        <div class="lbl-wraps d-flex">
+                                            <label class="lbl-tag" for="">Fillable Template</label>
+                                            <label class="lbl-tag" for="">Checked Out</label>
+                                            <div class="info-hover position-relative">
+                                                <em class="icon icon-info text-large"></em>
+                                                <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                                                  <div class="arrow"></div>
+                                                  <div class="tooltip-inner">
+                                                    <h6>Checked Out By:</h6>
+                                                    <p>Individual passed away.</p>
+                                                    <p class="mb-8">jonathan.smith@email.com</p>
+                                                    <h6>Date/Time</h6>
+                                                    <p>Dec. 9, 2019  11:59pm</p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown dropdown-hover d-flex justify-content-end">
+                                            <em class="icon icon-dot-verti"></em>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item" href="javascript:void(0);">Open Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Move Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Send Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Edit Document Properties</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Replace Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Version History</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(CheckInDocument,'','')">Check-In Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(ForceCheckInDocument,'','')">Force Check-In</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Check-Out History</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <span class="file-icon"><img src="assets/images/dms/excel.png" alt=""></span>
+                                            <p>Document Title
+                                                <small>(Version 1)</small>
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:jessica.smith@email.com" class="mail-tooltip" data-title="jessica.smith@email.com">Jessica Smith</a>
+                                    </td>
+                                    <td>
+                                        <p class="categry-wraps"><b>Auto-Pay Agre...</b>
+                                            <strong>… +2 more</strong>
+                                        </p>
+                                    </td>
+                                    <td>10 MB</td>
+                                    <td>
+                                        <p class="update-date"><strong>Dec. 9, 2019</strong>11:59pm</p>
+                                    </td>
+                                    <td>
+                                        <div class="lbl-wraps d-flex">
+                                            <label class="lbl-tag" for="">Checked Out</label>
+                                            <div class="info-hover position-relative">
+                                                <em class="icon icon-info text-large"></em>
+                                                <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                                                  <div class="arrow"></div>
+                                                  <div class="tooltip-inner">
+                                                    <h6>Checked Out By:</h6>
+                                                    <p>Individual passed away.</p>
+                                                    <p class="mb-8">jonathan.smith@email.com</p>
+                                                    <h6>Date/Time</h6>
+                                                    <p>Dec. 9, 2019  11:59pm</p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown dropdown-hover d-flex justify-content-end">
+                                            <em class="icon icon-dot-verti"></em>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item" href="javascript:void(0);">Open Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Move Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Send Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Edit Document Properties</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Replace Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Version History</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(CheckInDocument,'','')">Check-In Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(ForceCheckInDocument,'','')">Force Check-In</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Check-Out History</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="tr-selected">
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <span class="file-icon"><img src="assets/images/dms/worddoc.png" alt=""></span>
+                                            <p> Matter Name 01  <small>(Version 1) </small>
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td>Me</td>
+                                    <td>
+                                        <p class="categry-wraps"><b>Accounting</b>
+                                            <strong>… +2 more</strong>
+                                        </p>
+                                    </td>
+                                    <td>10 MB</td>
+                                    <td>
+                                        <p class="update-date"><strong>Dec. 9, 2019</strong>11:59pm</p>
+                                    </td>
+                                    <td>
+                                        <div class="lbl-wraps d-flex">
+                                            <label class="lbl-tag" for="">Drafting Template</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown dropdown-hover d-flex justify-content-end">
+                                            <em class="icon icon-dot-verti"></em>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item" href="javascript:void(0);">Open Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Move Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Send Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Edit Document Properties</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Replace Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Version History</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(CheckInDocument,'','')">Check-In Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(ForceCheckInDocument,'','')">Force Check-In</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Check-Out History</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="tr-hovered">
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <span class="file-icon"><img src="assets/images/dms/powerpoint.png" alt=""></span>
+                                            <p> Matter Name 01  <small>(Version 1) (Archived)</small> </p>
+                                        </div>
+                                    </td>
+                                    <td>Me</td>
+                                    <td>
+                                        <p class="categry-wraps"><b>Auto-Pay Agre...</b>
+                                            <strong>… +2 more</strong>
+                                        </p>
+                                    </td>
+                                    <td>10 MB</td>
+                                    <td>
+                                        <p class="update-date"><strong>Dec. 9, 2019</strong>11:59pm</p>
+                                    </td>
+                                    <td>
+                                        <div class="lbl-wraps d-flex">
+                                            <label class="lbl-tag" for="">Checked Out</label>
+                                            <div class="info-hover position-relative">
+                                                <em class="icon icon-info text-large"></em>
+                                                <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                                                  <div class="arrow"></div>
+                                                  <div class="tooltip-inner">
+                                                    <h6>Checked Out By:</h6>
+                                                    <p>Individual passed away.</p>
+                                                    <p class="mb-8">jonathan.smith@email.com</p>
+                                                    <h6>Date/Time</h6>
+                                                    <p>Dec. 9, 2019  11:59pm</p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown dropdown-hover d-flex justify-content-end">
+                                            <em class="icon icon-dot-verti"></em>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item" href="javascript:void(0);">Open Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Download Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Move Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Send Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Edit Document Properties</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">Replace Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Version History</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(CheckInDocument,'','')">Check-In Document</a>
+                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openPersonalinfo(ForceCheckInDocument,'','')">Force Check-In</a>
+                                                <a class="dropdown-item" href="javascript:void(0);">View Check-Out History</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <div class="table-toolbar d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="table-items d-flex align-items-center mr-36">
+                                Items per page:
+                                <div class="dropdown ml-8">
+                                    <a href="javascript:void(0)" class="dropdown-toggle " (click)="isShow = !isShow"> 10 </a>
+                                    <div [ngClass]="(isShow)?'dropdown-menu show':'dropdown-menu'" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item" href="#">10</a>
+                                        <a class="dropdown-item" href="#">20</a>
+                                        <a class="dropdown-item" href="#">50</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <span>1 - 2 of 2 items</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="dropdown"> Page 1 of 1
+                                <a href="javascript:void(0)" class="dropdown-toggle" (click)="isShow1 = !isShow1"> Page 1 of 1 </a>
+                                <div [ngClass]="(isShow1)?'dropdown-menu show':'dropdown-menu'" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="#">Page 1 of 40</a>
+                                    <a class="dropdown-item" href="#">Page 2 of 40</a>
+                                    <a class="dropdown-item" href="#">Page 3 of 40</a>
+                                </div>
+                            </div>
+                            <div class="table-next-prev ml-44">
+                                <span class="table-arrow table-arrow-left"><em class="icon icon-angle-left"></em></span>
+                                <span class="table-arrow table-arrow-right"><em class="icon icon-angle-right"></em></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="info-block">
+                    <ul class="list-unstyled d-flex dms-bredcumb mb-24 text-xlarge align-items-center flex-wrap">
+                        <li><a href="#">Firm Name</a></li>
+                        <li><a href="#">Folder name 123</a></li>
+                        <li class="active"><img src="assets/images/dms/pdffilled.svg" alt=""> Document Title - Version History</li>
+                    </ul>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-borderless table-align-top">
+                            <thead>
+                                <tr>
+                                    <th>Version</th>
+                                    <th>Document Name</th>
+                                    <th>File Name</th>
+                                    <th>File Size</th>
+                                    <th>Upload Date/Time</th>
+                                    <th>Modified By</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        4
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <span class="file-icon"><img src="assets/images/dms/pdffilled.svg" alt="" width="18" class="mr-12"></span>
+                                            <p class="m-0"> Document title</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        File_Name_01
+                                    </td>
+                                    <td>10 MB</td>
+                                    <td>
+                                        <p class="update-date m-0 lh-20"><strong class="d-block">Dec. 9, 2019</strong>11:59pm</p>
+                                    </td>
+                                    <td>
+                                        <a class="mail-tooltip" data-title="jessica.smith@email.com" href="mailto:jessica.smith@email.com">Jessica Smith</a>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown dropdown-hover d-flex justify-content-end">
+                                            <em class="icon icon-dot-verti"></em>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <a class="dropdown-item" href="#">Open Document</a>
+                                                <a class="dropdown-item" href="#">Download Document</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-toolbar d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="table-items d-flex align-items-center mr-36">
+                                Items per page:
+                                <div class="dropdown ml-8">
+                                    <a href="javascript:void(0)" class="dropdown-toggle " (click)="isShow2 = !isShow2"> 10 </a>
+                                    <div [ngClass]="(isShow2)?'dropdown-menu show':'dropdown-menu'" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item" href="#">10</a>
+                                        <a class="dropdown-item" href="#">20</a>
+                                        <a class="dropdown-item" href="#">50</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <span>1 - 2 of 2 items</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="dropdown"> Page 1 of 1
+                                <a href="javascript:void(0)" class="dropdown-toggle" (click)="isShow3 = !isShow3"> Page 1 of 1 </a>
+                                <div [ngClass]="(isShow3)?'dropdown-menu show':'dropdown-menu'" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="#">Page 1 of 40</a>
+                                    <a class="dropdown-item" href="#">Page 2 of 40</a>
+                                    <a class="dropdown-item" href="#">Page 3 of 40</a>
+                                </div>
+                            </div>
+                            <div class="table-next-prev ml-44">
+                                <span class="table-arrow table-arrow-left"><em class="icon icon-angle-left"></em></span>
+                                <span class="table-arrow table-arrow-right"><em class="icon icon-angle-right"></em></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade d-none in show " tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header d-block">
+                <h3 class="modal-title" >Download Document</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="close-model">
+                    <em class="icon icon-close"></em>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>You are about to download this document. Would you also like to check the document out?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-dismiss="modal" id="no-btn">No</button>
+                <button type="button" class="btn btn-primary" id="yes-checkout-btn">Yes, check-out document</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #CheckInDocument let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Check-In Document</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+        You are about to check-in this document. Do you want to continue?
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+      <button type="button" class="btn btn-primary" id="yes-checkin-doc">Yes, check-in document</button>
+    </div>
+</ng-template>
+
+
+<ng-template #ForceCheckInDocument let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Force Check-In Document</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-model">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+        You are about to force check-in this document. Do you want to continue?
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+      <button type="button" class="btn btn-primary" id="yes-force-check-in-btn">Yes, force check-in document</button>
+    </div>
+</ng-template>

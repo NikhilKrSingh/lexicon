@@ -1,0 +1,120 @@
+<div class="npc-block cust-card pb-0 mb-0">
+  <div class="cust-card-head d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <h3 class="m-0">Add Notes</h3>
+      <i class="lh-20 ml-8">Optional</i>
+    </div>
+  </div>
+  <div class="cust-card-body">
+    <p class="lh-20">Enter as many notes as needed.</p>
+    <div class="d-flex align-items-center mb-24 w-100 justify-content-between">
+      <div class="header-search flex-fill mr-20" *ngIf="originalNotes.length">
+        <form class="table-data-search">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input"
+                   placeholder="Search by author or note text"
+                   (keyup)='searchFilter($event)' id="search">
+            <button class="btn" type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+      <button
+        class="btn btn-primary btn-icon d-flex align-items-center" type="button"
+        (click)="addEditNote(null,$event)" id="createNewNoteId">
+        <i class="icon icon-plus"></i>
+        Create New Note
+      </button>
+    </div>
+    <div class="row gutter-16" [formGroup]='searchForm' *ngIf="originalNotes.length">
+      <div class="col-3">
+        <div class="form-group">
+          <label>Author</label>
+          <ng-select [items]="authorList" placeholder="Select an Author"
+                     formControlName='author' [bindValue]="'id'"
+                     [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'" id="authorListId">
+          </ng-select>
+        </div>
+      </div>
+      <div class="col-5">
+        <div class="form-group">
+          <label>Date Created Range</label>
+          <div class="row gutter-16">
+            <div class="col-6">
+              <app-date-picker
+                [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select start date'"
+                controlName='createdStartDate' id="createdStartDateId"></app-date-picker>
+            </div>
+            <div class="col-6">
+              <app-date-picker
+                [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select end date'"
+                controlName='createdEndDate' id="createdEndDateId"></app-date-picker>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="form-group">
+          <div class="custom-control custom-checkbox mt-32 pr-0">
+            <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                   formControlName="isVisibleToClient">
+            <label class="custom-control-label" for="dropcheck-1">Visible To Client</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="custom-table pt-24" *ngIf="originalNotes?.length > 0">
+      <ngx-datatable
+        #table class="material common-table datatable-auto-height ngtable-align-top" [rows]="notes"
+        [columnMode]="ColumnMode.force" [headerHeight]="50"
+        [messages]="messages"
+        rowHeight="auto"
+        id="originalNotesId">
+        <ngx-datatable-column [resizeable]="false" prop="content" name="Note Text" [width]="334">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <app-read-more [text]='row.content' [maxLines]='2'></app-read-more>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="applicableDate" name="Applicable Date" [width]="220">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span class="d-block font-weight-medium">{{row.applicableDate | date}}</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Written Date" [width]="220">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span class="d-block font-weight-medium mb-4">{{row.lastUpdated | date}}</span>
+            <span
+              class="small helper-text font-weight-regular d-block lh-20">{{row.lastUpdated | date: 'hh:mm a'}}</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="createdBy.name" name="Author" [width]="240">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span
+              class="d-block font-weight-medium mb-4">{{row.createdByName ? row.createdByName : row.createdBy.name}}</span>
+            <span
+              class="small helper-text font-weight-regular d-block lh-20">{{row.createdByEmail ? row.createdByEmail : row.createdBy?.email}}</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="isVisibleToClient" name=" " [width]="240" [sortable]="false">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <span *ngIf="row.isVisibleToClient"
+                  class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Visible To Client</span>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="" name="Action" [width]="120"
+                              [headerClass]="'text-right'" [sortable]="false">
+          <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+            <div class="icon-group d-flex justify-content-end">
+              <span (click)='addEditNote(row,$event)'>
+                <em class="icon icon-edit icon-color"></em>
+              </span>
+              <span (click)="deleteNote(row,$event)">
+                <em class="icon icon-remove icon-color"></em>
+              </span>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </div>
+  </div>
+
+</div>

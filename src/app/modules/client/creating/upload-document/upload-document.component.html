@@ -1,0 +1,315 @@
+<div class="npc-block pb-0">
+  <div class="cust-card">
+    <div class="cust-card-head d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <h3 class="m-0">Upload Document</h3>
+        <i class="lh-20 ml-8">Optional</i>
+      </div>
+    </div>
+    <div class="cust-card-body">
+      <p class="lh-20">Upload as many documents as needed</p>
+      <button *ngIf="practiceAreaId" class="btn btn-primary btn-icon" type="button"
+        (click)="openPersonalinfo(UploadDoc, 'xl', '');" id="upload-document-btn"> Upload Document
+      </button>
+      <div class="alert alert-primary d-flex justify-content-between mt-24 mb-0" *ngIf="!practiceAreaId">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-info text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">No Practice Area Selected</h5>
+            You must select a Practice Area above before you can upload a document.
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-danger d-flex justify-content-between mt-24 mb-0" *ngIf="getSecurityScanFailedStatus">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-error text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">Security Scan Failed</h5>
+            We detected one or more documents have failed the security scan. Please retry the security scan or remove
+            the document.
+          </div>
+        </div>
+      </div>
+      <div class="upld-doc-wrap pt-24">
+        <div class="upld-doc-block p-16" *ngFor="let file of fileArray; trackBy: trackByFn;let i = index">
+          <ng-container *ngIf="!file.isHidden">
+            <div class="d-flex align-items-center justify-content-between mb-16">
+              <div class="d-flex align-items-center">
+                <img [src]="file.name | commonService : 'getFileImage' : true" alt="" width="18">
+                <span class="small font-weight-medium lh-16 ml-12">{{file.name}}</span>
+              </div>
+              <div class="d-flex align-items-center justify-content-between upld-status">
+                <div class="d-flex align-items-center">
+                  <span *ngIf="!file.isScanFailed && !file.isScanPassed"
+                    class="sh-badge text-nowrap font-weight-medium sh-badge-primary" id="scan-progress-{{i}}">Security Scan In Progress</span>
+                  <span *ngIf="file.isScanPassed"
+                    class="sh-badge text-nowrap font-weight-medium sh-badge-success" id="scan-passed-{{i}}">Security Scan Passed</span>
+                  <span *ngIf="file.isScanFailed"
+                    class="sh-badge text-nowrap font-weight-medium sh-badge-danger" id="scan-failed-{{i}}">Security Scan Failed</span>
+                  <div *ngIf="file.isScanFailed" class="info-hover position-relative ml-8 d-inline-block">
+                    <em class="icon icon-info"></em>
+                    <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                      <div class="arrow"></div>
+                      <div class="tooltip-inner">
+                        <h6 class="font-weight-medium my-0">Security Scan Failed</h6>
+                        <p>{{file.virusDetails ? file.virusDetails+' detected' : 'Unknown virus detected'}}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="dropdown dropdown-hover-table ml-24" [class.active]="currentIndex == i"
+                  appAutoCloseOutsideClick (outsideClick)="onClickedOutside(i)">
+                  <span class="icon-area" (click)="openMenu(i)">
+                    <em class="icon icon-dot-verti"></em>
+                  </span>
+                  <div class="dropdown-menu dropdown-menu-right mt-8">
+                    <a href="javascript:void(0);" class="dropdown-item" (click)="retryScan(i)"
+                      *ngIf="file.isScanFailed" id="retryscan-index-{{i}}">
+                      Retry Scan
+                    </a>
+                    <a href="javascript:void(0);" class="dropdown-item"
+                      (click)="currentIndex = null;editDocument(i, EditDoc)" id="edit-index-{{i}}">
+                      Edit Document
+                    </a>
+                    <a href="javascript:void(0);" class="dropdown-item" (click)="removeFile(i)" id="remove-index-{{i}}">
+                      Remove Document
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row gutter-16">
+              <div class="col-3">
+                <label class="mb-4 d-block">Document Name</label>
+                {{file.DocumentName}}
+              </div>
+              <div class="col-4">
+                <label class="mb-4 d-block">Document Attributes</label>
+                <p class="m-0 lh-20"><span *ngIf="file.isDraftingTemplate">Drafting Template</span>
+                  <span *ngIf="file.isDraftingTemplate && file.isFillableTemplate">, &nbsp;</span>
+                  <span *ngIf="file.isFillableTemplate">Fillable Template</span>
+                </p>
+              </div>
+              <div class="col-5">
+                <label class="mb-4 d-block">Folder Location</label>
+                <span *ngIf="matterDetails?.matterNumber == file.folderId">{{matterDetails?.matterName || 'Matter Folder'}}</span>
+                <ul class="list-unstyled searchcrumb d-flex align-items-center small mb-12 flex-wrap"
+                  *ngIf="matterDetails.matterNumber != file.folderId">
+                  <li *ngFor="let path of file.folderPath | commonService: 'splitPath';trackBy: trackByFn;let i=index">
+                    {{path}}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #UploadDoc let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Upload Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="row gutter-16">
+      <div class="col-7">
+        <h4 class="mb-8 mt-0">Select Files</h4>
+        <p class="lh-20">Select one or more files from your local system to upload.</p>
+        <div class="row gutter-16">
+          <div class="col-8">
+            <div class="form-group" [class.has-error]="!selectedFolderId && modalSubmitted && isSameFolderForAll">
+              <label>Folder Location <sup>*</sup></label>
+              <ng-select [searchable]="false" [items]="practiceAreaFolderList" [clearable]="false"
+                placeholder="Select matter folder" (change)='applyFilter($event)' [(ngModel)]="selectedFolderId"
+                [bindValue]="'folderId'" [bindLabel]="'folderName'" [notFoundText]="'No record found'"
+                [selectOnTab]="true" id="folder-location">
+                <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+                  <div class="d-flex justify-content-between">
+                    <span [ngClass]="{'font-weight-medium': index == 0}">
+                      <i class="icon icon-folder mr-8 fs-14 icon-color" *ngIf="index > 0"></i>{{item.folderName}}
+                    </span>
+                  </div>
+                </ng-template>
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="!selectedFolderId && modalSubmitted && isSameFolderForAll">
+                Please select a Folder Location
+              </span>
+              <div class="custom-control custom-checkbox pr-0 pt-12">
+                <input type="checkbox" class="custom-control-input" id="customCheck1" [(ngModel)]="isSameFolderForAll"
+                  (ngModelChange)="toggleFolderLoction()">
+                <label class="custom-control-label lh-20" for="customCheck1">Same folder location for all files</label>
+              </div>
+            </div>
+          </div>
+          <div class="col-4">
+            <label class="d-block">&nbsp;</label>
+            <div class="upload-check d-inline-block position-relative">
+              <form id="fileForm">
+                <input #file type="file" (change)="selectedFile(file.files)" id="inpuFile" multiple>
+              </form>
+              <span class="btn btn-primary"> Select Files</span>
+              <div class="pt-12 small lh-16">Maximum upload file size: 2 GB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="upld-doc-wrap modal-upld-doc" *ngIf='selectedFileArray?.length'>
+      <div class="upld-doc-block p-16" *ngFor="let file of selectedFileArray;trackBy: trackByFn;let i=index">
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <div class="d-flex align-items-center">
+            <img [src]="file.name | commonService : 'getFileImage': true" alt="" width="18">
+            <span class="small font-weight-medium lh-16 ml-12">{{file.name}}</span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="dropdown dropdown-hover-table ml-24" [class.active]="currentIndex == i" appAutoCloseOutsideClick
+              (outsideClick)="onClickedOutside(i)">
+              <span class="icon-area" (click)="openMenu(i)" id="open-menu-index-{{i}}">
+                <em class="icon icon-dot-verti"></em>
+              </span>
+              <div class="dropdown-menu dropdown-menu-right mt-8">
+                <a href="javascript:void(0);" class="dropdown-item"
+                  (click)="currentIndex=null;removeFile(i, 'modalFile')" id="remove-doc-index-{{i}}">
+                  Remove document
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div class="form-group mb-0"
+              [class.has-error]="file.isExistError || !file.DocumentName || (file.DocumentName | commonService : 'trimText') =='' ">
+              <label>Document Name</label>
+              <input type="text" [(ngModel)]="file.DocumentName" (ngModelChange)="checkInternalFileNames(i)"
+                class="form-control white-form-control" placeholder="Provide name" id="document-name-{{i}}">
+              <span class="field-message text-danger" *ngIf="file.isExistError && (file.DocumentName | commonService : 'trimText')">
+                Same document name already exists
+              </span>
+              <span class="field-message text-danger" *ngIf="!file.DocumentName || (file.DocumentName | commonService : 'trimText') ==''">
+                Please provide a Document Name
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-0">
+              <label>Document Attribute</label>
+              <app-multiselect-dropdown [showSearch]="false" [unsort]="true" [title]="file.title"
+                [selections]="file.selectedAttArr" [displaySubItem]="file.attributesArray"
+                [filterName]="'Select Attributes'" [selectedMessage]="'filters are selected'"
+                (onSelectionChanged)="getAttributeSelected($event, i)"
+                (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)" (clearFilter)="clrAttributes(i)"
+                (applyFilter)="applyFilter($event)"
+                id="document-attribute-{{i}}"></app-multiselect-dropdown>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-0" *ngIf="!isSameFolderForAll"
+              [class.has-error]="modalSubmitted && !file.folderId">
+              <label>Folder Location <sup>*</sup></label>
+              <ng-select [searchable]="false" [items]="practiceAreaFolderList" [clearable]="false"
+                placeholder="Select matter folder" [(ngModel)]="file.folderId" [bindValue]="'folderId'"
+                [bindLabel]="'folderName'" [notFoundText]="'No record found'" [selectOnTab]="true" id="folder-location-{{i}}">
+                <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+                  <div class="d-flex justify-content-between">
+                    <span [ngClass]="{'font-weight-medium': index == 0}">
+                      <i *ngIf="i > 0" class="icon icon-folder mr-8 fs-14 icon-color"></i>{{item.folderName}}
+                    </span>
+
+                  </div>
+                </ng-template>
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="modalSubmitted && !file.folderId">
+                Please select a Folder Location
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="uploadDocuments()" id="upload-btn">Upload</button>
+  </div>
+</ng-template>
+
+<ng-template #EditDoc let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Edit Document</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="upld-doc-wrap modal-upld-doc">
+      <div class="upld-doc-block p-16">
+        <div class="d-flex align-items-center justify-content-between mb-16">
+          <div class="d-flex align-items-center">
+            <img [src]="editFileDetails.name | commonService : 'getFileImage': true" alt="" width="18">
+            <span class="small font-weight-medium lh-16 ml-12">{{editFileDetails.name}}</span>
+          </div>
+        </div>
+        <div class="row gutter-16">
+          <div class="col-4">
+            <div class="form-group mb-0"
+              [class.has-error]="editFileDetails.isExistError || !editFileDetails.DocumentName || (editFileDetails.DocumentName | commonService : 'trimText') =='' ">
+              <label>Document Name</label>
+              <input type="text" [(ngModel)]="editFileDetails.DocumentName"
+                (ngModelChange)="checkInternalFileNames(0, true)" class="form-control white-form-control"
+                placeholder="Provide name" id="document-name">
+              <span class="field-message text-danger"
+                *ngIf="editFileDetails.isExistError && (editFileDetails.DocumentName | commonService : 'trimText')">
+                Same document name already exists
+              </span>
+              <span class="field-message text-danger"
+                *ngIf="!editFileDetails.DocumentName || (editFileDetails.DocumentName | commonService : 'trimText') ==''">
+                Please provide a Document Name
+              </span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-0">
+              <label>Document Attribute</label>
+              <app-multiselect-dropdown [showSearch]="false" [unsort]="true" [title]="editFileDetails.title"
+                [selections]="editFileDetails.selectedAttArr" [displaySubItem]="editFileDetails.attributesArray"
+                [filterName]="'Select Attributes'" [selectedMessage]="'filters are selected'"
+                (onSelectionChanged)="getAttributeSelectedEditFile($event)"
+                (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                (clearFilter)="clrAttributesEditFile()" (applyFilter)="applyFilter($event)" id="doc-attribute"></app-multiselect-dropdown>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group mb-0" [class.has-error]="modalSubmitted && !editFileDetails.folderId">
+              <label>Folder Location <sup>*</sup></label>
+              <ng-select [searchable]="false" [items]="practiceAreaFolderList" [clearable]="false"
+                placeholder="Select matter folder" [(ngModel)]="editFileDetails.folderId" [bindValue]="'folderId'"
+                [bindLabel]="'folderName'" [notFoundText]="'No record found'" [selectOnTab]="true" id="folder-location">
+                <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+                  <div class="d-flex justify-content-between">
+                    <span [ngClass]="{'font-weight-medium': index == 0}">
+                      <i *ngIf="index > 0" class="icon icon-folder mr-8 fs-14 icon-color"></i>{{item.folderName}}
+                    </span>
+
+                  </div>
+                </ng-template>
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="modalSubmitted && !editFileDetails.folderId">
+                Please select a Folder Location
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveEditFile()" id="update-btn">Update</button>
+  </div>
+</ng-template>

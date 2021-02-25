@@ -1,0 +1,298 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/contact/all-contact']">Contacts</a></li>
+      <li class="breadcrumb-item">
+        <a href="javascript:void(0)" [routerLink]="['/contact/view-potential-client']"
+           [queryParams]="{clientId: clientId}">
+          Contact Profile
+          - {{clientDetail?.isCompany ? clientDetail?.companyName : clientDetail?.firstName + ' ' + clientDetail?.lastName}}
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Reassign Potential Client</li>
+    </ol>
+    <div class="profile-content d-flex align-items-center profile-client mb-32 section-area">
+      <div class="profile-heading mr-16">
+        <h2 class="mt-0 mb-2" *ngIf="!clientDetail?.isCompany">
+          Reassign Potential Client <span *ngIf='clientDetail'>- {{clientDetail?.firstName}} {{clientDetail?.lastName}}</span>
+        </h2>
+        <h2 class="mt-0 mb-2" *ngIf="clientDetail?.isCompany">
+          Reassign Potential Client <span *ngIf='clientDetail'>- {{clientDetail?.companyName}}</span>
+        </h2>
+        <span class="text-small font-weight-medium d-flex align-items-center"
+              *ngIf=" clientDetail && !clientDetail?.isCompany">Individual Potential Client - {{(clientDetail?.isVisible) ? 'Active' : (clientDetail?.isArchived) ? 'Archived' : 'Inactive'}}</span>
+        <span class="text-small font-weight-medium d-flex align-items-center"
+              *ngIf="clientDetail && clientDetail?.isCompany">Corporate Potential Client - {{(clientDetail?.isVisible) ? 'Active' : (clientDetail?.isArchived) ? 'Archived' : 'Inactive'}}</span>
+      </div>
+      <app-loader [active]="topLoading"></app-loader>
+    </div>
+    <div class="card">
+      <form class="card-body" #matterDetailForm="ngForm">
+        <h2 class="mb-24">Office & Attorney</h2>
+        <div class="row gutter-16 section-area">
+          <div class="col-3">
+            <div class="form-group"
+                 [class.has-error]="matterDetailForm.controls.consultLawOffice?.errors && formSubmitted">
+              <label>Consultation Law Office <sup>*</sup></label>
+              <ng-select [items]="consultOfficeList" placeholder="Choose an option"
+                         [(ngModel)]="consultOffice" [clearable]="false"
+                         [bindValue]="'id'" [bindLabel]="'officeName'" required name="consultLawOffice"
+                         (change)="consultOfficeChanged($event, OfficeChangeReassignConsultAttorney)"
+                         [selectOnTab]="true"
+                         [notFoundText]="'No record found'" id="consultation-law-office-select">
+              </ng-select>
+              <span class="field-message text-danger">
+                Please select consultation law office.
+              </span>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group"
+                 [class.has-error]="matterDetailForm.controls.practiceArea?.errors && formSubmitted">
+              <label>Practice Area <sup>*</sup></label>
+              <ng-select [items]="practiceList" placeholder="Practice Area" [(ngModel)]="practiceArea"
+                         [clearable]="false"
+                         [bindValue]="'id'" [bindLabel]="'name'" [selectOnTab]="true" name="practiceArea" required
+                         (change)="showWarningMessageOnChangePracticeArea(warningMessageChangePracticeArea, $event)"
+                         [notFoundText]="'No record found'" id="practice-area-select">
+              </ng-select>
+              <span class="field-message text-danger">
+                Please select practice area.
+              </span>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" [class.has-error]="matterDetailForm.controls.matterType?.errors && formSubmitted">
+              <label>Matter Type <sup>*</sup> </label>
+              <ng-select [items]="matterTypes" required
+                         placeholder="Matter Type" name="matterType" [readonly]="!practiceAreaSelected"
+                         [clearable]="false"
+                         [(ngModel)]="matterType" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'"
+                         [notFoundText]="'No record found'"
+                         id="matter-type-select">
+              </ng-select>
+              <span class="field-message text-danger">
+                Please select matter type.
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="row gutter-16 section-area">
+          <div class="col-3">
+            <div class="form-group" [class.has-error]="matterDetailForm.controls.state?.errors && formSubmitted">
+              <label>Jurisdiction of Matter - State <sup>*</sup></label>
+              <ng-select [selectOnTab]="true" [items]="stateList" placeholder="Jurisdiction" name="state" required
+                         [clearable]="false"
+                         [(ngModel)]="jurisdictionId" [bindValue]="'id'" [bindLabel]="'name'"
+                         (ngModelChange)="searchAttorney()"
+                         [notFoundText]="'No record found'"
+                         id="state-select">
+              </ng-select>
+              <span class="field-message text-danger">
+                Please select jurisdiction of matter - state.
+              </span>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" [class.has-error]="matterDetailForm.controls.county?.errors && formSubmitted">
+              <label>Jurisdiction of Matter - County <sup>*</sup></label>
+              <input type="text" name="county" required
+                     class="form-control" [(ngModel)]="jurisdictionCounty" placeholder="County" id="contry-text">
+              <span class="field-message text-danger">
+                Please enter jurisdiction of matter - county
+              </span>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group"
+                 [class.has-error]="matterDetailForm.controls.originatingAttorney?.errors && formSubmitted">
+              <label>Originating Attorney <sup>*</sup></label>
+              <ng-select [selectOnTab]="true" [items]="originatingAttorneyList" placeholder="Originating Attorney"
+                         name="originatingAttorney" required [clearable]="false"
+                         [(ngModel)]="originatingAttorneyId" [bindValue]="'id'" [bindLabel]="'name'"
+                         [notFoundText]="'No record found'" id="originating-attorney-select">
+              </ng-select>
+              <span class="field-message text-danger">
+                Please select originating attorney.
+              </span>
+            </div>
+          </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+        <h3 class="pt-24 mb-24">Consultation Attorney</h3>
+        <div class="d-flex align-items-center justify-content-between mb-24">
+          <div class="header-search flex-fill d-flex">
+            <form action="#" class="small-search">
+              <div class="header-search-wrapper">
+                <input type="text" class="form-control search-input" (keyup)="searchAttorney()" name="searchAttorney"
+                       [ngModelOptions]="{standalone: true}" [(ngModel)]="searchStr" placeholder="Search attorneys" id="consultation-attorney-select">
+                <button class="btn" type="submit" id="consultation-search-btn">Search</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-area">
+            <ngx-datatable #table class="material common-table" [rows]="attorneyList" [columnMode]="ColumnMode.force"
+                           [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+                           [count]="page.totalElements"
+                           [offset]="page.pageNumber" [limit]="page.size" [selectionType]="'checkbox'"
+                           [sorts]="[{prop: 'rank', dir: 'asc'}, {prop: 'firstName', dir: 'asc'}]"
+                           (sort)="updateFooterPage()" id="attorney-listing-tbl">
+              <ngx-datatable-column [resizeable]="false" prop="name" [sortable]="true" name="Name" [canAutoResize]="false" [width]="200">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex">
+                    <div class="custom-control custom-radio pr-0">
+                      <input type="radio" id="select_{{row.id}}" name="Attorney" value="true"
+                             class="custom-control-input"
+                             (change)='onSelect(row)' [checked]='selectedAttorneyId == row.id'>
+                      <label class="custom-control-label" for="select_{{row.id}}"></label>
+                    </div>
+                    <span>{{ row.name }}</span>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" name="Ranking" [width]="60">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{row.rank}}
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="200"></ngx-datatable-column>
+
+              <ngx-datatable-column [resizeable]="false" name="Primary Office" [width]="100">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.office}}
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" name="Title" [width]="80">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.jobTitle}}
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" name="Status" [width]="55">
+                <ng-template let-row="row" ngx-datatable-cell-template> {{ (row.isVisible) ? 'Active' : 'Inactive' }}
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                             let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                             let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                                  (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                        {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of
+                        {{(rowCount > 1) ? (rowCount) + ' items' : (rowCount) + ' item'}}
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected" name="pageSelector"
+                              (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i + 1 }}
+                          of
+                          {{page.totalPages}}</option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager
+                          [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'"
+                          [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage" [size]="pageSize" [count]="rowCount"
+                          [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+            <app-loader [active]="attorneyLoading"></app-loader>
+          </div>
+        </div>
+
+
+        <br><br>
+        <div class="row">
+          <div class="col-7">
+            <div class="form-group mb-0">
+              <label>Change Notes</label>
+              <textarea class="form-control" placeholder="Enter change notes (optional)" rows="4" name="changeNotes"
+                        [(ngModel)]="changeNotes" id="change-note-textarea"></textarea>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" [routerLink]="['/contact/view-potential-client']"
+                [queryParams]="{clientId: clientId, state: 'edit'}" class="btn btn-light" id="cancel-btn">Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="checkAssociated($event)" id="save-btn">Save</button>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="nextLoading"></app-loader>
+</div>
+
+
+<ng-template #OfficeChangeReassignConsultAttorney let-modal>
+  <div class="modal-header d-block pb-32">
+    <h3 class="modal-title mb-0">Reassign Consult Attorney</h3>
+    <button type="button" class="close" (click)="modal.close()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    You’ve already selected an attorney. If you navigate to a different office, this selection will be removed. What
+    would you like to do?
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('cancel')" id="cancel-btn">
+      Keep Current Attorney
+    </button>
+    <button type="button" class="btn btn-primary" (click)="modal.close('ok')"  id="select-new-office-attorney">Select New Office & Attorney</button>
+  </div>
+</ng-template>
+
+
+<ng-template #warningMessageChangePracticeArea let-modal>
+  <div class="modal-header d-block pb-8">
+    <h3 class="modal-title mb-0">Change Practice Area</h3>
+    <button type="button" class="close" (click)="modal.close('Cross click');cancelChangePracticeArea();"
+            aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <br>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <p>Hold up! If you change the practice area, you'll need to select a new attorney, reschedule calender events,
+          and re-upload any documents.Are you sure you want to continue?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light"
+            (click)="modal.close('Cross click');cancelChangePracticeArea();" id="cancel-btn">Cancel
+    </button>
+    <button type="button" class="btn btn-primary" (click)="modal.close('Cross click');confirmChangePracticeArea() " id="continue-btn">
+      Continue
+    </button>
+  </div>
+</ng-template>

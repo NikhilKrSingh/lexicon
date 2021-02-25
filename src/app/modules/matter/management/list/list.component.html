@@ -1,0 +1,526 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Matters</li>
+    </ol>
+    <div class="heading">
+      <h1>Matters</h1>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-24">
+      <div class="header-search flex-fill d-flex">
+        <form action="#" class="md-search">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input"
+              placeholder="Search matter number, name, client name, attorney name, matter office"
+              (keyup)="searchFilter($event)" [ngModelOptions]="{standalone: true}" [(ngModel)]="searchString"
+              id="matter-list-search-input">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row gutter-16">
+          <div class="col-12">
+            <div class="row gutter-16">
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label>Matter Office</label>
+                  <div class="dropdown-matter">
+                    <ng-select [items]="officeList" placeholder="Select matter office" (change)='applyFilter()'
+                      [(ngModel)]="searchOption.officeId" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'"
+                      [notFoundText]="'No record found'" id="matter-office-select">
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-3">
+                <div class="form-group date-picker">
+                  <label>Service Date - Start</label>
+                  <app-date-picker [isNgModel]='true' [(data)]='searchOption.openDate' (dataChange)='applyFilter()'
+                    placeholderText="Select service date" id="service-date-start"></app-date-picker>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group date-picker">
+                  <label>Service Date - End</label>
+                  <app-date-picker [isNgModel]='true' [(data)]='searchOption.closeDate' (dataChange)='applyFilter()'
+                    placeholderText="Select service date" id="service-date-end"></app-date-picker>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label>Status</label>
+                  <ng-select [items]="statusList" placeholder="Select status" (change)='applyFilter()'
+                    [(ngModel)]="searchOption.statusId" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'"
+                    [notFoundText]="'No record found'" id="status-select">
+                  </ng-select>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label>Bill Type</label>
+                  <ng-select [items]="billTypeList" placeholder="Select bill type" (change)='applyFilter()'
+                    [(ngModel)]="searchOption.billTypeId" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'"
+                    [notFoundText]="'No record found'" id="bill-type-select">
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="mb-24">
+              <button class="btn btn-primary" type="button" [disabled]="selectedRowLength < 2 || loading"
+                (click)="closeWarningModal(CloseMatter, null, CloseMatterWarn)" id="close-matters">Close
+                Matters</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="position-relative">
+          <div class="custom-table matter-list">
+            <ngx-datatable #table class="material common-table matter-table fix-col-right" id="matter-list-table"
+              [class.matter-no-data]="matterList?.length === 0" [rows]="matterList" [columnMode]="ColumnMode.force"
+              [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="page.totalElements"
+              [offset]="page.pageNumber" [limit]="page.size" [selected]='selectedMatterList'
+              [selectionType]="'checkbox'" [scrollbarV]="false" [scrollbarH]="true"
+              (sort)="updateDatatableFooterPage()" [sorts]="[{prop: 'matterNumber', dir: 'desc'}]">
+              <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false"
+                [draggable]="false">
+                <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+                  let-selectFn="selectFn">
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" [checked]="allSelected" (change)="selectDeselectRecords()" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+                <ng-template ngx-datatable-cell-template let-row="row" let-isSelected="isSelected"
+                  let-onCheckboxChangeFn="onCheckboxChangeFn">
+                  <label class="cust-check cursor-pointer">
+                    <input type="checkbox" [checked]="row.selected" (change)="changeChildSelection(row)" />
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="matterNumber" name="Matter Number" [width]="150"
+                [headerClass]="'checkbox-header'">
+                <ng-template ngx-datatable-header-template let-value="value">
+                  <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                    <span class="datatable-header-cell-label">Matter Number</span>
+                  </span>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="matterName" name="Matter Name" [width]="320">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='value' [maxLength]='45'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="cname" name="Client Name" [width]="300">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='value' [maxLength]='40'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="rname" name="Responsible Attorney" [width]="300">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='value' [maxLength]='35'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="billType" name="Bill Type"
+                [width]="150">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='value' [maxLength]='30'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="matterType.name" name="Matter Type"
+                [width]="220">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='value' [maxLength]='30'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="matterPrimaryOffice.name" name="Matter Office"
+                [width]="200">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <app-custom-tooltip [text]='value' [maxLength]='28'></app-custom-tooltip>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="matterOpenDate" name="Matter Open Date" [width]="200">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <span>{{value | date : 'MM/dd/yyyy'}} </span>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="matterCloseDate" name="Matter Close Date" [width]="200">
+                <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                  <span>{{value | date : 'MM/dd/yyyy'}} </span>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="matterStatus.name" name="Status" [width]="180">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right'" name="Action"
+                [frozenRight]='true' [width]="150">
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+
+                  <div class="d-flex justify-content-end">
+                    <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                      *ngIf='currentActive == rowIndex' [class.active]="currentActive == rowIndex"
+                      (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                      (outsideClick)="onClickedOutside($event, rowIndex)">
+                      <em class="icon icon-dot-verti"></em>
+                      <div class="dropdown-menu dropdown-menu-right overflow-hide custom-height"
+                        aria-labelledby="dropdownMenuButton">
+                        <div class="dropdown-slimscrol">
+                          <a class="dropdown-item" href="javascript:void(0);" [routerLink]="['/matter/dashboard']"
+                            [queryParams]="{matterId: row.id}" id="matter-view-{{row.id}}">View Matter</a>
+                          <a *ngIf="row.matterStatus?.name == 'Open'" class="dropdown-item"
+                            (click)="closeWarningModal(CloseMatter,row, CloseMatterWarn)" id="matter-close-{{row.id}}">
+                            Close Matter</a>
+                          <a *ngIf="row.matterStatus?.name == 'Closed'" class="dropdown-item"
+                            (click)="reopenWarningModal(ReopenMatter,row)" id="matter-reopen-{{row.id}}">
+                            Reopen Matter</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                      *ngIf='currentActive != rowIndex' (click)="openMenu(rowIndex, $event)">
+                      <em class="icon icon-dot-verti"></em>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                  let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                            (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                        {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                        {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                          [value]="i+1">Page
+                          {{ i+1 }} of {{page.totalPages}}</option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+
+      </div>
+    </div>
+    <div class="card d-none">
+      <div class="card-body">
+        <div class="row gutter-16">
+          <div class="col-9">
+            <div class="row gutter-16">
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label>Matter Office</label>
+                  <select class="custom-select">
+                    <option disabled>Select matter office</option>
+                    <option>Matter Office 1</option>
+                    <option>Matter Office 2</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="form-group">
+                  <label>Status</label>
+                  <select class="custom-select">
+                    <option disabled>Select status</option>
+                    <option>status 1</option>
+                    <option>status 2</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="justify-content-end d-flex">
+              <div class="form-group">
+                <label class="d-block">&nbsp;</label>
+                <div class="btn-group">
+                  <button class="btn btn-primary only-icon" type="button"> <i class="icon icon-move text-large"></i>
+                  </button>
+                  <div class="position-relative filter-hover ml-16">
+                    <button class="btn btn-primary only-icon" type="button" (click)="clickEvent1()"> <i
+                        class="icon icon-setting text-large"></i> </button>
+                    <div class="filter-card position-absolute" [ngClass]="status1 ? '' : 'd-none'">
+                      <p class="text-small">Select a column header to show or hide</p>
+                      <div class="row">
+                        <div class="col-4">
+                          <div class="custom-control custom-checkbox pr-0">
+                            <input type="checkbox" class="custom-control-input" id="filter-check-1">
+                            <label class="custom-control-label" for="filter-check-1">Matter Number</label>
+                          </div>
+                        </div>
+                        <div class="col-4">
+                          <div class="custom-control custom-checkbox pr-0">
+                            <input type="checkbox" class="custom-control-input" id="filter-check-2">
+                            <label class="custom-control-label" for="filter-check-2">Open Date</label>
+                          </div>
+                        </div>
+                        <div class="col-4">
+                          <div class="custom-control custom-checkbox pr-0">
+                            <input type="checkbox" class="custom-control-input" id="filter-check-3">
+                            <label class="custom-control-label" for="filter-check-3">Attorney Name</label>
+                          </div>
+                        </div>
+                        <div class="col-4">
+                          <div class="custom-control custom-checkbox pr-0">
+                            <input type="checkbox" class="custom-control-input" id="filter-check-4">
+                            <label class="custom-control-label" for="filter-check-4">Matter Name</label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="d-flex justify-content-end pt-20">
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-light">Cancel</button>
+                          <button type="button" class="btn btn-primary">Save</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="custom-table">
+          <div class="table-responsive">
+            <table class="table table-striped table-borderless">
+              <thead>
+                <tr>
+                  <th class="all-check">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" id="th-check">
+                      <label class="custom-control-label" for="th-check"></label>
+                    </div>
+                  </th>
+                  <th class="has-sort">Matter Number</th>
+                  <th class="has-sort">Matter Name</th>
+                  <th class="has-sort">Client Name</th>
+                  <th class="has-sort">Responsible Attorney</th>
+                  <th class="has-sort">Matter Type</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th class="all-check">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" id="td-check-1">
+                      <label class="custom-control-label" for="td-check-1"></label>
+                    </div>
+                  </th>
+                  <td>123456789</td>
+                  <td>
+                    <a href="javascript:void(0);" class="matter-name-link info-hover position-relative">
+                      <span class="text-ellipsis">Johnson v. Johns johns</span>
+                      <div class="tooltip bs-tooltip-top center" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner">
+                          <h6>Matter</h6>
+                          <p>Johnson v. Johnson</p>
+                        </div>
+                      </div>
+                    </a>
+                  </td>
+                  <td>
+                    <a href="javascript:void(0);" class="matter-link">Johnson, Aaron</a>
+                  </td>
+                  <td>
+                    <a href="javascript:void(0);" class="matter-link">Mcclain, Dolly</a>
+                  </td>
+                  <td>Domestic Litigation</td>
+                  <td>
+                    <div class="d-flex justify-content-end">
+                      <a href="javascript:void(0);" class="font-weight-medium">View Matter</a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #CloseMatter let-modal>
+  <div class="modal-header d-block pb-24">
+
+    <h3 class="modal-title mb-0" *ngIf="selectedRowLength > 1">Close Matters</h3>
+    <h3 class="modal-title mb-0" *ngIf="selectedRowLength == 1">Close Matter</h3>
+    <button type="button" class="close" *ngIf="!errMessage" (click)="modal.dismiss('Cross click')" aria-label="Close"
+      id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <app-loader [active]="loading1"></app-loader>
+  <div class="modal-body" *ngIf="selectedRowLength > 1 && !errMessage">
+    <div class="d-flex lh-20">
+
+      You are about to close multiple matters. Are you sure you want to continue?
+    </div>
+  </div>
+  <div class="modal-body" *ngIf="selectedRowLength == 1 && !errMessage">
+    <div class="d-flex lh-20">
+      Are you sure you want to close this matter?
+    </div>
+  </div>
+  <div class="modal-body" *ngIf="errMessage">
+    <div class="d-flex lh-20">
+      <em class="icon icon-error text-danger f-s-20 mr-10"></em>
+      {{errMessage}}
+    </div>
+  </div>
+
+  <div class="modal-footer" *ngIf="!errMessage">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="closeMatter()" id="yes-btn">Yes</button>
+  </div>
+  <div class="modal-footer" *ngIf="errMessage">
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click');errMessage=null "
+      id="ok-btn">Okay</button>
+  </div>
+</ng-template>
+
+<ng-template #CloseMatterWarn let-modal>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title mb-0" *ngIf="selectedRowLength > 1">Close Matters</h3>
+    <h3 class="modal-title mb-0" *ngIf="selectedRowLength == 1">Close Matter</h3>
+    <button type="button" class="close" *ngIf="!errMessage" (click)="modal.dismiss('Cross click')" aria-label="Close"
+      id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-16">
+    <div>
+      <div class="d-flex align-items-start">
+        <em class="icon icon-error text-danger f-s-20"></em>
+        <div class="lh-20 ml-20">
+          <p *ngIf="isSingleMatterPositiveBal" class="m-0">You cannot close this matter, because it still has a Primary
+            Retainer Trust or Trust-Only balance greater than $0. You must refund the client via the matter dashboard.
+          </p>
+          <p *ngIf="isMultipleSomeMatterPositiveBal" class="m-0">You cannot close one or more of the selected matters,
+            because there is still a Primary Retainer Trust or Trust-Only balance greater than $0. You must refund the
+            client via the <em>Matter Actions</em> button on each corresponding matter profile before re-attempting to
+            close the matter. You can optionally choose to close the selected matters that don't have an outstanding
+            trust balance, and exclude those shown below.</p>
+          <p *ngIf="isMultipleAllMatterPositiveBal" class="m-0">You cannot close one or more of the selected matters,
+            because there is still a Primary Retainer Trust or Trust-Only balance greater than $0. You must refund the
+            client via the <em>Matter Actions</em> button on each corresponding matter profile before re-attempting to
+            close the matter.</p>
+        </div>
+      </div>
+      <div *ngIf="!isSingleMatterPositiveBal" class="position-relative balance pt-16">
+        <div class="custom-table matter-list">
+          <ngx-datatable #tableBal class="material common-table matter-table" id="matter-list-table"
+            [class.matter-no-data]="positiveBalanceMatters?.length === 0" [rows]="positiveBalanceMatters"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" rowHeight="auto"
+            [count]="page.totalElements" [offset]="page.pageNumber" [limit]="10000" [selected]='selectedMatterList' [selectionType]="'checkbox'" [scrollbarV]="false" [scrollbarH]="false"
+            (sort)="calcTotalPages()">
+            <ngx-datatable-column [resizeable]="false" prop="matterNumber" name="Matter Number" [width]="100">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="matterName" name="Matter Name" [width]="170">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <ng-container *ngIf='row?.matterName?.length < 20'>
+                  <span> {{row.matterName}} </span>
+                </ng-container>
+                <div class="d-inline-flex justify-content-between" *ngIf='row.matterName?.length >= 20'>
+                  <div class="info-hover position-relative">
+                    <a href="javascript:void(0)" class="text-decoration" placement="bottom"
+                      ngbTooltip="{{row.matterName}}">
+                      <span> {{row.matterName?.slice(0, 19)}}... </span>
+                    </a>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="cname" name="Client Name" [width]="170">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span>{{value}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right pr-24'"
+              name="Action" [frozenRight]='true' [width]="100">
+              <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-end">
+                  <a class="font-weight-medium" href="javascript:void(0);" [routerLink]="['/matter/dashboard']"
+                    [queryParams]="{matterId: row.id}" id="matter-view-{{row.id}}"
+                    (click)="modal.dismiss('Cross click')">Go To Matter</a>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="loading1"></app-loader>
+  <div *ngIf="isSingleMatterPositiveBal" class="modal-footer action-btns">
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="cancel-btn">Okay</button>
+  </div>
+  <div *ngIf="!isSingleMatterPositiveBal" class="modal-footer action-btns">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">Cancel</button>
+    <button *ngIf="isMultipleSomeMatterPositiveBal" type="button" class="btn btn-primary"
+      (click)="closeMatter(CloseMatter)" id="yes-btn">Exclude and Close the Others</button>
+  </div>
+</ng-template>
+
+
+
+<ng-template #ReopenMatter let-modal>
+  <div class="modal-header d-block pb-24">
+
+    <h3 class="modal-title mb-0">Open Matter</h3>
+    <button type="button" class="close" *ngIf="!errMessage" (click)="modal.dismiss('Cross click')" aria-label="Close"
+      id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <app-loader [active]="loading1"></app-loader>
+  <div class="modal-body">
+    <div class="d-flex lh-20">
+      Are you sure you want to reopen this matter?
+    </div>
+  </div>
+
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="reopenMatter()" id="yes-btn">Yes</button>
+  </div>
+</ng-template>

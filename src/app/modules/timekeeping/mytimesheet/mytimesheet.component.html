@@ -1,0 +1,1078 @@
+<div class="container">
+  <div class="main-content">
+    <div class="d-flex justify-content-between">
+      <div>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+          <li class="breadcrumb-item" *ngIf="!fromEmployeeProfile && permissionList.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisViewOnly">
+            <a href="javascript:void(0)" [routerLink]="['/timekeeping/all-timesheets']">Timekeeping</a>
+          </li>
+          <li class="breadcrumb-item" *ngIf="fromEmployeeProfile">
+            <a href="javascript:void(0)" [routerLink]="['/employee/list']">Employees</a>
+          </li>
+          <li class="breadcrumb-item" *ngIf="fromEmployeeProfile">
+            <a href="javascript:void(0)" [routerLink]="['/employee/profile']"
+               [queryParams]="{employeeId: personId}">{{personName}}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <span *ngIf='personId && personId != loginUser.id'>
+              {{personName}}'s Timesheet
+            </span>
+            <span *ngIf='!personId || (personId == loginUser.id)'>
+              My Timesheet
+            </span>
+          </li>
+        </ol>
+        <div class="heading">
+          <h1 *ngIf='!personId || personId == loginUser.id'>My Timesheet</h1>
+          <h1 *ngIf='personId && personId != loginUser.id'>{{personName}}'s Timesheet</h1>
+        </div>
+      </div>
+      <div class="d-flex flex-column">
+        <button class="btn btn-link p-0 ml-auto mb-20" type="button"
+                (click)="openPersonalinfo(ConfigureTimeDisplay,'','modal-lmd')" id="editTimeDisplayId">Edit Time Display
+        </button>
+        <ng-container *ngIf='enableEnterTime'>
+          <button type="button" class="btn btn-primary btn-icon"
+                (click)="enterTimeNew(CreateNewTimeEntry,'','modal-xlg')" id="enterTimeId" *ngIf="(permissionList?.TIMEKEEPING_SELFisEdit && (!personId || personId == loginUser.id)) || (personId && (personId != loginUser.id && permissionList?.TIMEKEEPING_OTHERSisAdmin))"><em class="icon icon-alarm"></em> Enter Time
+          </button>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="info-block time-row mb-32">
+      <div class="row gutter-24">
+        <div class="col-4-5">
+          <div class="time-item row">
+            <div class="col-4" id="totalTimeId">
+              <div class="row mx-0 fs-18 lh-24 pb-16">
+                <span>Total Time</span>
+              </div>
+              <div class="row mx-0 fs-24 lh-36">
+                <span>{{totalHours}}</span>
+              </div>
+            </div>
+            <div class="col-4" id="totalTimeBillableId">
+              <div class="row mx-0 fs-14 lh-24 pb-16">
+                <span>Billable</span>
+              </div>
+              <div class="row mx-0 fs-18 lh-36">
+                <span>{{totalBillableHours}}</span>
+              </div>
+            </div>
+            <div class="col-4" id="totalTimeNonBillableId">
+              <div class="row mx-0 fs-14 lh-24 pb-16">
+                <span>Non-Billable</span>
+              </div>
+              <div class="row mx-0 fs-18 lh-36">
+                <span>{{totalNonBillableHours}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-2-5">
+          <div class="time-item" id="totalAmount">
+            <div class="row mx-0 fs-18 lh-24 pb-16">
+                <span>Total Amount</span>
+            </div>
+            <div class="row mx-0 fs-24 lh-36">
+              <span>{{TotalRate| currency}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-2-5">
+          <div class="time-item" id="writeOffsId">
+            <div class="row mx-0 fs-18 lh-24 pb-16">
+              <span>Write-Offs</span>
+            </div>
+            <div class="row mx-0 fs-24 lh-36 d-flex">
+              <div class="pr-12">
+                <span>0h 0m</span>
+              </div>
+              <span>$0</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-2-5">
+          <div class="time-item" id="writeDownsId">
+            <div class="row mx-0 fs-18 lh-24 pb-16">
+              <span>Write-Downs</span>
+            </div>
+            <div class="row mx-0 fs-24 lh-36 d-flex">
+              <div class="pr-12">
+                <span>0h 0m</span>
+              </div>
+              <span>$0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row gutter-16">
+      <div class="col-3">
+        <div class="form-group">
+          <label>Date Range</label>
+          <div class="date-field position-relative">
+            <input type="text" class="form-control cust-readonlyinput bg-white" name="dateGenerated" [(ngModel)]='dateGenerated'
+                   placeholder="Select Date range" [owlDateTimeTrigger]="dt1" [owlDateTime]="dt1" [selectMode]="'range'"
+                   (ngModelChange)='getMyTimesheetInfo()' readonly id="dateRangeId">
+            <em class="icon icon-calendar-invitation" [owlDateTimeTrigger]="dt1"></em>
+            <owl-date-time [pickerType]="'calendar'" #dt1>
+            </owl-date-time>
+          </div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group">
+          <label>Status</label>
+          <ng-select class="status-dropdown" [items]="statusArr" placeholder="All" [(ngModel)]="statusModel" [bindValue]="'name'"
+                     [bindLabel]="'name'" [selectOnTab]="true" (change)="statusChange($event, 'status')"
+                     [notFoundText]="'No record found'" id="statusId">
+          </ng-select>
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="form-group">
+          <label>Billable Status</label>
+          <ng-select class="status-dropdown" [items]="billableArr" placeholder="All" [(ngModel)]="billableStatusModel" [bindValue]="'value'"
+                     [bindLabel]="'name'" [selectOnTab]="true" (change)="statusChange($event, 'billable')"
+                     [notFoundText]="'No record found'" id="billableStatusId">
+          </ng-select>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="form-group">
+          <label>Charge Code</label>
+          <div class="search-group position-relative">
+            <form selectMatter="#">
+              <span class="search-icn"></span>
+              <input type="text" class="form-control bg-white" autocomplete="off" placeholder="Search charge codes"
+                     (keyup)="updateFilter($event,'1')" [(ngModel)]="code1" name="code1" id="chargeCodeId">
+              <div class="search-group-result d-block mt-4 p-0" *ngIf="filterdisbursementTypeList.length>0">
+                <div class="search-g-result-inner">
+                  <div class="search-collapse">
+                    <div class="search-panel px-16" *ngFor="let item of filterdisbursementTypeList;trackBy:trackByFn">
+                      <div class="search-panel-head p-0" (click)="selectChargeCode1(item)">
+                        <div class="text-large font-weight-medium"> {{item.code}} </div>
+                        <span class="small helper-text font-weight-medium d-block mt-4"> {{item.description}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label>Client / Overhead</label>
+          <div class="search-group position-relative">
+            <form selectMatter="#">
+              <span class="search-icn"></span>
+              <input #clientFilterText type="text" class="form-control bg-white"
+                     placeholder="Search clients or select as overhead"
+                     [(ngModel)]="searchclientfilter" [ngModelOptions]="{standalone: true}"
+                     (keyup)="updateClientFilter($event,'1')" id="clientOverheadId">
+              <div class="search-group-result px-0 mt-4 " *ngIf="clientList.length>0 && !isSearchLoading">
+                <div class="search-result px-16" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+                  <div>
+                    <h5 class="d-inline-block text-large lh-20 mt-8 mb-4">{{clientList.length}} results</h5>
+                  </div>
+                  <div class="search-collapse">
+                    <div class="search-panel" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                         *ngFor="let item of clientList; trackBy :trackByFn;">
+                      <div class="search-panel-head">
+                        <em class="search-res-icon icon icon-clients"></em>
+                        <div (click)="selectClientFilter(item)">
+                          <span *ngIf='item.isCompany'>
+                            <span [innerHTML]="item.companyName | highlightText : clientFilterText?.value"></span>
+                          </span>
+                          <span *ngIf='!item.isCompany'>
+                            <span
+                              [innerHTML]="((!item.firstName) ? item.lastName : item.lastName+', '+item.firstName) | highlightText : clientFilterText?.value"></span>
+                          </span>
+                          <span class="small helper-text font-weight-medium d-block mt-4">Client</span>
+                        </div>
+                        <span class="arrow" (click)=" $event.stopPropagation(); item.showGrid=!item.showGrid" *ngIf="item.id">
+                          <em class="icon icon-angle-down" ></em></span>
+                        <!-- <span class="arrow" (click)="item.showGrid=!item.showGrid">
+                          <em class="icon icon-angle-down"></em></span> -->
+                      </div>
+                      <div class="search-panel-body">
+                        <div class="mt-12">
+                          <span class="small helper-text d-block mb-4 font-weight-medium">
+                            Preferred Contact
+                          </span>
+                          {{item.preferredContactMethod == 'Email' ? item.email : item.phones}}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+              <div class="search-group-result px-0 mt-4 " *ngIf="isSearchLoading">
+                <app-search-loader  [active]="isSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label>Matters</label>
+          <div class="search-group position-relative">
+            <form selectMatter="#">
+              <span class="search-icn"></span>
+              <input #matterFilter type="text" class="form-control bg-white" placeholder="Search matters"
+                     [(ngModel)]="searchMatterfilter" [ngModelOptions]="{standalone: true}"
+                     (keyup)="updateMatterFilter($event,'1')" id="matterId">
+              <div class="search-group-result px-0 mt-4" *ngIf="matterList.length>0 && !isMatterSearch2Loading">
+                <div class="search-result px-16" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+                  <div>
+                    <h5 class="d-inline-block text-large lh-20 mt-8 mb-4">{{matterList.length}} results</h5>
+                  </div>
+                  <div class="search-collapse">
+                    <div class="search-panel" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                         *ngFor="let item of matterList; trackBy :trackByFn;">
+                      <div class="search-panel-head">
+                        <em class="search-res-icon icon icon-matters"></em>
+                        <div (click)="selectMatterFilter(item)">
+                          <span [innerHTML]="item.matterName | highlightText : matterFilter?.value"></span>
+                          <span *ngIf="item.id"> (</span>
+                          <span *ngIf="item.id"
+                                [innerHTML]="item.matterNumber | highlightText : matterFilter?.value"></span>
+                          <span *ngIf="item.id">)</span>
+                        </div>
+                        <span class="arrow" (click)="item.showGrid=!item.showGrid">
+                          <em class="icon icon-angle-down"></em></span>
+                      </div>
+                      <div class="search-panel-body">
+                        <div class="mt-12">
+                          <span class="small helper-text d-block mb-4 font-weight-medium">
+                            Client Name
+                          </span>
+                          {{item?.client?.isCompany ? item?.client?.companyName : (item?.client?.firstName + ', ' + item?.client?.lastName)}}
+                        </div>
+                        <div class="mt-12">
+                          <span class="small helper-text d-block mb-4 font-weight-medium">
+                            Attorney
+                          </span>
+                          <span *ngFor="let att of item.responsibleAttorny;trackBy: trackByFn">
+                            {{att.name}}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+              <div class="search-group-result px-0 mt-4 " *ngIf="isMatterSearch2Loading">
+                <app-search-loader  [active]="isMatterSearch2Loading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" *ngFor="let item of attendanceList; trackBy :trackByFn;let i = index;" id="{{item.dateOfService | date: 'MM-dd-yyyy'}}">
+        <div class="card-body pt-16">
+          <div class="title-row time-title d-flex justify-content-between align-items-end">
+            <div class="d-flex align-items-center">
+              <h1 class="my-0 mr-16 pb-8 h3 font-weight-bold" *ngIf="item.isToday">Today</h1>
+              <h1 class="my-0 mr-16 pb-8 h3 font-weight-bold" *ngIf="!item.isToday">
+                {{item.dateOfService | date:'EEEE'}}</h1>
+              <span class="text-large font-weight-medium mr-16">{{item.dateOfService | date: 'MM/dd/yyyy'}}
+              </span>
+              <span class="badge badge-success small"
+                    *ngIf="item.matterClientClocks[0].disbursementTypes[0].employeeAvailabilityStatus === 'Working'">
+                Working Day
+              </span>
+              <span class="badge badge-danger small"
+                    *ngIf="item.matterClientClocks[0].disbursementTypes[0].employeeAvailabilityStatus === 'NonWorking'">
+                Non-Working Day
+              </span>
+            </div>
+            <div class="right-captions">
+              <span class="d-block small helper-text text-right"> Total Time</span>
+              <div class="h3 m-0 font-weight-bold">{{item?.totalTime}} </div>
+            </div>
+          </div>
+          <div class="info-block pt-24">
+            <div class="custom-table" *ngIf="item.totalCount > 0">
+              <div class="table-responsive">
+                <table class="table table-striped table-borderless timesheet-table" id="matterTableId-{{i}}">
+                  <thead>
+                  <tr>
+                    <th class="time-mat-td">Matter Name</th>
+                    <th class="time-client-td">Client Name</th>
+                    <th class="time-rec-td">Time Recorded</th>
+                    <th class="time-ent-td"></th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr *ngFor="let matter of item.matterClientClocks;trackBy: trackByFn">
+                    <td colspan="4" class="p-0">
+                      <table class="table time-table-inn">
+                        <tbody>
+                        <tr>
+                          <td class="time-mat-td">
+                            <div class="d-flex align-items-center">
+                                  <span class="table-arrow" (click)="toggle(matter, i)">
+                                    <em [ngClass]="(!matter.showGrid)?'icon icon-angle-down':'icon icon-angle-up'"></em>
+                                  </span>
+                              <span class="table-badge ml-12 mr-16">{{matter.totalCount}}</span>
+                              <span *ngIf="matter.targetMatter && matter.targetMatter.id === 0; else matterNameDisp">Overhead</span>
+                              <ng-template #matterNameDisp> {{matter.targetMatter?.matterNumber}}
+                                -{{matter.targetMatter?.name}}</ng-template>
+                            </div>
+                          </td>
+                          <td class="time-client-td">
+                            <ng-container
+                              *ngIf="matter.targetClient && matter.targetClient.id === 0; else clientNameDisp">Overhead
+                            </ng-container>
+                            <ng-template
+                              #clientNameDisp>{{matter.targetClient && matter.targetClient.isCompany ? matter.targetClient.companyName : (matter.targetClient?.firstName + ', ' + matter.targetClient?.lastName)}}</ng-template>
+
+
+                          </td>
+                          <td class="time-rec-td"> {{matter.matterStr}}
+                          </td>
+                          <td class="text-right time-ent-td">
+                            <a class="font-weight-medium"
+                               href="javascript:void(0);"
+                               (click)="EnterTimeForDate(CreateNewTimeEntry, item.dateOfService, matter)" *ngIf="(permissionList?.TIMEKEEPING_SELFisEdit && (!personId || personId == loginUser.id)) || (personId && (personId != loginUser.id && permissionList?.TIMEKEEPING_OTHERSisAdmin))"><em
+                              class="icon icon-alarm mr-8"></em> Enter Time for Matter</a>
+                          </td>
+                        </tr>
+
+                        <tr class="table-detail" [ngClass]="(!matter.showGrid)?'d-none':''">
+                          <td colspan="4">
+                            <table class="table table-borderless">
+                              <thead>
+                              <tr>
+                                <th>Charge Code</th>
+                                <th>Charge Code Description</th>
+                                <th>Billable Amount</th>
+                                <th>Time Recorded</th>
+                                <th>Status</th>
+                                <th></th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                              <tr *ngFor="let type of matter.disbursementTypes; trackBy: trackByFn;let typeIndex = index" id="type-{{typeIndex}}">
+                                <td>{{type.code}}</td>
+                                <td>{{type.disbursementDescription}}</td>
+                                <td>{{type.isOverhead ? 'Non-Billable' : (type.isNegative ? '- ' : '' ) + (type.calAmount| currency)}}</td>
+                                <td>{{(type.isNegative ? '- ' : '') + (type.timeStr)}}
+                                </td>
+                                <td>{{type?.status?.name}}</td>
+                                <td>
+                                  <div class="dropdown dropdown-hover-table d-flex justify-content-end" [class.active]="currentActive ==  type"
+                                    (click)="openMenu(type, $event)" appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, type)">
+                                    <em class="icon icon-dot-verti"></em>
+                                    <div class="dropdown-menu dropdown-menu-right z-index-99"
+                                         aria-labelledby="dropdownMenuButton">
+                                      <a class="dropdown-item"
+                                         (click)="ViewTime(ViewTimeEntry,item.dateOfService,matter,type)" id="viewDetailsId-{{typeIndex}}">View
+                                        Details</a>
+                                      <a class="dropdown-item"
+                                         *ngIf='type?.editDeleteFlag && ((permissionList?.TIMEKEEPING_SELFisEdit && (!personId || personId == loginUser.id)) || (personId && (personId != loginUser.id && permissionList?.TIMEKEEPING_OTHERSisAdmin)) || (permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit)) && !permissionList?.TIMEKEEPING_OTHERSisViewOnly'
+                                         (click)="editTime(CreateNewTimeEntry,item.dateOfService,matter,type)" id="editTimeId-{{typeIndex}}">Edit
+                                        Time</a>
+
+                                      <a class="dropdown-item"
+                                         *ngIf='type?.editDeleteFlag && ((permissionList?.TIMEKEEPING_SELFisEdit && (!personId || personId == loginUser.id)) || (personId && (personId != loginUser.id && permissionList?.TIMEKEEPING_OTHERSisAdmin)) || (permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit)) && !permissionList?.TIMEKEEPING_OTHERSisViewOnly'
+                                         (click)="deleteTime(type)" id="deleteTimeId-{{typeIndex}}">Delete Time</a>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+
+
+                  </tbody>
+                  <tfoot>
+                  <tr>
+                    <td colspan="2"></td>
+                    <td>
+                        <span class="text-large font-weight-medium lh-20" id="totalTimeId-{{i}}">
+                          {{item.totalTime}}
+                        </span>
+
+                    </td>
+                    <td></td>
+                  </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div *ngIf="item.totalCount === 0" id="matterTableId-{{i}}">
+              <strong>No time entered for the day</strong>.<span> Use the <strong>Enter Time</strong> button at the top of the page to record work.</span>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+      <div class="text-center mt-12" *ngIf="attendanceList?.length === 0" id="noRecordFoundId">
+        No Record found
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+
+    <app-loader [active]="editLoading"></app-loader>
+
+
+    <ng-template #CreateNewTimeEntry let-modal>
+      <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0" *ngIf="!isEdit">Create New Time Entry</h3>
+        <h3 class="modal-title mb-0" *ngIf="isEdit">Edit Time Entry</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click');reset('cancel');" aria-label="Close" id="closeId">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body pb-0">
+        <form [formGroup]="timeEntryForm">
+          <div class="row gutter-16">
+
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="incorrectTimekeeper && formSubmitted">
+                <label>Timekeeper <sup>*</sup></label>
+                <div class="search-group position-relative">
+                  <form action="#" (click)="setEmployeeList()" (outsideClick)="clearDropDown('employeeListPopUp')"
+                    appAutoCloseOutsideClick><span class="search-icn"></span>
+                    <input #employeeFilterPopup type="text" class="form-control border-radius-20" [(ngModel)]="searchEmployee"
+                      (ngModelChange)="incorrectTimekeeper = false;" [ngModelOptions]="{standalone: true}"
+                      placeholder="Search timekeeper" (keyup)="updateTimekeeperFilter($event,'2')" (keydown.tab)="actionDropDown()"
+                      (keydown.enter)="actionDropDown()" autocomplete="off" id="timekeeper-search-text"
+                      [disabled]="disabledTimekeeper">
+                    <span class="field-message text-danger">
+                      <em class="icon icon-error mr-4"></em>
+                      Please select a timekeeper.
+                    </span>
+                    <div class="search-group-result px-0 mt-4 " *ngIf="employeeListPopUp.length>0">
+                      <div>
+                        <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{employeeListPopUp.length}} results</h5>
+                      </div>
+                      <div class="search-collapse custom-style-scroll">
+                        <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                          *ngFor="let item of employeeListPopUp; trackBy: trackByFn;let i = index; let first = first"
+                          [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}">
+                          <div class="search-panel-head" (click)="selectTimekeeper(item)" id="select-employee-record-{{i}}">
+                            <em class="search-res-icon icon icon-employees"></em>
+                            <span>
+                              <span
+                                [innerHTML]="((!item.firstName) ? item.lastName : item.lastName+', '+item.firstName) | highlightText : employeeFilterPopup?.value"></span>
+                            </span>
+                            <span class="small helper-text font-weight-medium d-block mt-4">Employee</span>
+                            <span class="arrow" (click)="$event.stopPropagation(); item.showGrid=!item.showGrid">
+                              <em class="icon icon-angle-down"></em></span>
+                          </div>
+                          <div class="search-panel-body">
+                            <div class="mt-12">
+                              <span class="small helper-text d-block mb-4 font-weight-medium">
+                                Phone Number
+                              </span>
+                              {{item.preferredPhone}}
+                            </div>
+                          </div>
+                          <div class="top-border-search-panel pt-16"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="search-group-result px-0 mt-4 " *ngIf="isTimekeepingSearchLoading">
+                      <app-search-loader [active]="isTimekeepingSearchLoading" [loaderMessage]="'Loading Search Results'">
+                      </app-search-loader>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="col-2 mb-12">
+              <div cdisabledClientlass="form-group" [class.has-error]="f['dateOfService'].errors && formSubmitted">
+                <label>Date of Service <sup>*</sup></label>
+                <div style="width: 165px;">
+                  <app-date-picker
+                    [isForm]='true'
+                    [dateform]='timeEntryForm'
+                    controlName='dateOfService'
+                    [reset]="dateReset"
+                    id="dateOfServiceId"
+                    (dataChange)="checkDate()"
+                    >
+                  </app-date-picker>
+                </div>
+                <span class="field-message text-danger"
+                      *ngIf="f['dateOfService'].errors && formSubmitted ? !!f['dateOfService'].errors.required : false">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select date of service
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="(clientError && formSubmitted) || incorrectClient">
+                <label>Client / Overhead <sup>*</sup></label>
+                <div class="search-group position-relative">
+                  <form select="#"
+                        (click)="setClientList()"
+                        (outsideClick)="clearDropDown('clientListPopUp')"
+                        appAutoCloseOutsideClick><span class="search-icn"></span>
+                    <input #clientFilterPopup type="text" class="form-control border-radius-20" id="client"
+                           placeholder="Search clients or select as overhead"
+                           [(ngModel)]="searchclient"
+                           (ngModelChange)="incorrectClient = false;"
+                           [ngModelOptions]="{standalone: true}"
+                           (keyup)="updateClientFilter($event,'2')"
+                           (keydown.tab)="actionDropDown()"
+                           (keydown.enter)="actionDropDown(metterFilterPopup)"
+                           [disabled]="disabledClient"
+                           [readOnly]="disabledClient"
+                           autocomplete="off">
+                    <div class="search-group-result px-0 mt-4 " *ngIf="clientListPopUp?.length > 0 && !isSearch2Loading && !disabledClient">
+
+                      <div>
+                        <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{clientListPopUp.length}}
+                          results</h5>
+                      </div>
+                      <div
+                        class="search-collapse">
+                        <div
+                          class="search-panel px-16 pt-16 pb-0"
+                          [ngClass]="(item.showGrid)?'search-panel-open':''"
+                          *ngFor="let item of clientListPopUp; trackBy: trackByFn;let i = index; let first = first"
+                          [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}"
+                        >
+                          <div class="search-panel-head">
+                            <em class="search-res-icon icon icon-clients"></em>
+                            <div (click)="selectClient(item)">
+                                <span *ngIf='item.isCompany'>
+                                  <span
+                                    [innerHTML]="item.companyName | highlightText : clientFilterPopup?.value"></span>
+                                </span>
+                              <span *ngIf='!item.isCompany'>
+                                  <span
+                                    [innerHTML]="((!item.firstName) ? item.lastName : item.lastName+', '+item.firstName) | highlightText : clientFilterPopup?.value"></span>
+                                </span>
+                              <span class="small helper-text font-weight-medium d-block mt-4" *ngIf="item.id">Client</span>
+                            </div>
+                            <!-- <span class="arrow" (click)="item.showGrid=!item.showGrid">
+                                <em class="icon icon-angle-down"></em></span> -->
+                                <span class="arrow" (click)=" $event.stopPropagation(); item.showGrid=!item.showGrid" *ngIf="item.id">
+                                  <em class="icon icon-angle-down" ></em></span>
+                          </div>
+                          <div class="search-panel-body">
+                            <div class="mt-12">
+                                <span class="small helper-text d-block mb-4 font-weight-medium">
+                                  Phone Number
+                                </span>
+                                {{item.preferredPhone}}
+                            </div>
+                          </div>
+                          <div class="top-border-search-panel pt-16"></div>
+                        </div>
+
+                      </div>
+
+                    </div>
+                    <div class="search-group-result px-0 mt-4 " *ngIf="isSearch2Loading && !disabledClient">
+                      <app-search-loader  [active]="isSearch2Loading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                    </div>
+                    <span class="field-message text-danger" *ngIf="clientError && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      Please select client
+                    </span>
+                    <span class="field-message text-danger" *ngIf="incorrectClient">
+                      <em class="icon icon-error mr-4"></em>
+                      Please enter a valid client.
+                    </span>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]="(matterError && formSubmitted) || incorrectMatter">
+                <label>Matter / Overhead <sup>*</sup></label>
+                <div class="search-group position-relative">
+                  <form selectMatter="#"
+                        (click)="setMatterList()"
+                        (outsideClick)="clearDropDown('matterListPopUp')"
+                        appAutoCloseOutsideClick><span class="search-icn"></span>
+                    <input
+                      id="metterFilterPopupp"
+                      #metterFilterPopup
+                      type="text"
+                      class="form-control border-radius-20"
+                      placeholder="Search matters"
+                      [(ngModel)]="searchMatter"
+                      (ngModelChange)="incorrectMatter = false;"
+                      [ngModelOptions]="{standalone: true}"
+                      (keyup)="updateMatterFilter($event,'2')"
+                      (keydown.tab)="actionDropDown(metterFilterPopup, 'code')"
+                      (keydown.enter)="actionDropDown(chargeCode, 'code')"
+                      [readOnly]="disabledMatter"
+                      [disabled]="disabledMatter"
+                      autocomplete="off">
+                    <div class="search-group-result px-0 mt-4" *ngIf="matterListPopUp?.length > 0 && !isMatterSearchLoading && !disabledMatter">
+                      <div>
+                        <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{matterListPopUp.length}}
+                          results</h5>
+                      </div>
+                      <div class="search-collapse">
+                        <div class="search-panel px-16 pt-16 pb-0"
+                             [ngClass]="(item.showGrid)?'search-panel-open':''"
+                             [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}"
+                             *ngFor="let item of matterListPopUp; trackBy :trackByFn;let i = index; let first=first">
+                          <div class="search-panel-head">
+                            <em class="search-res-icon icon icon-matters"></em>
+                            <div (click)="selectMatter(item, ' ');">
+                              <span [innerHTML]="item.matterName | highlightText : metterFilterPopup?.value"></span>
+                              <span *ngIf="item.id">-</span>
+                              <span *ngIf="item.id"
+                                    [innerHTML]="item.matterNumber | highlightText : metterFilterPopup?.value"></span>
+                            </div>
+                            <span class="arrow" (click)=" $event.stopPropagation(); item.showGrid=!item.showGrid" *ngIf="item.id">
+                              <em class="icon icon-angle-down" ></em></span>
+                          </div>
+                          <div class="search-panel-body">
+                            <div class="mt-12">
+                              <span class="small helper-text d-block mb-4 font-weight-medium">
+                                Client Name
+                              </span>
+                              {{item.client != null ? (item.client.isCompany ? item.client.companyName : (item.client.firstName + ', ' + item.client.lastName)) : searchclient }}
+                            </div>
+                            <div class="mt-12">
+                              <span class="small helper-text d-block mb-4 font-weight-medium">
+                                Attorney
+                              </span>
+                              <span *ngFor="let att of item.responsibleAttorny;trackBy: trackByFn">
+                                {{att.name}}
+                              </span>
+                            </div>
+                          </div>
+                          <div class="top-border-search-panel pt-16"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="search-group-result px-0 mt-4 " *ngIf="isMatterSearchLoading && !disabledMatter">
+                      <app-search-loader  [active]="isMatterSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                    </div>
+                    <span class="field-message text-danger" *ngIf="matterError && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      Please select matter
+                    </span>
+                    <span class="field-message text-danger" *ngIf="incorrectMatter">
+                    <em class="icon icon-error mr-4"></em>
+                      Please enter a valid matter.
+                    </span>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="row gutter-16">
+            <div class="col-3">
+              <div class="form-group"
+                   [class.has-error]="(chargeCodeError && formSubmitted) || incorrectDisbursementType">
+                <label>Charge Code <sup>*</sup></label>
+                <div class="search-group position-relative">
+                  <form selectMatter="#"
+                        (click)="!isMatterCleared ? setChargeCodes() : null"
+                        (outsideClick)="clearDropDown('filterdisbursementTypeListPopUP')"
+                        appAutoCloseOutsideClick><span class="search-icn"></span>
+                    <input
+                      #chargeCode
+                      type="text"
+                      class="form-control border-radius-20"
+                      [(ngModel)]="code"
+                      (ngModelChange)="incorrectDisbursementType = false;"
+                      [ngModelOptions]="{standalone: true}"
+                      placeholder="Search charge codes"
+                      (keyup)="updateFilter($event,'2')"
+                      (keydown.enter)="actionDropDown(timeWorked)"
+                      (keydown.tab)="actionDropDown()"
+                      autocomplete="off"
+                      [attr.disabled]="isMatterCleared ? true : null"
+                      id="chargeCodeId">
+                    <div class="search-group-result d-block mt-4 p-0"
+                         *ngIf="filterdisbursementTypeListPopUP.length > 0 && !chargeCodeLoading">
+                      <div class="search-g-result-inner">
+                        <div class="search-collapse">
+                          <div
+                            class="search-panel px-16 pt-16 pb-0"
+                            [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}"
+                            *ngFor="let item of filterdisbursementTypeListPopUP; trackBy: trackByFn;let i = index; let first=first">
+                            <div class="search-panel-head p-0" (click)="selectChargeCode(item)">
+                              <div class="text-large font-weight-medium"> {{item.code}} </div>
+                              <span class="small helper-text font-weight-medium d-block mt-4">
+                                {{item.description}}</span>
+                            </div>
+                            <div class="top-border-search-panel pt-16"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <span class="field-message text-danger" *ngIf="chargeCodeError && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      Please select charge code
+                    </span>
+                    <span class="field-message text-danger" *ngIf="incorrectDisbursementType">
+                      <em class="icon icon-error mr-4"></em>
+                      Please enter a valid Charge Code.
+                    </span>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="form-group"
+                   [class.has-error]="f['timeWorked'].errors && formSubmitted || valueMustError && formSubmitted && !f['timeWorked'].errors?.required">
+                <div class="d-flex justify-content-between">
+                  <label>Time Worked <sup>*</sup></label>
+                  <span class="small helper-text mb-4 lh-18">(Positive or Negative)</span>
+                </div>
+                <input
+                  #timeWorkedInput
+                  type="text"
+                  [placeholder]="timeStringPlaceholder"
+                  (change)="modelChanged()"
+                  class="form-control"
+                  formControlName="timeWorked"
+                  (keydown.enter)="actionDropDown(billingNarative)"
+                  (keypress)="checkNumber($event)"
+                  id="timeWorkedId">
+                <span class="field-message text-danger"
+                      *ngIf="f['timeWorked'].errors && formSubmitted ? !!f['timeWorked'].errors.required : false">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter time worked
+                </span>
+                <span class="field-message text-danger"
+                      *ngIf="valueMustError && formSubmitted && !f['timeWorked'].errors?.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Value must be a number
+                </span>
+
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>Calculated Charge</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Rate"
+                  [value]="chargePrefix + ((rate || 0) | number: '1.2-2')"
+                  disabled
+                  id="calculatedChargeId">
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-6">
+              <div class="d-flex justify-content-between">
+                <h4 class="mb-16 mt-0 pt-8">Billing Narrative</h4>
+              </div>
+              <div class="form-group" [class.has-error]="f['description'].errors && formSubmitted">
+                <label>Billing Narrative <sup *ngIf="!timeEntryForm.controls['description'].disabled && !isBillingNarratibeDisabled">*</sup></label>
+                <textarea
+                  #billingNarative
+                  class="form-control non-resize"
+                  rows="4"
+                  formControlName="description"
+                  placeholder="Describe the work performed"
+                  (blur)="copytoNote()"
+                  (keydown.tab)="copytoNote()"
+                  [disabled]="isBillingNarratibeDisabled"
+                  [readOnly]='isBillingNarratibeDisabled'
+                  id="billingNarrativeId"
+                ></textarea>
+                <span class="field-message text-danger"
+                      *ngIf="f['description'].errors && formSubmitted ? !!f['description'].errors.required : false">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter billing narrative.
+                </span>
+              </div>
+            </div>
+            <div class="col-6" *ngIf="!isEdit">
+              <div class="d-flex justify-content-between">
+                <h4 class="mb-16 mt-0 pt-8">Note to File</h4>
+                <div class="text-right visble-to-client">
+                  <div class="custom-control custom-checkbox pr-0 ml-auto">
+                    <input
+                      #visibletoclient
+                      type="checkbox"
+                      class="custom-control-input"
+                      id="visibletoclient"
+                      formControlName="visibleToClient"
+                      (keydown.enter)="actionDropDown({x: visibletoclient, y: notes})"
+                      [attr.disabled]="(clientDetail?.id === 0 || disbursementTypeDetail?.billingTo?.code == 'OVERHEAD' || isMatterCleared) ? true : null"
+                    >
+                    <label class="custom-control-label" for="visibletoclient">Visible to Client</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group position-relative" [class.has-error]="f['note'].errors && formSubmitted">
+                <div class="d-flex justify-content-between">
+                  <label>Notes <sup>*</sup></label>
+                  <div id="dateOfServiceId" class='mb-4 lh-18'>Date of Service: {{timeEntryForm.controls.dateOfService?.value | date: 'MM/dd/yyyy' }}</div>
+                </div>
+                <textarea
+                  #notes
+                  class="form-control non-resize"
+                  rows="4" placeholder="Enter notes"
+                  formControlName="note"
+                  maxlength="1000"
+                  (blur)="copytoNote()"
+                  (keydown.tab)="copytoNote()"
+                  id="notesId"
+                ></textarea>
+                <span class="field-message text-danger"
+                      *ngIf="f['note'].errors && formSubmitted ? !!f['note'].errors.required : false">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter note to file.
+                </span>
+              </div>
+            </div>
+            <div class="col-6" *ngIf="isEdit">
+              <div class="d-flex justify-content-between">
+                <h4 class="mb-16 mt-0 pt-8">Change Notes</h4>
+              </div>
+              <div class="form-group">
+                <label>Notes</label>
+                <textarea
+                  class="form-control non-resize"
+                  rows="4"
+                  placeholder="Enter change notes for the audit history (optional)"
+                  [(ngModel)]="changeNote"
+                  [ngModelOptions]="{standalone: true}"
+                  id="changeNotesId"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');reset('cancel');">Cancel
+        </button>
+        <button
+          #submitCreate
+          type="submit"
+          class="btn btn-outline-primary"
+          (click)="enterTime(true, timeWorkedInput)"
+          *ngIf="!isEdit"
+          id="submitAndCreateAnotherId">
+          Submit and Create Another
+        </button>
+        <button type="button" class="btn btn-primary" *ngIf="!isEdit"
+                (click)="enterTime();" id="submitId">Submit
+        </button>
+        <button type="button" class="btn btn-primary" *ngIf="isEdit"
+                (click)="updateTime()" id="submitId">Submit
+        </button>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </ng-template>
+
+
+    <ng-template #ViewTimeEntry let-modal>
+      <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">View Time Entry</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="closeId">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row gutter-16">
+          <div class="col-3">
+            <div class="form-group" id="clientId">
+              <label class="d-block">Client</label>
+              {{viewTimeEntryobj?.client}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="matterId">
+              <label class="d-block">Matter</label>
+              {{viewTimeEntryobj?.matter}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="dateTimeEnteredId">
+              <label class="d-block">Date/Time Entered</label>
+              {{viewTimeEntryobj?.disbursementTypeDetail.createdAt | date: 'MM/dd/yyyy, hh:mm aa'}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="dateOfServiceId">
+              <label class="d-block">Date of Service</label>
+              {{viewTimeEntryobj?.dateOfService | date: 'MM/dd/yyyy'}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="enteredById">
+              <label class="d-block">Timekeeper</label>
+              {{viewTimeEntryobj?.disbursementTypeDetail?.person.lastName}}, {{viewTimeEntryobj?.disbursementTypeDetail?.person.firstName}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="chargeCodeId">
+              <label class="d-block">Charge Code</label>
+              {{viewTimeEntryobj?.disbursementTypeDetail.code}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="chargeCodeDescriptionId">
+              <label class="d-block">Charge Code Description</label>
+              {{viewTimeEntryobj?.disbursementTypeDetail.disbursementDescription || viewTimeEntryobj?.disbursementTypeDetail?.note?.content}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="timeRecordedId">
+              <label class="d-block">Time Recorded</label>
+              {{(viewTimeEntryobj.disbursementTypeDetail.isNegative ? '- ' : '') + (viewTimeEntryobj?.timeWorked)}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="billableId">
+              <label class="d-block">Billable</label>
+              {{viewTimeEntryobj?.disbursementTypeDetail.isBillableToClient ? 'Yes' : 'No'}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="rateId">
+              <label class="d-block">Rate</label>
+              ${{viewTimeEntryobj?.disbursementTypeDetail.rate}}
+              <span *ngIf='viewTimeEntryobj.billType?.code == "HOURLY"'>per Hour</span>
+              <span *ngIf='viewTimeEntryobj.billType?.code == "FIXED"'></span>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="calculatedChargeId">
+              <label class="d-block">Calculated Charge</label>
+              {{(viewTimeEntryobj.disbursementTypeDetail.isNegative ? '- ' : '') + (viewTimeEntryobj?.amount | currency : 'USD' : 'symbol' : '1.2-2')}}
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group" id="statusId">
+              <label class="d-block">Status</label>
+              {{viewTimeEntryobj?.status?.name}}
+            </div>
+          </div>
+        </div>
+
+        <hr class="mt-0 mb-24">
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="d-flex justify-content-between">
+              <h4 class="mb-16 mt-0">Billing Narrative</h4>
+            </div>
+            <div class="form-group" id="billingNarrativeId">
+              <label class="d-block">Billing Narrative</label>
+              <p class="lh-20 m-0 word-wrap"> {{viewTimeEntryobj?.Narrative}} </p>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="d-flex justify-content-between">
+              <h4 class="mb-16 mt-0">Note to File</h4>
+              <div class="text-right visble-to-client mt-n12">
+                <div class="custom-control custom-checkbox pr-0 ml-auto">
+                  <input type="checkbox" class="custom-control-input" id="visibletoclient"
+                         [(ngModel)]="viewTimeEntryobj.visibleToClient" disabled>
+                  <label class="custom-control-label" for="visibletoclient">Visible to Client</label>
+                </div>
+                Date of Service: {{viewTimeEntryobj?.dateOfService | date: 'MM/dd/yyyy'}}
+              </div>
+            </div>
+            <div class="form-group" id="notesId">
+              <label class="d-block">Notes</label>
+              <p class="lh-20 m-0 word-wrap"> {{viewTimeEntryobj?.note}} </p>
+            </div>
+          </div>
+        </div>
+        <hr class="m-0">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="closeBottomId">Close</button>
+      </div>
+    </ng-template>
+
+
+
+    <ng-template #EnterWriteDown let-modal>
+      <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Enter Write Down</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body pb-0">
+        <p class="lh-24">Enter the actual amount to be billed, not the amount by which to adjust down.</p>
+        <div class="form-group">
+          <label>Dollar Amount to Bill <sub>*</sub></label>
+          <input type="text" class="form-control" value="$">
+        </div>
+        <div class="form-group">
+          <label>Reason <sub>*</sub></label>
+          <textarea rows="4" class="form-control" placeholder="Enter reason for the Write Down"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </ng-template>
+
+
+    <ng-template #ConfigureTimeDisplay let-modal>
+      <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Configure Time Display</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="closeId">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body pb-0">
+        <p class="lh-20 mb-24">Set the default time appearance for your work.<br>
+          Example: One hour and fifteen minutes of work.</p>
+        <div class="radio-group">
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="Time1" name="Time" class="custom-control-input" value="1"
+                   [(ngModel)]="TimeDisplayFormat">
+            <label class="custom-control-label" for="Time1">1h 15m</label>
+          </div>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="Time2" name="Time" class="custom-control-input" value="2"
+                   [(ngModel)]="TimeDisplayFormat">
+            <label class="custom-control-label" for="Time2">1:15</label>
+          </div>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="Time3" name="Time" class="custom-control-input" value="3"
+                   [(ngModel)]="TimeDisplayFormat">
+            <label class="custom-control-label" for="Time3">1.25</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancleId">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="!TimeDisplayFormat" *ngIf="!isCreate"
+                (click)="updateSetting()" id="saveUpdateId">Save
+        </button>
+        <button type="button" class="btn btn-primary" [disabled]="!TimeDisplayFormat" *ngIf="isCreate"
+                (click)="createSettings()" id="saveCreateId">Save
+        </button>
+      </div>
+    </ng-template>

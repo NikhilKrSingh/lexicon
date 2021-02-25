@@ -1,0 +1,70 @@
+<ng-container *ngIf='employee'>
+  <div class="d-flex justify-content-between align-items-center mb-24">
+    <h2 class="mb-0 helper-text">Rate Table</h2>
+    <span class="cursor-pointer helper-text" id="edit-icon"><em class="icon icon-edit small"></em></span>
+  </div>
+  <div class="form-group">
+    <label class="d-block">Employee’s Rate Table</label>
+    Attorney
+  </div>
+  <div class="d-flex justify-content-between align-items-center mb-32">
+    <div class="header-search flex-fill d-flex">
+      <div class="header-search-wrapper">
+        <input type="text" class="form-control search-input" placeholder="Search by code or description" [(ngModel)]='description' (ngModelChange)='applyFilter()' id="search-code">
+        <button class="btn" type="submit" id="search-btn">Search</button>
+      </div>
+    </div>
+    <div class="btn-group ml-md-24 ml-0">
+      <button class="btn btn-outline-primary" type="button" id="view-audit-history-btn">
+        View Audit History
+      </button>
+      
+    </div>
+  </div>
+  <div class="row gutter-16">
+    <div class="col-10">
+      <div class="row gutter-16">
+        <div class="col-3">
+          <div class="form-group">
+            <label>Bill Type</label>
+            <ng-select [items]="billingTypeList" placeholder="Select bill type" (change)='applyFilter()'
+              [(ngModel)]="billType" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'" id="bill-type-select">
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="form-group">
+            <label>Billable To</label>
+            <ng-select [items]="billingToList" placeholder="Select billable To" (change)='applyFilter()'
+              [(ngModel)]="billingTo" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'" id="billable-to-select">
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label class="d-flex justify-content-between">
+              Rate
+              <span>
+                {{rateMin | currency : 'USD': 'symbol': '1.0-0'}} -
+                {{rateMax | currency : 'USD': 'symbol': '1.0-0'}}
+              </span>
+            </label>
+            <div class="custom-slider">
+              <div class="min-label">{{rate_min | currency : 'USD': 'symbol': '1.0-0'}}</div>
+              <ng5-slider [(value)]="rateMin" [(highValue)]="rateMax" [options]="rateOptions"
+                (valueChange)='applyFilter()' (highValueChange)='applyFilter()' id="rate-min-max"></ng5-slider>
+              <div class="max-label">{{rate_max | currency : 'USD': 'symbol': '1.0-0'}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <app-employee-admin-rate-table [rateList]='rateList' (selectRow)='selectedRate = $event'>
+    </app-employee-admin-rate-table>
+  <app-loader [active]="loading"></app-loader>
+
+  </div>
+
+</ng-container>

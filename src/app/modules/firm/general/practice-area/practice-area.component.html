@@ -1,0 +1,23 @@
+<div class="modal-header pb-24">
+  <h3 class="modal-title m-0" *ngIf='!practieArea?.id'>Add Practice Area</h3>
+  <h3 class="modal-title m-0" *ngIf='practieArea?.id > 0'>Edit Practice Area</h3>
+  <button type="button" class="close" (click)='dismiss()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+    <div class="form-group" [ngClass]="{'has-error': practieAreaNameErrMsg && practieAreaName.invalid}">
+      <label>Practice Area Name <sup>*</sup></label>
+      <input type="text" class="form-control" #practieAreaName="ngModel" required
+        placeholder="Enter practice area name" maxlength="50" [(ngModel)]='practieArea.name' id="practice-area-name">
+      <span class="field-message text-danger"
+        *ngIf="practieAreaNameErrMsg || (practieAreaName.invalid && (practieAreaName.dirty || practieAreaName.touched))">
+        <em class="icon icon-error mr-4"></em>
+        {{ practieAreaNameErrMsg }}
+      </span>
+    </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='ok()' id="save-btn">Save</button>
+</div>

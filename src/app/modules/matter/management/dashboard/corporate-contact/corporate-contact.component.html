@@ -1,0 +1,26 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/matter/list']">Matters</a></li>
+      <li class="breadcrumb-item" [title]='matterDetails?.matterName'>
+        <a href="javascript:void(0)" (click)="onMatterNameClick()">
+          <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+            {{matterDetails?.matterName}} -
+          </ng-container>
+          <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+            {{matterDetails?.matterName?.slice(0, 25)}}... -
+          </ng-container>
+          {{matterDetails?.matterNumber}}
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Edit Corporate Contacts
+      </li>
+    </ol>
+    <app-add-edit-corp-contacts [fromMatter]="true"></app-add-edit-corp-contacts>
+    
+  </div>
+</div>
+
+

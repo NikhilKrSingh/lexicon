@@ -1,0 +1,69 @@
+<form [formGroup]="TotalRealizationForm">
+    <div class="container">
+        <div class="main-content">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)"
+                        [routerLink]="['../../reporting']">Reporting</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Total Realization Report</li>
+            </ol>
+            <div class="heading">
+                <h1>Total Realization Report</h1>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="mb-8">Generate Report</h2>
+                    <p class="lh-20">Generate your report by selecting the options below.</p>
+                    <div class="row gutter-16">
+                        <div class="col-5">
+                            <div class="form-group mb-0">
+                                <label>Billed Date Range <sup>*</sup></label>
+                                <div class="row gutter-16">
+                                    <div class="col-6">
+                                        <div class="form-group mb-20">
+                                            <app-date-picker [isForm]='true' [reset]="openReset" [maxDate]="TotalRealizationForm.value.BilledEndDate" placeholderText="Select Start Date" [dateform]='TotalRealizationForm' controlName='BilledStartDate' (dataChange)="openStartDateChange()" id="billed-startdate"></app-date-picker>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group mb-20">
+                                            <app-date-picker [isForm]='true' [dateform]='TotalRealizationForm' controlName='BilledEndDate' (dataChange)="openEndDateChange()" id="billed-closedate"></app-date-picker>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label>Cash Receipt Date Range <sup>*</sup></label>
+                                <div class="row gutter-16">
+                                    <div class="col-6">
+                                        <div class="form-group mb-20">
+                                            <app-date-picker [isForm]='true' [reset]="closeReset"  [maxDate]="TotalRealizationForm.value.CashReceiptEndDate" placeholderText="Select Start Date" [dateform]='TotalRealizationForm' controlName='CashReceiptStartDate' (dataChange)="closeStartDateChange()" id="case-startdate"></app-date-picker>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group mb-20">
+                                            <app-date-picker [isForm]='true' [dateform]='TotalRealizationForm' controlName='CashReceiptEndDate' (dataChange)="closeEndDateChange()" id="case-enddate"></app-date-picker>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+            </div>
+            <div class="d-flex justify-content-end pt-8">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!exportCsvFlag" (click)="submitTotalrealizationReport('Total Realization')" id="export-to-csv">Export to CSV</button>
+                </div>
+            </div>
+            <app-loader [active]='loading'></app-loader>
+
+        </div>
+    </div>
+</form>

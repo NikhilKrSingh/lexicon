@@ -1,0 +1,219 @@
+.card-heads {
+  padding-left: 32px;
+  padding-right: 32px;
+  &.bdr-btm {
+    position: relative;
+    &:before {
+      border-top: 1px solid #c4ccd4;
+      width: auto;
+      right: 32px;
+      left: 32px;
+      bottom: 0;
+      content: '';
+      position: absolute;
+    }
+  }
+}
+.hry-row {
+  .hry-header,
+  .hry-content,
+  .hry-footer {
+    width: 100%;
+    margin: 0;
+    max-width: 100%;
+    ul {
+      margin: 0;
+      padding: 0;
+      border-right: 1px solid #c4ccd4;
+      width: 250px;
+      li {
+        padding: 0;
+        display: block;
+        padding: 2px 15px 2px 30px;
+        transition: all 0.3s ease;
+        line-height: 25px;
+        > .d-flex {
+          min-height: 36px;
+          .flex-grow-1 {
+            max-width: 80%;
+          }
+        }
+        .info-hover {
+          line-height: normal;
+        }
+        .icon-group span + span {
+          margin-left: 10px;
+        }
+      }
+    }
+  }
+  .hry-header,
+  .hry-content {
+    ul {
+      li {
+        .icon {
+          opacity: 0;
+          transition: all 0.3s ease;
+        }
+        &:hover {
+          .icon {
+            color: #413a93;
+            opacity: 1;
+          }
+        }
+        span {
+          display: inline-block;
+          vertical-align: middle;
+          line-height: normal;
+        }
+        .info-hover {
+          margin-left: -5px;
+          .tooltip {
+            right: auto;
+            .arrow {
+              left: 62px;
+              right: auto;
+            }
+          }
+        }
+      }
+    }
+  }
+  .hry-header {
+    padding-top: 10px;
+    ul {
+      margin: 0;
+      padding: 0;
+      border-right: 1px solid #c4ccd4;
+      width: 250px;
+      li {
+        span {
+          color: #5d6a86;
+          font-size: 12px;
+          font-weight: 500;
+          line-height: 16px;
+        }
+      }
+    }
+  }
+  .hry-content {
+    min-height: 480px;
+    ul {
+      &:nth-child(1) {
+        z-index: 6;
+      }
+      &:nth-child(2) {
+        z-index: 5;
+        li {
+          &.selected {
+            background: #5c55ae;
+            color: #ffffff;
+            position: relative;
+            &:before {
+              border-color: transparent transparent transparent #5c55ae;
+            }
+            &:after {
+              border-color: transparent transparent transparent #fff;
+            }
+          }
+        }
+      }
+      &:nth-child(3) {
+        z-index: 4;
+        li {
+          &.selected {
+            background: #6761a9;
+            color: #ffffff;
+            position: relative;
+            &:before {
+              border-color: transparent transparent transparent #6761a9;
+            }
+            &:after {
+              border-color: transparent transparent transparent #fff;
+            }
+          }
+        }
+      }
+      &:nth-child(4) {
+        z-index: 3;
+        li {
+          &.selected {
+            background: #8d89be;
+            color: #ffffff;
+            position: relative;
+            &:before {
+              border-color: transparent transparent transparent #8d89be;
+            }
+            &:after {
+              border-color: transparent transparent transparent #fff;
+            }
+          }
+        }
+      }
+      &:nth-child(5) {
+        z-index: 2;
+        li {
+          &.selected {
+            background: #8d89be91;
+            color: #ffffff;
+            position: relative;
+            &:before {
+              border-color: transparent transparent transparent #8d89be91;
+            }
+            &:after {
+              border-color: transparent transparent transparent #fff;
+            }
+          }
+        }
+      }
+
+      li {
+        color: #353b4b;
+        font-size: 14px;
+        cursor: pointer;
+        &:hover {
+          background: #e7edf3;
+        }
+        &.selected {
+          background: #413a93;
+          color: #ffffff;
+          position: relative;
+          &:before {
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            right: -40px;
+            top: 0;
+            border-width: 20px;
+            border-style: solid;
+            border-color: transparent transparent transparent #413a93;
+            pointer-events: none;
+          }
+          &:after {
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            right: -41px;
+            top: 0;
+            border-width: 20px;
+            border-style: solid;
+            border-color: transparent transparent transparent #fff;
+            pointer-events: none;
+            z-index: -1;
+          }
+          .icon {
+            color: #fff;
+          }
+        }
+      }
+    }
+  }
+  .hry-footer {
+    ul {
+      padding: 0 10px;
+      border-top: 1px solid #c4ccd4;
+    }
+  }
+}

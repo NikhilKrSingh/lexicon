@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>UI/Icon/text editor/underline</title>
+    <defs>
+        <path d="M4,7.77777778 C5.89142857,7.77777778 7.42857143,6.28333333 7.42857143,4.44444444 L7.42857143,0 L6,0 L6,4.44444444 C6,5.51666667 5.10285714,6.38888889 4,6.38888889 C2.89714286,6.38888889 2,5.51666667 2,4.44444444 L2,0 L0.571428571,0 L0.571428571,4.44444444 C0.571428571,6.28333333 2.10857143,7.77777778 4,7.77777778 Z M0,8.88888889 L0,10 L8,10 L8,8.88888889 L0,8.88888889 Z" id="path-1"></path>
+    </defs>
+    <g id="UI/Icon/text-editor/underline" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Rectangle" transform="translate(4.000000, 3.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <!-- <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use> -->
+            <rect fill="#4E5F7B" mask="url(#mask-2)" x="-4" y="-3" width="16" height="16"></rect>
+        </g>
+    </g>
+</svg>

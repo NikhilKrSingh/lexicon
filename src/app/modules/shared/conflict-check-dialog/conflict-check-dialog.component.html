@@ -1,0 +1,153 @@
+
+<ng-container *ngIf='conflicts.length > 0'>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title mb-0">Conflict Check</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-danger d-flex justify-content-between mb-32">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-info"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h4 class="mr-36 mt-0 mb-0">{{ header }}</h4>
+          {{ message }}
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-warning d-flex justify-content-between mb-32" *ngIf='hasBlockedEmployees' id="warning-display">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-warning"></em>
+        <div class="d-flex align-items-top flex-wrap">
+          <h4 class="mr-36 mt-0 mb-0">Warning</h4>
+        </div>
+        <p>
+          {{conflict_warning_msg}}
+        </p>
+      </div>
+    </div>
+    <div class="row mb-24">
+      <div class="col-9" *ngIf="pageType === 'conflict'">
+        <p class="lh-20">Please read below and determine whether the conflict is accurate and poses a risk before saving
+          your changes. <br>
+          You may go back and make the necessary corrections or discard the edits entirely.
+        </p>
+      </div>
+      <div class="col-9" *ngIf="pageType === 'createnewpotentialcontact'">
+        <p class="lh-20">
+          Please read below and determine whether the conflict is accurate and poses a risk before saving the potential client. <br>
+          You may return to the workflow and make the necessary corrections or save the new potential client as-is.
+        </p>
+      </div>
+      <div class="col-9" *ngIf="pageType === 'createnewmatter'">
+        <p class="lh-20">
+          Please read below and determine whether the conflict is accurate and poses a risk before saving the matter. <br>
+          You may return to the workflow and make the necessary corrections or save the new matter as-is.
+        </p>
+      </div>
+      <div class="col-9" *ngIf="pageType === 'convertclient'">
+        <p class="lh-20">
+          Please read below and determine whether the conflict is accurate and poses a risk before saving the client. <br>
+          You may return to the workflow and make the necessary corrections or save the new client as-is.
+        </p>
+      </div>
+      <div class="col-9" *ngIf="pageType === 'createclient'">
+        <p class="lh-20">
+          Please read below and determine whether the conflict is accurate and poses a risk before saving the client. <br>
+          You may return to the workflow and make the necessary corrections or save the new client as-is.
+        </p>
+      </div>
+      <div class="col-3 text-right">
+        <button class="btn btn-primary" type="button" (click)='exporttocsv()' id="export-csv-btn">
+          <em class="icon icon-upload"></em>
+          Export to CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="custom-table">
+      <div class="table-responsive">
+        <ngx-datatable #table class="material common-table scroll-horz conflict-check-table" [rows]="conflicts" [columnMode]="ColumnMode.force"
+          [headerHeight]="50" rowHeight="auto" id="conflictsdata-tbl">
+          <ngx-datatable-column [resizeable]="false" prop="conflictType.name" name="Conflict Type" [width]="587">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <span>
+                {{row.message}}
+              </span>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="lastName" name="Conflicting Party" [width]="228">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              {{(row.lastName || row.firstName) ? (row.lastName ? row.lastName + ', ' + row.firstName : row.firstName) : row.company}}
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right mr-36'" name="Action" [width]="176">
+            <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+              <div class="d-flex justify-content-end mr-36">
+                <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+                  (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                  (outsideClick)="onClickedOutside($event, rowIndex)">
+                  <em class="icon icon-dot-verti"></em>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="javascript:void(0)" (click)='viewProfile(row, $event)' id="view-profile-index-{{rowIndex}}">
+                      View Profile
+                    </a>
+                    
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    
+    <button type="button" *ngIf="pageType === 'conflict'"  class="btn btn-light" (click)="close()" id="retrun-btn">{{ returnButtonText }}</button>
+    <button type="button" class="btn btn-primary" (click)='save()' *ngIf="pageType === 'conflict'" id="save-btn">Save</button>
+    
+    <button type="button" class="btn btn-light" *ngIf="pageType === 'createnewpotentialcontact'" (click)="close()" id="back-btn">Back</button>
+    <button type="button" class="btn btn-light" *ngIf="pageType === 'createnewmatter' || pageType === 'convertclient' || pageType == 'createclient'" (click)="close()" id="return-btn">Return to Workflow</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType === 'createnewpotentialcontact'" [disabled]="saveBtn" (click)="save()" id="save-new-potential-client-btn">Save New Potential Client</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType === 'createnewmatter'" (click)="save()" id="save-new-matter-btn">Save New Matter</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType === 'convertclient' || pageType == 'createclient'" (click)="save()" id="save-new-client-btn">Save New Client</button>
+  </div>
+</ng-container>
+
+
+<ng-container *ngIf='conflicts.length == 0'>
+  <div class="modal-header pb-24">
+    <h3 *ngIf="pageType === 'conflict'" class="modal-title mb-0">Conflict Check Successful</h3>
+    <h3 *ngIf="pageType === 'createnewpotentialcontact' || pageType === 'createnewmatter' || pageType === 'convertclient' || pageType == 'createclient'" class="modal-title mb-0">Conflict Check</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-success d-flex justify-content-between mb-32">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-check-circle"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h4 class="mr-36 mt-0 mb-0">{{no_conflict_header_msg}}</h4>
+          {{no_conflict_body_msg}}
+        </div>
+      </div>
+    </div>
+    <p class="lh-20 mb-0" *ngIf="pageType === 'conflict'" >We haven't identified any potential conflicts after reviewing your changes. Please select to Save
+      your changes and the updates will be made to information as requested.</p>
+    <p class="lh-20 mb-0" *ngIf="pageType === 'createnewpotentialcontact'" >Would you like to finalize and save this new potential client?</p>
+    <p class="lh-20 mb-0" *ngIf="pageType === 'createnewmatter'" >Would you like to finalize and save this new matter?</p>
+    <p class="lh-20 mb-0" *ngIf="pageType === 'createclient'" >Would you like to finalize and save this new client?</p>
+    <p class="lh-20 mb-0" *ngIf="pageType === 'convertclient'" >Would you like to finalize and save this new client?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" *ngIf="pageType === 'conflict'" (click)="disacard()" id="discard-changes-btn">Discard Changes</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType === 'conflict'" (click)='save()' id="save-btn">Save</button>
+    <button type="button" class="btn btn-light" *ngIf="pageType === 'createnewpotentialcontact' || pageType === 'createnewmatter' || pageType === 'convertclient' || pageType == 'createclient'" (click)="close()" id="return-to-workflow-btn">Return to Workflow</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType === 'createnewpotentialcontact'" (click)="save()" [disabled]="saveBtn" id="save-new-potential-client-btn">Save New Potential Client</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType === 'createnewmatter'" (click)="save()" id="save-new-matter-btn">Save New Matter</button>
+    <button type="button" class="btn btn-primary" *ngIf="pageType === 'convertclient' || pageType == 'createclient'" (click)="save()" id="save-new-client-btn">Save New Client</button>
+  </div>
+</ng-container>

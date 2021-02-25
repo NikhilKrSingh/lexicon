@@ -1,0 +1,22 @@
+.change-tenant-table{
+    &.common-table{
+        &.ngx-datatable{
+            .datatable-row-wrapper{
+                .datatable-row-odd{
+                    background-color: #fff;
+                }
+                + .datatable-row-wrapper{
+                    border-top: 1px solid #C4CCD4;
+                }
+            }
+            .datatable-body-cell{
+                padding: 16px 24px;
+            }
+        }
+    }
+}
+.t-image{
+    img{
+        width: 100px;
+    }
+}

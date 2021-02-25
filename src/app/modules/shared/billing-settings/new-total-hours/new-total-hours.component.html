@@ -1,0 +1,30 @@
+<div class="card gray-card card-full-h">
+  <div class="card-body">
+    <h4 class="mb-8">Total Hours</h4>
+    <div class="row mb-24">
+      <div class="col-12">
+        <div class="d-flex" *ngIf="currentBillAmount || previousBillAmount">
+          <span class="d-block" [ngClass]="currentBillAmount >=0 ? 'current-positive': 'current-negative'"></span>
+          <span class="d-block ml-2 legend-title">This current bill</span>
+          <span class="d-block" [ngClass]="previousBillAmount >=0 ? 'previous-positive': 'previous-negative'"></span>
+          <span class="d-block ml-2 legend-title">Previous bills</span>
+        </div>
+      </div>
+    </div>
+    <div class="bill-chart" #doughnutChart
+         *ngIf="!chartDataLoading && (currentBillAmount || previousBillAmount)">
+      <canvas baseChart
+              [options]="doughnutChartOptions"
+              [legend]="false"
+              [data]="doughnutChartData"
+              [labels]="doughnutChartLabels"
+              [colors]="doughnutChartColors"
+              [chartType]="doughnutChartType">
+      </canvas>
+    </div>
+    <div class="no-record" *ngIf="!currentBillAmount && !previousBillAmount">
+      <span class="helper-text">No time yet recorded</span>
+    </div>
+    <app-loader [active]="chartDataLoading"></app-loader>
+  </div>
+</div>

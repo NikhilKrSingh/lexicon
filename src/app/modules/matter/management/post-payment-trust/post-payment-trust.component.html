@@ -1,0 +1,468 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/matter/list']">Matters</a></li>
+      <li class="breadcrumb-item" *ngIf="matterDetails && matterDetails.matterName">
+        <a href="javascript:void(0)" [routerLink]="['/matter/dashboard']" [queryParams]="{matterId: matterId}">
+          {{ matterDetails?.matterName?.length >= 30 ? matterDetails?.matterName?.slice(0, 25) + '... -' : (matterDetails?.matterName) + ' -'}}
+          {{matterDetails?.matterNumber}}
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Post Payment to Trust</li>
+    </ol>
+    <div class="heading">
+      <h1>Post Payment to Trust - {{matterDetails?.matterName}}</h1>
+    </div>
+
+    <div class="card" *ngIf="step == 'postPayment'">
+      <div class="card-body">
+        <form [formGroup]="form">
+          <h3 class="mb-24">Post Payment to Trust</h3>
+          <div class="row">
+            <div class="col-3">
+              <div class="form-group">
+                <label>Date of Payment <sup>*</sup></label>
+                <app-date-picker placeholderText="Select an payment date" [isForm]='true' [dateform]='form'
+                  controlName='payment_date' (dataChange)='applyFilter()' id="date-of-payment">
+                </app-date-picker>
+                <app-validation-message [errorMessage]='dateErrMsg'></app-validation-message>
+              </div>
+            </div>
+          </div>
+          <div class="row pt-8">
+            <div class="col-4">
+              <div class="form-group">
+                <label class="mb-16">Select Payment Target</label>
+                <div class="custom-control custom-radio pr-0">
+                  <input type="radio" id="RequestAmount1" formControlName="payment_target" class="custom-control-input"
+                    value="primary" (change)="paymentTargetChange('primary')">
+                  <label class="custom-control-label" for="RequestAmount1">1 - Primary Retainer Trust</label>
+                </div>
+                <div class="custom-control custom-radio pr-0">
+                  <input type="radio" id="RequestAmount2" formControlName="payment_target" class="custom-control-input"
+                    value="trust" (change)="paymentTargetChange('trust')">
+                  <label class="custom-control-label" for="RequestAmount2">Trust-Only Account</label>
+                </div>
+                <ng-select [disabled]="form.value.payment_target == 'primary'" [items]="allTrustAccountList"
+                  placeholder="Select Trust" [(ngModel)]="selectedTrust" [ngModelOptions]="{standalone: true}"
+                  [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'"
+                  (change)='trustChange($event)' [selectOnTab]="true" id="select-trust">
+                </ng-select>
+                <app-validation-message [errorMessage]='trustErrMsg'></app-validation-message>
+              </div>
+            </div>
+
+          </div>
+          <div class="row pt-8">
+            <div class="col-4">
+              <div [ngClass]="(amountErrMsg)?'form-group has-error':'form-group'">
+                <label>Amount to Pay <sup>*</sup></label>
+                <input type="text" min="0" class="form-control" placeholder="$0.00" formControlName="payment_amount" (keyup)="validateAmount()"
+                  prefix="$" mask="separator.2" thousandSeparator="," (keypress)="chkNumber($event, true)" (focusout)="focusoutOfAmount()" id="amount-to-pay">
+                <span class="field-message text-danger" *ngIf="amountErrMsg">
+                  <em class="icon icon-error mr-4"></em>
+                  {{ amountErrMsg }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="mb-12">Select Payment Method</label>
+
+
+            <div class="custom-control custom-radio pr-0 d-flex align-items-center" *ngFor="let paymentType of paymentMethodTypesList;trackBy :trackByFn;">
+              <input type="radio" id="PayMethod1_{{paymentType.id}}" formControlName="paymentMethod"
+                [value]="paymentType.code" (change)="selectPaymentMethod(paymentType)" class="custom-control-input" [attr.disabled]="paymentType | paymentMethodDisable : accountType">
+              <label class="custom-control-label" for="PayMethod1_{{paymentType.id}}">{{paymentType.name}}</label>
+              <div class="info-hover position-relative ml-8" *ngIf="paymentType | paymentMethodDisable : accountType">
+                <em class="icon icon-info icon-color text-large"></em>
+                <div class="tooltip bs-tooltip-top center" role="tooltip">
+                  <div class="arrow"></div>
+                  <div class="tooltip-inner">
+                    <p class="m-0">The Trust Bank Account is not set up to process this type of payment</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <ng-container *ngIf="form.value.paymentMethod === 'CHECK'">
+          <div class="row gutter-16">
+            <div class="col-3">
+              <div class="form-group mb-16" [class.has-error]='checkNumberMissing'>
+                <label>Check Number <sup>*</sup> </label>
+                <input type="text" class="form-control" [(ngModel)]="checkNumber" (keypress)="chkNumber($event)" (keyup)="chkCheckNumber()"
+                  placeholder="Enter check number" id="check-number">
+                <app-validation-message [errorMessage]='checkNumberMissing' *ngIf='checkNumberMissing'></app-validation-message>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16 mt-8" *ngIf="!paymentCheckUploadFile">
+            <div class="col-6">
+              <div class="form-group mb-0">
+                <button type="button" class="btn btn-primary btn-icon" (click)='selectFile()' id="upload-check-img"><i
+                    class="icon icon-upload"></i>
+                  Upload check Image
+                </button>
+                <span class="ml-12"><i>Optional</i></span>
+                <form>
+                  <input type="file" accept=".jpeg, .png" hidden #paymentCheckImageInput
+                    (change)='uploadFile(paymentCheckImageInput.files)' id="file-hidden">
+                </form>
+                <span class="d-block font-weight-medium font-12 mt-8">File must be .jpeg or .png and Maximum upload file
+                  size: 5MB</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-12 mt-8" *ngIf="paymentCheck">
+            <div class="col-12">
+              <div [ngClass]="!this.paymentCheckUploadFile?'uploaded-image-danger':''"
+                class="uploaded-image d-flex align-items-center justify-content-between p-16 mb-24">
+                <div class="d-flex align-items-center">
+                  <img src="../../../../../assets/images/Calendar/image.svg" alt="" width="18">
+                  <span class="small font-weight-medium ml-12"> {{selectedFile?.name}}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <div class="ml-12 mb-0 small d-flex align-items-center" *ngIf="paymentCheckErr">
+                    <em class="icon icon-error mr-8 text-danger text-large"></em>{{ paymentCheckErrMsg }}
+                  </div>
+                  <div (click)="onPaymentClose()" class="ml-24" id="payment-close">
+                    <em class="icon icon-close-fill icon-color text-large cursor-pointer"></em>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="form.value.paymentMethod === 'CREDIT_CARD'">
+          <div class="row gutter-16">
+            <div class="col-9">
+              <h4 class="text-xlarge">Select an existing credit card</h4>
+              <div class="custom-table">
+                <div class="table-responsive">
+                  <table class="table table-striped table-borderless">
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Name on Card</th>
+                        <th>Card Number</th>
+                        <th>Expiration Date</th>
+                        <th>Card Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let card of creditCardList; trackBy :trackByFn;let i = index;">
+                        <tr id="card-tr-{{i}}">
+                          <td>
+                            <label class="cust-radio">
+                              <input type="radio" name="selectedCreditCard" [(ngModel)]="selectedCreditCard"
+                                [value]="card.id" id="card-radio-{{i}}">
+                              <span class="radio-style"></span>
+                            </label>
+                          </td>
+                          <td>
+                            {{card.firstName}} {{card.lastName}}
+                            {{card.companyName}}
+                          </td>
+                          <td>---- ---- ---- {{card.cardNumber}} </td>
+                          <td>
+                            {{card.expirationDate}}
+                          </td>
+                          <td>
+                            {{card.cardType | cardType}}
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <button (click)="addCreditCard=true" class="btn btn-link btn-icon px-0 d-flex align-items-center mb-20"
+                [class.mt-20]='!creditCardList?.length' type="button" id="add-credit-card">
+                <i class="icon icon-add-circle"></i>
+                Add Credit Card
+              </button>
+            </div>
+          </div>
+          <div class="row gutter-16" *ngIf="addCreditCard">
+            <div class="col-6">
+              <app-add-post-payment-credit-card [states]='states' [primaryAddress]='primaryAddress'
+                (saveCC)='saveCreditCard($event)' (cancel)='addCreditCard = false'>
+              </app-add-post-payment-credit-card>
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="form.value.paymentMethod === 'E-CHECK'">
+          <div class="row gutter-16">
+            <div class="col-12">
+              <div
+                *ngIf="sameDayACHStatus"
+                class="row gutter-16">
+                <div class="col-9">
+                  <div class="pl-32">
+                    <div class="custom-control custom-checkbox pr-0">
+                      <input [disabled]="!isTimeBefore12PmCt" [checked]="isCheckedSameDayACH" type="checkbox"
+                        [(ngModel)]="isCheckedSameDayACH" class="custom-control-input" id="customCheck1">
+                      <label class="custom-control-label" for="customCheck1">Process using Same-Day ACH</label>
+                    </div>
+                    <div class="alert alert-primary d-flex justify-content-between" role="alert">
+                      <div class="d-flex">
+                        <em class="alert-icon icon icon-info text-large"></em>
+                        <div class="lh-20">
+                          <h4 class="mr-0 mt-0 mb-4">Same-Day ACH Transaction</h4>
+                          <div *ngIf="isTimeBefore12PmCt">
+                            <div>
+                              The transaction will process at the end of the business day, rather than overnight, if submitted
+                              before 12pm CT.
+                            </div>
+                            <div>
+                              The firm will incur a fee for each Same-Day ACH transaction.
+                            </div>
+                          </div>
+                          <div *ngIf="!isTimeBefore12PmCt">
+                            Only transactions submitted before 12pm CT can be processed using Same-Day ACH.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-7">
+              <h4 class="text-xlarge">Select an existing E-Check</h4>
+              <div class="custom-table">
+                <div class="table-responsive">
+                  <table class="table table-striped table-borderless">
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Routing Number</th>
+                        <th>Account Number</th>
+                        <th>Bank</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let echeck of echeckList; trackBy :trackByFn;let i = index;">
+                        <tr id="echeck-tr-{{i}}">
+                          <td>
+                            <label class="cust-radio">
+                              <input type="radio" name="selectECheck" [(ngModel)]="selectedECheck" [value]="echeck.id"
+                                id="e-check-radio-{{i}}">
+                              <span class="radio-style"></span>
+                            </label>
+                          </td>
+                          <td>
+                            {{echeck.routingNumber | appRoutingNumber}}
+                          </td>
+                          <td>---- ---- {{echeck?.accountNumber?.substr(echeck?.accountNumber?.length - 4)}}</td>
+                          <td>
+                            {{echeck['bankName']}}
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <button (click)="addECheck = true" class="btn btn-link btn-icon px-0 d-flex align-items-center mb-20"
+                [class.mt-20]='!echeckList?.length' type="button" id="add-e-check">
+                <i class="icon icon-add-circle"></i> Add E-Check
+              </button>
+            </div>
+          </div>
+          <div class="row gutter-16" *ngIf="addECheck">
+            <div class="col-6">
+              <app-add-post-payment-echeck [states]='states' [primaryAddress]='primaryAddress' (saveEcheck)='saveEcheck($event)'
+                (cancel)='addECheck = false'>
+              </app-add-post-payment-echeck>
+            </div>
+          </div>
+        </ng-container>
+
+        <app-loader [active]='isLoading'></app-loader>
+      </div>
+    </div>
+
+    <div class="card review-payment" *ngIf="step == 'reviewPayment'">
+      <div class="card-body">
+        <h3 class="mb-24">Review Payment</h3>
+        <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert"
+          *ngIf="errorMessage">
+          <div class="d-flex align-items-center">
+            <em class="alert-icon icon icon-error"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <h4 class="mr-20 mt-0 mb-0">Error </h4>
+              {{fail_msg}} Reason: {{errorMessage}}
+            </div>
+          </div>
+          <a href="javascript:void(0)" (click)="step='postPayment'" class="font-weight-medium" id="return-to-post-payment">Return to Post
+            Payment
+          </a>
+        </div>
+        <div class="row">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Date of Payment </label>
+              {{form.value.payment_date | date: 'MM/dd/yyyy' }}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Matter Name </label>
+              {{matterDetails?.matterName}}
+            </div>
+          </div>
+        </div>
+        <div class="row pt-8">
+          <div class="col-4">
+            <div class="form-group">
+              <label>Payment Target</label>
+              <span>
+                {{ form.value.payment_target === 'primary' ? '1 - Primary Retainer Trust' : 'Trust-Only Account' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="row pt-8">
+          <div class="col-4">
+            <div class="form-group">
+              <label>Amount to Pay </label>
+              {{form.value.payment_amount |currency: 'USD'}}
+            </div>
+          </div>
+        </div>
+        <div class="row pt-8">
+          <div class="col-4">
+            <div class="form-group">
+              <label>Payment Method </label>
+              {{form.value.paymentMethod == 'CASH' ? 'Cash' : form.value.paymentMethod == 'CREDIT_CARD' ? 'Credit Card' : form.value.paymentMethod == 'CHECK' ? 'Check' : form.value.paymentMethod == 'E-CHECK' ? 'E-Check' : ''}}
+            </div>
+          </div>
+        </div>
+        <div class="row pt-8" *ngIf="form.value.paymentMethod == 'CHECK'">
+          <div class="col-4">
+            <div class="form-group">
+              <label>Check Number </label>
+              {{checkNumber}}
+            </div>
+          </div>
+        </div>
+        <div class="row" *ngIf="form.value.paymentMethod == 'CHECK' && !!selectedFile?.name">
+          <div class="col-12 pl-0 pt-8">
+            <div class="uploaded-image d-flex align-items-center justify-content-between p-16">
+              <div class="d-flex align-items-center">
+                <img src="../../../../../assets/images/Calendar/image.svg" alt="" width="18">
+                <span class="small font-weight-medium ml-12">{{selectedFile?.name}}</span>
+              </div>
+              <a href="javascript:void(0);" class="font-weight-medium"
+                (click)="open(viewPaymentCheckModal,'','modal-lmd')">View Check Image</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="row pt-8" *ngIf="form.value.paymentMethod == 'CREDIT_CARD'">
+          <div class="col-4">
+            <div class="form-group">
+              <p class="mb-8" *ngIf="!selectedCreditCardDetails?.isCompany">{{selectedCreditCardDetails?.firstName}}
+                {{selectedCreditCardDetails?.lastName}}</p>
+              <p class="mt-16" *ngIf="selectedCreditCardDetails?.isCompany">{{selectedCreditCardDetails?.companyName}}
+              </p>
+              <p class="mb-8">---- ---- ---- {{selectedCreditCardDetails?.cardNumber}}</p>
+              <p class="mb-8">Exp: {{selectedCreditCardDetails?.expirationDate}}</p>
+              <p class="mb-0">
+                {{(selectedCreditCardDetails?.cardType == 'AMEX') ? 'American Express' : (selectedCreditCardDetails?.cardType == 'MSTR') ? 'Mastercard' : selectedCreditCardDetails?.cardType | titlecase}}</p>
+            </div>
+          </div>
+        </div>
+        <div class="row pt-8" *ngIf="form.value.paymentMethod == 'E-CHECK'">
+          <div class="col-4">
+            <div class="form-group">
+              <label>Routing Number </label>
+              {{selectedECheckDetails?.routingNumber | appRoutingNumber}}
+            </div>
+          </div>
+        </div>
+        <div class="row pt-8" *ngIf="form.value.paymentMethod == 'E-CHECK'">
+          <div class="col-4">
+            <div class="form-group">
+              <label>Account Number </label>
+              ---- ----
+              {{selectedECheckDetails?.accountNumber?.substr(selectedECheckDetails?.accountNumber?.length - 4)}}
+            </div>
+          </div>
+        </div>
+
+        <app-loader [active]='isLoading'></app-loader>
+      </div>
+    </div>
+
+    <div class="card" *ngIf="step == 'confirmPayment'">
+      <div class="card-body">
+        <h3>Payment Confirmation</h3>
+        <div class="alert alert-success d-flex justify-content-between" role="alert">
+          <div class="d-flex">
+            <em class="alert-icon icon icon-check-circle"></em>
+            <div class="d-flex align-items-center flex-wrap">
+              <h4 class="mr-20 mt-0 mb-0">Success</h4>
+              {{successMsg}}
+            </div>
+          </div>
+        </div>
+        <app-loader [active]='isLoading'></app-loader>
+      </div>
+    </div>
+
+    <div class="d-none" *ngIf='postObject?.authCode'>
+      <app-common-receipt-pdf [recordData]="postObject" [clientData]="clientDetail" [isPaymentToTrust]='true'
+        [matterId]='matterId' [callback]='loaderCallback'>
+      </app-common-receipt-pdf>
+    </div>
+
+    <div class="d-flex justify-content-end mt-24 mb-12">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" *ngIf="step == 'reviewPayment'" [routerLink]="['/matter/dashboard']"
+          [queryParams]="{matterId:matterId}" id="cancle-btn">Cancel</button>
+        <button type="button" class="btn btn-light" *ngIf="step == 'reviewPayment'"
+          (click)="step = 'postPayment'" id="back-btn">Back</button>
+        <button type="button" class="btn btn-primary" *ngIf="step == 'reviewPayment'" [disabled]='isLoading' (click)="PostPayment()" id="post-payment-btn">Post
+          Payment</button>
+
+        <button type="button" class="btn btn-light" [routerLink]="['/matter/dashboard']"
+          [queryParams]="{matterId:matterId}" *ngIf="step == 'postPayment'" id="post-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="review(form.value)" *ngIf="step == 'postPayment'" id="review-payment">Review
+          Payment</button>
+
+        <button type="button" *ngIf="step == 'confirmPayment'" [routerLink]="['/matter/dashboard']"
+          [queryParams]="{matterId: matterId}" class="btn btn-light" id="return-to-matter-profile">Return to Matter Profile</button>
+        <button type="button" *ngIf="step == 'confirmPayment'" class="btn btn-primary" [disabled]='isLoading' (click)="printReceipt()" id="print-reciept">Print
+          Receipt</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<ng-template #viewPaymentCheckModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Check Image - {{checkNumber}}</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="" style="background-color: #c8ced4;">
+      <img src={{this.paymentCheckFileContent}} height="200px" width="580px">
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="close-btn-bottom">Close</button>
+  </div>
+</ng-template>

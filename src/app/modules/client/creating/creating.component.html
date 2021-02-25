@@ -1,0 +1,202 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']">
+        <a href="javascript:void(0)">Dashboard</a>
+      </li>
+      <li class="breadcrumb-item" [routerLink]="['/client-list/list']">
+        <a href="javascript:void(0)">Clients</a>
+      </li>
+      <li class="breadcrumb-item active">New Client </li>
+    </ol>
+    <div class="heading">
+      <h1>New Client</h1>
+    </div>
+    <div class="card">
+      <div class="card-body p-0">
+        <div class="scrolling-step-height" [ngStyle]="{'height':fixedHeight+'px'}"></div>
+        <div class="scrolling-steps" [class.fixed-top]="fixedTop"
+          [ngStyle]="{'top':topbarHeightst+'px','right':fixedRight+'px','left':fixedLeft+'px'}">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h4 class="text-xlarge mb-4">Create New Client</h4>
+              <p class="small lh-20 m-0">A conflict check will be run automatically to complete the process.</p>
+              <div class="d-flex">
+                <p class="small lh-20 m-0"><sup class="text-danger">*</sup>
+                  Section contains required fields.
+                </p>
+                <p class="font-weight-medium text-danger small lh-20 ml-8"
+                  *ngIf="formSubmitted && (basicInfoInvalid || matterInfoInvalid || billingInfoInvalid)">
+                  Please enter all required information to proceed.
+                </p>
+              </div>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-light" type="button" [disabled]='isLoading' (click)="cancelConfirm()" id="cancel-confirm-btn">
+                Cancel
+              </button>
+
+              <button class="btn btn-outline-primary" type="button" [disabled]='isLoading || disableSave'
+                (click)="runConflictsCheck()" id="run-conflict-check-btn">
+                Run Conflict Check
+              </button>
+
+              <button class="btn btn-primary" type="button" [disabled]='isLoading || disableSave'
+                (click)="saveClient()" id="save-new-client-btn">
+                Save New Client
+              </button>
+            </div>
+          </div>
+          <ul class="list-unstyled scroll-step-menu text-large d-flex mb-0">
+            <li [class.has-error]="formSubmitted && basicInfoInvalid">
+              <a href="javascript:void(0)" [class.current]="activeTab === 'basicInfo'"
+                (click)="scrollToElement('basicInfo')">
+                <em class="icon icon-user-circle mt-1"></em>
+                <span>Basic Information <sup class="text-danger">*</sup></span>
+              </a>
+            </li>
+            <li [class.has-error]="formSubmitted && matterInfoInvalid">
+              <a href="javascript:void(0)" [class.current]="activeTab === 'matterDetailsInfo'"
+                (click)="scrollToElement('matterDetailsInfo')">
+                <em class="icon icon-info"></em>
+                <span>Matter Details <sup class="text-danger">*</sup></span>
+              </a>
+            </li>
+            <li [class.has-error]="formSubmitted && billingInfoInvalid">
+              <a href="javascript:void(0)" [class.current]="activeTab === 'billingInformation'"
+                (click)="scrollToElement('billingInformation')">
+                <em class="icon icon-billing"></em>
+                <span>Billing Information <sup class="text-danger">*</sup></span>
+              </a>
+            </li>
+            <li *ngIf="isTrustAccountEnabled" [class.has-error]="formSubmitted && trustAccountInvalid">
+              <a href="javascript:void(0)" [class.current]="activeTab === 'trustAccounting'"
+                (click)="scrollToElement('trustAccounting')">
+                <em class="icon icon-trust-accounting"></em>
+                <span>Trust Accounting <sup class="text-danger">*</sup></span>
+              </a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" [class.current]="activeTab === 'calendarEvents'"
+                (click)="scrollToElement('calendarEvents')">
+                <em class="icon icon-calendar"></em>
+                <span>Calendar Events</span>
+              </a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" [class.current]="activeTab === 'uploadDocuments'"
+                (click)="scrollToElement('uploadDocuments')">
+                <em class="icon icon-documents"></em>
+                <span>Documents</span>
+              </a>
+            </li>
+            <li>
+              <a href="javascript:void(0)" [class.current]="activeTab === 'addNotes'"
+                (click)="scrollToElement('addNotes')">
+                <em class="icon icon-template"></em>
+                <span>Notes</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="npc-body">
+          <app-client-basic-info #basicInfo [formSubmitted]="formSubmitted" [refresh]="refresh"
+            (sendClientAssociation)="onChangeAssociation($event)" [isTuckerAllenAccount]='isTuckerallenAccount'
+            [updateDetails]="updateDetails" (showHideLoader)="showHideLoader($event)"
+            (stateListArr)="stateListArr($event)" (contactInfoDetails)='getClientInfo($event)'
+            (clientType)="getClientType($event)" (changesMade)='validateBasicDetails()'
+            (checkingEmail)='disableSaveButton($event)' [uniqueNumber]="uniqueNumber"
+            (uniqueNumberChange)='uniqueNumber = $event'>
+          </app-client-basic-info>
+
+          <app-client-matter-details #matterDetailsInfo (sendDataAssociation)="onChangeAssociation($event)"
+            [formSubmitted]="formSubmitted" [pageType]="'client'" [clientType]="clientType"
+            (sendData)="getMatterDetails($event)" (changesMade)="changesMade($event); validateMatterDetails()"
+            [parentuniqueNumber]="uniqueNumber" (uniNumber)='uniqueNumber = $event'
+            (selectedOfficeDetails)="getSelectedOfficeDetails($event)">
+          </app-client-matter-details>
+
+          <app-client-billing-info #billingInformation [primaryAddress]='primaryAddress' [formSubmitted]="formSubmitted"
+            (changesMade)='onChangeBillingInfo()'>
+          </app-client-billing-info>
+
+
+
+          <div #trustAccounting *ngIf="isTrustAccountEnabled">
+            <h2 class="mb-24">Trust Account Settings</h2>
+            <app-trust-bank-accounts [hasExpanded]="true" [officeId]="officeId" [isFormSubmitted]="formSubmitted" (changeData)='validateTrustBankAccount()'></app-trust-bank-accounts>
+            <app-trust-account  [BILLING_MANAGEMENTisEdit]="BILLING_MANAGEMENTisEdit" [BILLING_MANAGEMENTisAdmin]="BILLING_MANAGEMENTisAdmin" [clientId]="clientId" [officeId]="officeId"
+            [matterId]="matterId">
+            </app-trust-account>
+          </div>
+
+
+          <app-client-calendar-event #calendarEvents [clientDetails]="clientDetails">
+          </app-client-calendar-event>
+
+
+
+          <app-client-upload-document #uploadDocuments [matterDetails]="matterDetails?.value">
+          </app-client-upload-document>
+
+          <app-client-add-note #addNotes (changesMade)="changesMade($event)"></app-client-add-note>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-loader [active]="isLoading"></app-loader>
+
+<div class="d-none" *ngIf='savedClientInfo && savedClientInfo?.invoiceDetails && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='savedClientInfo?.invoiceDetails?.invoice'
+    [invoiceTemplateDetails]='invoiceTemplateDetails'
+    [matterBillingSettings]='savedClientInfo?.invoiceDetails?.matterBillingSettings' [tenantDetails]='tenantDetails'
+    [loggedinuserId]='userInfo?.id' [default_logo_url]='defaultLogoUrl' (invoiceHTMLDetails)='saveInvoice($event)'>
+  </app-invoice-extended-pdf>
+</div>
+
+
+
+<ng-template #NewClientCreated let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">New Client Created</h3>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-success d-flex justify-content-between mb-0">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-check-circle icon-success"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h4 class="mr-20 mt-0 mb-0">Success</h4>
+          <span>A new client has been created.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="navigate('matter-dashboard')" id="goto-matter">Go to Matter Dashboard</button>
+  </div>
+</ng-template>
+
+
+<ng-template #UnsavedChanges let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Unsaved Changes</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">Are you sure you want to continue without saving these changes?
+          This will remove any edits you’ve made.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="gotoList()" id="yes-continue-w-saving">Yes, continue without saving</button>
+  </div>
+</ng-template>

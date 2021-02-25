@@ -1,0 +1,261 @@
+<div id="content-area" class="d-flex justify-content-between align-items-stretch">
+  <app-sidebar></app-sidebar>
+  <div class="right-caption-area flex-fill">
+    <app-topbar></app-topbar>
+    <div class="content-area">
+      <div class="container">
+        <div class="main-content">
+          <div class="row">
+            <div class="col-4">
+              <h3 class="mb-16 mt-0">Important Docs</h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/typo']" target="_blank"
+                  href="javascript:void(0);">Design kit</a>
+                <a class="list-group-item list-group-item-action" href="https://docs.google.com/spreadsheets/d/1d9T4WoV9IY-ahny8tGeFQsDdUFcjET8bPJN3KanywbM/edit?ts=5dcd9f91#gid=1358704597" target="_blank"
+                  href="javascript:void(0);">CPMG Tracker</a>
+                <a class="list-group-item list-group-item-action" href="https://docs.google.com/spreadsheets/d/1DwROfJceGR8CANTR7dTua3ZBNpJZcVorR9bzxj45vhY/edit#gid=1264319320" target="_blank"
+                  href="javascript:void(0);">Query Tracker</a>
+              </div>
+              <h3 class="mb-16 mt-0">Login/Onboarding <a class="text-large" target="_blank"
+                  href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18589431">Invision link</a> (100%)
+                  <span class="badge badge-info small" title= "1.Matt needs to provide stories for 'Remember me' ">90% Devlopment done</span>
+              </h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/activate-account']"
+                  [queryParams]="{uid: '8a4bdf9f-db80-4382-a267-f75a58bff11b',rid:'27426d26-f31a-445d-bd52-a52c65385ab6'}"
+                  target="_blank" href="javascript:void(0);">Activate Account</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/login']" target="_blank"
+                  href="javascript:void(0);">Login</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/forgot-password']" target="_blank"
+                  href="javascript:void(0);">Forgot Password</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/resetpass']"
+                  [queryParams]="{uid: '8a4bdf9f-db80-4382-a267-f75a58bff11b',rid:'ee123db3-e7fe-4067-81eb-5a5baabfa2f7'}"
+                  target="_blank" href="javascript:void(0);">Reset Password</a>
+              </div>
+              <h3 class="mb-16 mt-0">Employee Admin links <a class="text-large" target="_blank"
+                  href="https://codal.invisionapp.com/d/main#/projects/prototypes/18574549">Invision link</a> (100%) <span class="badge badge-info small">60% Devlopment done</span>
+              </h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/employee/list']" target="_blank"
+                  href="javascript:void(0);">Employee List</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/employee/profile']" target="_blank"
+                  href="javascript:void(0);">Employee Profile</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/employee/create']" target="_blank"
+                  href="javascript:void(0);">Create New Employee</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/employee/audit-history']"
+                  target="_blank" href="javascript:void(0);">Employee Profile Audit History</a>
+              </div>
+              <h3 class="mb-16 mt-0">Employee User links <a class="text-large" target="_blank"
+                  href="https://codal.invisionapp.com/d/main#/projects/prototypes/18574601">Invision link</a> (100%) <span class="badge badge-info small">70% Devlopment done</span>
+              </h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/user-employee/directory']"
+                  target="_blank" href="javascript:void(0);">Employee Directory</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/user-employee/profile']"
+                  target="_blank" href="javascript:void(0);">Employee Profile</a>
+              </div>
+              <h3 class="mb-16 mt-0">Office Admin links <a class="text-large" target="_blank"
+                  href="https://codal.invisionapp.com/d/main#/projects/prototypes/18578953">Invision link</a> (100%) <span class="badge badge-info small">60% Devlopment done</span>
+              </h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/office/list']" target="_blank"
+                  href="javascript:void(0);">Office List</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/office/create']" target="_blank"
+                  href="javascript:void(0);">Create Office</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/office/detail']" target="_blank"
+                  href="javascript:void(0);"> Office Detail</a>
+              </div>
+              <h3 class="mb-16 mt-0">Office User links <a class="text-large" target="_blank"
+                  href="https://codal.invisionapp.com/d/main#/projects/prototypes/18578385">Invision link</a> (100%) <span class="badge badge-info small">60% Devlopment done</span>
+              </h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/user-office/list']" target="_blank"
+                  href="javascript:void(0);">Office List</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/user-office/detail']" target="_blank"
+                  href="javascript:void(0);"> Office Detail</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/user-office/audit-history']"
+                  target="_blank" href="javascript:void(0);"> Office Audit History</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/user-office/profile']"
+                  target="_blank" href="javascript:void(0);"> Office Profile</a>
+              </div>
+              <h3 class="mb-16 mt-0">Matter Management <a class="text-large"
+                href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18648603" target="_blank">Invision
+                Link</a>(74%)</h3>
+                <div class="list-group mb-32">
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/matter/list']" target="_blank"
+                    href="javascript:void(0);">List</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/matter/edit']" target="_blank"
+                    href="javascript:void(0);">Edit</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/matter/dashboard']" target="_blank"
+                    href="javascript:void(0);">Dashboard</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/matter/reassign']" target="_blank"
+                    href="javascript:void(0);">Re Assign</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/matter/alert']" target="_blank"
+                    href="javascript:void(0);">Alert</a>
+                </div>
+                <h3 class="mb-16 mt-0">CPMG Matter Creation <a class="text-large"
+                    href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18694725" target="_blank">Invision
+                    Link</a>(95%)</h3>
+                <div class="list-group mb-32">
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/activate-account']"
+                    [queryParams]="{uid: '8a4bdf9f-db80-4382-a267-f75a58bff11b',rid:'27426d26-f31a-445d-bd52-a52c65385ab6'}"
+                    target="_blank" href="javascript:void(0);">Activate Account</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/login']" target="_blank"
+                    href="javascript:void(0);">Login</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/forgot-password']" target="_blank"
+                    href="javascript:void(0);">Forgot Password</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/resetpass']"
+                    [queryParams]="{uid: '8a4bdf9f-db80-4382-a267-f75a58bff11b',rid:'ee123db3-e7fe-4067-81eb-5a5baabfa2f7'}"
+                    target="_blank" href="javascript:void(0);">Reset Password</a>
+                </div>
+            </div>
+            <div class="col-4">
+              <h3 class="mb-16 mt-0">Search Results links <a class="text-large" target="_blank"
+                  href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18782178">Invision link</a> (100%)
+              </h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/search/results']" target="_blank"
+                  href="javascript:void(0);">Search Results</a>
+              </div>
+              <h3 class="mb-16 mt-0">Access Management links <a class="text-large" target="_blank"
+                  href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18780090">Invision link</a> (100%) <span class="badge badge-danger small" title="1. waiting for story from @matt for 'Access management'">80% Devlopment done</span>
+              </h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/access-management/list']"
+                  target="_blank" href="javascript:void(0);">Group</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/access-management/create']"
+                  target="_blank" href="javascript:void(0);">New & Edit Group</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/access-management/audit-history']"
+                  target="_blank" href="javascript:void(0);"> Audit History </a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/access-management/view']"
+                  target="_blank" href="javascript:void(0);"> View Group </a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG Firm Settings<a class="text-large"
+                  href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18590398" target="_blank"> Invision
+                  Link</a>(80%)</h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/firm']" target="_blank"
+                  href="javascript:void(0);">Settings General</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/firm/hierarchy']" target="_blank"
+                  href="javascript:void(0);">System Hierarchy</a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG - Client Management<a class="text-large"
+                href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18814932?scrollOffset=0"
+                target="_blank"> Invision Link</a> (80%)</h3>
+            <div class="list-group mb-32">
+              <a class="list-group-item list-group-item-action" [routerLink]="['/client-list/list']" target="_blank"
+                href="javascript:void(0);">Client list</a>
+              <a class="list-group-item list-group-item-action" [routerLink]="['/client-view/individual']"
+                target="_blank" href="javascript:void(0);">View a Client (Individual)</a>
+              <a class="list-group-item list-group-item-action" [routerLink]="['/client-view/corporate']"
+                target="_blank" href="javascript:void(0);">View a Client (Corporate)</a>
+              <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/individual']"
+                target="_blank" href="javascript:void(0);">Edit a Client (Individual)</a>
+              <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/other-info']"
+                target="_blank" href="javascript:void(0);">Edit a Client (Individual) Other Information</a>
+              <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/corporate']"
+                target="_blank" href="javascript:void(0);">Edit a Client (Corporate)</a>
+              <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/other-info-corp']"
+                target="_blank" href="javascript:void(0);">Edit a Client (Corporate) Other Information</a>
+            </div>
+            <h3 class="mb-16 mt-0">CPMG - Potential Client Management<a class="text-large"
+              href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18789882" target="_blank"> Invision
+              Link</a> (95%)</h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/client-list/list']" target="_blank"
+                  href="javascript:void(0);">Client list</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/client-view/individual']"
+                  target="_blank" href="javascript:void(0);">View a Client (Individual)</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/client-view/corporate']"
+                  target="_blank" href="javascript:void(0);">View a Client (Corporate)</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/individual']"
+                  target="_blank" href="javascript:void(0);">Edit a Client (Individual)</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/other-info']"
+                  target="_blank" href="javascript:void(0);">Edit a Client (Individual) Other Information</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/corporate']"
+                  target="_blank" href="javascript:void(0);">Edit a Client (Corporate)</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/client-edit/other-info-corp']"
+                  target="_blank" href="javascript:void(0);">Edit a Client (Corporate) Other Information</a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG - Contact Management<a class="text-large" href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18806369" target="_blank"> Invision Link</a> (72%)</h3>
+              <div class="list-group mb-32">
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/all-contact']" target="_blank" href="javascript:void(0);">All Contacts</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/potential-client']" target="_blank" href="javascript:void(0);">Potential Clients</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/corporate-contact']" target="_blank" href="javascript:void(0);">Corporate Contacts</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/client-associations']" target="_blank" href="javascript:void(0);">Client Associations</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/view-potential-client']" target="_blank" href="javascript:void(0);">View Potential Client - Individual & Corporate</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/edit-potential-client']" target="_blank" href="javascript:void(0);">Edit Potential Client - Individual & Corporate</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/edit-potential-client-associations']" target="_blank" href="javascript:void(0);">Edit Potential Client Associations</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/reassign-client']" target="_blank" href="javascript:void(0);">Reassign Client</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/manage-initial-consultation']" target="_blank" href="javascript:void(0);">Manage Initial Consultation</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/reschedule-initial-consultation']" target="_blank" href="javascript:void(0);">Reschedule Initial Consultation</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/cancel-initial-consultation']" target="_blank" href="javascript:void(0);">Cancel Initial Consultation</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/mark-no-show']" target="_blank" href="javascript:void(0);">Mark No-Show</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/create-client-association']" target="_blank" href="javascript:void(0);">Create Client Association</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/create-corporate-contact']" target="_blank" href="javascript:void(0);">Create Corporate Contact</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/edit-corporate-contact']" target="_blank" href="javascript:void(0);">Edit Corporate Contact</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/do-not-contact']" target="_blank" href="javascript:void(0);">Do Not Contact</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/contact/record-initial-consultation']" target="_blank" href="javascript:void(0);"> Initial Consultation</a>
+              </div>
+            </div>
+            <div class="col-4">
+              <h3 class="mb-16 mt-0">CPMG - Notifications + Support<a class="text-large"
+                  href="https://codal.invisionapp.com/d/main#/projects/prototypes/18920393" target="_blank"> Invision
+                  Link</a> (95%)</h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/notifications/all']" target="_blank"
+                  href="javascript:void(0);"> All Notifications</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/notifications/settings']"
+                  target="_blank" href="javascript:void(0);"> Notifications Settings</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/notifications/support']"
+                  target="_blank" href="javascript:void(0);">Support</a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG - Timekeeping<a class="text-large" href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18900571" target="_blank"> Invision Link</a> (75%)</h3>
+              <div class="list-group mb-32">
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/timekeeping']" target="_blank" href="javascript:void(0);"> My Time sheet</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/timekeeping/setting']" target="_blank" href="javascript:void(0);"> Setting</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/timekeeping/timekeeping']" target="_blank" href="javascript:void(0);"> Timekeeping</a>
+                </div>
+              <h3 class="mb-16 mt-0">CPMG - Import<a class="text-large" href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18922343" target="_blank"> Invision Link</a> (95%)</h3>
+              <div class="list-group mb-32">
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/import']" target="_blank" href="javascript:void(0);">Data Import</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/import/details']" target="_blank" href="javascript:void(0);">Import Clients</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/import/run']" target="_blank" href="javascript:void(0);">Run Clients</a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG - Calender<a class="text-large" href="https://codal.invisionapp.com/d/main/#/console/18920481/394394108/" target="_blank"> Invision Link</a> (20%)</h3>
+              <div class="list-group mb-32">
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/calendar']" target="_blank" href="javascript:void(0);">Calendar Main</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/calendar/setting']" target="_blank" href="javascript:void(0);">Calendar Settings</a>
+                  <a class="list-group-item list-group-item-action" [routerLink]="['/calendar/create-event']" target="_blank" href="javascript:void(0);">Create Event</a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG - Billing<a class="text-large" href="https://codal.invisionapp.com/d/main#/projects/prototypes/18825397" target="_blank"> Invision Link</a> (78%)</h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing']" target="_blank" href="javascript:void(0);">Invoices</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/pre-bill']" target="_blank" href="javascript:void(0);">Pre-bill</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/pre-bill/view']" target="_blank" href="javascript:void(0);">View Pre-bill</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing-firm/charge-codes']" target="_blank" href="javascript:void(0);">Charge Codes</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing-firm/disbursement']" target="_blank" href="javascript:void(0);">Disbursement</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing-firm/settings']" target="_blank" href="javascript:void(0);">Settings</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing-office/admin']" target="_blank" href="javascript:void(0);">Billing Office Admin</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing-client/client-conversion']" target="_blank" href="javascript:void(0);">Billing Client Conversion </a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing-client/profile']" target="_blank" href="javascript:void(0);">Billing Client Profile </a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing/disbursements-matter']" target="_blank" href="javascript:void(0);">Manage Time or Disbursements on a Matter </a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/billing/manage-payment']" target="_blank" href="javascript:void(0);">Manage Payment</a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG - Dashboard<a class="text-large" href="https://codal.invisionapp.com/d/main/#/projects/prototypes/18959937" target="_blank"> Invision Link</a> (90%)</h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/dashboard-main']" target="_blank" href="javascript:void(0);">Dashboard</a>
+              </div>
+              <h3 class="mb-16 mt-0">CPMG - DMS<a class="text-large" href="https://codal.invisionapp.com/d/main#/projects/prototypes/19060354" target="_blank"> Invision Link</a> (100%)</h3>
+              <div class="list-group mb-32">
+                <a class="list-group-item list-group-item-action" [routerLink]="['/manage-folders/document']" target="_blank" href="javascript:void(0);">Manage Document</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/manage-folders/view-document']" target="_blank" href="javascript:void(0);">View Document</a>
+                <a class="list-group-item list-group-item-action" [routerLink]="['/manage-folders/upload-document']" target="_blank" href="javascript:void(0);">upload Document</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

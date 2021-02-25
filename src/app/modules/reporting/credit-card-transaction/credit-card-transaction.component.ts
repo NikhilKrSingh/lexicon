@@ -1,0 +1,110 @@
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
+import * as _ from 'lodash';
+import { ExporttocsvService } from 'src/app/service/exporttocsv.service';
+import { ReportService } from 'src/common/swagger-providers/services';
+import { CreditCardTransactionModels } from '../../models/creditcard-transaction.model';
+
+@Component({
+  selector: 'app-credit-card-transaction',
+  templateUrl: './credit-card-transaction.component.html',
+  styleUrls: ['./credit-card-transaction.component.scss'],
+  encapsulation: ViewEncapsulation.Emulated
+})
+export class CreditCardTransactionComponent implements OnInit {
+  creditCardTransactionForm: FormGroup;
+  public rows: Array<any> = [];
+  public columnList: any = [];
+  startDates:any;
+  endDates:any;
+  noDataToDisplay = false;
+  exportCsvFlag = false;
+  public loading: boolean = false;
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private reportService: ReportService,
+    private exporttocsvService: ExporttocsvService,
+    private pagetitle: Title
+  ) { }
+
+  ngOnInit() {
+    this.pagetitle.setTitle("Credit Card Transaction Report");
+    this.creditCardTransactionReport();
+  }
+
+  creditCardTransactionReport() {
+    this.creditCardTransactionForm = this.formBuilder.group({
+      startDateInput: ['', Validators.required],
+      endDateInput: ['', Validators.required]
+    });
+
+    this.creditCardTransactionForm.controls['endDateInput'].setValue(this.currentDate());
+  }
+  submitCreditCardTransactionReport() {
+    let data: any = new CreditCardTransactionModels();
+    data.TransactionStartDate = this.startDates;
+    data.TransactionEndDate = this.endDates;
+    this.loading = true;
+    this.reportService.v1ReportCreditCardTransactionReportPost$Json$Response({ body: data })
+      .subscribe((suc: {}) => {
+        this.loading = false;
+        const res: any = suc;
+        if (res && res.body) {
+          var records = JSON.parse(res.body);
+          this.rows = [...records.results];
+          if (this.rows.length > 0) {
+            const keys = Object.keys(this.rows[0]);
+            this.addkeysIncolumnlist(keys);
+          } else {
+            var columnListHeader = ['TransactionDate', 'ProcessingDate', 'EmployeeID', 'EmployeeName',
+            'ClientNumber', 'ClientName', 'MatterNumber',
+              'MatterName',  'PracticeArea', 'MatterType', 'OfficeName',
+              'Status', 'AttemptedAmount', 'ApprovedAmount', 'AmountVariance','DeclineReasonCode','DeclineReasonDescription'];
+            const keys = columnListHeader;
+            this.addkeysIncolumnlist(keys);
+          }
+        }
+        this.ExportToCSV('Credit Card Transaction Report');
+      },(err)=>{
+        this.loading = false;
+      });
+  }
+  addkeysIncolumnlist(keys: any[] | string[]) {
+    this.columnList = [];
+    for (let i = 0; i < keys.length; i++) {
+      this.columnList.push({
+        Name: keys[i],
+        displayName: keys[i] = _.startCase(keys[i])
+      });
+    }
+  }
+
+  ExportToCSV(reportName) {
+    const temprows = JSON.parse(JSON.stringify(this.rows));
+    const selectedrows = Object.assign([], temprows);
+
+    this.exporttocsvService.downloadReportFile(
+      selectedrows,
+      this.columnList,
+      reportName
+    );
+  }
+  GetColumnHeaderList() {
+    return [];
+  }
+  currentDate() {
+    const currentDate = new Date();
+    return currentDate.toISOString().substring(0, 10);
+  }
+  startDate(e){
+    this.startDates = e;
+    this.exportCsvFlag = e ? true : false;
+    this.noDataToDisplay =false;
+  }
+  endDate(e){
+    this.endDates = e;
+    this.exportCsvFlag = this.startDates && e ? true : false;
+  }
+}

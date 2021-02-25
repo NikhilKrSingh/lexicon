@@ -1,0 +1,132 @@
+<div class="modal-header">
+  <h3 class="modal-title mb-0">Add Blocked Employees</h3>
+  <button type="button" class="close" (click)='cancel()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-8">
+
+    <div class="row">
+      <div class="col-3">
+        <div class="form-group">
+          <label>Primary Office</label>
+          <app-multiselect-dropdown [title]="empOfficeTitle" backgroundColor="#fff" [selections]="selectedOffice"
+            [displaySubItem]="officeList" [filterName]="filterName" (onSelectionChanged)="selectDropdwnOffice($event)"
+            (clearFilter)="clearFilterPrimaryOffice()" (applyFilter)="applyFilter()" id="primary-office">
+          </app-multiselect-dropdown>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group">
+          <label>Status</label>
+          <app-multiselect-dropdown [title]="empStatustitle" [selections]="selectedStatus" [displaySubItem]="statusList"
+            [filterName]="filterName" (onSelectionChanged)="selectEmployeeStatus($event)"
+            (clearFilter)="clearStatusFilter()" (applyFilter)="applyFilter()" id="status-multi">
+          </app-multiselect-dropdown>
+        </div>
+      </div>
+      <div class="col-6">
+        <form class="mt-20">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" name="searchText" [(ngModel)]='searchText'
+              (ngModelChange)='applyFilter()' placeholder="Search by name, email address, or primary office" id="search-text">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="custom-table section-area pb-16">
+      <ngx-datatable #table class="material common-table matter-table fix-col-right"
+        [class.matter-no-data]="employeesRows?.length === 0" [rows]="employeesRows" [columnMode]="ColumnMode.force"
+        [headerHeight]="50" [footerHeight]="50" rowHeight="auto" [count]="page.totalElements"
+        [offset]="page.pageNumber" [limit]="page.size" [selected]='selectedRows' (select)="onSelect($event)"
+        [selectionType]="'checkbox'" [sorts]="[{prop: 'lastName', dir: 'asc'}]" (sort)="updateDatatableFooterPage()"
+        id="employeedata-tbl">
+        <ngx-datatable-column [resizeable]="false" [width]="34" [sortable]="false" [canAutoResize]="false" [draggable]="false">
+          <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+            let-selectFn="selectFn">
+            <label class="cust-check cursor-pointer">
+              <input type="checkbox" [checked]="allRowsSelected" (change)="selectFn(!allRowsSelected)" />
+              <span class="check-style"></span>
+            </label>
+          </ng-template>
+          <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+            let-onCheckboxChangeFn="onCheckboxChangeFn">
+            <label class="cust-check cursor-pointer">
+              <input type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+              <span class="check-style"></span>
+            </label>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="firstName" name="Name" [width]="200" [headerClass]="'checkbox-header'">
+          <ng-template ngx-datatable-header-template let-value="value">
+              <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                <span class="datatable-header-cell-label">Name</span>
+              </span>
+          </ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            {{(row.lastName) ? row.lastName + ', ' + row.firstName : row.firstName}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="255"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="primaryOffice.name" name="Primary Office" [width]="190"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [width]="186"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="isVisible" name="Status" [width]="155">
+          <ng-template let-value="value" ngx-datatable-cell-template>{{value ? 'Active' : 'Inactive'}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-footer>
+          <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+            let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+            <div class="d-flex justify-content-between flex-fill">
+              <div class="d-flex align-items-center">
+                <div class="table-items d-flex align-items-center mr-36">
+                  Items per page:
+                  <div class=" ml-8">
+                    <select class="custom-select border-less" [formControl]="pageSelector"
+                      (change)="changePageSize()">
+                      <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                    </select>
+                  </div>
+                </div>
+                <span>
+                    {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                    {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                </span>
+              </div>
+
+              <div class="d-flex align-items-center" *ngIf="page.totalPages > 0">
+                <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                  <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                    {{ i+1 }} of {{page.totalPages}}</option>
+                </select>
+                <div class="ml-8">
+                  <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                    [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                    [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                    (change)="table.onFooterPage($event);pageChange($event)">
+                  </datatable-pager>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-footer>
+      </ngx-datatable>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+
+    <div class="form-group" [class.has-error]='createNoteError.note'>
+      <label>Description</label>
+      <textarea placeholder="Enter reason for blocking employee(s)" class="form-control" rows="3"
+        [(ngModel)]='changeStatusNotes' id="enter-reason"></textarea>
+      <app-validation-message [errorMessage]='createNoteError.noteMessage' *ngIf='createNoteError.note'>
+      </app-validation-message>
+    </div>
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='cancel()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+</div>

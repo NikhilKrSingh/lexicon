@@ -1,0 +1,19 @@
+.pdf {
+  zoom: 150%;
+
+  app-loader {
+    .loader {
+      zoom: 75%;
+    }
+  }
+
+  &.is-legacy {
+    zoom: 100%;
+
+    app-loader {
+      .loader {
+        zoom: 100%;
+      }
+    }
+  }
+}

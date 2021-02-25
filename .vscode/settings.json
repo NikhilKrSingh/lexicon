@@ -1,0 +1,5 @@
+{
+    "files.autoSaveDelay": 2000,
+    "tslint.rulesDirectory": "./node_modules/codelyzer",
+    "typescript.tsdk": "node_modules/typescript/lib"
+}

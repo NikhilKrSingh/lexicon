@@ -1,0 +1,23 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0" *ngIf='!hierarchy?.id'>Create Hierarchy Level</h3>
+  <h3 class="modal-title mb-0" *ngIf='hierarchy?.id > 0'>Edit Hierarchy Level</h3>
+  <button type="button" class="close" (click)="cancel()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="form-group">
+    <label>Parent Level <sup>*</sup></label>
+    <ng-select disabled [clearable]='false' [items]="parentLevelEchelons" placeholder="Select Parent Level"
+      [(ngModel)]="level" [bindValue]="'id'" [selectOnTab]="true" [bindLabel]="'name'" [notFoundText]="'No record found'" id="parent-lvl">
+    </ng-select>
+  </div>
+  <div class="form-group">
+    <label>Hierarchy Level Name <sup>*</sup></label>
+    <input type="text" class="form-control" placeholder="Enter level name" [(ngModel)]='hierarchy.name' id="hierarchy-name">
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='ok()' id="save-btn">Save</button>
+</div>

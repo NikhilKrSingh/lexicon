@@ -1,0 +1,202 @@
+<ng-container>
+  <div class="modal-header d-block pb-20">
+    <h3 class="modal-title mb-0">{{modalType === 'addOn' ? 'Add Add-On' : 'Add Fixed Fee Service' }}</h3>
+    <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+    <div class="alert alert-warning d-flex justify-content-between mb-24 mt-24" *ngIf='isExistingMatter' id="warning-display">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-warning"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h4 class="mr-36 mt-0 mb-0">Warning</h4>
+          {{existing_matter_warning}}
+        </div>
+      </div>
+    </div>
+    <form class="mt-5" *ngIf="!isExistingMatter">
+      <div class="custom-control custom-radio pr-0">
+        <input type="radio" id='existing' name="addOn" value="existing" (change)='onSelectRadioFixedFee($event)'
+          class="custom-control-input" checked>
+        <label label class="custom-control-label" for="existing">
+          Select from existing fixed fee {{modalType === 'addOn' ? 'add-ons' : 'services'}}</label>
+      </div>
+      <div class="custom-control custom-radio pr-0"
+        *ngIf="(tenantTierName == 'Ascending' || tenantTierName == 'Iconic') && (permissionList?.BILLING_MANAGEMENTisEdit || permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.CLIENT_CONTACT_MANAGEMENTisAdmin)">
+        <input type="radio" id='custom' name="addOn" value="custom" (change)='onSelectRadioFixedFee($event)'
+          class="custom-control-input">
+        <label class="custom-control-label" for="custom">Create custom
+          {{modalType === 'fixedFeeservice' ? 'fixed fee service' : 'add-on'}}</label>
+      </div>
+    </form>
+    <form
+      *ngIf="isExistingMatter && (tenantTierName == 'Ascending' || tenantTierName == 'Iconic') && (permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit )">
+      <div class="custom-control custom-radio pr-0">
+        <input type="radio" id='existing' name="addOn" value="existing" (change)='onSelectRadioFixedFee($event)'
+          class="custom-control-input" checked>
+        <label label class="custom-control-label" for="existing">
+          Select from existing fixed fee {{modalType === 'addOn' ? 'add-ons' : 'services'}}</label>
+      </div>
+      <div class="custom-control custom-radio pr-0">
+        <input type="radio" id='custom' name="addOn" value="custom" (change)='onSelectRadioFixedFee($event)'
+          class="custom-control-input">
+        <label class="custom-control-label" for="custom">Create custom
+          {{modalType === 'fixedFeeservice' ? 'fixed fee service' : 'add-on'}}</label>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="createType === 'existing'" class="modal-body pb-0">
+    <div
+      [class]="modalType !== 'fixedFeeservice' ? 'header-search-wrapper c-width' : 'header-search-wrapper c-width-service'">
+      <input type="text" class="form-control search-input custom-input mt-0" name='searchAddOn' [(ngModel)]='searchText'
+        (ngModelChange)='applyFilter()'
+        [placeholder]="modalType === 'addOn' ? 'Search add-ons' : 'Search fixed fee services'" id="search-text">
+      <span class="d-flex mt-2" *ngIf="selectedRows.length > 0 && modalType === 'addOn'">
+        <span class="badge-c badge badge-primary badge-list" (click)="clearSelectedRows()" id="clear-selected-row">
+          <span>{{selectedRows.length}}</span><em class="icon icon-size icon-close ml-8"></em>
+        </span>
+        <span class="ml-8 mt-8" style="width: 110px;">add-on{{selectedRows.length > 1 ? 's': ''}} selected</span>
+      </span>
+    </div>
+
+    
+    
+    <div class="position-relative pt-24">
+      <div class="custom-table matter-list">
+        <ngx-datatable #table class="material common-table matter-table no-min-height"
+          [class.matter-no-data]="fixeFeeList?.length === 0" [rows]="fixeFeeList" [columnMode]="ColumnMode.force"
+          [headerHeight]="50" [footerHeight]="footerHeight" [selectionType]="SelectionType.checkbox"
+          (select)="onSelect($event)" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+          [limit]="page.size" (sort)="calculateTotalPage()" id="fixed-fee-tbl">
+          
+
+          <ngx-datatable-column [resizeable]="false" *ngIf="modalType === 'fixedFeeservice'" [sortable]="false" name="Code" prop="code"
+            [canAutoResize]="false" [width]="50">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <div class="custom-control custom-radio">
+                <input type="radio" id="select_{{row.id}}" name="selectedFixedFeeId"
+                  [(ngModel)]="selectedFixedFeeId" [value]="row.id" class="custom-control-input"
+                  [checked]="selectedFixedFeeId == row?.id" (change)="onSelect(row, 'existing')">
+                <label class="custom-control-label" for="select_{{row.id}}"></label>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" *ngIf="modalType === 'fixedFeeservice'" name="" prop="code" [width]="70"
+            [sortable]="true">
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" *ngIf="modalType !== 'fixedFeeservice'" name="Code" prop="code" [width]="100">
+            <ng-template ngx-datatable-cell-template let-value="value" let-isSelected="isSelected"
+              let-onCheckboxChangeFn="onCheckboxChangeFn">
+              <div class="d-flex align-items-start">
+                <label class="cust-check mr-12 mt-2">
+                  <input type="checkbox" [checked]="isSelected" (change)="onCheckboxChangeFn($event)" />
+                  <span class="check-style"></span>
+                </label>
+                {{value}}
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="description" name="Name" [width]="200">
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" prop="amount" name="Rate" [width]="100">
+            <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+              <span *ngIf='value'> {{value  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-footer>
+            <ng-template let-rowCount="rowCount" ngx-datatable-footer-template let-pageSize="pageSize"
+              let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+              <div class="d-flex justify-content-between flex-fill">
+                <div class="d-flex align-items-center">
+                  <div class="table-items d-flex align-items-center mr-36">
+                    Items per page:
+                    <div class=" ml-8">
+                      <select class="custom-select border-less" [formControl]="selectPageSize"
+                        (change)="pageSizeChange()">
+                        <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">
+                          {{ limit }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <span>
+                    {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                    {{(rowCount > (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+                  </span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                    <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                      Page {{ i+1 }} of {{page.totalPages}}
+                    </option>
+                  </select>
+                  <div class="ml-8">
+                    <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                      [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                      [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                      [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                      (change)="table.onFooterPage($event);changePageDropDown($event)">
+                    </datatable-pager>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-footer>
+        </ngx-datatable>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+      
+    <div *ngIf="selectedRows?.length === 0 && existFormSubmitted" class="alert alert-danger mb-32">
+      <div>
+        <div class="error-wrapper">
+          <em class="alert-icon icon icon-info"></em>
+          <h4 class="mr-36 mt-0 mb-0 d-inline">Error</h4>
+        </div>
+        <div class="margin-c">
+          You have not selected {{ modalType === 'addOn' ? 'an add-on' : 'a fixed fee service' }}. Please select one
+          from the table above.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="createType === 'custom'" class="modal-body pb-0">
+    <form [formGroup]="customFixedFee">
+      <div class="form-group w-25 p-0">
+        <label>Generated Code</label>
+        <input type="text" class="form-control f-c" formControlName="code" [readonly]="true" id="generated-code">
+      </div>
+      <div class='d-flex justify-content-between'>
+        <div
+          [class]="(f['name']?.errors && f['name']?.touched) || (f['name']?.errors && formSubmitted) ? 'form-group has-error text-dark w-75 mr-3 mb-2' : 'form-group w-75 mr-3'">
+          <label>Name <sup>*</sup></label>
+          <span class="char-counter f-c">{{customFixedFee?.controls['name']?.value?.length || 0}}/50</span>
+          <input type="text" class="form-control f-c mb-2" formControlName="name" maxlength="50"
+            placeholder="Enter name" id="name">
+          <span class="field-message text-danger" *ngIf="f['name'].errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Please enter a name
+          </span>
+        </div>
+        <div
+          [class]="(f['amount']?.errors && f['amount']?.touched) || (f['amount']?.errors && formSubmitted) ? 'form-group has-error text-dark w-75 mr-3 mb-2' : 'form-group w-75 mr-3'">
+          <label>Amount <sup>*</sup></label>
+          <input type="text" class="form-control f-c mb-2" formControlName="amount" (keyup)="removePrefix()"
+            (focusout)="removePrefix();addCent();" placeholder="Enter an amount" maxlength="50" prefix="$"
+            mask="separator.2" thousandSeparator="," id="amount">
+          <span class="field-message text-danger" *ngIf="f['amount'].errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Please enter an amount
+          </span>
+        </div>
+      </div>
+    </form>
+    <app-loader [active]="loading"></app-loader>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="loading" id="save-btn">Save</button>
+  </div>
+</ng-container>

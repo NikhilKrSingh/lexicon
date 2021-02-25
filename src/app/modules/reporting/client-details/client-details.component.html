@@ -1,0 +1,95 @@
+<form>
+  <div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+        <li class="breadcrumb-item active" aria-current="page"> Client Details Report</li>
+      </ol>
+      <div class="heading">
+        <h1> Client Details Report</h1>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="mb-8">Generate Report</h2>
+          <p class="lh-20">Generate your report by selecting the options below.</p>
+          <div class="row gutter-16">
+            <div class="col-5">
+              <div [class.has-error]="!selectedType" class="form-group">
+                <label>Date Range Type <sup>*</sup></label>
+                <ng-select [items]="dateRangeType" placeholder="Date of Service Range" [(ngModel)]="selectedType"
+                  [ngModelOptions]="{standalone: true}" [bindValue]="'key'" [bindLabel]="'value'" [searchable]="false"
+                  [selectOnTab]="true" [notFoundText]="'No record found'" (ngModelChange)='changeDateRangeType()'>
+                </ng-select>
+                <span class="field-message text-danger" *ngIf="!selectedType">
+                    <em class="icon icon-error mr-4"></em>
+                    Please select date range type.
+                  </span>
+              </div>
+
+              <div class="form-group">
+                <app-date-range-report (startDate)="startDate($event)" [title]="'Date Range'"
+                  (endDate)="endDate($event)" [startEndDateAsTodayFlag]="false"></app-date-range-report>
+              </div>
+
+              <div class="form-group">
+                <label>Type <sup>*</sup> </label>
+                <span class="ml-12 field-message d-inline text-danger" *ngIf="!isClient && !isPotentialClient">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select at least one type.
+                </span>
+                <div class="custom-control custom-checkbox mt-12">
+                  <input type="checkbox" class="custom-control-input" id="customCheck1_client" name="client"
+                    [value]='true' [(ngModel)]='isClient' [ngModelOptions]="{standalone: true}">
+                  <label class="custom-control-label" for="customCheck1_client">Clients</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="customCheck2_pclient" name="potential_client"
+                    [value]='true' [(ngModel)]='isPotentialClient' [ngModelOptions]="{standalone: true}" [disabled]='isPCReadOnly'>
+                  <label class="custom-control-label" for="customCheck2_pclient">Potential Clients</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row gutter-16">
+            <div class="col-8">
+              <div class="form-group">
+                <label>Status of clients / potential clients to consider <sup>*</sup> </label>
+                <span class="ml-12 field-message d-inline text-danger" *ngIf="!isActive && !isInActive && !isArchived">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select at least one status.
+                </span>
+                <div class="custom-control custom-checkbox mt-12">
+                  <input type="checkbox" class="custom-control-input" id="customCheck1_email" name="active"
+                    [value]='true' [(ngModel)]='isActive' [ngModelOptions]="{standalone: true}">
+                  <label class="custom-control-label" for="customCheck1_email">Active</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="customCheck2_inactive" name="inactive"
+                    [value]='true' [(ngModel)]='isInActive' [ngModelOptions]="{standalone: true}">
+                  <label class="custom-control-label" for="customCheck2_inactive">Inactive</label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="customCheck3_archive" name="archived"
+                    [value]='true' [(ngModel)]='isArchived' [ngModelOptions]="{standalone: true}">
+                  <label class="custom-control-label" for="customCheck3_archive">Archived</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-loader [active]='loading'></app-loader>
+
+      <div class="d-flex justify-content-end pt-8">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" [routerLink]="['../../reporting']">Cancel</button>
+          <button type="button" class="btn btn-primary"
+            [disabled]="!selectedType || !exportCsvFlag || (!isActive && !isInActive && !isArchived) || (!isClient && !isPotentialClient)"
+            (click)="submitClientDetailReport()">Export to CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

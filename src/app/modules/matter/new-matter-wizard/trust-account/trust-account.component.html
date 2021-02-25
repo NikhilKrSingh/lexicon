@@ -1,0 +1,122 @@
+<div class="npc-block base-matt-info-block">
+    <form [formGroup]="trustAccountingForm">
+           
+        
+        <div class="row gutter-16">
+            <div class="col-6">
+                <div class="info-block pt-8">
+                    <h5 class="mb-8 mt-0 font-weight-bold">Minimum Primary Retainer Trust Balance</h5>
+                    <p class="mb-16 lh-20">
+                        Enter the minimum balance the client should maintain in their trust account at all
+                        times.
+                    </p>
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="form-group">
+                                <form [formGroup]="minTrustBalanceForm">
+                                    <input type="text" min="0" prefix="$" mask="separator.2" thousandSeparator="," placeholder="$0.00"
+                                        formControlName="minTrustBalance" class="form-control" value="$0.00" (focusout)="modifyMinTrustBal()" id="minTrustBalanceId">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="info-block pt-8">
+                    <h5 class="mb-8 mt-0 font-weight-bold">Trust Payment Grace Period</h5>
+                    <p class="mb-16 lh-20">
+                        Specifies number of days after an invoice is due before client’s bill is automatically
+                        paid from their primary retainer trust account.
+                    </p>
+                    <div class="d-flex align-items-center form-group">
+                        <form [formGroup]="trustPaymentGracePeriodForm">
+                            
+                            <div class="position-relative cust-spinner">
+                                <input type="text"
+                                formControlName="trustPaymentGracePeriod"
+                                onkeypress="return (event.charCode == 8 || event.charCode == 0 || event.charCode == 13) ? null : event.charCode >= 48 && event.charCode <= 57"
+                                class="form-control number-control custom-readonly" id="trustPaymentGracePeriodId">
+                                <div class="cust-spinn-arrow">
+                                    <span class="up-spin" (click)="changeUp()" id="change-up">
+                                        <em class="icon icon-angle-up"></em>
+                                    </span>
+                                    <span class="down-spin" (click)="changeDown()" id="change-down">
+                                        <em class="icon icon-angle-down"></em>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                        <span class="ml-8">days</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="info-block pt-8">
+                    <h5 class="mb-8 mt-0 font-weight-bold">Target Account for Overpayments</h5>
+                    <p class="mb-16 lh-20">
+                        Sets which account receives overpayment funds by default. <br>
+                        Payment into Accounts Receivable Balance will appear as a negative balance due.
+                    </p>
+                    <div class="mb-32">
+                        <div class="custom-control custom-radio pr-0 mb-12">
+                            <input type="radio" id="TAO-1" (click)="overPaymentCheck()" name="TAO"
+                                [disabled]="!this.BILLING_MANAGEMENTisAdmin && !this.BILLING_MANAGEMENTisEdit"
+                                class="custom-control-input" [checked]="overPaymentOption">
+                            <label class="custom-control-label" for="TAO-1">Accounts Receivable Balance</label>
+                        </div>
+                        <div class="custom-control custom-radio pr-0 mb-0">
+                            <input type="radio" id="TAO-2" name="TAO" class="custom-control-input"
+                            [disabled]="!this.BILLING_MANAGEMENTisAdmin && !this.BILLING_MANAGEMENTisEdit"
+                                (click)="overPaymentCheck()" [checked]="!overPaymentOption">
+                            <label class="custom-control-label" for="TAO-2">Primary Retainer Trust Account</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cust-card">
+            <div class="cust-card-head d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center">
+                <h3 class="m-0">Trust-Only Accounts</h3>
+                <i class="lh-20 ml-8">Optional</i>
+              </div>
+            </div>
+            <div class="cust-card-body">
+                <p class="lh-20">Enter as many Trust-Only accounts as needed</p>
+                <app-trust-only-account-new-matter-wizard-common
+                [matterAdmin]="matterAdmin"
+                [matterAdminEdit]="matterAdminEdit"
+                (trustOnlyAccountData)=receiveTrustOnlyAccountData($event)
+                [nextTrustNumber]="nextTrustNumber"
+                (trustNumber)="recieveTrustNumber($event)">
+                </app-trust-only-account-new-matter-wizard-common>
+            </div>
+        </div>
+        <div class="cust-card mb-8">
+            <div class="cust-card-head d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center">
+                <h3 class="m-0">Property Items Held in Trust</h3>
+                <i class="lh-20 ml-8">Optional</i>
+              </div>
+            </div>
+            <div class="cust-card-body">
+                <p class="lh-20">Enter as many Property Items Held in Trust as needed</p>
+                
+                <app-property-held-in-trust-new-matter-wizard
+                [clientId]="clientId"
+                [matterAdmin]="matterAdmin"
+                [matterAdminEdit]="matterAdminEdit"
+                (propertyHeldInTrustData)="recievePropertyHeldInTrustData($event)"
+                [nextTrustNumber]="nextTrustNumber"
+                (trustNumber)="recieveTrustNumberPropery($event)">
+                </app-property-held-in-trust-new-matter-wizard>
+            </div>
+        </div>
+    </form>
+</div>

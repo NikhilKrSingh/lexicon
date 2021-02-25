@@ -1,0 +1,158 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Admin Settings</a></li>
+      <li class="breadcrumb-item active">Import & Export</li>
+    </ol>
+    <div class="heading">
+      <h1>Import & Export</h1>
+    </div>
+    <div class="card">
+      <div class="card-body section-area">
+        <h4 class="mb-8 text-xlarge">Import New Data </h4>
+        <p class="lh-20 mb-16">New data should be imported in the following order, to ensure the required relational objects are in place.<br>(For example, a client must be created before a matter can be assigned to it.)</p>
+        
+
+         <div class="pt-16 pb-16" *ngIf='showAllOptions && permissionList?.EMPLOYEE_MANAGEMENTisAdmin'>
+          <div class="row align-items-center">
+            <div class="col-6 ">
+              <h4 class="mb-4 text-xlarge">Employees </h4>
+              <span class="font-weight-normal d-block lh-20" *ngIf="employeeImport && employeeImport.lastUpdatedBy">Last import run on {{employeeImport.lastUpdated}} by {{employeeImport.lastUpdatedBy}}</span>
+            </div>
+            <div class="col-6 text-right">
+              
+              
+                <button class="btn btn-outline-primary" (click)="fetchExportModelList(ExportModal, 'Employees')" id="employee-export-btn">Export to CSV</button>
+              </div>
+          </div>
+        </div>
+        <div class="pt-16 pb-16 bdr-tp"  *ngIf="showAllOptions && permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin">
+          <div class="row  align-items-center">
+            <div class="col-6 ">
+              <h4 class="mb-4 text-xlarge">Clients </h4>
+              <span class="font-weight-normal d-block lh-20" *ngIf="clientImport && clientImport.lastUpdatedBy">Last import run on {{clientImport.lastUpdated}} by {{clientImport.lastUpdatedBy}}</span>
+            </div>
+            <div class="col-6 text-right">
+              
+                <button class="btn btn-outline-primary" (click)="fetchExportModelList(ExportModal, 'Clients')" id="clients-export-btn">Export to CSV</button>
+            </div>
+          </div>
+        </div>
+        <div class="pt-16 pb-16 bdr-tp"  *ngIf="showAllOptions && permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin">
+          <div class="row  align-items-center">
+            <div class="col-6 ">
+              <h4 class="mb-4 text-xlarge">Corporate Contacts </h4>
+              <span class="font-weight-normal d-block lh-20" *ngIf="corporateimport && corporateimport.lastUpdatedBy">Last import run on {{corporateimport.lastUpdated}} by {{corporateimport.lastUpdatedBy}}></span>
+            </div>
+            <div class="col-6 text-right">
+              
+              
+              
+              
+              <button class="btn btn-outline-primary" (click)="fetchExportModelList(ExportModal, 'CorporateContacts')" id="corporate-contact-export-btn">Export to CSV</button>
+            </div>
+          </div>
+        </div>
+        <div class="pt-16 pb-16 bdr-tp" *ngIf="showAllOptions && permissionList.MATTER_MANAGEMENTisAdmin">
+          <div class="row  align-items-center">
+            <div class="col-6 ">
+              <h4 class="mb-4 text-xlarge">Matters </h4>
+              <span class="font-weight-normal d-block lh-20" *ngIf="matterimport && matterimport.lastUpdatedBy">Last import run on {{matterimport.lastUpdated}} by {{matterimport.lastUpdatedBy}}></span>
+            </div>
+            <div class="col-6 text-right">
+              
+              
+              
+              
+              <button class="btn btn-outline-primary" (click)="fetchExportModelList(ExportModal, 'Matters')" id="matters-export-btn">Export to CSV</button>
+            </div>
+          </div>
+        </div>
+        <div class="pt-16 pb-16 bdr-tp" *ngIf="showAllOptions && permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin">
+          <div class="row  align-items-center">
+            <div class="col-6 ">
+              <h4 class="mb-4 text-xlarge">Potential Clients </h4>
+              <span class="font-weight-normal d-block lh-20" *ngIf="potentialimport && potentialimport.lastUpdatedBy">Last import run on {{potentialimport.lastUpdated}} by {{potentialimport.lastUpdatedBy}}></span>
+            </div>
+            <div class="col-6 text-right">
+              
+              
+              
+              
+              <button class="btn btn-outline-primary" (click)="fetchExportModelList(ExportModal, 'PotentialClients')" id="potential-clients-export-btn">Export to CSV</button>
+            </div>
+          </div>
+        </div>
+        <div class="pt-16 pb-16 bdr-tp" *ngIf="showAllOptions">
+          <div class="row  align-items-center">
+            <div class="col-6 ">
+              <h4 class="mb-4 text-xlarge">Client/Matter Associations</h4>
+              
+            </div>
+            <div class="col-6 text-right">
+               
+              
+              <button class="btn btn-outline-primary" (click)="fetchExportModelList(ExportModal, 'ClientMatterAssociations' )" id="client-matter-association-export-btn">Export to CSV</button>
+            </div>
+          </div>
+        </div>
+        
+         <div class="pt-16 pb-0 bdr-tp"  *ngIf="isTrustAccountEnabled && permissionList.TENANT_CONFIGURATIONisAdmin">
+          <div class="row  align-items-center">
+            <div class="col-6 ">
+              <h4 class="mb-4 text-xlarge">Trusts</h4>
+              <span class="font-weight-normal d-block lh-20" *ngIf="trustImport && trustImport.lastUpdatedBy">
+                Last import run on {{trustImport.lastUpdated}} by {{trustImport.lastUpdatedBy}}
+              </span>
+            </div>
+            <div class="col-6 text-right">
+              <a href="https://quartodmsqa.blob.core.windows.net/import-templates/lexicon-trust-import-template.csv"
+                target="_blank" class="btn-link mr-24" id="trust-download-template-anchor"><em class="icon icon-download mr-8"></em>Download
+                Template</a>
+              <a href="javascript:void(0);" [routerLink]="['/import/run']" [queryParams]="{type:'trusts'}"
+                class="btn btn-outline-primary mr-16" id="trusts-import-anchor">Import Data</a>
+                <button class="btn btn-outline-primary" id="trusts-export-btn">Export To CSV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #ExportModal let-modal>
+  <div class="modal-header d-block">
+    <h3 class="modal-title">{{'Export '+selectModelName+' Data'}}</h3>
+    <p>Select which data you want to export</p>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="custom-control custom-checkbox pr-0 d-inline-block mb-8">
+      <input class="custom-control-input" [(ngModel)]="selectAllColumn" id="selectAll"
+      (ngModelChange)="selectAllColumnsForExport()" type="checkbox">
+      <label class="custom-control-label" for="selectAll">All Data</label>
+    </div>
+    <div class="pl-32">
+
+
+    <div class="row no-gutters">
+      <div class="col-3" *ngFor="let item of exportColumnList; trackBy: trackByFn;let i = index">
+        <div class="custom-control custom-checkbox pr-0">
+          <input class="custom-control-input" id="{{item.TechnicalName}}-{{i}}" [checked]="item.isChecked"
+            (change)="singleColumnChange(i)" type="checkbox">
+          <label class="custom-control-label" for="{{item.TechnicalName}}-{{i}}">{{item.FriendlyName}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" data-dismiss="modal"
+      (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="getButtonStatus" (click)="ExportToCSV()" id="export-to-csv-btn">Export to CSV</button>
+  </div>
+</ng-template>

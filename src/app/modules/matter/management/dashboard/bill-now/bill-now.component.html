@@ -1,0 +1,203 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/matter/list']">Matters</a></li>
+      <li class="breadcrumb-item" aria-current="page" [title]='matterDetails?.matterName'>
+        <a href="javascript:void(0)" [routerLink]="['/matter/dashboard']" [queryParams]="{matterId: matterId}">
+          <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+            {{matterDetails?.matterName}} -
+          </ng-container>
+          <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+            {{matterDetails?.matterName?.slice(0, 25)}}... -
+          </ng-container>
+          {{matterDetails?.matterNumber}}
+        </a>
+      </li>
+      <li class="breadcrumb-item active" *ngIf="!isWorkCompleteFlow">Bill Now</li>
+      <li class="breadcrumb-item active" *ngIf="isWorkCompleteFlow">Mark as Work Complete</li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2" *ngIf="!isWorkCompleteFlow">Bill Now</h2>
+          <h2 class="mt-0 mb-2" *ngIf="isWorkCompleteFlow">Mark as Work Complete</h2>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" (click)='previewInvoice()' id="preview-invoice">Preview
+          Invoice
+        </button>
+      </div>
+    </div>
+    <div class="alert alert-primary mt-8 mb-24 border-left-0" role="alert" *ngIf="isWorkCompleteFlow">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-info"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          Mark the matter as Work Complete to indicate that the work is complete and the client is ready to receive a
+          final bill.<br>
+          This will not close the matter automatically, and you can still bill the client for any additional charges
+          later by selecting to Bill Now from Matter Dashboard.
+        </div>
+      </div>
+    </div>
+    <div class="card" *ngIf='matterDetails && matterDetails?.isFixedFee'>
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Fixed Fee Services</h2>
+          </div>
+          <ng-container *ngIf='prebillingSettings?.fixedFeeService?.length > 0; else noFixedFeeService'>
+            <app-fixed-fee-services [prebillingSettings]='prebillingSettings' [billNow]='true'
+                                    [isAttorney]='timeWriteDownBtn' (validateSaveBtn)="validateSaveBtn($event)"
+                                    [isDisabled]='workComplete'>
+            </app-fixed-fee-services>
+          </ng-container>
+
+          <ng-template #noFixedFeeService>
+            <p>No unbilled fixed fee service recorded</p>
+          </ng-template>
+        </div>
+        <div class="info-block pt-32">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Add-Ons</h2>
+          </div>
+          <ng-container *ngIf='prebillingSettings?.addOnServices?.length > 0; else noAddOnServices'>
+            <app-add-on-services [prebillingSettings]='prebillingSettings' [isDisabled]='workComplete' [billNow]='true'
+                                 (validateSaveBtn)="validateSaveBtn($event)" [isAttorney]='timeWriteDownBtn'>
+            </app-add-on-services>
+          </ng-container>
+
+          <ng-template #noAddOnServices>
+            <p>No unbilled fixed fee add-ons recorded</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+    <app-time-entry-bill-now *ngIf='matterDetails && !matterDetails?.isFixedFee' [timekeepingList]="timekeepingList"
+                             [loginUser]="loginUser" [timeWriteDownBtn]="timeWriteDownBtn" (getDetails)="getDetails()"
+                             (validateSaveBtn)="validateSaveBtn($event)" [workComplete]="workComplete"
+                             [matterDetails]="matterDetails"
+                             [lastPrebillDate]="lastPrebillDate" [(timeEntrySelected)]="timeEntrySelected"
+                             [isWorkCompleteFlow]="isWorkCompleteFlow"
+                             (removeWriteDown)="removeWriteDown($event)">
+    </app-time-entry-bill-now>
+    <app-disbursement *ngIf="matterDetails" [matterDetails]="matterDetails" [disbursementList]="disbursementList"
+                      [loginUser]="loginUser"
+                      [timeWriteDownBtn]="timeWriteDownBtn" (getDetails)="getDetails()"
+                      (validateSaveBtn)="validateSaveBtn($event)"
+                      [workComplete]="workComplete" [(disbursementSelected)]="disbursementSelected"
+                      [isWorkCompleteFlow]="isWorkCompleteFlow"
+                      (removeWriteDown)="removeWriteDown($event)">
+    </app-disbursement>
+
+
+    <app-loader [active]='loading'></app-loader>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)="cancel()" id="cancle-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="saveBtn" (click)='billToClient(billClient)'
+                id="bill-now-btn">
+          <span *ngIf="!isWorkCompleteFlow">Bill Now</span>
+          <span *ngIf="isWorkCompleteFlow">Mark as Work Complete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice' [isWorkCompleteFlow]="isWorkCompleteFlow"
+                            [invoiceTemplateDetails]='invoiceTemplateDetails' [matterBillingSettings]='billingSettings'
+                            [tenantDetails]='tenantDetails' [loggedinuserId]='loginUser.id'
+                            [default_logo_url]='default_logo_url'
+                            [trustAccountEnabled]='trustAccountEnabled' [checkTrustAccountStatus]='false'
+                            (invoiceHTMLDetails)='sendEmailAndPrint($event, emilAddressNotOnFile)'>
+  </app-invoice-extended-pdf>
+</div>
+
+<ng-template #billClient let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!isWorkCompleteFlow">Bill to Client</h3>
+    <h3 class="modal-title mb-0" *ngIf="isWorkCompleteFlow">Mark as Work Complete</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-model">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data mb-24">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0" *ngIf="!isWorkCompleteFlow">
+          Are you sure you want to bill
+          <strong>{{matterDetails?.matterName}}</strong> for
+          <strong>{{totalBillAmount | currency : 'USD' : 'symbol': '1.2-2'}}</strong>?
+        </p>
+        <p class="m-0" *ngIf="isWorkCompleteFlow">
+          Are you sure you want to mark this Matter as Work Complete?<br>
+          This action <strong>cannot be reversed</strong>.</p>
+        <div class="mt-12" *ngIf="isWorkCompleteFlow">
+          <strong>{{matterDetails?.matterName}}</strong> will be billed for
+          <strong>{{totalBillAmount | currency : 'USD' : 'symbol': '1.2-2'}}</strong>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="custom-control custom-checkbox mb-12 pr-0"
+           *ngIf='billingSettings?.invoiceDelivery?.id == electronicInvoice?.id || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+        <input type="checkbox" class="custom-control-input" id="customCheck1_email" [value]='true'
+               [(ngModel)]='sendEmail'>
+        <label class="custom-control-label" for="customCheck1_email">Email invoice to client</label>
+      </div>
+      <div class="custom-control custom-checkbox mb-0 pr-0"
+           *ngIf='billingSettings?.invoiceDelivery?.id == paperInvoice?.id  || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+        <input type="checkbox" class="custom-control-input" id="customCheck2_print" [value]='true' [(ngModel)]='print'>
+        <label class="custom-control-label" for="customCheck2_print">Print invoice</label>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancle-model">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="yes-bill-to-client">
+      <span *ngIf="!isWorkCompleteFlow">Yes, bill to client</span>
+      <span *ngIf="isWorkCompleteFlow">Yes, Mark as Work Complete</span>
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #emilAddressNotOnFile let-modal>
+  <div class="card mb-0">
+    <div class="card-body">
+      <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Email Address Not on File</h3>
+        <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-model">
+          <em class="icon icon-close"></em>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-start missing-data mb-32">
+          <em class="icon icon-warning text-warning"></em>
+          <div class="lh-20 ml-16">
+            <p class="m-0">
+              Client <strong> {{clientEmailInfo.client.name}} </strong> has no email address on file, so their cannot be
+              sent. Enter an email address to complete this step. <br>
+              This will be saved to the client's profile.
+            </p>
+
+            <div class="form-group">
+              <label>Email Address <sup>*</sup></label>
+              <input type="text" class="form-control" placeholder="Enter client's email address"
+                     [(ngModel)]='emailAddressToUpdate' id="enter-client-email">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancle-model">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="save-and-send-email">Save and Send
+          Email
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>

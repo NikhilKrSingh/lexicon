@@ -1,0 +1,455 @@
+<div class="row gutter-16">
+  <div class="col-10">
+    <div class="row gutter-16">
+      <div class="col-3 pr-24" *ngIf="billingSettings?.invoiceDelivery?.code !== 'ELECTRONIC'">
+        <div class="form-group">
+          <label class="d-flex justify-content-between align-items-center">
+            Invoice Address
+            <em class="icon icon-edit icon-color text-small cursor-pointer" *ngIf='matterDetails?.clientName?.id'
+                (click)='editInvoiceAddress()' [class.disabled]="afterLoadstateList || afterLoadBilling"
+                id="edit-invoice-address"></em>
+          </label>
+          <p class="m-0 lh-20" *ngIf='billingAddress'>
+            {{billingAddress?.address1}}
+            {{billingAddress?.address2}} <br>
+            {{billingAddress?.city}}
+            {{billingAddress?.state}}, {{billingAddress?.zipCode}}
+          </p>
+        </div>
+      </div>
+      <div class="col-3 pr-24 pl-24">
+        <div class="form-group">
+          <label class="d-flex justify-content-between align-items-center">
+            Invoice Preferences
+            <em class="icon icon-edit icon-color text-small cursor-pointer" (click)='editInvoicePreferences()'
+                [class.disabled]="afterLoadstateList" id="invoice-preferences"></em>
+          </label>
+          <p class="m-0 lh-20">{{billingSettings?.invoiceDelivery?.name}}</p>
+        </div>
+      </div>
+      <div class="col-4 pr-24 pl-24" *ngIf="!matterDetails?.isFixedFee">
+        <div class="form-group">
+          <label class="d-flex justify-content-between align-items-center">
+            Bill Issuance Frequency
+            <em class="icon icon-edit icon-color text-small cursor-pointer" (click)='editIssuanceFrequency()'
+                id="edit-issuance-frequency"></em>
+          </label>
+          <p class="m-0 lh-20">{{billingSettings?.isWorkComplete ? 'Work Complete' : ''}}</p>
+          <p class="m-0 lh-20">{{billingSettings?.billFrequencyQuantity}}
+            {{billFrequencyDurationName}}</p>
+          <p class="m-0 lh-20" *ngIf="billingSettings?.billFrequencyDuration?.code === 'WEEKS'">Repeats on
+            {{billFrequencyDayObj?.name}}</p>
+          <p class="m-0 lh-20" *ngIf="billingSettings?.billFrequencyDuration?.code === 'MONTHS'">Repeats on the
+            {{recurringName[billingSettings.billFrequencyRecursOn - 1]}} {{billFrequencyDayObj?.name}} of the month</p>
+          <div class="upcoming-change" *ngIf="billingSettings?.effectiveBillFrequencyQuantity">
+            <div class="upcome-accordian open icon-color">
+              <div class="d-flex align-items-center upcome-head">
+                <span class="cursor-pointer upcome-drop mr-4" (click)="showUpcoming = !showUpcoming">
+                  <em class="icon icon-angle-down icon-color"
+                      [ngClass]="showUpcoming ? 'icon-angle-down':'icon-angle-up'"></em>
+                </span>
+                <p class="m-0 lh-20"><i>Upcoming changes
+                  {{billingSettings?.effectiveBillFrequencyStartingDate | date : 'MM/dd/yyyy'}}</i></p>
+              </div>
+              <div class="upcome-body pl-20" *ngIf="showUpcoming">
+                <p class="m-0 lh-20">
+                  <i>
+                    {{billingSettings?.effectiveBillFrequencyQuantity}}&nbsp;{{effectiveBillFrequencyDurationName}}
+                    <br>
+                    <ng-container *ngIf="billingSettings?.effectiveBillFrequencyDuration?.code === 'WEEKS'">
+                      Repeats on {{effectiveBillFrequencyDayObj?.name}}
+                    </ng-container>
+                    <ng-container *ngIf="billingSettings?.effectiveBillFrequencyDuration?.code === 'MONTHS'">
+                      Repeats on {{recurringName[billingSettings.effectiveBillFrequencyRecursOn - 1]}}
+                      {{effectiveBillFrequencyDayObj?.name}} of the month
+                    </ng-container>
+                  </i></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-2 pl-24">
+        <div class="form-group">
+          <label class="d-flex justify-content-between align-items-center">
+            Fixed Fee Matter
+
+          </label>
+          <p class="m-0 lh-20">
+            {{matterDetails?.isFixedFee ? 'Yes' : 'No'}}<br>
+            <span *ngIf='matterDetails?.isFixedFee'>
+              {{billingSettings?.fixedAmount | currency : 'USD' : 'symbol': '1.2-2'}}
+            </span>
+          </p>
+        </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+  <div class="col-2 d-flex justify-content-end align-items-start"
+       *ngIf='permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit || isRaOrBa'>
+
+
+    <div class="d-inline-block ml-16" ngbDropdown>
+      <button class="btn btn-primary bulk-btn" ngbDropdownToggle>Billing Actions</button>
+      <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+        <button ngbDropdownItem type="button"
+                *ngIf='permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit'
+                [routerLink]="['/matter/post-payment']" [queryParams]="{matterId:matterDetails.id, clientId:clientId, officeId: matterDetails?.matterPrimaryOffice?.id,type:'matter'}" id="record-payment">
+          Record Payment
+        </button>
+
+        <button ngbDropdownItem type="button"
+                *ngIf='permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit || isRaOrBa'
+                [routerLink]="['/matter/refund-client-trust']" [queryParams]="{matterId:matterDetails.id}"
+                id="refund-client">
+          Refund Client
+        </button>
+
+        <button ngbDropdownItem type="button" (click)='billNow(billNowReview)'
+                *ngIf="!disableBillNow || !(matterDetails?.isFixedFee && !fixedFreebillingSettings)" id="bill-now">Bill
+          Now
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="info-block pt-32" *ngIf="matterDetails?.isFixedFee">
+  <div class="row">
+    <div class="col-10">
+      <h2 class="mb-24">Fixed Fee Services</h2>
+    </div>
+  </div>
+  <div class="custom-table section-area">
+    <div class="table-responsive">
+      <table class="table table-striped table-borderless" id="rate-table">
+        <thead>
+        <tr>
+          <th>Code</th>
+          <th style="width:320px">Name</th>
+          <th style="width:500px">Rate</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let fixedfee of fixedFeeService;trackBy: trackByFn;let i= index" id="{{i}}">
+          <td>{{fixedfee?.code }}</td>
+          <td>{{fixedfee?.description }}</td>
+          <td [class.text-danger]="fixedfee.isCustom">{{fixedfee?.rateAmount | currency : 'USD': 'symbol': '1.2-2' }}
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-loader [active]='fixedFeeLoading'></app-loader>
+  </div>
+</div>
+<div class="info-block pt-32 mb-24 " *ngIf="matterDetails?.isFixedFee">
+  <div class="row">
+    <div class="col-10">
+      <h2 class="mb-24">Add-On Services</h2>
+      <p class="mb-16 lh-20">Search for and select as many add-on services as needed</p>
+    </div>
+
+    <div class="col-2 d-flex justify-content-end align-items-start" *ngIf="addonServices?.length > 0">
+      <button class="btn btn-primary btn-icon" type="button" (click)="addAddOn()" *ngIf="showAddOn" id="add-add-on">
+        <i class="icon icon-plus"></i>
+        Add Add-On
+      </button>
+    </div>
+  </div>
+  <div class="custom-table section-area">
+    <div *ngIf="!addonServices?.length">
+      <button class="btn btn-primary btn-icon" id="add-addon-matter-dash" type="button" (click)="addAddOn()"
+              *ngIf="showAddOn" id="add-on-on-2">
+        <i class="icon icon-plus"></i>
+        Add Add-On
+      </button>
+    </div>
+    <div class="table-responsive" *ngIf="addonServices?.length > 0">
+      <table class="table table-striped table-borderless" id="addon-table-matter-dash">
+        <thead>
+        <tr>
+          <th>Code</th>
+          <th style="width:320px">Name</th>
+          <th style="width:500px">Rate</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let addon of addonServices;trackBy: trackByFn;let i= index" id="{{i}}">
+          <td>{{addon.code }}</td>
+          <td>{{addon.serviceName }}</td>
+          <td [class.text-danger]="addon.isCustom">{{addon.serviceAmount | currency : 'USD': 'symbol': '1.2-2' }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-loader [active]='addOnLoading'></app-loader>
+  </div>
+</div>
+<div class="info-block pt-32" *ngIf="matterDetails?.isFixedFee && fixedFreebillingSettings">
+  <h3 class="mb-24">Payment</h3>
+  <div class="custom-table">
+    <div class="table-responsive">
+      <table class="table table-striped table-borderless" id="payment-history-table">
+        <thead>
+        <tr>
+          <th>Total Amount</th>
+          <th>Amount Paid</th>
+          <th>Amount Remaining</th>
+          <th>Billing Deferred</th>
+          <th>Deferred Until</th>
+          <th class="text-right" *ngIf="fixedFreebillingSettings?.fixedFeeBillOnWorkComplete">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>{{fixedFreebillingSettings.fixedAmount | currency : 'USD': 'symbol': '1.2-2' }}</td>
+          <td>{{fixedFreebillingSettings.fixedFeeAmountToPay | currency : 'USD': 'symbol': '1.2-2' }}</td>
+          <td>{{fixedFreebillingSettings.fixedFeeRemainingAmount | currency : 'USD': 'symbol': '1.2-2' }}</td>
+          <td>{{(fixedFreebillingSettings.fixedFeeIsFullAmount) ? 'No' : 'Yes'}}</td>
+          <td>
+            {{fixedFreebillingSettings.fixedFeeIsFullAmount ? '-' : (fixedFreebillingSettings.fixedFeeDueDate) ? (fixedFreebillingSettings.fixedFeeDueDate | date : 'MM/dd/yyyy') : 'Work Complete' }}
+          </td>
+          <td *ngIf="fixedFreebillingSettings?.fixedFeeBillOnWorkComplete">
+            <div class="d-flex justify-content-end">
+              <div class="dropdown dropdown-hover-table" [class.active]="showPaymentMenu"
+                   (click)="showPaymentMenu = true" appAutoCloseOutsideClick (outsideClick)="showPaymentMenu = false"
+                   id="show-payment-menu">
+                <em class="icon icon-dot-verti"></em>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton" id="mark-as-work">
+                  <a class="dropdown-item" href="javascript:void(0)" (click)='workComplete()'>Mark as Work
+                    Complete</a>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="info-block mb-24" *ngIf="!matterDetails?.isFixedFee">
+  <app-billing-rate-table
+    [rateTables]="rateTables"
+    (rateTablesChange)="rateTablesChange.emit($event)"
+    [isCustomBillingRate]="isCustomBillingRate"
+    (isCustomBillingRateChange)="isCustomBillingRateChange.emit($event)"
+    [isEditRateTable]="isEditRateTable"
+    (isEditRateTableChange)="isEditRateTableChange.emit($event)"
+    [matterDetails]='matterDetails'>
+  </app-billing-rate-table>
+</div>
+<div class="pt-32">
+  <app-disbursement-rates
+  [pageType]="'matterdashboard'"
+  [clientId]="clientId"
+  [matterId]="matterDetails?.id"
+  [rateTables]="rateTables"
+  (rateTablesChange)="rateTablesChange.emit($event)"
+  [isCustomBillingRate]="isCustomBillingRate"
+  (isCustomBillingRateChange)="isCustomBillingRateChange.emit($event)"
+  [isEditRateTable]="isEditRateTable"
+  (isEditRateTableChange)="isEditRateTableChange.emit($event)"
+  (getDisburs)="getDisburs($event)">
+  </app-disbursement-rates>
+</div>
+<div class="info-block mb-24">
+  <h2 class="mb-24">Payment Methods</h2>
+  <app-billing-payment-method
+    [hasPermissionToAdd]="true" [paymentPlanList]='paymentPlanList'
+    [rateTables]="rateTables"
+    (rateTablesChange)="rateTablesChange.emit($event)"
+    [isCustomBillingRate]="isCustomBillingRate"
+    (isCustomBillingRateChange)="isCustomBillingRateChange.emit($event)"
+    [isEditRateTable]="isEditRateTable"
+    (isEditRateTableChange)="isEditRateTableChange.emit($event)"
+    [paymentMethodeText]='matterDetails?.isFixedFee' [matterDetails]='matterDetails'
+    [type]='type'>
+  </app-billing-payment-method>
+</div>
+<div *ngIf="isPaymentPlanEnabled" class="info-block mb-24 section-area">
+  <div class="mt-8">
+    <h3 class="mb-24">Payment Plan</h3>
+    <div class="custom-table payment-plan-table" *ngIf="paymentPlanList?.length > 0">
+      <div class="table-responsive">
+        <table class="table table-borderless" [class.expanded]='showGrid' id="payment-plan-table">
+          <thead>
+          <tr>
+            <th>Frequency</th>
+            <th>Amount</th>
+            <th class="text-center">Auto-Pay</th>
+            <th>Auto-Pay Method</th>
+            <th>Balance Past Due</th>
+            <th class="text-right">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let plan of paymentPlanList; trackBy: trackByFn;let i = index;" [class.bordered]='showGrid'
+              id="payment-planlist-index-{{i}}">
+            <td>
+              <div class="d-flex align-items-center">
+                  <span class="payment-plan-table-arrow" (click)="showGrid=!showGrid">
+                    <em [ngClass]="!showGrid?'icon icon-angle-down':'icon icon-angle-up'"></em>
+                  </span>
+                <span>
+                    Every <span>{{plan.billFrequencyQuantity}}
+                  {{plan.billFrequencyLookUpName == 'Months' ? 'month' : 'week'}} </span>
+                    <span *ngIf='selectedRecursDay'> on the {{selectedRecursDay?.name}}</span>
+                    <span *ngIf='selectedDay && !selectedRecursDay'>on the {{selectedDay}}</span>
+                  </span>
+              </div>
+            </td>
+            <td>{{ plan.amountToPay | currency : 'USD': 'symbol': '1.2-2' }}</td>
+            <td class="text-center">
+              <ng-container *ngIf='plan.cCardId > 0 || plan.echeckId > 0'>
+                <label class="cust-check" *ngIf='plan?.isAutoPay else notAutoPay'>
+                  <input type="checkbox" checked disabled/>
+                  <span class="check-style"></span>
+                </label>
+                <ng-template #notAutoPay>
+                  <label class="cust-check not-checked">
+                    <input type="checkbox" disabled/>
+                    <span class="check-style"></span>
+                  </label>
+                </ng-template>
+              </ng-container>
+            </td>
+            <td>
+              <ng-container *ngIf='plan.cCardId > 0 || plan.echeckId > 0'>
+                  <span *ngIf='plan.cCardId > 0'>
+                    {{ 'Card Ending in ' + plan?.creditCard?.cardNumber }}
+                  </span>
+                <span *ngIf='plan.echeckId > 0'>
+                    {{ 'Account Ending in ' + plan?.echeckDetail?.accountNumber?.slice(-4) }}
+                  </span>
+              </ng-container>
+            </td>
+            <td>{{ (plan.balanceDue || 0) | currency : 'USD': 'symbol': '1.2-2' }}</td>
+            <td class="text-right">
+              <div class="d-flex justify-content-end">
+                <div class="dropdown dropdown-hover-table" [class.active]="currentActive == i"
+                     (click)="openMenu(i)" appAutoCloseOutsideClick
+                     (outsideClick)="onClickedOutside(i)">
+                  <em class="icon icon-dot-verti"></em>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="javascript:void(0)" (click)='editPaymentPlan(plan)'
+                       id="edit-payment-plan-index-{{i}}">
+                      Edit Payment Plan
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0)" (click)='deletePaymentPlan(plan)'
+                       id="delete-payment-plan-{{i}}">
+                      Delete Payment Plan
+                    </a>
+
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr class="payment-plan-detail-row" *ngFor="let plan of paymentPlanList; trackBy: trackByFn;let i = index;"
+              [ngClass]="!showGrid?'d-none':''" id="payment-planlistindex-{{i}}">
+            <td colspan="6">
+              <table class="table table-borderless" [class.month]='selectedRecursDay'
+                     [class.week]='!selectedRecursDay'>
+                <thead>
+                <tr>
+                  <th>&nbsp;</th>
+                  <th>Est Payoff Date</th>
+                  <th>Next Payment Due Date</th>
+                  <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="bdr-btm">
+                  <th>&nbsp;</th>
+                  <td>{{plan.estimatedPayoffDate | date: 'MM/dd/yyyy'}}</td>
+                  <td>{{plan.nextPaymentDate | date: 'MM/dd/yyyy'}}</td>
+                  <td>&nbsp;</td>
+                </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <button
+      *ngIf='paymentPlanList && paymentPlanList?.length < 1 && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin)'
+      class="btn btn-link btn-icon px-0 d-flex align-items-center mt-0 mb-24" type="button" (click)="addPaymentPlan()"
+      id="create-payment-plan">
+      <i class="icon icon-add-circle"></i>
+      Create Payment Plan
+    </button>
+  </div>
+
+  <app-loader [active]='paymentPlanLoader'></app-loader>
+</div>
+<div class="info-block mb-24 pt-0"
+     *ngIf="type=='matter' && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisViewOnly)">
+  <app-billing-disbursements
+    [rateTables]="rateTables"
+    (rateTablesChange)="rateTablesChange.emit($event)"
+    [isCustomBillingRate]="isCustomBillingRate"
+    (isCustomBillingRateChange)="isCustomBillingRateChange.emit($event)"
+    [isEditRateTable]="isEditRateTable"
+    (isEditRateTableChange)="isEditRateTableChange.emit($event)"
+    [officeBillingSettings]='officeBillingSettings'
+    [matterDetails]='matterDetails'
+    [updateDisbursMent]='updateDisbursMent'
+    [firmDetails]='firmDetails'></app-billing-disbursements>
+</div>
+<div class="info-block mb-24"
+     *ngIf="type=='matter' && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin)">
+  <app-billing-write-offs [invoiceId]="invoiceId" [prebillId]='prebillId' [balanceDue]="balanceDue"
+                          [matterDetails]='matterDetails'></app-billing-write-offs>
+</div>
+<div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice'
+                            [invoiceTemplateDetails]='invoiceTemplateDetails' [matterBillingSettings]='billingSettings'
+                            [tenantDetails]='tenantDetails' [loggedinuserId]='loginUser.id'
+                            [default_logo_url]='default_logo_url' (invoiceHTMLDetails)='sendEmailAndPrint($event)'>
+  </app-invoice-extended-pdf>
+</div>
+<app-loader [active]="billNowloading"></app-loader>
+
+<ng-template #billNowReview let-modal>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title mb-0">Bill Now Review</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-12">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning" style="font-size: 22px;"></em>
+      <div class="lh-20 ml-16">
+        <p class="mb-0" id="bill-now-message">{{billNowMessage}}</p>
+        <div class="mt-20" *ngIf="!chargesBillNow">
+          <div class="custom-control custom-checkbox mb-0 pr-0"
+               *ngIf='billingSettings?.invoiceDelivery?.id == electronicInvoice?.id || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+            <input type="checkbox" class="custom-control-input" id="customCheck1_email" [value]='true'
+                   [(ngModel)]='sendEmail'>
+            <label class="custom-control-label" for="customCheck1_email">Email invoice to client</label>
+          </div>
+          <div class="custom-control custom-checkbox mb-0 pr-0"
+               *ngIf='billingSettings?.invoiceDelivery?.id == paperInvoice?.id  || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+            <input type="checkbox" class="custom-control-input" id="customCheck2_print" [value]='true'
+                   [(ngModel)]='print'>
+            <label class="custom-control-label" for="customCheck2_print">Print invoice</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancel">Cancel</button>
+    <button type="button" class="btn btn-primary" *ngIf="chargesBillNow" (click)="modal.close(true)"
+            id="yes-bill-now-btn">Yes, Bill Now
+    </button>
+    <button type="button" class="btn btn-primary" *ngIf="!chargesBillNow" (click)="modal.close('zeroInvoice')"
+            id="yes-generate-invoice-btn">Yes, Generate Invoice
+    </button>
+  </div>
+</ng-template>

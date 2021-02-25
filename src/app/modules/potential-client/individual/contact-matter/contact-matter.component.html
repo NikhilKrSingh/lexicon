@@ -1,0 +1,367 @@
+<div class="card">
+  <div class="card-body pb-20">
+    <div class="info-block">
+      <h2>Matter Details</h2>
+      <form [formGroup]="MatterForm">
+        <div class="row gutter-16 section-area">
+          <div class="col-3">
+            <div class="form-group">
+              <label>Consultation Law Office <sup>*</sup></label>
+              <ng-select [items]="consultationLawOfficeList" placeholder="Choose an option" formControlName="officeId"
+                [bindValue]="'id'" [selectOnTab]="true" [bindLabel]="'officeName'" (change)="getPracticeAreas()" [notFoundText]="'No record found'" id="consultation-law-office-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label>Practice Area <sup>*</sup></label>
+              <ng-select [items]="practiceAreaList" placeholder="Choose an option" [bindValue]="'id'"
+                [bindLabel]="'name'" [notFoundText]="'No record found'" formControlName='practiceId'
+                (change)="onChange($event)" [selectOnTab]="true" [readonly]="!MatterForm.value.officeId" id="practice-area-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label>Matter Type <sup>*</sup></label>
+              <ng-select [items]="matterTypeList" [disabled]="true" placeholder="Choose an option"
+                formControlName="matterTypeId" [bindValue]="'id'" [bindLabel]="'name'"
+                [notFoundText]="'No record found'" [selectOnTab]="true" id="matter-type-select">
+              </ng-select>
+            </div>
+          </div>
+          <div class="offset-3"></div>
+          <div class="col-3">
+            <div class="form-group">
+              <label>Jurisdiction of Matter </label>
+              <ng-select [items]="stateList" placeholder="State" formControlName="jurisdictionId" [bindValue]="'id'"
+                [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" id="juri-metter">
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label> &nbsp;<br></label>
+              <input type="text" class="form-control" formControlName="jurisdictionCounty" placeholder="County" id="county enter">
+            </div>
+          </div>
+          <app-loader [active]="officesLoading"></app-loader>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body pb-24">
+    <h2>Matter Associations</h2>
+    <div class="info-block">
+      <h3>Opposing Party</h3>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Email Address</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody *ngIf="opposingPartyList.length > 0;else no_data_found">
+              <tr *ngFor="let opp of opposingPartyList; trackBy :trackByFn;let i =index;" id="opposing-partylist-row-index-{{i}}">
+                <td> {{ (opp?.isCompany) ? opp.companyName : opp.firstName + ', ' + opp.lastName }}</td>
+                <td>{{(opp?.isCompany) ? 'Corporate':'Individual'}}</td>
+                <td>{{ (opp?.email) ? opp.email : '--'  }}</td>
+                <td>{{ opp.primaryPhone | phoneFormatter }}
+                </td>
+                <td>{{ (opp.isVisible) ? 'Active' : (opp.isArchived) ? 'Archived' : 'Inactive' }}</td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span (click)='editOpposingPartyClick(opp, i)' id="edit-opposing-partylist-row-index-{{i}}">
+                      <em class="icon icon-edit icon-color"></em>
+                    </span>
+                    <span
+                      (click)="deleteMatterAssociations(errorData.opposingparty_delete_confirm, i,'Opposing Party')" id="delete-opposing-partylist-row-index-{{i}}">
+                      <em class="icon icon-remove icon-color"></em>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <ng-template #no_data_found>
+              <tbody>
+                <tr>
+                  <td colspan="5" class="text-center">{{ errorData.table_no_data_found }}</td>
+                </tr>
+              </tbody>
+            </ng-template>
+          </table>
+        </div>
+        <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16"
+          (click)="addOpposingPartyClick()" type="button" id="add-opposingparty">
+          <i class="icon icon-add-circle"></i>
+          Add Opposing Party
+        </button>
+      </div>
+    </div>
+    <div class="info-block pt-24">
+      <h3>Opposing Counsel</h3>
+      <div class="custom-control custom-checkbox mb-24 pr-0">
+        <input type="checkbox" class="custom-control-input" id="td-check-101" name="opposingPartyRepresentingThemselves"
+          [(ngModel)]="opposingPartyRepresentingThemselves">
+        <label class="custom-control-label" for="td-check-101">
+          Opposing Party is Representing Themselves
+        </label>
+      </div>
+      <div class="custom-table pt-5" *ngIf="!opposingPartyRepresentingThemselves">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Email Address</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody *ngIf="opposingCounselList.length > 0;else no_data_found">
+              <tr *ngFor="let counsel of opposingCounselList; trackBy :trackByFn;let i=index;" id="opposing-counsellist-row-index-{{i}}">
+                <td>{{ (counsel.firstName) ? counsel.firstName +', '+ counsel.lastName : ''  }}</td>
+                <td>{{ counsel.companyName }}</td>
+                <td>{{ counsel?.email }}</td>
+                <td>{{ counsel.primaryPhone | phoneFormatter }}
+                </td>
+                <td>{{ (counsel.isVisible) ? 'Active' : (counsel.isArchived) ? 'Archived' : 'Inactive' }}</td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span (click)='editOpposingCounselClick(counsel, i)' id="edit-opposing-counsellist-row-index-{{i}}">
+                      <em class="icon icon-edit icon-color"></em>
+                    </span>
+                    <span
+                      (click)="deleteMatterAssociations(errorData.opposingcounsel_delete_confirm, i,'Opposing Counsel')" id="delete-opposing-counsellist-row-index-{{i}}">
+                      <em class="icon icon-remove icon-color"></em>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+          (click)='addOpposingCounselClick()' id="add-opposingcounsel">
+          <i class="icon icon-add-circle"></i>
+          Add Opposing Counsel
+        </button>
+      </div>
+    </div>
+    <div class="info-block pt-24">
+      <h3 class="mb-16">Expert Witnesses</h3>
+
+      <div class="custom-table">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Email Address</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody *ngIf="expertWitnessList.length > 0;else no_data_found">
+              <tr *ngFor="let expert of expertWitnessList; trackBy :trackByFn;let i=index" id="expert-witnesslist-row-index-{{i}}">
+                <td>{{ expert.firstName+ ', '+expert.lastName }}</td>
+                <td>{{ expert.companyName }}</td>
+                <td>{{ expert?.email }}</td>
+                <td>{{ expert.primaryPhone | phoneFormatter }}</td>
+                <td>{{ (expert.isVisible) ? 'Active' : (expert.isArchived) ? 'Archived' : 'Inactive' }}</td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span (click)='editExpertWitnessClick(expert, i)' id="edit-expert-witnesslist-row-index-{{i}}">
+                      <em class="icon icon-edit icon-color"></em>
+                    </span>
+                    <span
+                      (click)="deleteMatterAssociations(errorData.expert_witnesses_delete_confirm,i,'Expert Witnesses')" id="delete-expert-witnesslist-row-index-{{i}}">
+                      <em class="icon icon-remove icon-color"></em>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" type="button"
+          (click)='addExpertWitnessClick()' id="add-expert-witness">
+          <i class="icon icon-add-circle"></i>
+          Add Expert Witness
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body pb-24">
+    <h2>Client Associations</h2>
+    <div class="info-block">
+      <h3>Vendor</h3>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Email Address</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody *ngIf="vendorList.length > 0;else no_data_found">
+              <tr *ngFor="let vendor of vendorList; trackBy :trackByFn;let i=index" id="vendorlist-row-index-{{i}}">
+                <td>{{vendor.lastName}}{{vendor.lastName ? ', ': ''}}{{vendor.firstName}}</td>
+                <td>{{vendor.companyName}}</td>
+                <td>{{vendor.email}}</td>
+                <td>{{ vendor.primaryPhone | phoneFormatter }}</td>
+                <td>{{ (vendor.isVisible) ? 'Active' : (vendor.isArchived) ? 'Archived' : 'Inactive' }}</td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span>
+                      <em class="icon icon-edit icon-color" (click)='editVendorClick(vendor, i)' id="edit-vendorlist-row-index-{{i}}"></em>
+                    </span>
+                    <span>
+                      <em class="icon icon-remove icon-color" (click)="deleteMatterAssociations(errorData.vendor_delete_confirm, i,'Vendor')" id="delete-vendorlist-row-index-{{i}}"></em>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" (click)="addVendorClick()"
+          type="button" id="add-vendor">
+          <i class="icon icon-add-circle"></i>
+          Add Vendor
+        </button>
+      </div>
+    </div>
+    <div class="info-block pt-24">
+      <h3>Subsidiary</h3>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Email Address</th>
+                <th>Phone Number</th>
+                <th>Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody *ngIf="subsidiaryList.length > 0;else no_data_found">
+              <tr *ngFor="let sub of subsidiaryList; trackBy :trackByFn;let i = index" id="subsidiarylist-row-index-{{i}}">
+                <td>{{sub.lastName}}{{sub.lastName ? ', ': ''}}{{sub.firstName}}</td>
+                <td>{{sub.companyName}}</td>
+                <td>{{sub.email}}</td>
+                <td>{{ sub.primaryPhone | phoneFormatter }}</td>
+                <td>{{ (sub.isVisible) ? 'Active' : (sub.isArchived) ? 'Archived' : 'Inactive' }}</td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span>
+                      <em class="icon icon-edit icon-color" (click)='editSubsidiaryClick(sub, i)' id="edit-subsidiarylist-row-index-{{i}}"></em>
+                    </span>
+                    <span>
+                      <em class="icon icon-remove icon-color" (click)="deleteMatterAssociations(errorData.subsidiary_delete_confirm, i,'Subsidiary')" id="delete-subsidiarylist-row-index-{{i}}"></em>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-24 mb-16" (click)="addSubsidiaryClick()"
+          type="button" id="add-subsidiary">
+          <i class="icon icon-add-circle"></i>
+          Add Subsidiary
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+
+<div class="card">
+  <div class="card-body pb-24">
+    <div class="row">
+      <div class="col-6">
+        <h2 class="mb-0">Conflict Check</h2>
+      </div>
+      <div class="col-6 ">
+        <div class="text-right d-flex justify-content-end">
+          <a (click)="runConflictsCheck()" href="javascript:void(0)" class="btn btn-primary" id="run-conflict-check">
+            Run Conflict Check
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-between pb-48">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='cancel()' id="cancel-btn">Cancel</button>
+  </div>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='prev()' id="pre-btn">Previous</button>
+    <button type="button" class="btn btn-primary" [disabled]="!MatterForm.valid" (click)='next()' id="next-btn">Next
+    </button>
+  </div>
+</div>
+
+<app-loader [active]="loading"></app-loader>
+
+<ng-container *ngIf="addOpposingParty">
+  <app-add-opposing-party [mode]='addOpposingPartyMode' [association]='selectedOpposingParty'
+    [associateOpposingParty]="associateOpposingParty" [addToDb]="addToDb" [associateFlag]="'add'" [matterId]="matterId"
+    (closeModel)="closeOpposingParty($event)" (added)='onAddAssoc($event)'></app-add-opposing-party>
+</ng-container>
+
+
+<ng-container *ngIf='addExpertWitness'>
+  <app-add-expert-witnesses [mode]='addExpertWitnessMode' [addToDb]="addToDb" [association]='selectedExpertWitness' [matterId]="matterId"
+    [associateExpertWitness]="associateExpertWitness" (closeModel)="closeExpertWitness($event)" (added)='onAddAssoc($event)'>
+  </app-add-expert-witnesses>
+</ng-container>
+
+
+<ng-container *ngIf='addOpposingCouncel'>
+  <app-add-opposing-counsel [mode]='addOpposingCouncelMode' [addToDb]="addToDb" [association]='selectedOpposingCounsel'
+    [associateOpposingCouncil]="associateOpposingCouncil" [matterId]="matterId"
+    (closeModel)="closeOpposingCouncel($event)" (added)='onAddAssoc($event)'></app-add-opposing-counsel>
+
+</ng-container>
+
+<ng-container *ngIf="addVendor">
+  <app-add-vendor [mode]="addVendorMode" [addToDb]="addToDb" [vendorDetails]='selectedVendor' [matterId]="matterId"
+    (closeModel)='closeVendor($event)' [associateVendor]="associateVendor" [associateFlag]="'add'" [type]="'Vendor'"
+    (added)='onAddAssoc($event)'>
+  </app-add-vendor>
+</ng-container>
+
+<ng-container *ngIf="addSubsidiary">
+  <app-add-vendor [mode]="addSubsidiaryMode" [addToDb]="addToDb" [vendorDetails]='selectedSubsidiary' [matterId]="matterId"
+    (closeModel)='closeSubsidiary($event)' [associateVendor]="associateSubsidiary" [associateFlag]="'add'"
+    [type]="'Subsidiary'" (added)='onAddAssoc($event)'>
+  </app-add-vendor>
+</ng-container>

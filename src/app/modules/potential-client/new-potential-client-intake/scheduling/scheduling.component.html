@@ -1,0 +1,315 @@
+<div class="npc-block schedule-block">
+    <h2 class="mb-16">Scheduling</h2>
+    <p *ngIf="!showSchedulingForm" class="lh-20">Please select a <span class="font-weight-medium">Practice Area</span>
+        and
+        <span class="font-weight-medium">Matter Type</span> before scheduling an initial consultation. <br>
+        You can find these fields in <i>Basic Matter Information</i> at the top of this page. </p>
+
+    <div class="row gutter-16 section-area" *ngIf="showSchedulingForm">
+        <form [formGroup]="schedulingForm">
+            <div class="col-11">
+                <p class="lh-20">The <span class="font-weight-medium">Consultation Office</span> and <span
+                        class="font-weight-medium">Attorney</span> filters pre-populate to reflect the selections made
+                    in
+                    the <i>Basic Matter Information</i> section above. You can adjust the filters, view availability for and
+                    schedule an event with a different attorney if desired. The relevant fields in the <i>Basic Matter Information</i> section will be automatically updated.</p>
+                <div class="custom-control custom-checkbox mb-16 mt-4 pr-0">
+                    <input type="checkbox" formControlName="nextAppointment" class="custom-control-input"
+                        id="next-appoinment">
+                    <label class="custom-control-label" for="next-appoinment">Next Available Appointment</label>
+                </div>
+                <div class="row gutter-16">
+                    <div class="col-5">
+                        <div class="row gutter-16">
+                            <div class="col-6">
+                                <div class="form-group" [class.has-error]="!selectedDatesValid">
+                                    <label>Earliest Desired Date</label>
+                                    <app-date-picker [isForm]='true' [dateform]='schedulingForm'
+                                        controlName='earlydesiredDate' (dataChange)="onDateChange()" id="earlydesiredDateId"></app-date-picker>
+                                    <span class="field-message text-danger" *ngIf="!selectedDatesValid">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Earliest desired date cannot be greater than latest desired date
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Latest Desired Date</label>
+                                    <app-date-picker [isForm]='true' [dateform]='schedulingForm'
+                                        controlName='lastDesiredDate' (dataChange)="onDateChange()" id="lastDesiredDateId"></app-date-picker>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-7">
+                        <div class="row gutter-16">
+                            <div class="col-8">
+                                <div class="form-group">
+                                    <label>Desired Times</label>
+                                    <app-multiselect-dropdown [title]="desiredTimeTitle" [selections]="selectedDesiredTime"
+                                        [showAll]="true" [showSearch]="false" [displaySubItem]="desiredTimeList"
+                                        [filterName]="'Apply'" [selectedMessage]="'times are selected'"
+                                        (onSelectionChanged)="getdesiredTimeSelected($event)"
+                                        (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                                        (clearFilter)="clrDesiredtime()" (applyFilter)="applytimeFilter($event)" id="selectedDesiredTimeId">
+                                    </app-multiselect-dropdown>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>Minimum Time Available</label>
+                                    <ng-select [items]="minimiumTimeList" placeholder="Select Minimum Time"
+                                        formControlName="mintimeavilable" [bindValue]="'id'" [bindLabel]="'name'"
+                                        [notFoundText]="'No record found'" [selectOnTab]="true" [clearable]="false" id="mintimeavilableId">
+                                    </ng-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row gutter-16">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Consultation Office</label>
+                            <app-multiselect-dropdown [title]="consultationOfficetitle" [selections]="selectedOffices"
+                                [displaySubItem]="officeList" [filterName]="'Select Offices'" [showAll]="true"
+                                [selectedMessage]="'offices are selected'"
+                                (onSelectionChanged)="getOfficesSelected($event)"
+                                (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                                (clearFilter)="clrOffices()" (applyFilter)="applyofficeFilter($event)" id="selectedOfficesId">
+                            </app-multiselect-dropdown>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Attorney</label>
+                            <app-multiselect-dropdown [title]="attorneyTitle" [selections]="selectedAttorneys"
+                                [displaySubItem]="attorneyList" [filterName]="'Select Attorneys'" [showAll]="true"
+                                [selectedMessage]="'attorneys are selected'"
+                                (onSelectionChanged)="getAttorneysSelected($event)"
+                                (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                                (clearFilter)="clrAttorneys()" (applyFilter)="applyattorneyFilter($event)" id="selectedAttorneysId">
+                            </app-multiselect-dropdown>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" [disabled]="disableAvailabilityBtn" (click)="checkAvailablity()" id="view-availability-btn">View
+                    Availability</button>
+            </div>
+        </form>
+        <app-loader [active]='viewAvailabilityLoading'></app-loader>
+    </div>
+    <div class="row gutter-16 mt-12">
+        <div class="col-10">
+            <span *ngIf="datesArray?.length" class="fs-12 fw-400 pb-24" id="time-display-in-given-office">(Times displayed are in the given office's time zone)</span>
+            <div class="schedule-acc-wrap">
+                <div class="date-accordian" *ngIf="datesArray?.length">
+                    <ngx-datatable
+                        #table
+                        class="table-footer-pager"
+                        [class.matter-no-data]="datesArray?.length === 0"
+                        [rows]="datesArray"
+                        [columnMode]="ColumnMode.force"
+                        [headerHeight]="0"
+                        [footerHeight]="50"
+                        [messages]="messages"
+                        rowHeight="auto"
+                        [scrollbarH]="true"
+                        [count]="page.totalElements"
+                        [offset]="page.pageNumber"
+                        [limit]="page.size"
+                        (sort)="updateDatatableFooterPage()"
+                        id="datesArrayId">
+
+                        <ngx-datatable-column [resizeable]="false" name="">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                <div class="date-acc-panel open">
+                                    <div class="date-acc-head d-flex align-items-center cursor-pointer" (click)="toggleShowOffice(row)">
+                                        <h4 class="m-0 text-xlarge">{{row.dateName | date: 'fullDate'}}</h4>
+                                        <span class="date-arrow cursor-pointer">
+                                            <em class="icon icon-color"
+                                                [class.icon-angle-up]="!row.showOffices"
+                                                [class.icon-angle-down]="row.showOffices"></em>
+                                        </span>
+                                    </div>
+                                    <div class="date-acc-body" *ngIf="row.showOffices">
+                                        <ng-container *ngFor="let office of row.offices;trackBy: trackByFn">
+                                          <div class="city-acc-panel open" *ngIf="office?.displayOffice">
+                                              <div
+                                                  class="city-acc-head d-flex justify-content-between align-items-center cursor-pointer"
+                                                  (click)="office.showAttorneys=!office.showAttorneys">
+                                                  <div class="helper-text">
+                                                      <h4 class="mb-4">{{office.name}}
+                                                          <span class="fs-12 fw-400 pl-2">
+                                                              {{office.timezone.name}} ({{office.timezone.abbrev}})
+                                                          </span>
+                                                      </h4>
+                                                      <span
+                                                          class="d-block small font-weight-medium">{{(office.attorneys.length > 1) ? office.attorneys.length+' Available Attorneys' : office.attorneys.length+' Available Attorney'}}</span>
+                                                  </div>
+                                                  <span class="city-arrow cursor-pointer">
+                                                      <em class="icon icon-angle-down icon-color"
+
+                                                          [class.icon-angle-up]="!office.showAttorneys"
+                                                          [class.icon-angle-down]="office.showAttorneys"></em>
+                                                  </span>
+                                              </div>
+                                              <div class="city-acc-body" *ngIf="office.showAttorneys">
+                                                  <div class="user-acc-panel open" *ngFor="let att of office.attorneys;trackBy: trackByFn">
+                                                      <div
+                                                          class="user-acc-head d-flex justify-content-between align-items-center cursor-pointer" (click)="att.showTimes=!att.showTimes">
+                                                          <div
+                                                              class="d-flex align-items-center justify-content-between flex-fill">
+                                                              <div>
+                                                                  <h4 class="mb-4">{{att.lastName+', '+att.firstName}}
+                                                                  </h4>
+                                                                  <span class="d-block small helper-text">
+                                                                      {{att.availableTimes | totalAvailablity}}
+                                                                      <span
+                                                                          class="fw-400">{{att | timeMappedValue}}</span>
+                                                                  </span>
+                                                              </div>
+                                                              <span *ngIf="att?.rank"
+                                                                  class="sh-badge sh-badge-primary font-weight-medium py-4 rank-min-width">Ranked
+                                                                  {{att.rank}}{{ (att.rank==1) ? 'st': (att.rank == 2) ? 'nd': (att.rank == 3) ? 'rd': 'th' }}</span>
+                                                          </div>
+                                                          <span class="user-arrow cursor-pointer">
+                                                              <em class="icon icon-angle-down icon-color"
+                                                                  [class.icon-angle-up]="!att.showTimes"
+                                                                  [class.icon-angle-down]="att.showTimes"></em>
+                                                          </span>
+                                                      </div>
+                                                      <div class="user-acc-body" *ngIf="att.showTimes">
+                                                          <ul class="list-unstyled time-list d-flex flex-wrap m-0">
+                                                              <ng-container *ngFor="let time of att.availableTimes;trackBy: trackByFn">
+                                                                <li *ngIf="time?.isAvailable" [class.selected-time]="time.availableTimesStatus">
+                                                                    <span (click)="selectTime($event, UpdateConsultationInformation, row, time, att, office)">
+                                                                      {{time?.name}}
+                                                                    </span>
+                                                                </li>
+                                                              </ng-container>
+                                                          </ul>
+                                                      </div>
+                                                  </div>
+
+                                              </div>
+                                          </div>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-footer>
+                            <ng-template ngx-datatable-footer-template              let-rowCount="rowCount"
+                                let-pageSize="pageSize"
+                                let-selectedCount="selectedCount"
+                                let-curPage="curPage"
+                                let-offset="offset"
+                                let-isVisible="isVisible">
+                                <div class="d-flex justify-content-between flex-fill">
+                                    <div class="d-flex align-items-center">
+                                        <span>
+                                            {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                                            {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                                            {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <select class="custom-select border-less" [(ngModel)]="pangeSelected"
+                                            (change)="changePage()">
+                                            <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                                                [value]="i+1">Page {{ i+1 }} of {{page.totalPages}}</option>
+                                        </select>
+                                        <div class="ml-8">
+                                            <div class="">
+                                                <datatable-pager
+                                                    [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                                    [pagerPreviousIcon]="'datatable-icon-prev'"
+                                                    [pagerNextIcon]="'datatable-icon-skip'"
+                                                    [page]="curPage"
+                                                    [size]="pageSize"
+                                                    [count]="rowCount"
+                                                    [hidden]="!((rowCount / pageSize) > 1)"
+                                                    (change)="table.onFooterPage($event);pageChange($event)">
+                                                </datatable-pager>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </ngx-datatable-footer>
+                    </ngx-datatable>
+                </div>
+
+                <div class="alert alert-danger d-flex justify-content-between no-shadow my-24"
+                    *ngIf="!datesArray?.length && viewAvailablityisSubmit">
+                    <div class="d-flex">
+                        <em class="alert-icon icon-error icon-danger"></em>
+                        <div class="d-flex align-items-center flex-wrap">
+                            <h4 class="mr-16 mt-0 mb-0">No Availability Found</h4>
+                            <span>Your search didn't return any results. Please adjust the scheduling details and try again.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #availablityRequiredPopup let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">{{ requiredTitle }} Required</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="alert alert-danger d-flex justify-content-between mb-24">
+            <div class="d-flex">
+                <em class="alert-icon icon icon-error icon-danger"></em>
+                <div class="d-flex align-items-center flex-wrap">
+                    <h4 class="mr-20 mt-0 mb-0">Error</h4>
+                    You must select at least 1 {{ requiredTitle | lowercase }}.
+                </div>
+            </div>
+        </div>
+        <p class="m-0 lh-20">The filter has been reset to the default value of All.</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-primary" id="close-btn">Close</button>
+    </div>
+</ng-template>
+
+
+<ng-template #UpdateConsultationInformation let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Update Consultation Information</h3>
+    </div>
+    <div class="modal-body">
+        <div class="alert alert-warning d-flex justify-content-between mb-24">
+            <div class="d-flex">
+                <em class="alert-icon icon icon-warning icon-warning"></em>
+                <div class="d-flex align-items-center flex-wrap">
+                    <h4 class="mt-0 mb-4">Warning</h4>
+                    The consultation office and/or attorney you're scheduling with is different than your initial
+                    selection in the <i>Basic Matter Information</i> section.
+                </div>
+            </div>
+        </div>
+        <p class="m-0 lh-20">Scheduling an event with this attorney in this office will automatically update the <span
+                class="font-weight-medium">Consultation Office</span> and <span
+                class="font-weight-medium">Attorney</span> fields in the <i>Basic Matter Information</i> section as
+            well. Please confirm this update to the consultation information.</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light"
+            (click)="setSelectedTimeDateValues(false, selectedDate, selectedTime, selectedAtt, selectedOffice)" id="cancel-btn">Cancel,
+            Keep Original Selections</button>
+        <button type="button" class="btn btn-primary"
+            (click)="setSelectedTimeDateValues(true, selectedDate, selectedTime, selectedAtt, selectedOffice)" id="confirm-and-update-consultation-info-btn">Confirm
+            and Update Consultation Information</button>
+    </div>
+</ng-template>

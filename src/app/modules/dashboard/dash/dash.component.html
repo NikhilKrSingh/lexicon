@@ -1,0 +1,97 @@
+<div class="container">
+  <div class="main-content">
+    <div class="heading">
+      <h1>Dashboard</h1>
+    </div>
+    <div class="card">
+      <div class="card-body" *ngIf="showTaskList">
+        <div class="task-list-row">
+          <h2 class="mb-24">Your Tasks</h2>
+          <div class="row gutter-16">
+            <div class="col-3">
+              <div class="form-group">
+                <label>Status</label>
+                <ng-select [items]="filterOptions" placeholder="Select task Filter"
+                [bindValue]="'id'" [bindLabel]="'name'" [(ngModel)]="selectedFilter"
+                [notFoundText]="'No record found'" [clearable]="false" [selectOnTab]="true" (change)="filterTasks($event)" id="status-select">
+                </ng-select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="custom-table">
+            <div class="table-responsive">
+              <ngx-datatable #table class="material common-table" [rows]="activeTasksList" [columnMode]="ColumnMode.force"
+                [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="page.totalElements"
+                [offset]="page.pageNumber" [limit]="page.size" [selectionType]="'checkbox'"
+                [sorts]="[{prop: 'firstName', dir: 'asc'}]" (sort)="updateFooterPage()" id="active-task-listing-tbl" [scrollbarH]="false" [scrollbarV]="false">
+                <ngx-datatable-column [resizeable]="false" name="Task" prop="taskName" [width]="400">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" name="Due Date" [width]="35">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                              <span class="d-block" [class.text-danger]="row.isOverDue && row.taskStatusId !== completedTaskId && !row.isSame">{{row.dueDate | date: 'M/d/y'}}</span>
+                              <span *ngIf="row.isOverDue && row.taskStatusId !== completedTaskId && !row.isSame" class="helper-text font-weight-normal">Overdue</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="matterName" name="Matter Name" [width]="60">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" name="Client Name" prop="clientDisplayName" [width]="60">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" name="Status" [width]="50">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <span *ngIf="completedTaskId !== row.taskStatusId" class="sh-badge sh-badge-danger text-nowrap font-weight-medium">Incomplete</span>
+                              <span *ngIf="completedTaskId === row.taskStatusId" class="sh-badge sh-badge-success text-nowrap font-weight-medium">Completed</span>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" name="Action" [width]="100">
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <a href="javascript:void(0)" class="font-weight-medium d-inline-block" [class.disabled]="row.taskStatusId === completedTaskId" (click)="markTaskAsComplete(row)">Mark as Complete</a>
+                  </ng-template>
+
+                </ngx-datatable-column>
+                <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                    let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+              <div class="d-flex justify-content-between flex-fill">
+                <div class="d-flex align-items-center">
+                  <div class="table-items d-flex align-items-center mr-36">
+                    Items per page:
+                    <div class=" ml-8">
+                      <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                        <option *ngFor="let limit of limitArray;trackBy : trackByFn" [value]="limit">{{ limit }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <span>
+                      {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                      {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                  </span>
+                </div>
+
+                <div class="d-flex align-items-center">
+                  <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                    <option *ngFor='let num of page.totalPages | counterPipe;trackBy : trackByFn;let i= index' [value]="i+1">Page {{ i+1 }} of
+                      {{page.totalPages}}</option>
+                  </select>
+                  <div class="ml-8">
+                    <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                      [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                      [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                      [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                      (change)="table.onFooterPage($event);pageChange($event)">
+                    </datatable-pager>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-footer>
+        </ngx-datatable>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-loader [active]='loading'></app-loader>

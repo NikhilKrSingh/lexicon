@@ -1,0 +1,31 @@
+<div class="card">
+  <div class="card-body">
+    <h2>Create Office Notes</h2>
+    <div *ngIf="!showThis">
+      <div class="form-group mb-0">
+        <label>Label</label>
+        <ejs-richtexteditor #toolsRTE id='alltoolRTE' [(ngModel)]="officeNotes"></ejs-richtexteditor>
+      </div>
+
+    </div>
+    <div *ngIf="showThis">
+      <div class="form-group">
+        <label class="bdr-btm-full">Note</label>
+        <p innerHTML="{{officeNotes}}" id="office-notes-text"></p>
+
+      </div>
+      <div class="form-group mb-0">
+        <button class="btn btn-link btn-icon px-0 d-flex align-items-center mt-4 mb-16" type="button"
+          (click)="showThis=false" id="edit-note-btn"><i class="icon icon icon-edit"></i>Edit Note</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-end">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="prev()" id="cancel-lawoffice-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='next()' [disabled]="submitButton" id="finish-btn">Finish</button>
+  </div>
+</div>
+<app-loader class="law-office-notes" [active]="loading"></app-loader>

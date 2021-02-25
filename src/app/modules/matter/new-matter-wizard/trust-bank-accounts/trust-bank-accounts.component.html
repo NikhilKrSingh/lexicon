@@ -1,0 +1,248 @@
+<h3 class="mb-8 mt-4">Trust Bank Account <sup  class="text-danger" *ngIf="opratingMode == 'Edit' || opratingMode == 'Create' ">*</sup></h3>
+
+  
+  <div  class="alert alert-danger d-flex justify-content-between my-24 no-shadow" [class.ng-invalid]="isFormSubmitted && (selectedAccounts?.length == 0)" *ngIf="isFormSubmitted && (selectedAccounts?.length == 0)" id="error-display">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-info ml-12"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        <h4 class="mr-16 mt-0 mb-0">Error</h4>
+        <span>Please select a trust bank account before proceeding.</span>
+      </div>
+    </div>
+  </div>
+  <div  class="row my-24" *ngIf="originalOfficeBankList?.length > 1 && pageType != 'matterDashboard'">
+    <div class="col-8">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <input
+            type="text"
+            class="form-control search-input"
+            name="searchAccount"
+            placeholder="Search by account name or account number"
+            [(ngModel)]="searchText"
+            (keyup)='applyFilter()'
+            [disabled]="loading"
+            id="search-ac">
+
+            <button
+            class="btn"
+            type="button"
+            (click)='applyFilter()'
+            [disabled]="loading"
+            id="search-btn"
+            >Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div  class="row mb-18" *ngIf="originalOfficeBankList?.length > 1 && pageType != 'matterDashboard' ">
+    <div class="col-2">
+        <div class="form-group">
+            <label>Merchant Account</label>
+            <ng-select
+              [items]="merchantAccountFilterList"
+              placeholder="Choose an option"
+              [(ngModel)]="merchantAccountFilterId"
+              [bindValue]="'id'"
+              [bindLabel]="'name'"
+              [clearable]="true"
+              [selectOnTab]="true"
+              [readonly]="loading"
+              (change)="applyFilter()"
+              id="merchant-ac">
+            </ng-select>
+        </div>
+    </div>
+    <div class="col-2">
+      <div class="form-group">
+          <label>Transaction Type</label>
+          <ng-select
+            [items]="transactionAccountFilterList"
+            placeholder="Choose an option"
+            [(ngModel)]="transactionAccountFilterId"
+            [bindValue]="'id'"
+            [bindLabel]="'name'"
+            [readonly]="loading"
+            [clearable]='false'
+            [selectOnTab]="true"
+            (change)="applyFilter()"
+            id="transaction-type">
+          </ng-select>
+      </div>
+    </div>
+
+  </div>
+  <div class="custom-table matter-list">
+      <ngx-datatable
+          #table
+          class="material common-table matter-table expandable datatable-auto-height no-min-height"
+          [class.matter-no-data]="officeBankList?.length === 0"
+          [rows]="officeBankList"
+          [columnMode]="'force'"
+          [headerHeight]="50"
+          [footerHeight]="footerHeight"
+          rowHeight="auto"
+          [selectionType]="SelectionType.checkbox"
+          [count]="page.totalElements"
+          [offset]="page.pageNumber"
+          [limit]="page.size"
+          (sort)="calculateTotalPage()"
+          [selected]="selectedAccounts"
+          (select)="onSelect($event)"
+          id="office-bank-tbl">
+
+          <ngx-datatable-row-detail [rowHeight]="100" #myDetailRow >
+            <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
+              <div class="px-48 invoice-shadow">
+                <div class="table-responsive">
+                  <table class="table table-borderless">
+                    <thead>
+                      <tr>
+                        <th style="width: 300px;">Credit Card Trust Bank Account</th>
+                        <th>Account Number</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{row?.creditCardAccountName}}</td>
+                        <td>---- ---- ---- {{row?.creditCardAccountNumber | substrByLength : 4 }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-row-detail>
+
+          <ngx-datatable-column [resizeable]="false" [sortable]="true" name="Name"
+            [canAutoResize]="false" [width]="300">
+            <ng-template  let-row="row" let-value="value" ngx-datatable-cell-template>
+              <div class="d-flex" (click)="toggleExpandRow(row, true)" (change)="toggleExpandRow(row)">
+                <div class="custom-control custom-radio-position custom-radio mb-0 pr-8" [hidden]="(originalOfficeBankList?.length == 0)" *ngIf="(opratingMode == 'Create' || opratingMode == 'Edit' )">
+                  <input type="radio" id="select_{{row?.id}}"
+                    [value]="row?.id" class="custom-control-input"
+                    name="creditCardTrustAccount"
+                    [checked]="selectedAccounts?.id == row?.id || opratingAccountReadOnlyFlag"
+                   (change)="onSelect(row)" [disabled]="opratingAccountReadOnlyFlag">
+                  <label class="custom-control-label" for="select_{{row?.id}}"></label>
+                </div>
+                <span>{{ value }}</span>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+
+          
+
+          
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="isMerchantAccount"
+              name="Merchant Account"
+              [width]="50">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <div *ngIf="value" class="ml-48">
+                  <em class="icon icon-check fs-10 icon-color"></em>
+                </div>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="isCreditCardAccount"
+              name="Credit Card"
+              [width]="40">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <div *ngIf="value" class="ml-28">
+                  <em class="icon icon-check fs-10 icon-color"></em>
+                </div>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="isAchAccount"
+              name="ACH"
+              [width]="40">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <div *ngIf="value" class="ml-8">
+                  <em class="icon icon-check fs-10 icon-color"></em>
+                </div>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [resizeable]="false"
+          name="Account Number"
+          [width]="80" >
+          <ng-template ngx-datatable-cell-template let-row="row">
+            <span *ngIf="row.isMerchantAccount">{{ '---- ---- ---- ' + row?.merchantAccountNumber?.substr(row?.merchantAccountNumber?.length - 4) }}</span>
+            <span *ngIf="!row.isMerchantAccount">{{ '---- ---- ---- ' + row?.nonMerchantAccountNumber?.substr(row?.nonMerchantAccountNumber?.length - 4) }}</span>
+          </ng-template>
+      </ngx-datatable-column>
+
+
+          <ngx-datatable-column [resizeable]="false"
+              prop="lastTransactionDate"
+              name="Last Transaction Date"
+              [width]="100">
+              <ng-template ngx-datatable-cell-template let-value="value">
+                <span>{{ value | date: 'MM/dd/yyyy'}}</span>
+              </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-footer>
+              <ng-template
+                let-rowCount="rowCount"
+                ngx-datatable-footer-template
+                let-pageSize="pageSize"
+                let-curPage="curPage"
+                let-offset="offset"
+                let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select
+                            class="custom-select border-less"
+                            [formControl]="selectPageSize"
+                            (change)="pageSizeChange()">
+                              <option
+                                *ngFor="let limit of limitArray;trackBy: trackByFn"
+                                [value]="limit">
+                                {{ limit }}
+                              </option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                        {{(rowCount > (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+                      </span>
+                    </div>
+                    <div class="d-flex align-items-center" *ngIf="(page.totalPages | counterPipe) && (page.totalPages | counterPipe).length">
+                      <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                          Page {{ i+1 }} of {{page.totalPages}}
+                        </option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager
+                          [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'"
+                          [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage"
+                          [size]="pageSize"
+                          [count]="rowCount"
+                          [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);changePageDropDown($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+              </ng-template>
+            </ngx-datatable-footer>
+      </ngx-datatable>
+      <app-loader [active]="loading"></app-loader>
+  </div>

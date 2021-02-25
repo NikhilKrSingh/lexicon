@@ -1,0 +1,102 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item active">All Notifications</li>
+        </ol>
+        <div class="heading">
+            <h1>All Notifications</h1>
+        </div>
+        
+
+        <div class="card" *ngIf="viewAllList.length">
+            <div class="card-body pt-16">
+                <ngx-datatable #table class="material common-table notific-table"
+                    [class.matter-no-data]="viewAllList?.length === 0" [rows]="viewAllList"
+                    [columnMode]="ColumnMode.force" [headerHeight]="0" [footerHeight]="50" [messages]="messages"
+                    rowHeight="auto" [scrollbarH]="true" [count]="page.totalElements" [offset]="page.pageNumber"
+                    [limit]="page.size" (sort)="updateDatatableFooterPage()" id="view-all-listing-tbl">
+
+                    <ngx-datatable-column [resizeable]="false" name="" [width]="600">
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                            <div class="result-row d-flex">
+                                <div class="result-icon pr-10 mt-2">
+                                    <em class="icon icon-matters mr-16" *ngIf="row.category == 'Matters' || row.category == 'Matter' || row.category == 'Matter Ledger'"></em>
+                                    <em class="icon icon-clients icon-color mr-16" *ngIf="row.category == 'Client' || row.category == 'Potential Client' || row.category == 'Potential Clients'"></em>
+                                    <em class="icon icon-contacts icon-color mr-16" *ngIf="row.category == 'Profile Billing' || row.category == 'Pre Bill'"></em>
+                                    <em class="icon icon-calendar icon-color mr-16" *ngIf="row.category == 'Calendar' || row.category == 'Calendar Event'"></em>
+                                    <em class="icon icon-building icon-color mr-16" *ngIf="row.category == 'Office'"></em>
+                                    <em class="icon icon-employees icon-color mr-16" *ngIf="row.category == 'Employee'"></em>
+                                    <em class="icon icon-timekeeping icon-color mr-16" *ngIf="row.category == 'Timesheet'"></em>
+                                    <em class="icon icon-documents icon-color mr-16" *ngIf="row.category == 'DMS Path' || row.category == 'DMS Matter Folder'"></em>
+                                </div>
+                                <div class="result-content d-flex flex-column flex-fill">
+                                    <div class="result-title">
+                                        {{row.notificationMessage}}
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" name="" [width]="20">
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                            {{row.notificationDate}}
+                        </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" name="" [width]="20">
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                            <a (click)="openMessage(row)" class="font-weight-medium" href="javascript:void(0)">
+                                {{row.category | categoryAction}}
+                            </a>
+                        </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-footer>
+                        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                            let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                            let-isVisible="isVisible">
+                            <div class="d-flex justify-content-between flex-fill">
+                                <div class="d-flex align-items-center">
+                                    <div class="table-items d-flex align-items-center mr-36">
+                                        Items per page:
+                                        <div class=" ml-8">
+                                            <select class="custom-select border-less" [formControl]="pageSelector"
+                                                (change)="changePageSize()">
+                                                <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <span>
+                                        {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                                        {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                                        {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex align-items-center">
+                                    <select class="custom-select border-less" [(ngModel)]="pangeSelected"
+                                        (change)="changePage()">
+                                        <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                                            Page
+                                            {{ i+1 }} of {{page.totalPages}}</option>
+                                    </select>
+                                    <div class="ml-8">
+                                        <datatable-pager
+                                            [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                            [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                            [pagerPreviousIcon]="'datatable-icon-prev'"
+                                            [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage" [size]="pageSize"
+                                            [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                                            (change)="table.onFooterPage($event);pageChange($event)">
+                                        </datatable-pager>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ngx-datatable-footer>
+                </ngx-datatable>
+            </div>
+        </div>
+    </div>
+    <app-loader [active]="isLoading"></app-loader>
+</div>

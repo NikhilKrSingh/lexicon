@@ -1,0 +1,49 @@
+<div class="modal-header d-block">
+  <h2 class="modal-title">Edit Fixed Fee Settings</h2>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)='dismiss()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="row gutter-16">
+    <div class="col-12">
+      <div class="form-group">
+        <label class="mb-16">Are the client's matter fixed-fee?</label>
+        <div class="custom-control custom-radio">
+          <input type="radio" id="customRadio1" name="customRadio" class="custom-control-input" [value]='true'
+            [(ngModel)]='billingSettings.isFixedAmount' (change)='change()'>
+          <label class="custom-control-label" for="customRadio1">Yes</label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input" [value]='false'
+            [(ngModel)]='billingSettings.isFixedAmount' (change)='change()'>
+          <label class="custom-control-label" for="customRadio2">No</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12" *ngIf='billingSettings.isFixedAmount'>
+      <div class="form-group">
+        <label class="d-flex justify-content-between char-limit">
+          Fixed Fee
+        </label>
+        <input type="text" class="form-control" prefix="$" mask="separator.2" thousandSeparator="," placeholder="Enter rate"
+          [(ngModel)]='billingSettings.fixedAmount' id="enter-rate">
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="form-group position-relative">
+        <label class="d-flex justify-content-between char-limit">
+          <span>Change Note (optional)</span>
+          <span> {{changeNotes?.length || 0}}/1000</span>
+        </label>
+        <textarea class="form-control min-h-180" maxlength="1000" placeholder="Enter Change Notes" [(ngModel)]="changeNotes" id="change-note"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='close()' id="save-changes">Save Changes</button>
+</div>

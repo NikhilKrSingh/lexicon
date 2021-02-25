@@ -1,0 +1,43 @@
+<form >
+    <div class="container">
+        <div class="main-content">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)"
+                        [routerLink]="['../../reporting']">Reporting</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Trust Ledger History Report</li>
+            </ol>
+            <div class="heading">
+                <h1>Trust Ledger History Report</h1>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="mb-8">Generate Report</h2>
+                    <p class="lh-20">Generate your report by selecting the options below.</p>
+                    <div class="row gutter-16">
+                        <div class="col-5">
+                            <app-date-range-report (startDate)="startDate($event)" [title]="'Date Range'"
+                                (endDate)="endDate($event)"></app-date-range-report>
+                            <div class="form-group">
+                                <label>Matters <sup>*</sup></label>
+                                <app-custom-multiselect-dropdown [title]="title" [selections]="selectedMatterListClone" [loading]="loading"
+                                     (search)="onSearch($event)" (isAllStatus)="isAllStatus($event)"
+                                   [showAll]= "true"  [displaySubItem]="matterListClone" (clearFilter)="clearFilter()" (applyFilter)="applyFilter()" (scrollEnd)="scrollEnd()" [isPerformSearch]="isPerformSearch"
+                                  [filterName]="filterName" [searchValue]="searchText" [selectedMessage] = "selectedMessage" [placeholder]="placeholder" (selectionChanged)="processSelectUnselect($event)"
+                                  ></app-custom-multiselect-dropdown>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end pt-8">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+                    <button type="button" class="btn btn-primary" [disabled]="!exportCsvFlag || !title"(click)="submitTrustTransactionDetailReport()" id="export-to-csv">Export to CSV</button>
+                </div>
+            </div>
+            <app-loader [active]='loadingReport'></app-loader>
+
+        </div>
+    </div>
+</form>

@@ -1,0 +1,381 @@
+<h2 class="mb-24">Portal Accounts</h2>
+<div class="header-search flex-fill d-flex mb-24">
+    <form action="#" class="small-search">
+        <div class="header-search-wrapper">
+            <input #search type="text" class="form-control search-input" name="q1" id="q1" [(ngModel)]="searchInput"
+            placeholder="Search by name, or email address..." required="" (keyup)="applyFilter($event)">
+            <button class="btn" type="submit">Search</button>
+        </div>
+    </form>
+</div>
+<div class="row gutter-16">
+    <div class="col-3">
+        <div class="form-group">
+            <label>Type</label>
+            <app-multiselect-dropdown [title]="title" [selections]="selectedType" [displaySubItem]="typeList"
+            [filterName]="filterName" (onSelectionChanged)="getSelectedType($event)"
+            (clearFilter)="clearFilter('type')" (applyFilter)="applyFilter()" id="type-select"></app-multiselect-dropdown>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="form-group">
+            <label>Status</label>
+            <app-multiselect-dropdown [title]="title1" [selections]="selectedStatus" [displaySubItem]="statusList"
+            [filterName]="filterName" (onSelectionChanged)="getSelectedStatus($event)"
+            (clearFilter)="clearFilter('status')" (applyFilter)="applyFilter()" id="status-select"></app-multiselect-dropdown>
+        </div>
+    </div>
+    <div class="col-4">
+        <label>&nbsp;</label>
+        <div class="custom-control custom-checkbox mt-8">
+            <input class="custom-control-input" id="po-3" type="checkbox" [value]="false"  [(ngModel)]="sharedDocument" (change)="applyFilter()">
+            <label class="custom-control-label" for="po-3">Users with no shared documents</label>
+        </div>
+    </div>
+</div>
+<div class="custom-table">
+    <div class="custom-table matter-list position-relative">
+      <ngx-datatable #table class="material common-table no-hover-datatable no-cursor-datatable" [class.fix-col-right]="tables?.frozenRightArr[0]" [class.matter-no-data]="portalAccountList?.length === 0"
+        [rows]="portalAccountList" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight"
+        [messages]="messages" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+        [scrollbarH]="true" [sorts]="[{prop: 'name', dir: 'asc'}]" (sort)="updateDatatableFooterPage()" id="portal-ac-list-tbl">
+        <ngx-datatable-column [resizeable]="false" prop="name" name="Name" [sortable]="true" [width]="230">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [sortable]="true" [width]="230">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="type" name="Type" [sortable]="true" [width]="90">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="sharedDocumentCount" name="Shared" [sortable]="true" [width]="90">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="createdAt" name="Created" [sortable]="true" [width]="120">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <strong>{{row.createdAt | date: 'MMM.  dd, yyyy'}}</strong><br>
+            {{row.createdAt | date:'hh:mm'}}{{ row.createdAt | date : 'a' | lowercase }}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="lastLogin" name="Last Login" [sortable]="true" [width]="120">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <strong>{{row.lastLogin | date: 'MMM.  dd, yyyy'}}</strong><br>
+            {{row.lastLogin | date:'hh:mm'}}{{ row.lastLogin | date : 'a' | lowercase }}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="statusName" name="Status" [sortable]="true" [width]="120">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <span class="sh-badge text-nowrap font-weight-medium sh-badge-primary">{{row.statusName}}</span>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='tables?.frozenRightArr[0]'
+          [width]="100" prop='id'>
+          <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+            <div class="d-flex justify-content-end">
+              <div class="dropdown dropdown-hover-table" [class.active]="currentActive == rowIndex"
+                (click)="openMenu(rowIndex, $event)" appAutoCloseOutsideClick
+                (outsideClick)="onClickedOutside($event, rowIndex)">
+                <em class="icon icon-dot-verti"></em>
+                <div class="dropdown-menu dropdown-menu-right document-matter" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" (click)="openPersonalinfo(DeactivateAccount,'','modal-lmd',row,true)" *ngIf="row.statusName == 'Active'" id="deactivate-ac-index-{{rowIndex}}">Deactivate Account</a>
+                  <a class="dropdown-item" (click)="openPersonalinfo(ActivateAccount,'','modal-lmd',row,true)" *ngIf="row.statusName == 'Inactive'" id="activate-ac-index-{{rowIndex}}">Activate Account</a>
+                  <a class="dropdown-item" (click)="openPersonalinfo(DeleteAccount,'','modal-lmd',row,true)" *ngIf="row.statusName == 'Pending'" id="delete-ac-index-{{rowIndex}}">Delete Account</a>
+                  <a class="dropdown-item" (click)="resendActivationLink(row)" *ngIf="row.statusName == 'Pending'" id="resend-activation-email-index-{{rowIndex}}">Resend Activation Email</a>
+
+                  <a class="dropdown-item" (click)="getSharedDocuments(SharedDocuments,'xl','', row);selectedRecord=row;" *ngIf="row.sharedDocumentCount > 0 " id="view-shared-doc-index-{{rowIndex}}">View Shared Documents</a>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-footer>
+          <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+            let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+            <div class="d-flex justify-content-between flex-fill">
+              <div class="d-flex align-items-center">
+                <div class="table-items d-flex align-items-center mr-36">
+                  Items per page:
+                  <div class=" ml-8">
+                    <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                      <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                    </select>
+                  </div>
+                </div>
+                <span>
+                  {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                  {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                  {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                </span>
+              </div>
+  
+              <div class="d-flex align-items-center">
+                <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                  <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                    of {{page.totalPages}}</option>
+                </select>
+                <div class="ml-8">
+                  <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                    [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                    [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                    (change)="table.onFooterPage($event);pageChange($event)">
+                  </datatable-pager>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-footer>
+      </ngx-datatable>
+      <app-loader [active]="portalLoading"></app-loader>
+    </div>
+  </div>
+
+<ng-template #DeactivateAccount let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Deactivate Account</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click');selectedRecord=null" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div class="d-flex align-items-start missing-data">
+            <em class="icon icon-warning text-warning"></em>
+            <div class="lh-20 ml-16">
+                <p class="m-0">Are you sure you want to deactive this account? Deactivation will remove this user from any shared documents and cannot be undone.</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');selectedRecord=null" id="no-btn">No</button>
+      <button type="button" class="btn btn-primary" (click)="deactivateAccount()" id="yes-deactivate-btn">Yes, deactivate</button>
+    </div>
+</ng-template>
+
+<ng-template #ActivateAccount let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Activate Account</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');selectedRecord=null" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+      <div class="d-flex align-items-start missing-data">
+          <em class="icon icon-warning text-warning"></em>
+          <div class="lh-20 ml-16">
+              <p class="m-0">Are you sure you want to active this account?</p>
+          </div>
+      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');selectedRecord=null" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="activateAccount()" id="yes-activate-btn">Yes, activate</button>
+  </div>
+</ng-template>
+
+<ng-template #DeleteAccount let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Delete Account</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');selectedRecord=null" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+      <div class="d-flex align-items-start missing-data">
+          <em class="icon icon-warning text-warning"></em>
+          <div class="lh-20 ml-16">
+              <p class="m-0">Are you sure you want to delete this account?</p>
+          </div>
+      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');selectedRecord=null" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="deleteAccount()"  id="yes-delete-btn">Yes, delete</button>
+  </div>
+</ng-template>
+
+<ng-template #RevokeAccess let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Revoke Access</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');selectedRevokeRecord=null;" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+      <div class="d-flex align-items-start missing-data">
+          <em class="icon icon-warning text-warning"></em>
+          <div class="lh-20 ml-16">
+              <p class="m-0">Are you sure you want to revoke access to <span style="font-weight: bold">{{selectedRevokeRecord && selectedRevokeRecord.fileName ? selectedRevokeRecord.fileName : selectedRevokeRecord.name}}</span>? This action cannot be undone.</p>
+          </div>
+      </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');selectedRevokeRecord=null" id="no-btn">No</button>
+    <button type="button" class="btn btn-primary" (click)="revokeAccess(modal)" id="yes-revoke-btn">Yes, revoke</button>
+  </div>
+</ng-template>
+
+
+<ng-template #SharedDocuments let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-8">Shared Documents</h3>
+      <h4 class="helper-text m-0">{{selectedRecord.name}}</h4>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click');selectedRecord = null;" aria-label="Close" id="close-btn">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+        <ul class="list-unstyled d-flex dms-bredcumb mb-24 text-xlarge align-items-center mb-16 flex-wrap">
+          <li (click)="getSharedDocuments('','','', selectedRecord)">Firm Name</li>
+          <li *ngFor="let item of breadCrumb;trackBy: trackByFn;let last = last;let i=index;" [ngClass]="last ? 'active':''">
+            <a href="JavaScript:void(0);" (click)="getDetailsFolder(item,i)"
+              *ngIf="!last" id="folder-detail-index-{{i}}">{{item.name}}</a>
+            <span *ngIf="last && item.name">{{item.name}}</span>
+            <span *ngIf="last && item.fileName"><span class="file-icon"><img width="20px"
+                  [src]="item.fileName | commonService: 'getFileImage'"></span>{{item.fileName}}
+            </span>
+          </li>
+        </ul>
+        <div class="custom-table">
+          <div class="custom-table matter-list">
+            <ngx-datatable #table class="material common-table " [class.matter-no-data]="folderList?.length === 0"
+              [rows]="folderList" [columnMode]="ColumnMode.force" [headerHeight]="50"
+              [messages]="messages" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" (sort)="mySortingFunction($event)" [externalSorting]="true"
+              [scrollbarH]="true" [sorts]="[{prop: 'name', dir: 'asc'}]" id="folderlisting-tbl">
+
+              <ngx-datatable-column [resizeable]="false" name="Name" [width]="120">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div *ngIf="!row.fileName" class="d-flex align-items-center" (dblclick)="getDetailsFolder(row)">
+                    <div class="info-hover position-relative">
+                      <span class="file-icon file-folder-icon d-inline-block mr-8 text-large"><em
+                          class="icon icon-folder"
+                          [ngClass]="(row.status==='Archived')?'text-secondary':''"></em></span>
+                      <a href="javascript:void(0)"
+                        *ngIf="row.status!=='Archived'">
+                        {{row.name | truncate: 30}}</a>
+                      <span class="text-ellipsis text-secondary" *ngIf="row.status==='Archived'">
+                        {{row.name | truncate: 30}}</span>
+                      <div class="tooltip bs-tooltip-top left" role="tooltip" *ngIf="row.name.length > 30"
+                        data-placement="right">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner tooltip-lg">
+                          <p>{{ row.name }} </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="row.fileName" class="d-flex align-items-center" >
+                    <div class="info-hover position-relative">
+                      <span class="file-icon"><img width="20px" [src]="row.fileName | commonService: 'getFileImage'"></span>
+                      <span class="">
+                        {{row.fileName | truncate: 30}}</span>
+                      <div class="tooltip bs-tooltip-top left" role="tooltip" *ngIf="row.fileName.length > 30"
+                        data-placement="right">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner tooltip-lg">
+                          <p>{{ row.fileName }} </p>
+                        </div>
+                      </div>
+                      <br>
+                      <small *ngIf="row.version">(Version {{ row.version }})</small>
+                      <small *ngIf="row.status === 'Archived'">( Archived)</small>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="owner.firstName" name="Owner"
+              [width]="60">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                    <span *ngIf="row.owner?.id == currentUserInfo?.id">Me</span>
+                  <div class="info-hover position-relative"
+                    *ngIf="row.owner && row.owner?.id != currentUserInfo?.id">
+                    <a href="javascript:void(0)" class="text-decoration">
+                      <span>{{(row.owner.firstName && row.owner.lastName)? row.owner.firstName+' '+row.owner.lastName : row.owner.firstName }}</span>
+                    </a>
+                    <div class="tooltip bs-tooltip-top left" role="tooltip" *ngIf="row.owner.email">
+                      <div class="arrow"></div>
+                      <div class="tooltip-inner tooltip-lg">
+                        <p>{{ row.owner.email }} </p>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="category_name" [sortable]="true"  name="Category" [width]="60">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <ng-container *ngIf="row.fileName && (row.categories && row.categories.length > 0)">
+                  <span> {{ row.categories[0].name }}<span *ngIf="row.categories.length > 1">..</span> </span>
+                </ng-container>
+                <div class="d-inline-flex justify-content-between"
+                  *ngIf="row.fileName && (row.categories && row.categories.length > 1)">
+                  <div class="info-hover position-relative">
+                    <a href="javascript:void(0)" class="text-decoration">
+                      <span>... +{{row.categories.length -1}} more</span>
+                    </a>
+                    <div class="tooltip bs-tooltip-top center" role="tooltip">
+                      <div class="arrow"></div>
+                      <div class="tooltip-inner tooltip-lg">
+                        <p>Categories</p>
+                        <p *ngFor="let cat of row.categories | orderBy;trackBy: trackByFn">{{ cat.name}} </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="true" name="File Size"
+            prop="fileSizeInKB" [width]="60">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <span *ngIf="row.fileName && (row.fileSizeInKB) < 1000">
+                {{ row.fileSizeInKB | commonService: 'formatKiloBytes'}}
+              </span>
+              <span *ngIf="row.fileName && (row.fileSizeInKB/1024) >= 1000">
+                {{(row.fileSizeInKB/1024) | toFixed: 2}} MB
+              </span>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="lastUpdated"
+          name="Last Updated" [width]="60">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <strong>{{value | date: 'MMM dd,yyyy'}}</strong><br>
+            {{value | date:'hh:mm a'}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" [sortable]="false" name="" [width]="40">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <div *ngIf="row?.isFillableTemplate || row?.isDraftingTemplate || row?.checkedOutDateTime ">
+              <div class="lbl-wraps d-flex" *ngIf="row.fileName">
+                <label class="lbl-tag" for="" *ngIf="row.isFillableTemplate">Fillable Template</label>
+                <label class="lbl-tag" for="" *ngIf="row.isDraftingTemplate">Drafting Template</label>
+                <label class="lbl-tag" for="" *ngIf="row.checkedOutDateTime && !row.checkedInDateTime">Checked
+                  Out</label>
+                <div class="info-hover position-relative"
+                  *ngIf="row.checkedOutDateTime && !row.checkedInDateTime">
+                  <em class="icon icon-info text-large"></em>
+                  <div class="tooltip bs-tooltip-top" role="tooltip">
+                    <div class="arrow"></div>
+                    <div class="tooltip-inner">
+                      <h6>Checked Out By:</h6>
+                      <p>
+                        {{ (row?.checkedOutTo && row.checkedOutTo?.firstName) ? row.checkedOutTo?.firstName: ''}}
+                        {{ (row?.checkedOutTo && row.checkedOutTo?.lastName) ? row.checkedOutTo?.lastName: ''}}
+                      </p>
+                      <p class="mb-8">
+                        {{ (row.checkedOutTo && row.checkedOutTo.email) ? row.checkedOutTo.email : '' }}</p>
+                      <h6>Date/Time</h6>
+                      <p>{{ row.checkedOutDateTime | date: 'MMM dd, yyyy hh:mm a'}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='true'
+                [width]="100" prop='id'>
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div class="d-flex justify-content-end"><a href="javascript:void(0);" (click)="openPersonalinfo(RevokeAccess,'','modal-lmd',row,false); selectedRevokeRecord=row" id="revoke-access-index-{{rowIndex}}" >Revoke Access </a></div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,40 @@
+.pr-10{padding-right: 10px !important;}
+.w-10{max-width: 10%;}
+.search-results{
+    .card-head{
+        padding: 32px 32px 0;
+    }
+    .search-filter{
+        .dropdown{display: inline-block;
+            &.dropdown-lg{
+                .dropdown-toggle{font-size: 28px; font-weight: 500; line-height: 36px;}
+            }
+        }
+    }
+
+    .result-row{border-top:1px solid #c4ccd4;
+        &:first-child{border-top: 0;}
+        .btn-txt{font-size: 14px;font-weight: 500;}
+        .result-content{
+            .result-title{font-size: 18px;color: #353B4B;}
+        }
+    }
+}
+.custom-tooltip
+{
+    left: 50% !important;
+    right: auto !important;
+}
+.custom-arrow
+{
+    right: 50% !important;
+}
+.mw-235{
+    min-width: 235px;
+}
+.mh-150{
+    min-height: 250px;
+}
+
+
+

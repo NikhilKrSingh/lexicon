@@ -1,0 +1,90 @@
+<div class="d-flex justify-content-center">
+  <div class="dms-setting-wrap">
+    <div class="headgin">
+      <h1>Settings</h1>
+    </div>
+    <div>
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <a href="javascript:void(0);" (click)="selecttabs1 = mytabs" *ngFor="let mytabs of alltabs1; trackBy: trackByFn;let i = index;" role="tab"
+          class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs" id="tab-index-{{i}}">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32">
+            <div *ngIf="selecttabs1 === alltabs1[0]" class="tab-pane fade show active" role="tabpanel">
+              <h2 class="mb-24">Profile Information</h2>
+              <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control" [value]="userDetails?.name" disabled id="name">
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="text" class="form-control" [value]="userDetails?.email" disabled id="email-address">
+              </div>
+            </div>
+            <div *ngIf="selecttabs1 === alltabs1[1]" class="tab-pane fade show active" role="tabpanel">
+              <h2 class="mb-8">Password</h2>
+              <p>Optionally update your password.</p>
+              <form [formGroup]="changePasswordForm" #changePwd="ngForm" (submit)="changePassword()">
+                <div class="form-group">
+                  <label>Old Password</label>
+                  <div class="form-control-cover" [ngClass]="{'has-error' : changePwd.submitted && f.oldPassword.errors}">
+                    <input [type]="viewPassword ? 'text' : 'password'"                       placeholder="Enter your old password" class="form-control" formControlName="oldPassword" autocomplete="old-password" id="new-password">
+                    <em class="icon" [ngClass]="!viewPassword ? 'icon-eye' : 'icon-eye-slash'"
+                      (click)="viewPassword=!viewPassword"></em>
+                    <span class="small mt-4 text-danger d-flex align-items-center" *ngIf="changePwd.submitted && f.oldPassword.errors && f.oldPassword.errors.required ">
+                      <em class="icon icon-error mr-4 position-static small p-0 text-danger"></em>
+                      Old password is required
+                    </span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>New Password</label>
+                  <div class="form-control-cover" [ngClass]="{'has-error' : changePwd.submitted && f.newPassword.errors}">
+                    <input [type]="viewNewPassword ? 'text' : 'password'"                       placeholder="Enter your new password" class="form-control" formControlName="newPassword" autocomplete="new-password" id="new-password">
+                    <em class="icon" [ngClass]="!viewNewPassword ? 'icon-eye' : 'icon-eye-slash'"
+                      (click)="viewNewPassword=!viewNewPassword"></em>
+                      <span class="small mt-4 text-danger d-flex align-items-center" *ngIf="changePwd.submitted && f.newPassword.errors && f.newPassword.errors.required ">
+                        <em class="icon icon-error mr-4 position-static small p-0 text-danger"></em>
+                        New password is required
+                      </span>
+                      <span class="small mt-4 text-danger d-flex align-items-center" *ngIf="changePwd.submitted && f.newPassword.errors.minLength">
+                        <em class="icon icon-error mr-4 position-static small p-0 text-danger"></em>
+                          Minimum of 7 characters
+                      </span>
+                      <span class="small mt-4 text-danger d-flex align-items-center" *ngIf="changePwd.submitted && f.newPassword.errors && !f.newPassword.errors.minLength && f.newPassword.errors.alphaNumeric">
+                        <em class="icon icon-error mr-4 position-static small p-0 text-danger"></em>
+                        Must contain one upper case, one lower case, one numeric value and one special character
+                      </span>
+                      <span class="small mt-4 text-danger d-flex align-items-center" *ngIf="changePwd.submitted && f.newPassword.errors &&!f.newPassword.errors.minLength && !f.newPassword.errors.alphaNumeric && f.newPassword.errors.specialCharacter">
+                        <em class="icon icon-error mr-4 position-static small p-0 text-danger"></em>
+                        Must contain one upper case, one lower case, one numeric value and one special character
+                      </span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Confirm New Password</label>
+                  <div class="form-control-cover" [ngClass]="{'has-error' : changePwd.submitted && f.confirmPassword.errors}">
+                    <input type="password" placeholder="Enter and confirm your new password" class="form-control" formControlName="confirmPassword" id="confirm-new-password">
+                    <span class="small mt-4 text-danger d-flex align-items-center" *ngIf="changePwd.submitted && f.confirmPassword.errors && f.confirmPassword.errors.required" autocomplete="new-password">
+                      <em class="icon icon-error mr-4 position-static small p-0 text-danger"></em>
+                      Confirm password is required
+                    </span>
+                    <span class="small mt-4 text-danger d-flex align-items-center" *ngIf="changePwd.submitted && f.confirmPassword.errors && f.confirmPassword.errors.passwordsNotMatching">
+                      <em class="icon icon-error mr-4 position-static small p-0 text-danger"></em>
+                      Password and confirm password do not match
+                    </span>
+                  </div>
+                </div>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-light" [routerLink]="['/dmsportal/dashboard']" id="cancel-btn">Cancel</button>
+                  <button type="submit" class="btn btn-primary" id="save-changes">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

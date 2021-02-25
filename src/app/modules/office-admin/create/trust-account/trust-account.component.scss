@@ -1,0 +1,23 @@
+.error-info{
+    color: red;
+}
+.error{
+    color: red;
+    margin-top: 5px;
+}
+.ngx-datatable.material {
+    .datatable-header {
+        .datatable-header-cell {
+            padding-right: 18px !important;
+        }
+    }
+}
+
+.custom-height {
+    .ngx-datatable .datatable-body {
+        min-height: 45px !important;
+    }
+}
+.custom-switch-index {
+    z-index: 1 !important;
+}

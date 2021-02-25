@@ -1,0 +1,22 @@
+.full-cal-wraps{width: 100%; height: auto; margin: 0;
+    .main-full-cal{-webkit-flex: 1; -moz-flex: 1; -ms-flex: 1; -o-flex: 1; flex: 1;/*margin-right: 250px;*/
+    }
+    .sidebar-row{padding: 0; width: 100% ; max-width: 250px; background: #fff;
+    }
+}
+.dropdown-menu{
+  overflow: hidden;
+}
+.cal-aside-button{
+  .btn{
+    border-radius: 0;
+  }
+}
+
+.cal-aside-content-scroll{
+  overflow: auto;
+  height: calc(100vh - 202px);
+}
+.cal-aside-content{
+  overflow: hidden;
+}

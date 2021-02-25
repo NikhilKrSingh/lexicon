@@ -1,0 +1,335 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" routerLink="/manage-folders/document">Document
+          Management</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {{ isEditMode ? 'Modify Document Properties': 'Upload Document' }}</li>
+    </ol>
+    <div class="heading">
+      <h1 id="page-heading">{{ isEditMode ? 'Modify Document Properties': 'Upload Document' }}</h1>
+    </div>
+    <div class="card" *ngIf="!isEditMode">
+      <form [formGroup]="documentForm">
+        <div class="card-body">
+          <h2 class="mb-8">Select Files</h2>
+          <p>Select one or more files from your local system to upload.</p>
+          <div class=""></div>
+          <div class="upload-check d-inline-block position-relative">
+            <form id="fileForm"><input #file type="file" (change)="selectedFile(file.files)" id="inpuFile" multiple
+                [disabled]="folderLoading">
+            </form>
+            <span class="btn btn-primary" [ngClass]="{'disabled' : folderLoading}"> Select Files</span>
+          </div>
+          <p class="pt-12 pb-2 fs-11 mb-0">Maximum upload file size: 25 MB</p>
+          <div class="fprogress-bar select-file-up progress-error max-width-fit"
+               *ngIf="fileErrorMsg">
+            <div class="d-flex mt-4" >
+              <span class="prog-close mr-8">
+                <em class="icon icon-close"></em>
+              </span>
+              <div class="lh-20">
+                <span class="d-block font-weight-medium">
+                  File upload error!
+                </span>
+                {{fileErrorMsg}}
+              </div>
+            </div>
+          </div>
+          <div class="upload-file-group d-block mb-2"  *ngIf="fileArray.length > 0">
+            <div class="px-16 pb-8">
+              <div class="row gutter-16">
+                <div class="col-3">
+                  <span class="label mb-0 d-block">File Name</span>
+                </div>
+                <div class="col-4">
+                  <span class="label mb-0 d-block">Document Name</span>
+                </div>
+                <div class="col-4">
+                  <span class="label mb-0 d-block">Document Attribute</span>
+                </div>
+              </div>
+            </div>
+            <div class="upload-file-block" [ngClass]="(file.isFileSizeError) ? 'upload-file-error d-flex justify-content-between align-items-center p-16' :''" *ngFor="let file of fileArray;trackBy: trackByFn;let i=index">
+              <div class="row gutter-16" *ngIf="!file.isFileSizeError">
+                <div class="col-3">
+                  <div class="uploaded-file-name py-8 px-0">
+                    <div class="d-flex align-items-center font-weight-medium small lh-24">
+                      <img [src]="(file.name| commonService : 'getFileImage')" width="20px">
+                      <span
+                        class="pl-12">{{(file.name.length > 24) ? (file.name | slice:0:24) +'...'+ (file.name | commonService : 'getFileExtension') :  file?.name}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group mb-0" [class.has-error]="file.isExistError" >
+                    <input type="text" class="form-control white-form-control"
+                      [readOnly]="!file.isScanFailed && !file.isScanPassed" (ngModelChange)="onNameChanged(i)"
+                      [(ngModel)]="file.nameOfFile" [ngModelOptions]="{standalone: true}" placeholder="Provide name" id="provide-name-{{i}}">
+                    <span class="field-message text-danger d-flex align-items-start" *ngIf="file.isExistError">
+                      <em class="icon icon-error mr-4 mt-0"></em>
+                      {{file.isExistError}}
+                    </span>
+                    <span class="field-message text-danger d-flex align-items-start" *ngIf="!file.nameOfFile">
+                      <em class="icon icon-error mr-4 mt-0"></em>
+                      Please enter document name.
+                    </span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group mb-0">
+                    <app-multiselect-dropdown [showSearch]="false" [unsort]="true" [title]="file.title"
+                      [selections]="file.selectedAttArr" [displaySubItem]="file.attributesArray"
+                      [filterName]="'Apply Attributes'" [selectedMessage]="'attributes selected'"
+                      (onSelectionChanged)="getAttributeSelected($event, i)"
+                      (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                      (clearFilter)="clrAttributes(i)" (applyFilter)="applyFilter($event)" id="filetitle-{{i}}"></app-multiselect-dropdown>
+                  </div>
+                </div>
+                <div class="col-1">
+                  <div class="d-flex align-items-center justify-content-end pt-12 badge-dots-block">
+                    
+                    <div class="dropdown dropdown-hover-table" [class.active]="currentIndex==i" appAutoCloseOutsideClick
+                      (outsideClick)="onClickedOutside(i)" (click)="openSubMenu(i)">
+                      <span class="icon-area">
+                        <em class="icon icon-dot-verti"></em>
+                      </span>
+                      <div *ngIf="currentIndex==i" class="dropdown-menu dropdown-menu-right mt-8">
+                        <a href="javascript:void(0);" class="dropdown-item" (click)="currentIndex=null;removeImage(i);" id="remove-img-{{i}}">
+                          Remove document
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="d-flex align-items-center font-weight-medium small helper-text" *ngIf="file.isFileSizeError">
+                  <img [src]="(file.name| commonService : 'getFileImage')" width="20px">
+                  <span class="ml-12">{{(file.name.length > 24) ? (file.name | slice:0:24) +'...'+ (file.name | commonService : 'getFileExtension') :  file?.name}}</span>
+                </div>
+                <div class="d-flex align-items-center" *ngIf="file.isFileSizeError">
+                  <div class="d-flex align-items-center">
+                    <em class="icon icon-error text-danger mr-8"></em>
+                    <span class="small lh-16">Files must be no larger than 25 MB in size</span>
+                  </div>
+                  <span class="ml-24">
+                    <em class="icon icon-close-fill text-large cursor-pointer icon-color" (click)="removeImage(i)" id="rem-img-{{i}}"></em>
+                  </span>
+                </div>
+
+            </div>
+            <app-loader [active]="fileLoading"></app-loader>
+          </div>
+          <div class="info-block pt-32">
+            <h2 class="mb-24">Folder Location</h2>
+            <div class="row gutter-16">
+              <div class="col-4">
+                <div [ngClass]="(errorSelectFolder!='')?'form-group has-error':'form-group'">
+                  <div [class.opacity]="folderLoading">
+                    <label>Folder Name <sup>*</sup></label>
+                    <app-multilevel-folder-dropdown [folderId]="folderId" (onSelectionChanged)="onSelectionChanged($event)">
+                    </app-multilevel-folder-dropdown>
+                    <span class="field-message text-danger" *ngIf="errorSelectFolder!=''"><em
+                        class="icon icon-error mr-4"></em>
+                      {{errorSelectFolder}}
+                    </span>
+                  </div>
+                  <app-loader [active]="folderLoading"></app-loader>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="info-block pt-12">
+            <h2 class="mb-8">Document Categories</h2>
+            <p>Optionally select one or more categories to apply to each document.</p>
+            <div class="row gutter-16">
+              <div class="col-5">
+                <div class="form-group">
+                  <label>Category Name</label>
+                  
+                  <app-multiselect-dropdown [title]="title" [selections]="selectedCategories"
+                    [displaySubItem]="categoriesArray" [filterName]="'Apply'" [selectedMessage]="'categories selected'"
+                    (onSelectionChanged)="getCategorySelected($event)"
+                    (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                    (clearFilter)="clrFiltercategory()" (applyFilter)="applyFilter($event)" id="cate-name"></app-multiselect-dropdown>
+                  <ul class="list-unstyled cate-list" *ngIf="selectedCategories.length && displayCategories.length">
+                    <li class="d-flex justify-content-between align-items-center helper-text"
+                      *ngFor="let cat of displayCategories;trackBy :trackByFn;let i = index;">
+                      {{cat.name}}
+                      <span class="cursor-pointer" (click)="removeCategory(cat.id)" id="rem-cat-{{i}}"><em
+                          class="icon icon-close icon-color icon-small"></em></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="info-block pt-20">
+            <h2 class="mb-8">Co-Owners</h2>
+            <p>Optionally select other internal users to be co-owners on the document.</p>
+            <div class="row gutter-16">
+              <div class="col-5">
+                <div class="form-group mb-md-0 mb-20">
+                  <label>Internal Users </label>
+                  <app-multiselect-dropdown [title]="coOwnerTitle" [selections]="selectedCoOwner"
+                    [displaySubItem]="employeeList" [filterName]="filterName"
+                    [selectedMessage]="'internal users selected'" (onSelectionChanged)="selectCoOwner($event)"
+                    (clearFilter)="clearCoOwnerFilter()" (applyFilter)="applyFilterCoOwner()" id="int-user">
+                  </app-multiselect-dropdown>
+                  <ul class="list-unstyled cate-list cate-ownerlist">
+                    <li class="d-flex justify-content-between align-items-center"
+                      *ngFor="let selectedCoOwners of displayCoOwners; trackBy :trackByFn;let i = index;">
+                      <div class="d-flex">
+                        <div class="owner-pic">
+                          <img
+                            src="{{selectedCoOwners?.profilePicture ? selectedCoOwners.profilePicture :'../../../../assets/images/user.png'}}"
+                            alt="">
+                        </div>
+                        <div>
+                          <strong>{{selectedCoOwners?.name}}</strong>
+                          <p class="m-0">{{selectedCoOwners?.email}}</p>
+                        </div>
+                      </div>
+                      <span class="cursor-pointer" (click)="removeCoOwners(selectedCoOwners.id)" id="rm-user-{{i}}"><em
+                          class="icon icon-close icon-color icon-small"></em></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="card" *ngIf="isEditMode">
+      <form [formGroup]="editDocumentForm">
+        <div class="card-body">
+          <h2 class="mb-8">Document Properties</h2>
+          <div class="form-group mb-0" *ngIf="editDoc">
+            <div class="upload-file-group d-block mb-2">
+              <div class="px-16 pb-8">
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <span class="label mb-0 d-block">File Name</span>
+                  </div>
+                  <div class="col-4">
+                    <span class="label mb-0 d-block">Document Name</span>
+                  </div>
+                  <div class="col-4">
+                    <span class="label mb-0 d-block">Document Attribute</span>
+                  </div>
+                </div>
+              </div>
+              <div class="upload-file-block">
+                <div class="row gutter-16">
+                  <div class="col-4">
+                    <div class="uploaded-file-name py-8 px-0">
+                      <div class="d-flex align-items-center font-weight-medium small lh-24">
+                        <img [src]="(editDoc.fileName | commonService : 'getFileImage')" width="20px">
+                        <span
+                          class="pl-12">{{(editDoc?.fileName.length > 24) ? (editDoc.fileName | slice:0:24) +'...'+ (editDoc.fileName | commonService : 'getFileExtension') :  editDoc?.fileName}}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group mb-0" [class.has-error]="isExistError">
+                      <input type="text" formControlName="nameOfFile" class="form-control white-form-control"
+                        placeholder="Document Title" (ngModelChange)="fileNameChanged()" id="name-of-file">
+                      <span class="field-message text-danger d-flex align-items-start" *ngIf="isExistError">
+                        <em class="icon icon-error mr-4 mt-0"></em>
+                        {{isExistError}}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="form-group mb-0">
+                      <app-multiselect-dropdown [title]="propTitle" [showSearch]="false" [selections]="selectedAttributes"
+                        [displaySubItem]="docAttributes" [filterName]="'Apply Attributes'"
+                        [selectedMessage]="'attributes selected'" [unsort]="true"
+                        (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                        (onSelectionChanged)="getAttributesSelected($event)" (applyFilter)="applyFilter($event)"
+                        (clearFilter)="clrEditAttributes()" id="attribute-title">
+                      </app-multiselect-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="info-block pt-12">
+            <h2 class="mb-8">Document Categories</h2>
+            <p>Optionally select one or more categories to apply to each document.</p>
+            <div class="row gutter-16">
+              <div class="col-5">
+                <div class="form-group">
+                  <label>Category Name</label>
+                  <app-multiselect-dropdown [title]="title" [selections]="selectedCategories"
+                    [displaySubItem]="categoriesArray" [filterName]="'Apply'" [selectedMessage]="'categories selected'"
+                    (onSelectionChanged)="getCategorySelected($event)"
+                    (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+                    (clearFilter)="clrFiltercategory()" (applyFilter)="applyFilter($event)" id="cat-name">
+                  </app-multiselect-dropdown>
+                  <ul class="list-unstyled cate-list" *ngIf="selectedCategories.length && displayCategories.length">
+                    <li class="d-flex justify-content-between align-items-center helper-text"
+                      *ngFor="let cat of displayCategories; trackBy :trackByFn;let i = index;">
+                      {{cat ? cat.name : ''}}
+                      <span class="cursor-pointer" (click)="removeCategory(cat.id)" id="rem-cat-{{i}}"><em
+                          class="icon icon-close icon-color icon-small"></em></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="info-block pt-20">
+            <h2 class="mb-8">Co-Owners</h2>
+            <p>Optionally select other internal users to be co-owners on the document.</p>
+            <div class="row gutter-16">
+              <div class="col-5">
+                <div class="form-group mb-md-0 mb-20">
+                  <label>Internal Users </label>
+                  <app-multiselect-dropdown [title]="coOwnerTitle" [selections]="selectedCoOwner"
+                    [displaySubItem]="employeeList" [filterName]="filterName"
+                    [selectedMessage]="'internal users selected'" (onSelectionChanged)="selectCoOwner($event)"
+                    (clearFilter)="clearCoOwnerFilter()" (applyFilter)="applyFilterCoOwner()" id="c-owner">
+                  </app-multiselect-dropdown>
+                  <ul class="list-unstyled cate-list cate-ownerlist">
+                    <li class="d-flex justify-content-between align-items-center"
+                      *ngFor="let selectedCoOwners of displayCoOwners; trackBy :trackByFn;let i = index;">
+                      <div class="d-flex">
+                        <div class="owner-pic">
+                          <img
+                            src="{{selectedCoOwners?.profilePicture ? selectedCoOwners.profilePicture :'../../../../assets/images/user.png'}}"
+                            alt="">
+                        </div>
+                        <div>
+                          <strong>{{selectedCoOwners?.name}}</strong>
+                          <p class="m-0">{{selectedCoOwners?.email}}</p>
+                        </div>
+                      </div>
+                      <span class="cursor-pointer" (click)="removeCoOwners(selectedCoOwners.id)" id="rem-c-{{i}}"><em
+                          class="icon icon-close icon-color icon-small"></em></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="d-flex justify-content-end">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" (click)="manageRouting()" id="cancel-btn">Cancel</button>
+        <button type="button" *ngIf="!isEditMode" class="btn btn-primary"
+          [disabled]="!documentForm.valid || !fileArray.length || !checkIfScanPassedDocsExist"
+          (click)="sendFilesForScan()" id="upload-doc-btn">Upload Document</button>
+        <button type="button" *ngIf="isEditMode" class="btn btn-primary"
+          [disabled]="!editDocumentForm.valid || isExistError"
+          (click)="updateDocumentProperties(editDocumentForm.value,'edit')" id="save-change-btn">Save Changes</button>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>
+</div>

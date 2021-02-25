@@ -1,0 +1,735 @@
+<div class="modal-header pb-24">
+  <h3 class="modal-title mb-0">{{(action === 'add') ? 'Create New Event' : 'Edit Event'}}</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-24 new-matt-event">
+  <div class="row gutter-50">
+    <div class="col-8">
+      <div class="nav nav-tabs nav-tabs-unerline d-inline-flex flex-nowrap justify-content-start"
+        role="tablist">
+        <a href="javascript:void(0);" (click)="selectftabs = myfirsttabs" *ngFor="let myfirsttabs of myfirsttab;trackBy: trackByFn"
+        role="tab" class="nav-link" [class.active]="selectftabs === myfirsttabs">{{ myfirsttabs }}</a>
+      </div>
+      <div class="tab-content pt-32">
+        <form [formGroup]="eventForm">
+          <div *ngIf="selectftabs === myfirsttab[0]" class="tab-pane fade show active" role="tabpanel">
+            <div class="icon-form">
+              <div class="row gutter-16">
+                <div class="col-12">
+                  <div class="form-group" [class.has-error]="f.title.errors && submitted">
+                    <label for="">Event Name <sup>*</sup></label>
+                    <input type="text" placeholder="Enter event name" name="title"
+                      formControlName="title" class="form-control" id="titleId">
+                      <span class="field-message text-danger" *ngIf="submitted && f.title.errors">
+                        <span *ngIf="f.title.errors?.required">
+                          <em class="icon icon-error mr-4"></em>
+                          Required event name.
+                        </span>
+                      </span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-group" [class.has-error]="f.eventType.errors && submitted">
+                    <label for="">Event Type <sup>*</sup></label>
+                    <ng-select
+                      [items]="matterTypeList"
+                      placeholder="Select event type"
+                      formControlName="eventType"
+                      [bindValue]="'id'"
+                      [bindLabel]="'name'"
+                      [selectOnTab]="true"
+                      [notFoundText]="'No record found'"
+                      id="eventTypeId">
+                    </ng-select>
+                    <span class="field-message text-danger" *ngIf="submitted && f.eventType.errors">
+                      <span *ngIf="f.eventType.errors?.required">
+                        <em class="icon icon-error mr-4"></em>
+                        Required event type.
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="row gutter-16">
+                    <div class="col-7">
+                      <div class="form-group" [class.has-error]="f.startDate.errors && submitted">
+                        <label for="">Start Date <sup>*</sup></label>
+                        <app-date-picker
+                          [isForm]='true'
+                          [dateform]='eventForm'
+                          controlName='startDate'
+                          (dataChange)='setEndDate($event)'
+                          id="startDateId">
+                        </app-date-picker>
+                        <span class="field-message text-danger" *ngIf="submitted && f.startDate.errors">
+                          <span *ngIf="f.startDate.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Required start date.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-5">
+                      <div class="form-group" [class.has-error]="f.startTime.errors && submitted">
+                        <label for="">Start Time <sup>*</sup></label>
+                        <input type="text" class="form-control cust-readonlyinput" (ngModelChange)="changeEndTime($event)" name="startTime"
+                          [(ngModel)]="startTime" formControlName="startTime" placeholder="Start time"
+                          [owlDateTimeTrigger]="dt2" [owlDateTime]="dt2"  readonly id="startTimeId">
+                        <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt2></owl-date-time>
+                        <span class="field-message text-danger" *ngIf="submitted && f.startTime.errors">
+                          <span *ngIf="f.startTime.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Required time.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="row gutter-16">
+                    <div class="col-5">
+                      <div class="form-group" [class.has-error]="f.endTime.errors && submitted">
+                        <label for="">End Time <sup>*</sup></label>
+                        <input type="text" class="form-control cust-readonlyinput" name="endTime"
+                        [(ngModel)]="endTime" formControlName="endTime" placeholder="End time"
+                          [owlDateTimeTrigger]="dt3" [owlDateTime]="dt3" readonly [min]="startTime" id="endTimeId">
+                        <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt3></owl-date-time>
+                        <span class="field-message text-danger" *ngIf="submitted && f.endTime.errors">
+                          <span *ngIf="f.endTime.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Required time.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-7">
+                      <div class="form-group" [class.has-error]="f.endDate.errors && submitted">
+                        <label for="">End Date <sup>*</sup></label>
+                        <app-date-picker [isForm]='true' [minDate]='eventForm.value.startDate' [dateform]='eventForm' controlName='endDate' id="endDateId"></app-date-picker>
+                        <span class="field-message text-danger" *ngIf="submitted && f.endDate.errors">
+                          <span *ngIf="f.endDate.errors?.required">
+                            <em class="icon icon-error mr-4"></em>
+                            Required end date.
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="form-group">
+                    <label for="">Employee Travel Time (before event)</label>
+                    <ng-select
+                      class="custom-hours"
+                      placeholder="Select duration"
+                      [items]="hoursArray"
+                      [bindValue]="'id'"
+                      [bindLabel]="'name'"
+                      formControlName="beforeTravelTimeHours"
+                      [selectOnTab]="true"
+                      (change)="travelTime();travelTimeBeforEvent(CustomHoursBeforEvent)"
+                      id="hoursArrayId">
+                    </ng-select>
+                </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-group">
+                    <label for="">Employee Travel Time (after event)</label>
+                    <ng-select
+                      placeholder="Select duration"
+                      class="custom-hours"
+                      [items]="hoursArray2"
+                      [bindValue]="'id'"
+                      [bindLabel]="'name'"
+                      formControlName="afterTravelTimeHours"
+                      [selectOnTab]="true"
+                      (change)="travelTime();travelTimeAfterEvent(CustomHoursAfterEvent)"
+                      id="hoursArray2Id">
+                    </ng-select>
+                </div>
+                </div>
+                <div class="col-12">
+                  <div class="row gutter-16">
+                    <div class="col-9">
+                      <div class="form-group">
+                        <label for="">Recurring Event</label>
+                        <ng-select
+                          [items]="recurringTypesList"
+                          placeholder="Select recurring event"
+                          formControlName="recurringType"
+                          [bindValue]="'id'"
+                          (clear)="removeOption();"
+                          [bindLabel]="'name'"
+                          (change)="changeRecurring($event)"
+                          [notFoundText]="'No record found'"
+                          [selectOnTab]="true"
+                          id="recurringTypesListId">
+                        </ng-select>
+                      </div>
+                      <div class="row" *ngIf="eventForm.value.recurringType === 1">
+                        <div class="col-12  ">
+                          <div class="form-group" [class.has-error]="f.recurringEndDate.errors && submitted">
+                            <label for="">Recurring End Date</label>
+                            <div class="date-field position-relative">
+                              <input type="text" class="form-control cust-readonlyinput" name="recurringEndDate"
+                                formControlName="recurringEndDate" placeholder="Recurring End Date"
+                                [owlDateTimeTrigger]="dt5" [owlDateTime]="dt5" readonly id="recurringEndDateId">
+                                <em class="icon icon-calendar-invitation" [owlDateTimeTrigger]="dt5"></em>
+                              <owl-date-time [pickerType]="'calendar'" #dt5></owl-date-time>
+                            </div>
+                            <span class="field-message text-danger" *ngIf="submitted && f.recurringEndDate.errors">
+                              <span *ngIf="f.recurringEndDate.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Please select recurring end date.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row" *ngIf="eventForm.value.recurringType === 10">
+                        <div class="col-4">
+                          <div class="form-group" [class.has-error]="f.repeatEvery.errors && submitted">
+                            <label for="">Repeat Every</label>
+                            <input type="text" class="form-control" formControlName="repeatEvery"
+                              placeholder="Repeat Every" (keypress)="checkNumber($event)" id="repeatEveryId">
+                            <span class="field-message text-danger" *ngIf="submitted && f.repeatEvery.errors">
+                              <span *ngIf="f.repeatEvery.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Please enter repeat every.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="form-group"  [class.has-error]="f.recurringEventEvery.errors && submitted">
+                            <label for="">&nbsp;</label>
+                            <ng-select
+                              [items]="recurringEventArr"
+                              placeholder="Recurring Every"
+                              formControlName="recurringEventEvery"
+                              [bindValue]="'value'"
+                              [bindLabel]="'name'"
+                              (change)="changedRecurringEvery($event)"
+                              [notFoundText]="'No record found'"
+                              [selectOnTab]="true"
+                              id="recurringEventEveryId">
+                            </ng-select>
+                            <span class="field-message text-danger" *ngIf="submitted && f.recurringEventEvery.errors">
+                              <span *ngIf="f.recurringEventEvery.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Please select recurring events.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="col-12">
+                          <div class="form-group" [class.has-error]="f.daysOfWeek.errors && submitted" *ngIf="eventForm.value.recurringEventEvery && eventForm.value.recurringEventEvery !== 'Daily'">
+                            <label for="">Repeats on</label>
+                            <ul class="list-unstyled mb-0 day-list d-flex">
+                              <li (click)="getDaySelected(0)" [class.active]="dayofweekArray[0].checked" id="S">S</li>
+                              <li (click)="getDaySelected(1)" [class.active]="dayofweekArray[1].checked" id="M">M</li>
+                              <li (click)="getDaySelected(2)" [class.active]="dayofweekArray[2].checked" id="t">t</li>
+                              <li (click)="getDaySelected(3)" [class.active]="dayofweekArray[3].checked" id="w">w</li>
+                              <li (click)="getDaySelected(4)" [class.active]="dayofweekArray[4].checked" id="t">t</li>
+                              <li (click)="getDaySelected(5)" [class.active]="dayofweekArray[5].checked" id="f">f</li>
+                              <li (click)="getDaySelected(6)" [class.active]="dayofweekArray[6].checked" id="s">s</li>
+                            </ul>
+                            <span class="field-message text-danger" *ngIf="submitted && f.daysOfWeek.errors">
+                              <span *ngIf="f.daysOfWeek.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Please select day of the week.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="col-12  ">
+                          <div class="form-group">
+                            <label for="" class="mb-16">Ends</label>
+                            <div class="row gutter-16 mb-8">
+                              <div class="col-4">
+                                <div class="custom-control custom-radio pr-0 my-8">
+                                  <input class="custom-control-input" name="ends" value="on" formControlName="ends"
+                                    id="On" type="radio" (change)="changeEnds($event)">
+                                  <label class="custom-control-label" for="On">On</label>
+                                </div>
+                              </div>
+                              <div class="col-6" *ngIf="eventForm.value.ends === 'on' || eventForm.value.ends === null" [class.has-error]="f.recurringEndDate.errors && submitted">
+                                <div class="date-field position-relative">
+                                  <input type="text" [min]="minDate" class="form-control cust-readonlyinput"
+                                    name="recurringEndDate" formControlName="recurringEndDate"
+                                    placeholder="Recurring End Date" [owlDateTimeTrigger]="dt6" [owlDateTime]="dt6"
+                                    readonly id="recurringEndDateId">
+                                    <em class="icon icon-calendar-invitation" [owlDateTimeTrigger]="dt6"></em>
+                                  <owl-date-time [pickerType]="'calendar'" #dt6></owl-date-time>
+                                </div>
+                                <span class="field-message text-danger" *ngIf="submitted && f.recurringEndDate.errors">
+                                  <span *ngIf="f.recurringEndDate.errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please select recurring end date.
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="row gutter-16">
+                              <div class="col-4">
+                                <div class="custom-control custom-radio pr-0 my-8" [class.has-error]="submitted && f.ends.errors">
+                                  <input class="custom-control-input" name="ends" value="after"
+                                    formControlName="ends" id="After" type="radio" (change)="changeEnds($event)">
+                                  <label class="custom-control-label" for="After">After</label>
+                                  <span class="field-message text-danger" *ngIf="submitted && f.ends.errors">
+                                    <span *ngIf="f.ends.errors?.required">
+                                      <em class="icon icon-error mr-4"></em>
+                                      Please select ends.
+                                    </span>
+                                  </span>
+                                </div>
+                              </div>
+                              <div class="col-6" *ngIf="eventForm.value.ends === 'after' || eventForm.value.ends === null" [class.has-error]="f.numberOfOccurancesEnd.errors && submitted">
+                                <div class="position-relative occu-grp">
+                                  <input type="text" formControlName="numberOfOccurancesEnd" class="form-control"
+                                    (keypress)="checkNumber($event)" id="numberOfOccurancesEndId">
+                                  <span>occurrences</span>
+                                </div>
+                                <span class="field-message text-danger" *ngIf="submitted && f.numberOfOccurancesEnd.errors">
+                                  <span *ngIf="f.numberOfOccurancesEnd.errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please enter number of occurrences.
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="row gutter-16">
+                              <div class="col-10">
+                                <div class="d-flex justify-content-end pt-24">
+                                  <div class="btn-group">
+                                    <button type="button" (click)="removeRecuringEvent()"
+                                      class="btn btn-light">Cancel</button>
+                                    <button type="button" (click)="saveRecuringEvent()" class="btn btn-primary ">Save
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label class="mb-12" for="">&nbsp;</label>
+                        <div class="custom-control custom-checkbox pr-0">
+                          <input class="custom-control-input" (change)="disableEventTime($event)" formControlName="isAllDayEvent" id="all"
+                            type="checkbox">
+                          <label class="custom-control-label" for="all">All day</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-group" [class.has-error]='eventFormError.eventLocation'>
+                    <label for="">Location</label>
+                    <div class="search-group position-relative">
+                      <div appAutoCloseOutsideClick (outsideClick)='showOfficeSearchResults = false'>
+                        <span class="search-icn"></span>
+                        <input type="text" class="form-control border-radius-20" id="office-search-input-text"
+                               name="officeSearchBox"
+                               formControlName="eventLocation" (keyup)="searchOffice($event.target.value)"
+                               placeholder="Search for an office or enter a custom address" autocomplete="off">
+                      </div>
+                      <div class="search-group-result pt-0 px-0"
+                           *ngIf="!officeSearchResultsLoading && showOfficeSearchResults && eventForm.value.eventLocation.length > 2">
+                        <div class="search-collapse custom-style-scroll" *ngIf="officeSearchResults.length">
+                          <div class="search-panel px-16 pt-16 pb-2" *ngFor="let office of officeSearchResults; trackBy: trackByFn; let i = index;">
+                            <div class="search-panel-head pl-24" (click)="selectOffice(office)" id="select-employee-record-{{i}}">
+                              <em class="search-res-icon icon icon-building pt-2"></em>
+                              <span>
+                                <span [innerHTML]="office.officeName | highlightText : eventForm.value.eventLocation"></span>
+                              </span>
+                              <span class="small helper-text font-weight-normal d-block mt-4">
+                                {{office.address1}}{{office.address2 ? ', ' + office.address2 : ''}}
+                                {{office.city ? ', ' + office.city : ''}}{{office.state ? ', ' + office.state : ''}}
+                                {{office.zipCode}}{{timeZoneEnum[office.timeZone] ? ' (' + timeZoneEnum[office.timeZone] + ')' : ''}}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="search-group-result px-0" *ngIf="officeSearchResultsLoading">
+                        <app-search-loader [active]="officeSearchResultsLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                      </div>
+                    </div>
+                    <app-validation-message
+                      [errorMessage]='eventFormError.eventLocationMessage'
+                      *ngIf='eventFormError.eventLocation'>
+                    </app-validation-message>
+                  </div>
+                </div>
+
+
+                <div class="col-4">
+                  <div class="form-group">
+                    <label for="">Status</label>
+                    <ng-select
+                      [items]="eventStatusList"
+                      placeholder="Select status"
+                      formControlName="eventStatus"
+                      [bindValue]="'id'"
+                      [bindLabel]="'name'"
+                      [notFoundText]="'No record found'"
+                      [selectOnTab]="true"
+                      [clearable]="false"
+                      id="eventStatusId">
+                    </ng-select>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label for="">Privacy</label>
+                    <ng-select
+                      [items]="eventPrivacyList"
+                      placeholder="Select privacy"
+                      formControlName="eventPrivacy"
+                      [bindValue]="'id'"
+                      [bindLabel]="'name'"
+                      [notFoundText]="'No record found'"
+                      [selectOnTab]="true"
+                      [clearable]="false"
+                      id="eventPrivacyId">
+                    </ng-select>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-group mb-0" [class.has-error]='eventFormError.description'>
+                    <label for="">Description</label>
+                    <tinymce
+                      formControlName="description"
+                      #mouseenter
+                      [config]="config"
+                      [placeholder]="'Enter a description'"
+                      id="descriptionId">{{addCssEditor}}
+                    </tinymce>
+                    <app-validation-message
+                      [errorMessage]='eventFormError.descriptionMessage'
+                      *ngIf='eventFormError.description'>
+                    </app-validation-message>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="selectftabs === myfirsttab[1]" class="tab-pane fade show active app-calendar-timeline-view"
+            role="tabpanel">
+            <div class="row gutter-16">
+              <div class="col-10">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <div class="row gutter-16">
+                      <div class="col-7">
+                        <div class="form-group" [class.has-error]="f.startDate.errors && submitted">
+                          <label for="">Start Date <sup>*</sup></label>
+                          <app-date-picker
+                            [isForm]='true'
+                            [dateform]='eventForm'
+                            controlName='startDate'
+                            (dataChange)='setEndDate($event)'
+                            id="startDateId">
+                          </app-date-picker>
+                          <span class="field-message text-danger" *ngIf="submitted && f.startDate.errors">
+                            <span *ngIf="f.startDate.errors?.required">
+                              <em class="icon icon-error mr-4"></em>
+                              Required start date.
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="col-5">
+                        <div class="form-group" [class.has-error]="f.startTime.errors && submitted">
+                          <label for="">Start Time <sup>*</sup></label>
+                          <input type="text" class="form-control cust-readonlyinput" (ngModelChange)="changeEndTime($event)" name="startTime"
+                            [(ngModel)]="startTime" formControlName="startTime" placeholder="Start time"
+                            [owlDateTimeTrigger]="dt2" [owlDateTime]="dt2"  readonly id="startTimeId">
+                          <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt2></owl-date-time>
+                          <span class="field-message text-danger" *ngIf="submitted && f.startTime.errors">
+                            <span *ngIf="f.startTime.errors?.required">
+                              <em class="icon icon-error mr-4"></em>
+                              Required time.
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="row gutter-16">
+                      <div class="col-5">
+                        <div class="form-group" [class.has-error]="f.endTime.errors && submitted">
+                          <label for="">End Time <sup>*</sup></label>
+                          <input type="text" class="form-control cust-readonlyinput" name="endTime"
+                          [(ngModel)]="endTime" formControlName="endTime" placeholder="End time"
+                            [owlDateTimeTrigger]="dt3" [owlDateTime]="dt3" readonly [min]="startTime" id="endTimeId">
+                          <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt3></owl-date-time>
+                          <span class="field-message text-danger" *ngIf="submitted && f.endTime.errors">
+                            <span *ngIf="f.endTime.errors?.required">
+                              <em class="icon icon-error mr-4"></em>
+                              Required time.
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="col-7">
+                        <div class="form-group" [class.has-error]="f.endDate.errors && submitted">
+                          <label for="">End Date <sup>*</sup></label>
+                          <app-date-picker [isForm]='true' [minDate]='eventForm.value.startDate' [dateform]='eventForm' controlName='endDate' id="endDateId"></app-date-picker>
+                          <span class="field-message text-danger" *ngIf="submitted && f.endDate.errors">
+                            <span *ngIf="f.endDate.errors?.required">
+                              <em class="icon icon-error mr-4"></em>
+                              Required end date.
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <app-calendar-timeline-view
+              (calendarDate)="calendarDate($event)"
+              [eventsArr]="calendarEvents"
+              [resourceArr]="resourceArray">
+            </app-calendar-timeline-view>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="nav nav-tabs nav-tabs-unerline d-inline-flex flex-nowrap justify-content-start"
+        role="tablist">
+        <a href="javascript:void(0);" (click)="selecttabs = mytabs" *ngFor="let mytabs of mytab;trackBy: trackByFn" role="tab"
+          class="nav-link" [class.active]="selecttabs === mytabs" id="{{mytabs}}">{{ mytabs }}</a>
+      </div>
+      <div class="tab-content pt-32">
+        <div *ngIf="selecttabs === mytab[0]" class="tab-pane fade show active" role="tabpanel">
+          <div class="form-group" [class.has-error]="isInvalidEmail">
+            <label for="">Invitee</label>
+            <div class="invite-result-cover" appAutoCloseOutsideClick (outsideClick)='inviteeListDisplay = false'>
+              <input type="text" [(ngModel)]="searchInvitee" (ngModelChange)="selectEmpType($event)"
+                (keydown)="enterInvitee($event)" placeholder="Enter email address"
+                class="form-control" id="searchInviteeId">
+              <span class="field-message text-danger" *ngIf="isInvalidEmail">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter valid email address.
+              </span>
+              <div class="invite-result-box" *ngIf="inviteeList.length>0 && !isInviteeSearchLoading" [class.d-none]="!inviteeListDisplay">
+                <h4 class="mb-0 mt-0 p-16 lh-20" *ngIf="inviteeList">{{inviteeList.length}} Results</h4>
+                <div class="invite-result-overflow" malihu-scrollbar [scrollbarOptions]="scrollbarOptions">
+                  <div class="result-item" *ngFor="let invitee of inviteeList;trackBy: trackByFn" [ngClass]="(invitee.showGrid)?'search-panel-open':''">
+                    <em class="icon icon-employees icon-color"></em>
+                    <div class="result-detail flex-fill cursor-pointer" >
+                      <div class="search-panel-head pl-0">
+                            <div class="d-flex align-items-start" (click)="selectUser(invitee)">
+                              <span [innerHTML]="invitee.lastName ? invitee.lastName + ', ' + invitee.firstName : invitee.firstName | highlightText : searchInvitee"></span>
+                              <span *ngIf="f.eventType.value == consultationId && invitee.doNotSchedule" class="text-nowrap ml-8 sh-badge sh-badge-danger font-weight-medium">Do Not Schedule</span>
+                              <span *ngIf="invitee.doNotContact" class="text-danger ml-8 d-flex align-items-center font-weight-medium small text-nowrap">
+                                <i class="icon icon-close-fill mr-4 text-large mt-n3"></i>Do Not Contact</span>
+                            </div>
+                            <span class="arrow" (click)="invitee.showGrid=invitee.showGrid ?!invitee.showGrid:true">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                      </div>
+                      <div class="search-panel-body pl-0">
+                            <div class="d-flex justify-content-between pt-8">
+                              <div class="mt-0 flex-fill" style="max-width: 60%;">
+                                <span class="small helper-text d-block mb-4 font-weight-medium lh-16">
+                                  Email Address
+                                </span>
+                                <span class="d-block small lh-16">{{invitee.email}} </span>
+                              </div>
+                              <div class="mt-0 pl-20">
+                                <span class="small helper-text d-block mb-4 font-weight-medium lh-16">
+                                  Primary Office
+                                </span>
+                                <span class="d-block small lh-16">{{invitee.primaryOffice}}</span>
+                              </div>
+                            </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="invite-result-box"
+                           *ngIf="inviteeListDisplay && inviteeList && inviteeList?.length === 0 && !isInviteeSearchLoading">
+                  <div class="py-8 px-16">
+                    <h5 class="mb-8 mt-0">We couldn’t find anything matching your search.</h5>
+                    <p class="m-0">Try again with a different term.</p>
+                  </div>
+              </div>
+              <div class="invite-result-box" *ngIf="isInviteeSearchLoading">
+                  <div class="invite-result-overflow ">
+                    <app-search-loader [active]="isInviteeSearchLoading"
+                                       [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                  </div>
+              </div>
+            </div>
+
+            <div class="guests-row" *ngIf="selectedInvite?.length > 0; let i=index">
+              <div class="guests-heading">
+                <h5 class="mb-0"> {{selectedInvite.length}}
+                  {{(selectedInvite.length === 1) ? 'guest' : 'guests'}} </h5>
+              </div>
+              <div class="guests-list" *ngFor="let guest of selectedInvite; trackBy: trackByFn;let i=index" id=guest-{{i}}>
+                <div class="guests-item d-flex justify-content-between align-items-center">
+                  <div class="custom-control custom-checkbox pr-0 mb-0 ck-{{guest?.colorCode}}">
+                    <input class="custom-control-input" name="employee" id="invitee_{{i}}" type="checkbox" checked disabled>
+                    <label class="custom-control-label" for="invitee_{{i}}"></label>
+                  </div>
+                  <div class="flex-fill">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <h5 *ngIf="!guest.doNotContact">
+                        {{(guest?.firstName && guest?.lastName) ? guest?.firstName + ' ' + guest?.lastName : guest?.email ? guest?.email : guest?.companyName? guest?.companyName : guest?.personEmail ? guest?.personEmail: guest?.userName}}
+                        <span><i *ngIf="guest.isOrganiser"> Organizer</i><i *ngIf="guest.isHost">Host</i><i *ngIf="guest.isOptional">Optional</i><i *ngIf="guest?.personEmail">External</i><i *ngIf="guest.doNotContact">Do Not Contact</i><i *ngIf="guest.doNotSchedule">Do Not Schedule</i></span>
+                      </h5>
+                      <h5 *ngIf="guest.doNotContact">
+                        <div class="d-flex text-wrap">
+                          {{(guest?.firstName && guest?.lastName) ? guest?.firstName + ' ' + guest?.lastName : guest?.email ? guest?.email : guest?.companyName? guest?.companyName : guest?.personEmail ? guest?.personEmail: guest?.userName}}
+                          <span class="text-danger ml-8 d-flex align-items-center font-weight-medium small text-nowrap"><em class="icon icon-close-fill mr-4 text-large mt-n3"></em>Do Not Contact</span>
+                        </div>
+                        <span><i>{{guest?.email}}</i></span>
+                      </h5>
+                      <div class="edit-close-guests position-relative py-0">
+                        <div class="d-flex align-items-center mt-2 lh-16">
+                          <a href="javascript:void(0);" appAutoCloseOutsideClick
+                            (outsideClick)="onClickedOutside($event, i)" (click)="openMenu(i)"><em
+                              class="icon icon-dot-verti icon-color"></em></a>
+                          <a (click)="deleteInvitee(guest)" href="javascript:void(0);" class="ml-12"><em
+                              class="icon icon-close icon-color"></em></a>
+                        </div>
+                        <div class="dropdown-menu dropdown-menu-right d-block mr-20 mt-4" *ngIf="currentIndex==i">
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('host',i)" *ngIf="!guest.isHost">Mark as Host</a>
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('host',i)" *ngIf="guest.isHost">Remove as Host</a>
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('optional',i)" *ngIf="!guest.isOptional">Mark as Optional</a>
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('optional',i)" *ngIf="guest.isOptional">Mark as Required</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="" class="mb-20">Select Invitees</label>
+            <div class="custom-control custom-checkbox pr-0">
+              <input class="custom-control-input" name="employee" [(ngModel)]="employee"
+                (ngModelChange)="checkInviteeType($event, 'employee')" id="employee" type="checkbox">
+              <label class="custom-control-label" for="employee">Employee</label>
+            </div>
+            <div class="custom-control custom-checkbox  pr-0">
+              <input class="custom-control-input" name="client" [(ngModel)]="client"
+                (click)="checkInviteeType($event, 'client')" id="client" type="checkbox">
+              <label class="custom-control-label" for="client">Client</label>
+            </div>
+            <div class="custom-control custom-checkbox pr-0">
+              <input class="custom-control-input" name="associations" [(ngModel)]="associations"
+                (click)="checkInviteeType($event, 'associations')" id="associations" type="checkbox">
+              <label class="custom-control-label" for="associations">Client Associations</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancelId">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="saveId"> Save </button>
+</div>
+<app-loader [active]="iLoading"></app-loader>
+
+
+<ng-template #CustomHoursBeforEvent let-modal>
+  <form [formGroup]="customeHoursBeforEventForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Custom Travel Time</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click');eventForm.patchValue({beforeTravelTimeHours:null});" aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+
+     <div class="row gutter-16">
+      <div class="col-6" [class.has-error]="fBeforEvent.hours.errors && formBeforEvent">
+        <input type="text" class="form-control" (keypress)="checkNumber($event)" (keyup)="validateBeforHours()" (focusout)="addHoursLabelBeforeEvent(customeHoursBeforEventForm.value.hours)" placeholder="hours" formControlName="hours" id="hoursId">
+        <span class="field-message text-danger" *ngIf="formBeforEvent && fBeforEvent.hours.errors">
+          <span *ngIf="fBeforEvent.hours.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required hour.
+          </span>
+        </span>
+      </div>
+      <div class="col-6 custom-control custom-checkbox mb-4"  [class.has-error]="fBeforEvent.minutes.errors && formBeforEvent">
+        <input type="text" class="form-control" (keypress)="checkNumber($event)" (keyup)="validateBeforMinutes()" (focusout)="addMinutesLabelBeforeEvent(customeHoursBeforEventForm.value.minutes)" placeholder="minutes" formControlName="minutes" id="minutesId">
+        <span class="field-message text-danger" *ngIf="formBeforEvent && fBeforEvent.minutes.errors">
+          <span *ngIf="fBeforEvent.minutes.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required minute.
+          </span>
+        </span>
+      </div>
+     </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');eventForm.patchValue({beforeTravelTimeHours:null});">Cancel</button>
+      <button type="submit" class="btn btn-primary" *ngIf="!customeHoursBeforEventForm.valid" (click)="saveCustomHoursBeforEvent();">Save</button>
+      <button type="submit" class="btn btn-primary" *ngIf="customeHoursBeforEventForm.valid" (click)="saveCustomHoursBeforEvent();modal.dismiss('Cross click')">Save</button>
+    </div>
+  </form>
+</ng-template>
+<ng-template #CustomHoursAfterEvent let-modal>
+  <form [formGroup]="customeHoursAfterEventForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Custom Travel Time</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click'); eventForm.patchValue({afterTravelTimeHours:null});" aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+
+     <div class="row gutter-16">
+      <div class="col-6" [class.has-error]="fAfterEvent.hours.errors && formAfterEvent">
+        <input type="text" class="form-control" placeholder="hours" (keypress)="checkNumber($event)" (focusout)="addHoursLabelAfterEvent(customeHoursAfterEventForm.value.hours)" (keyup)="validateAfterHours()" formControlName="hours" id="hoursId">
+        <span class="field-message text-danger" *ngIf="formAfterEvent && fAfterEvent.hours.errors">
+          <span *ngIf="fAfterEvent.hours.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required hour.
+          </span>
+        </span>
+      </div>
+      <div class="col-6 custom-control custom-checkbox mb-4" [class.has-error]="fAfterEvent.minutes.errors && formAfterEvent">
+        <input type="text" class="form-control" placeholder="minutes" (keypress)="checkNumber($event)" (focusout)="addMinutesLabelAfterEvent(customeHoursAfterEventForm.value.minutes)" (keyup)="validateAfterMinutes()" formControlName="minutes" id="minutesId">
+        <span class="field-message text-danger" *ngIf="formAfterEvent && fAfterEvent.minutes.errors">
+          <span *ngIf="fAfterEvent.minutes.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required minute.
+          </span>
+        </span>
+      </div>
+     </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');eventForm.patchValue({afterTravelTimeHours:null});" id="cancelId">Cancel</button>
+      <button type="submit" class="btn btn-primary" *ngIf="!customeHoursAfterEventForm.valid" (click)="saveCustomHoursAfterEvent();" id="saveId">Save</button>
+      <button type="submit" class="btn btn-primary" *ngIf="customeHoursAfterEventForm.valid" (click)="saveCustomHoursAfterEvent();modal.dismiss('Cross click')" id="saveId">Save</button>
+    </div>
+  </form>
+</ng-template>

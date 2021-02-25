@@ -1,0 +1,88 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a [routerLink]="['/firm']">Firm Settings</a></li>
+      <li class="breadcrumb-item active">System Hierarchy</li>
+    </ol>
+    <div class="heading">
+      <h1>System Hierarchy</h1>
+    </div>
+    <div class="card">
+      <div class="card-body pl-0 pr-0">
+        <div class="card-heads bdr-btm">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <span class="small helper-text d-block mb-8">Firm</span>
+                {{firmDetails?.name}}
+              </div>
+            </div>
+            <div class="col-6 text-right">
+              <div class="btn-group ml-md-24 ml-0">
+                
+                
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hry-row d-flex justify-content-between flex-column">
+          <div class="hry-header d-flex align-items-start justify-content-start">
+            <ul *ngFor="let hierarchy of firmHierarchy;trackBy :trackByFn;let i = index;">
+              <li>
+                <div class="d-flex align-items-center">
+                  <div class="flex-grow-1 d-flex justify-content-start align-items-center">
+                    <span> {{hierarchy.name}} </span>
+                    
+                  </div>
+                  <div *ngIf="hierarchy.level < maxLevel" class="icon-group d-flex justify-content-end">
+                    <span (click)='editHierarchyLevel(hierarchy)' id="editHierarchyLevel-index-{{i}}">
+                      <em class="icon icon-edit icon-color"></em>
+                    </span>
+                    <span (click)='deleteHierarchyLevel(hierarchy)' id="deleteHierarchyLevel-index-{{i}}">
+                      <em class="icon icon-remove icon-color"></em>
+                    </span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="hry-content d-flex align-items-stretch justify-content-start">
+            <ul *ngFor="let hierarchy of firmHierarchy;trackBy :trackByFn;let i = index">
+              <li *ngFor="let echelon of hierarchy.echelons; trackBy :trackByFn;let index = index;" (click)='selectHierarchyLevel(echelon, hierarchy.level)'
+                [class.selected]='echelon.isSelected' [class.no-hover]='hierarchy.level == maxLevel'>
+                <div class="d-flex align-items-center">
+                  <div class="flex-grow-1 d-flex justify-content-start align-items-center">
+                    <span *ngIf='echelon?.name?.length <= 20'> {{echelon.name}} </span>
+                    <span>&nbsp;</span>
+                    <div *ngIf='echelon?.name?.length > 20' class="info-hover position-relative">
+                      <span>{{echelon.name | truncate: 20}}</span>
+                      <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner">
+                          <p> {{echelon.name}} </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="hierarchy.level < maxLevel" class="icon-group d-flex justify-content-end">
+                    <span>
+                      <em (click)="edit(echelon, hierarchy, $event)" class="icon icon-edit icon-color" id="edit-echelon-{{i}}-{{index}}"></em>
+                    </span>
+                    <span>
+                      <em (click)='remove(echelon, hierarchy, $event)' class="icon icon-remove icon-color" id="remove-echelon-{{i}}-{{index}}"></em>
+                    </span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="hry-footer d-flex align-items-start justify-content-start">
+            <ul *ngFor='let h of firmHierarchy; trackBy: trackByFn;let i = index'>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

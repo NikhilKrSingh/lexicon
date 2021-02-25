@@ -1,0 +1,45 @@
+<form [formGroup]="timeEntriesByAttorneyForm">
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Time Entries by Attorney Report</li>
+        </ol>
+        <div class="heading">
+            <h1>Time Entries by Attorney Report</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-8">Generate Report</h2>
+                <p class="lh-20">Generate your report by selecting the options below.</p>
+                <div class="row gutter-16">
+                    <div class="col-5">
+                        <app-date-range-report (startDate)="startDate($event)" [title]="'Date of Service Range'" (endDate)="endDate($event)"></app-date-range-report>
+
+                        
+                        <div class="form-group">
+                            <label>Timekeeper</label>
+                            
+                            <ng-select [items]="newTimeKeeperList" placeholder="All"
+                                        formControlName="timeKeeper" [bindValue]="'timeKeeperID'" [bindLabel]="'name'"
+                                            [notFoundText]="'No record found'" id="timekeeper-select">
+                                        </ng-select>
+                                        
+                        </div>
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pt-8">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="!exportCsvFlag"(click)="submitTimeEntriesByAttorneyReport()" id="export-to-csv">Export to CSV</button>
+            </div>
+        </div>
+        <app-loader [active]='loading'></app-loader>
+    </div>
+</div>
+</form>

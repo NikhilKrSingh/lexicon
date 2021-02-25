@@ -1,0 +1,27 @@
+
+<div class="d-flex justify-content-between align-items-start">
+  <div>
+    <h3 class="mb-8">Document Portal Access</h3>
+    <p class="mb-32">Select whether document portal access is enabled or disabled.</p>
+  </div>
+</div>
+<div class="form-group" *ngIf="documentPortal">
+  <div class="custom-control custom-radio pr-0">
+    <input type="radio" id="yes" name="documentPortal" [value]="true" [(ngModel)]="documentPortal.documentPortalAccess"
+      (change)="radioChange($event)" class="custom-control-input">
+    <label class="custom-control-label" for="yes">Enable</label>
+  </div>
+  <span class="enable-heading">All individual client and primary corporate contacts assigned to matters will receive access to the portal</span>
+  <div class="custom-control custom-radio pr-0 custom-margin">
+    <input type="radio" id="no" name="documentPortal" [value]="false" [(ngModel)]="documentPortal.documentPortalAccess"
+      (change)="radioChange($event)" class="custom-control-input">
+    <label class="custom-control-label" for="no">Disable</label>
+  </div>
+</div>
+
+<div class="d-flex">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+    <button type=" button" class="btn btn-primary" (click)="confirmSave()" id="save-btn">Save</button>
+  </div>
+</div>

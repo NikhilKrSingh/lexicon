@@ -1,0 +1,165 @@
+
+<div class="modal-header d-block">
+	<h3 class="modal-title">Edit General Information</h3>
+
+	<button type="button" class="close" (click)="dismiss('Cross click')" aria-label="Close" id="close-btn">
+		<em class="icon icon-close"></em>
+	</button>
+</div>
+<div class="modal-body" *ngIf='employee'>
+	<form [formGroup]="employeeForm" >
+		<div class="row">
+			<div class="col-6">
+				<div class="form-group" [class.has-error]="f['firstName'].errors && formSubmitted">
+					<label>First Name <sup>*</sup></label>
+					<input class="form-control" type="text" placeholder="First Name" formControlName="firstName" id='first-name' maxlength="50">
+          <span class="field-message text-danger" *ngIf="f['firstName'].errors && formSubmitted ? !!f['firstName'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+            {{errorData.echeck_first_name_error}}
+          </span>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="form-group">
+					<label>Middle Name</label>
+					<input class="form-control" type="text" placeholder="Middle Name" formControlName="middleName" id="middle-name" maxlength="50">
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="form-group" [class.has-error]="f['lastName'].errors && formSubmitted">
+					<label>Last Name <sup>*</sup></label>
+					<input class="form-control" type="text" placeholder="Last Name" formControlName="lastName" id="last-name" maxlength="50">
+          <span class="field-message text-danger" *ngIf="f['lastName'].errors && formSubmitted ? !!f['lastName'].errors.required : false">
+                <em class="icon icon-error mr-4"></em>
+            {{errorData.echeck_last_name_error}}
+          </span>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="form-group">
+					<label>Maiden Name</label>
+					<input class="form-control" type="text" placeholder="Maiden Name" formControlName="maidenName" id="maiden-name" maxlength="50">
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="form-group">
+					<label>Nickname</label>
+					<input class="form-control" type="text" placeholder="Nickname" formControlName="nickName" id="nick-name" maxlength="50">
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="form-group">
+					<label>Common Name</label>
+					<input class="form-control" type="text" placeholder="Common Name" formControlName="commonName" id="common-name" maxlength="50">
+				</div>
+			</div>
+
+			<div class="col-6">
+				<div class="form-group"  [class.has-error]="f['jobFamily'].errors && formSubmitted">
+					<label>Job Family <sup>*</sup></label>
+					<ng-select [items]="jobList"
+							   placeholder="Job Family"
+							   formControlName="jobFamily"
+							   [(ngModel)]="jselected"
+							   [bindValue]="'id'"
+							   [bindLabel]="'name'"
+							   [selectOnTab]="true"
+							   [notFoundText]="'No record found'"
+							   id="joblist-select">
+					</ng-select>
+					<span class="field-message text-danger" *ngIf="f['jobFamily'].errors && formSubmitted ? !!f['jobFamily'].errors.required ? true : false : false">
+					  <em class="icon icon-error mr-4"></em>
+						{{errorData.jobFamily}}
+					</span>
+				  </div>
+			</div>
+
+			<div class="col-6">
+				<div class="form-group" [class.has-error]="f['jobTitle'].errors && formSubmitted">
+					<label>Job Title <sup>*</sup></label>
+					<input class="form-control" type="text" placeholder="Title" formControlName="jobTitle" maxlength="50">
+          <span class="field-message text-danger" *ngIf="f['jobTitle'].errors && formSubmitted ? !!f['jobTitle'].errors.required : false" id="job-title">
+                <em class="icon icon-error mr-4"></em>
+            {{errorData.jobtitle_required}}
+          </span>
+				</div>
+      </div>
+      <div class="col-6">
+				<div class="mb-0 custom-control custom-checkbox">
+          <input class="custom-control-input" formControlName="doNotSchedule" id="doNotSchedule" type="checkbox" >
+          <label class="custom-control-label" for="doNotSchedule">Mark as Do Not Schedule</label>
+        </div>
+			</div>
+    </div>
+
+    <div class="alert alert-warning d-flex justify-content-between mb-0 mt-20 no-shadow" *ngIf="showDoNotScheduleWarning && f['doNotSchedule'].value">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-warning"></em>
+        <div class="d-flex align-items-center flex-wrap" id="display-warning-message">
+            <h4 class="mr-16 mt-0 mb-4">Warning</h4>
+            This employee is currently assigned to one or more active matters or potential clients. Be sure to reassign these to other attorneys, if necessary.
+        </div>
+      </div>
+    </div>
+
+		<div class="info-block mt-32 pt-0">
+			<h6 class="helper-text mb-16">This employee is eligible for:</h6>
+			<div class="row gutter-16">
+				<div class="col-4">
+					<div class="custom-control custom-checkbox mb-16">
+						<input class="custom-control-input" formControlName="retainer" id="eligible1" type="checkbox" >
+						<label class="custom-control-label" for="eligible1">Client assignment</label>
+					</div>
+					<div class="form-group mb-0 mb-md-32 emp-cerate" *ngIf="employeeForm.value.retainer"
+               [class.has-error]="employeeForm.value.retainer && (!retainerPracticeArea || !retainerPracticeArea.length) && formSubmitted">
+						<label>Practice Area(s) <sup>*</sup></label>
+						<app-multiselect-dropdown
+              [title]="titlePracticeArea"
+              [selections]="retainerPracticeArea"
+              [displaySubItem]="practiceList"
+              [filterName]="filterName"
+              (onSelectionChanged)="retainerSelected($event)"
+              (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+              (clearFilter)="clearFilterRetainer()"
+			  (applyFilter)="applyFilter()"
+			  id="retainer-practice-area-multi">
+						</app-multiselect-dropdown>
+            <span class="field-message text-danger"
+                  *ngIf="employeeForm.value.retainer && (!retainerPracticeArea || !retainerPracticeArea.length) && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+              {{errorData.retainer_practice_area_required}}
+            </span>
+					</div>
+					<div class="custom-control custom-checkbox mb-16">
+						<input class="custom-control-input" id="eligible2" formControlName="initialConsultations" type="checkbox" >
+						<label class="custom-control-label" for="eligible2">Initial consultations</label>
+					</div>
+					<div class="form-group mb-0 emp-cerate" *ngIf="employeeForm.value.initialConsultations"
+               [class.has-error]="employeeForm.value.initialConsultations && (!initialConsulPracticeArea || !initialConsulPracticeArea.length) && formSubmitted">
+						<label>Practice Area(s) <sup>*</sup> </label>
+						<app-multiselect-dropdown
+              [title]="titlePracticeAreai"
+              [selections]="initialConsulPracticeArea"
+              [displaySubItem]="practiceListIC"
+              [filterName]="filterName"
+              (onSelectionChanged)="initialConsulSelected($event)"
+              (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+              (clearFilter)="clearFilterInitialConsul()"
+			  (applyFilter)="applyFilter()"
+			  id="initial-practice-area-multi">
+						</app-multiselect-dropdown>
+            <span class="field-message text-danger" *ngIf="employeeForm.value.initialConsultations && (!initialConsulPracticeArea || !initialConsulPracticeArea.length) && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+              {{errorData.initial_consulation_practice_area_required}}
+            </span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+<div class="modal-footer">
+	<button type="button" class="btn btn-light" (click)="dismiss('Cross click')" id='cancel-empedt-btn'>Cancel</button>
+	<button type="button" class="btn btn-primary" (click)='save(employeeForm.value)' id='save-btn'>Save</button>
+</div>
+<app-loader [active]="loading"></app-loader>

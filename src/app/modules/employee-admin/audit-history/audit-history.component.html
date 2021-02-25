@@ -1,0 +1,79 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']" >Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Employee Management</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Employee Profile</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Employee Profile Audit History</li>
+        </ol>
+        <div class="heading">
+            <h1>Employee Profile Audit History - James Smith</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                   
+                        <div class="custom-table">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-borderless table-align-top">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Date</th>
+                                            <th>Changed By</th>
+                                            <th>Change Notes</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>86710</td>
+                                            <td>9/21/2019</td>
+                                            <td>
+                                                <span class="font-weight-medium mb-8 d-block">Lauren Harman</span>
+                                                <a class="color-ltgray" href="javascript:void(0);">lauren.harman@gmail.com</a>
+                                            </td>
+                                            <td>
+                                                <div class="note-table-text">
+                                                    <p class="mb-0" *ngIf="showLess">{{myText | slice:0: 65}}...</p>
+                                                    <p class="mb-0" *ngIf="!showLess">{{myText}}</p>
+                                                    
+                                                    <button type="button" class="btn btn-link p-0 text-decoration"
+                                                    (click)="showLess=!showLess">Show {{!showLess ? 'Less' : 'More'}}</button>
+                                                </div>
+                                            </td>
+                                            <td>Current</td>
+                                            <td class="text-right">
+                                                <a href="javascript:void(0);"><strong>View Audit History</strong></a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>86710</td>
+                                            <td>9/21/2019</td>
+                                            <td>
+                                                <span class="font-weight-medium mb-8 d-block">Lauren Harman</span>
+                                                <a class="color-ltgray" href="javascript:void(0);">lauren.harman@gmail.com</a>
+                                            </td>
+                                            <td>
+                                                <div class="note-table-text">
+                                                    <p class="mb-0" *ngIf="!showMore">{{myText | slice:0: 65}}...</p>
+                                                    <p class="mb-0" *ngIf="showMore">{{myText}}</p>
+                                                    <button type="button" class="btn btn-link p-0 text-decoration"
+                                                    (click)="showMore=!showMore">Show {{showMore ? 'Less' : 'More'}}</button>
+                                                </div>
+                                            </td>
+                                            <td>Past</td>
+                                            <td class="text-right">
+                                                <a href="javascript:void(0);"><strong>View Audit History</strong></a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    
+                    
+            </div>
+        </div>
+    </div>

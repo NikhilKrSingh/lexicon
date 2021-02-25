@@ -1,0 +1,56 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">{{title}}</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="row" [formGroup]='trustAccountForm'>
+    <div class="col-12">
+      <div class="form-group" [ngClass]="{'has-error': accountNameErrMsg}">
+        <label>Account Name <sup>*</sup></label>
+        <input type="text" class="form-control" formControlName='accountName'
+          placeholder="Enter bank account (nick)name" (keyup)='changeAccountName()' id="ac-name">
+        <span class="field-message text-danger" *ngIf="accountNameErrMsg">
+          <em class="icon icon-error mr-4"></em>
+          {{ accountNameErrMsg }}
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group" [ngClass]="{'has-error': routingNumberErrMsg || routingNumberErrorFlag}">
+        <label>Routing Number <sup>*</sup></label>
+        <input type="text" mask="000000000" placeholder="Enter routing number" class="form-control"
+          formControlName='routingNumber' (keyup)='changeRoutingNumber()' (blur)='changeRoutingNumber()' id="routing-number">
+        <span class="d-block pt-8">{{bankName}}</span>
+        <span class="field-message text-danger" *ngIf="routingNumberErrMsg">
+          <em class="icon icon-error mr-4"></em>
+          {{ routingNumberErrMsg }}
+        </span>
+        <span class="field-message text-danger" *ngIf="routingNumberErrorFlag">
+          <em class="icon icon-error mr-4"></em>
+          {{ errorMessageRouting }}
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group" [ngClass]="{'has-error': accountNumberErrMsg || accountNumberErrorFlag}">
+        <label>Bank Account Number <sup>*</sup></label>
+        <input type="text" mask="000000000000" placeholder="Enter bank account number" class="form-control"
+          formControlName='accountNumber' (keyup)='changeAccountNumber()' (blur)='changeAccountNumber()' id="bank-ac-number">
+        <span class="field-message text-danger" *ngIf="accountNumberErrMsg">
+          <em class="icon icon-error mr-4"></em>
+          {{ accountNumberErrMsg }}
+        </span>
+        <span class="field-message text-danger" *ngIf="accountNumberErrorFlag">
+          <em class="icon icon-error mr-4"></em>
+          {{ errorMessageAccount }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" id="save-btn">{{btnName}}</button>
+</div>

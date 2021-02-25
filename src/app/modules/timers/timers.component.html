@@ -1,0 +1,341 @@
+<div id="timerWidget" class="timer-bar section-area" [class.timer-bar-open]="displayTimersView"
+  [class.displayTimers]="!displayTimersTab">
+  <div class="timer-bar-header d-flex align-items-center">
+    <div class="timer-head-title d-flex align-items-center    justify-content-between flex-fill">
+      <div class="d-flex align-items-center mr-12">
+        <em class="icon icon-alarm mr-12 text-large"></em>
+        <span class="text-large font-weight-medium" *ngIf="listOfTimers?.length === 1">{{listOfTimers?.length}}
+          Timer</span>
+        <span class="text-large font-weight-medium" *ngIf="listOfTimers?.length != 1">{{listOfTimers?.length}}
+          Timers</span>
+      </div>
+      <div class="d-flex">
+        <span class="time-status d-flex align-items-center" *ngIf="runningTimers > 0">
+          <span class="bg-success status-circle"></span>
+          {{runningTimers}}
+        </span>
+        <span class="time-status d-flex align-items-center" *ngIf="stoppedTimers > 0">
+          <span class="bg-orange status-circle"></span>
+          {{stoppedTimers}}
+        </span>
+      </div>
+    </div>
+    <div class="timer-head-plus d-flex align-items-center justify-content-center" (click)="startNewTimer()" id="startNewTimerId">
+      <em class="icon icon-plus"></em>
+      <span class="ml-8 font-weight-medium" *ngIf="displayTimersView">Start New</span>
+    </div>
+    <div class="timer-head-expand">
+      <span (click)="displayTimersView = !displayTimersView">
+        <em *ngIf="!displayTimersView" class="icon icon-angle-up"></em>
+        <em *ngIf="displayTimersView" class="icon icon-angle-down"></em>
+      </span>
+    </div>
+  </div>
+  <div class="timer-bar-dropdown">
+    <div *ngIf="displayTimers && displayTimersView">
+      <div class="timer-bar-body">
+        <div class="d-flex flex-column h-100">
+          <div class="d-flex align-items-center justify-content-between font-weight-medium lh-20 mb-12 pr-12">
+            <span>{{today | date : 'EEEE, MM/dd/yyyy'}}</span>
+            <span>Total: {{totalTime}}</span>
+          </div>
+          <ng-container *ngIf="listOfTimers?.length > 0">
+            <div class="times-wrap h-100 custom-style-scroll w-5">
+              <div class="times-block d-flex align-items-start justify-content-between"
+                *ngFor="let item of listOfTimers; trackBy :trackByFn;let i = index; let first = first" id="item-{{i}}">
+                <div class="d-flex align-items-start justify-content-between pt-4">
+                  <span class="bg-orange status-circle mr-4 mt-4" *ngIf="!item.isRunning"></span>
+                  <span class="bg-success status-circle mr-4 mt-4" *ngIf="item.isRunning"></span>
+                  <div class="small" *ngIf="item.client">
+                    <span class="d-block font-weight-medium lh-16 timer-title text-nowrap">{{item.matter?.number}} -
+                      {{item.matter?.name}}</span>
+                    <span class="d-block font-weight-normal helper-text lh-16">{{item.client?.name}}</span>
+                  </div>
+                  <a href="javascript:void(0);" (click)="editDetails(item)" class="font-weight-medium"
+                    *ngIf="!item.client" id="editDetailsId-{{i}}">Edit Details</a>
+                </div>
+                <div class="d-flex align-items-center justify-content-between flex-nowrap">
+                  <span class="font-weight-medium mr-6">{{item.totalSeconds | secondsTohhmmss}}</span>
+                  <span class="play-pause active mr-6 cursor-pointer" *ngIf="item.isRunning"
+                    (click)="pause(item)"></span>
+                  <span class="play-pause mr-6 cursor-pointer" *ngIf="!item.isRunning" (click)="play(item)" id="playId={{i}}"></span>
+                  <button type="button" class="btn btn-light btn-sm time-button mr-12" (click)='enterTime(item)' id="enterTimerId-{{i}}">Enter
+                    Time</button>
+                  <span class="time-remove cursor-pointer" (click)="deleteTimer(item, DeleteTimer);" id="deleteTimerId-{{i}}">
+                    <em class="icon icon-remove icon-color"></em>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          <div
+            class="no-times-block h-100 position-relative d-flex align-items-center justify-content-center text-center"
+            *ngIf="listOfTimers?.length == 0 || !listOfTimers" id="startNewId">
+            <em class="icon icon-alarm"></em>
+            <div class="no-timetext text-xlarge font-weight-medium">
+              Begin tracking your time using the “Start New” button above.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="timer-bar-footer small p-16">
+        Looking for a detailed breakdown? <a (click)="openTimesheet()" href="javascript:void(0);"
+          class="font-weight-medium" id="visitTimeKeepingId">Visit Timekeeping</a>
+      </div>
+    </div>
+
+
+    <div *ngIf="!displayTimers">
+      <form class="timer-bar-body editTimers">
+          <div class="form-group">
+            <div class="search-group position-relative header-search" [class.has-error]='clientError'>
+              <label>Client</label>
+              <form action="#" (outsideClick)="clearDropDown('clientListPopUp')" appAutoCloseOutsideClick></form>
+
+
+                <div class="search-with-button">
+                  <span class="search-icn"></span>
+                  <input #clientFilterPopup type="type" class="form-control search-client-matter white-form-control"
+                    [(ngModel)]="searchedClient" [ngModelOptions]="{standalone: true}" placeholder="Search clients"
+                    (keyup)="getsearchResult(searchedClient,true)" (keydown.tab)="actionDropDown()"
+                    (keydown.enter)="actionDropDown(metterFilterPopup)" autocomplete="off" (blur)="addClassFlag=false"
+                    (focus)="addClassFlag=true" id="searchedClientId">
+                  <button type="button" class="close" (click)="clear('client')" aria-label="Clear Client Search" *ngIf="searchedClient">
+                    <em class="icon icon-close small"></em>
+                  </button>
+                </div>
+
+
+                <div class="search-group-result px-0 mt-4 " *ngIf="clientListPopUp.length>0">
+                  <div>
+                    <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">
+                      {{clientListPopUp.length}} results</h5>
+                  </div>
+                  <div class="search-collapse custom-style-scroll w-5" >
+                    <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                      *ngFor="let item of clientListPopUp; trackBy :trackByFn;let i = index; let first = first"
+                      [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}">
+                      <div class="search-panel-head" (click)="selectClient(item)">
+                        <em class="search-res-icon icon icon-clients"></em>
+                        <div class="client-result d-flex">
+                          <span *ngIf='item.isCompany'>
+                            <span [innerHTML]="item.companyName | highlightText : clientFilterPopup?.value"></span>
+                          </span>
+                          <span *ngIf='!item.isCompany'>
+                            <span
+                              [innerHTML]="((!item.firstName) ? item.lastName : item.lastName+', '+item.firstName) | highlightText : clientFilterPopup?.value"></span>
+                          </span>
+                          <div *ngIf="item.doNotContact" class="schedule-label">
+                            <span class="close-icon ml-8 mr-4">
+                              <i class="icon icon-close"></i>
+                            </span>
+                            <span class="do-not-contact">Do not contact</span>
+                          </div>
+                        </div>
+                        <span class="small helper-text font-weight-medium d-block mt-4">{{item.role}}</span>
+                        <span class="arrow" (click)="$event.stopPropagation();item.showGrid=!item.showGrid">
+                          <em class="icon icon-angle-down"></em>
+                        </span>
+                      </div>
+                      <div class="search-panel-body">
+                        <div class="mt-12 contact-area">
+                          <div class="contact-info">
+                            <!-- <span class="small helper-text d-block mb-4 font-weight-medium"
+                              *ngIf="item.preferredContactMethod == 'Email' && !item.doNotContact">
+                              Email
+                            </span> -->
+                            <!-- *ngIf="item.preferredContactMethod != 'Email' && item.preferredPhone && !item.doNotContact" -->
+                            <span class="small helper-text d-block mb-4 font-weight-medium"
+                              *ngIf="item.preferredPhone && !item.doNotContact">
+                              Phone Number
+                            </span>
+                            <span class="small helper-text d-block mb-4 font-weight-medium"
+                              *ngIf="(!item.preferredPhone && !item.email) || item.doNotContact">
+                              -
+                            </span>
+                            <span *ngIf="!item.doNotContact">
+                              {{item?.preferredPhone | mask : '(000) 000-0000'}}
+                            </span>
+                          </div>
+                          <div class="contact-info">
+                            <span class="small helper-text d-block mb-4 font-weight-medium"
+                              *ngIf="item.companyName && !item.doNotContact">
+                              Primary Contact
+                            </span>
+                            <span *ngIf="item.companyName && !item.doNotContact">
+                              {{item.primaryContact?.name}}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="mt-12" *ngIf="item?.email">
+                          <span class="small helper-text d-block mb-4 font-weight-medium">
+                            Email Address
+                          </span>
+                          {{item?.email}}
+                        </div>
+                      </div>
+                      <div class="top-border-search-panel pt-16"></div>
+                    </div>
+
+                  </div>
+                </div>
+                <div class="search-group-result px-0 mt-4 " *ngIf="isSearchLoading">
+                  <app-search-loader  [active]="isSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                </div>
+
+              <app-validation-message *ngIf='clientError' [errorMessage]='clientError'></app-validation-message>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="search-group position-relative" [class.has-error]='matterError'>
+              <label>Matter</label>
+              <form action="#" (outsideClick)="clearDropDown('matterListPopUp')" appAutoCloseOutsideClick>
+                <div class="search-with-button">
+                  <span class="search-icn"></span>
+                  <input #metterFilterPopup type="text" class="form-control search-client-matter white-form-control"
+                    placeholder="Search matters" [(ngModel)]="searchMatter" [ngModelOptions]="{standalone: true}"
+                    (keyup)="updateMatterFilter($event)" (keydown.tab)="actionDropDown(metterFilterPopup, 'code')"
+                    (keydown.enter)="actionDropDown(null, 'code')" autocomplete="off"
+                    [disabled]="selectedClient?.role == 'Potential Client' || disabled" id="searchMatterId">
+                  <button type="button" class="close" (click)="clear('matter')" aria-label="Clear Client Search"
+                    *ngIf="searchMatter && !disabled">
+                    <em class="icon icon-close small"></em>
+                  </button>
+                </div>
+
+                <div class="search-group-result px-0 mt-4" *ngIf="matterListPopUp?.length>0">
+                  <div>
+                    <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">
+                      {{matterListPopUp.length}} results</h5>
+                  </div>
+                  <div class="search-collapse custom-style-scroll w-5">
+                    <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                      [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}"
+                      *ngFor="let item of matterListPopUp; trackBy :trackByFn; let i = index; let first=first">
+                      <div class="search-panel-head" (click)="selectMatter(item, ' ')">
+                        <em class="search-res-icon icon icon-matters"></em>
+                        <div>
+                          <span [innerHTML]="item.matterName | highlightText : metterFilterPopup?.value"></span>
+                        </div>
+
+                        <span class="arrow" (click)="$event.stopPropagation();item.showGrid=!item.showGrid">
+                          <em class="icon icon-angle-down"></em>
+                        </span>
+                      </div>
+                      <div class="search-panel-body">
+                        <div class='d-flex align-items-start'>
+                          <div class="row col-12 m-0 p-0">
+                            <div class="col-5 p-0">
+                              <div class="mt-12">
+                                <span class="small helper-text d-block mb-4 font-weight-medium">
+                                  Matter Number
+                                </span>
+                                <span>
+                                  {{item.id }}
+                                </span>
+                              </div>
+                            </div>
+                            <div class="col-7 p-0">
+                              <div class="mt-12">
+                                <span class="small helper-text d-block mb-4 font-weight-medium">
+                                  Attorney
+                                </span>
+                                <span *ngFor="let att of item.responsibleAttorny;trackBy: trackByFn">
+                                  {{att.name}}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="top-border-search-panel pt-16"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="search-group-result px-0 mt-4 " *ngIf="isMatterSearchLoading">
+                  <app-search-loader  [active]="isMatterSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                </div>
+                <app-validation-message *ngIf='matterError' [errorMessage]='matterError'></app-validation-message>
+
+              </form>
+            </div>
+          </div>
+      </form>
+
+      <div class="modal-footer edit-footer">
+        <button type="button" class="btn btn-light" (click)="displayTimers = !displayTimers" id="DisplayCancleId">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="updateTimerDetails()" id="updateTimerDetailsId">Update</button>
+      </div>
+    </div>
+
+
+
+    <app-loader [active]='loading'></app-loader>
+  </div>
+</div>
+<ng-template #DeleteTimer let-modal class="delete-modal">
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Delete Timer</h3>
+    <button type="button" class="close" (click)="modal.close(false)" aria-label="Close" id="closeId">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start">
+      <em class="icon icon-warning text-danger mr-16"></em>
+      <div class="lh-20">
+        <p class="m-0">Are you sure you want to delete this timer without creating a time entry?</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(false)" id="cancleId">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true) " id="yesDeleteTimerId">
+      Yes, Delete Timer
+    </button>
+  </div>
+</ng-template>
+
+<div class="fix-message" *ngIf='showSuccess || showWarning || showDiscardSuccess'>
+  <div class="alert d-flex justify-content-between align-items-start mb-8 alert-success" role="alert"
+    *ngIf='showSuccess' id="showSucessId">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-check-circle text-large"></em>
+      <div class="">
+        <h5 class="mr-36 mt-0 mb-4">Success</h5>
+        <span class="lh-20 d-block">
+          Time entry submitted.
+        </span>
+      </div>
+    </div>
+    <span class="alert-close" (click)='showSuccess = false' id="submittedSuccessId"><em class="icon icon-close"></em></span>
+  </div>
+  <div class="alert d-flex justify-content-between align-items-start mb-8 alert-success" role="alert"
+    *ngIf='showDiscardSuccess' id="showDiscardSuccessId">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-check-circle text-large"></em>
+      <div class="">
+        <h5 class="mr-36 mt-0 mb-4">Success</h5>
+        <span class="lh-20 d-block">
+          Remaining Time Discarded.
+        </span>
+      </div>
+    </div>
+    <span class="alert-close" (click)='showSuccess = false' id="discardedSuccessId"><em class="icon icon-close"></em></span>
+  </div>
+  <div class="alert d-flex justify-content-between align-items-start mb-8 alert-warning" role="alert"
+    *ngIf='showWarning' id="showWarningId">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-warning text-large"></em>
+      <div class="">
+        <h5 class="mr-36 mt-0 mb-4">Warning</h5>
+        <span class="lh-20 d-block mb-8">
+          {{remainingTime | suggestedTimeEntry }} from the timer were left unallocated and will be discarded when this
+          message is dismissed.
+        </span>
+        <a href="javascript:void(0);" class="font-weight-medium" (click)='allocateTime()'>Allocate Time</a>
+      </div>
+    </div>
+    <span class="alert-close" (click)='showWarning = false' id="warningId"><em class="icon icon-close"></em></span>
+  </div>
+</div>

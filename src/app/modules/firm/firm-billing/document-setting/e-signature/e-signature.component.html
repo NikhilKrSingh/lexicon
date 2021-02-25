@@ -1,0 +1,27 @@
+<div class="d-flex justify-content-between align-items-start">
+  <div>
+    <h3 class="mb-8">E-Signature</h3>
+    <p class="mb-32 helper-text font-weight-normal">Select whether E-Signature of documents is enabled or disabled.</p>
+  </div>
+</div>
+<div class="form-group">
+  <label class="mb-20">Enable/Disable E-Signature</label>
+  <div class="custom-control custom-radio pr-0">
+    <input type="radio" id="yes" [value]="true" [(ngModel)]="eSignature" class="custom-control-input" (change)="radioChange($event)">
+    <label class="custom-control-label" for="yes">Enable</label>
+  </div>
+
+  <div class="custom-control custom-radio pr-0">
+    <input type="radio" id="no" [value]="false" [(ngModel)]="eSignature" class="custom-control-input" (change)="radioChange($event)">
+    <label class="custom-control-label" for="no">Disable</label>
+  </div>
+</div>
+
+<div class="d-flex">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)="goToDashboard()" id="cancel-btn">Cancel</button>
+    <button type=" button" class="btn btn-primary" (click)="updateESignature()" id="save-btn">Save</button>
+  </div>
+</div>
+
+<app-loader [active]="loading"></app-loader>

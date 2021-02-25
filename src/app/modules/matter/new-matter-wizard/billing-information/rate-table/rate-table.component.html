@@ -1,0 +1,77 @@
+<div class="modal-header pb-24 d-block">
+  <h3 class="modal-title mb-8">Rate Table</h3>
+  <span class="d-block helper-text lh-20">Set Exception Rate</span>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="closeId">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-24">
+  <ngx-datatable #tableratetable class="material common-table custom-hr-table"
+    [class.matter-no-data]="rateList?.length === 0"
+    [rows]="rateList"
+    [columnMode]="ColumnMode.force"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    rowHeight="auto"
+    [count]="page.totalElements"
+    [offset]="page.pageNumber"
+    [limit]="page.size"
+    (sort)="calcTotalPages()"
+    id="rateListId">
+
+    <ngx-datatable-column [resizeable]="false" prop="code" name="Code" [width]="180"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [width]="270"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="billingTo.name" name="Billable To" [width]="150"> </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="rateAmount" name="Rate" [width]="150">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <input type="text" class="form-control bordred w-116" [ngClass]="{'text-danger': row.isCustom}" placeholder="Rate" mask="separator.2" prefix="$"
+          thousandSeparator="," name="enterAmount" (blur)="rateFormat(row)" [(ngModel)]="row.rateAmount" (keyup)="valueChange($event, row);">
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column [resizeable]="false" prop="billingType.name" name="Bill Type" [width]="150"> </ngx-datatable-column>
+    <ngx-datatable-footer>
+      <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+        let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="pageSelector"
+                  (change)="changePageSize()">
+                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+              {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+              <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page
+                {{ i+1 }} of {{page.totalPages}}</option>
+            </select>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                (change)="tableratetable.onFooterPage($event);pageChange($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancelId">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="saveId">
+    Save
+  </button>
+</div>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>UI/Icon/text editor/attachment</title>
+    <defs>
+        <path d="M7.7,15c-2,0-3.7-1.6-3.7-3.7v-7c0-1.5,1.2-2.7,2.7-2.7s2.7,1.2,2.7,2.7V10
+			c0,0.9-0.7,1.7-1.7,1.7S6,10.9,6,10V5h1.3v5.1c0,0.4,0.7,0.4,0.7,0V4.3C8,3.6,7.4,3,6.7,3S5.3,3.6,5.3,4.3v7c0,1.3,1,2.3,2.3,2.3
+			s2.3-1,2.3-2.3V5h1.3v6.3C11.3,13.4,9.7,15,7.7,15z" id="path-1"></path>
+    </defs>
+    <g id="UI/Icon/text-editor/attachment" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Rectangle" transform="translate(0.000000, 0.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <!-- <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use> -->
+            <rect fill="#4E5F7B" mask="url(#mask-2)" x="0" y="0" width="16" height="16"></rect>
+        </g>
+    </g>
+</svg>

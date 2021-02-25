@@ -1,0 +1,37 @@
+.metrics-wrapper {
+  padding-top: 50px;
+  padding-bottom: 60px;
+  .col-2 {
+    flex: 0 0 20%;
+    max-width: 20%;
+  }
+}
+
+.metric-block {
+  border: 1px solid #c4ccd4;
+  border-radius: 10px;
+  padding: 24px 20px;
+  .h2 {
+    color: #4756ce;
+  }
+}
+
+gridster {
+  background-color: transparent !important;
+}
+
+gridster-item {
+  background-color: transparent !important;
+}
+
+.dash-card {
+  height: 100%;
+}
+
+.edit-widget-dashboard {
+  .widget-area {
+    min-height: 200px;
+  }
+}
+
+

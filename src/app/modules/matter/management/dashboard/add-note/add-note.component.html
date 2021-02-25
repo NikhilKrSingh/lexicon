@@ -1,0 +1,54 @@
+<div class="modal-header pb-24 d-block">
+  <h3 class="modal-title  mb-0">{{note?.id > 0 && !isEdit ? 'Edit a note' : isEdit ? 'Edit Note' : 'Create New Note'}}</h3>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)='dismiss()' id="close-btn-notes-model">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="row gutter-16">
+    <div class="col-4">
+      <div class="form-group" [class.has-error]="(note.applicableDate == null) && formSubmitted">
+        <label>Applicable Date <sup>*</sup></label>
+        <app-date-picker [isNgModel]="true" [(data)]='note.applicableDate' id="application-date"></app-date-picker>
+        <input type="hidden" class="form-control" [(ngModel)]="note.id" id="hidden-note-id">
+        <span class="field-message text-danger">
+          <em class="icon icon-error mr-4"></em>
+          Please select applicable date.
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group position-relative" [class.has-error]="(note.content == null) && formSubmitted">
+        <label class="w-100">Note Text <sup>*</sup> </label>
+        <span class="count-char">{{note?.content?.length || 0}}/1000</span>
+        <textarea class="form-control height-2" maxlength="1000" placeholder="Enter text"
+                  [(ngModel)]="note.content" id="note-textarea"></textarea>
+        <span class="field-message text-danger">
+          <em class="icon icon-error mr-4"></em>
+          {{ errorData?.note_error }}
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group">
+        <label class="mb-16">Visible to client</label>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="customRadio1" name="customRadio" (ngModelChange)="onChange($event)"
+                 class="custom-control-input" [value]='true'
+                 [(ngModel)]='note.isVisibleToClient'>
+          <label class="custom-control-label" for="customRadio1">Yes</label>
+        </div>
+        <div class="custom-control custom-radio pr-0 mb-0">
+          <input type="radio" id="customRadio2" name="customRadio" (ngModelChange)="onChange($event)"
+                 class="custom-control-input" [value]='false'
+                 [(ngModel)]='note.isVisibleToClient'>
+          <label class="custom-control-label" for="customRadio2">No</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn-note">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='close()' id="save-btn-note">Save</button>
+</div>

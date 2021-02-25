@@ -1,0 +1,72 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item"[routerLink]="['/contact/potential-client']"><a href="javascript:void(0)">Potential Clients</a></li>
+      <li class="breadcrumb-item active">Add New Potential Client Intake</li>
+    </ol>
+    <div class="heading">
+      <h1>Add New Potential Client</h1>
+    </div>
+    <ul class="list-unstyled steps d-flex mb-32 justify-content-between">
+      <li class="d-flex align-items-center" [class.current]="step == 'basic'"
+        [class.completed]="completedArr.basic">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>1</span>
+        </span>
+        <a href="javascript:void(0)" (click)="changeStep('basic')">Basic Details</a>
+      </li>
+      <li class="d-flex align-items-center" [class.current]="step == 'matter'"
+        [class.completed]="completedArr.matter">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>2</span>
+        </span>
+        <a href="javascript:void(0)" (click)="changeStep('matter')">Matter Details</a>
+      </li>
+      <li class="d-flex align-items-center" [class.current]="step == 'attorney'"
+        [class.completed]="completedArr.attorney">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>3</span>
+        </span>
+        <a href="javascript:void(0)" (click)="changeStep('attorney')">Attorney</a>
+      </li>
+      <li class="d-flex align-items-center" [class.current]="step == 'scheduling'"
+        [class.completed]="completedArr.scheduling">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>4</span>
+        </span>
+        <a href="javascript:void(0)" (click)="changeStep('scheduling')">Scheduling</a>
+      </li>
+      <li class="d-flex align-items-center" [class.current]="step == 'notes'">
+        <span class="step-number mr-8">
+          <em class="icon icon-check"></em>
+          <span>5</span>
+        </span>
+        <a href="javascript:void(0)" (click)="changeStep('notes')">Notes</a>
+      </li>
+    </ul>
+
+    <app-contact-basic *ngIf="step==='basic'" (nextStep)='nextStep($event)'></app-contact-basic>
+    <app-contact-matter *ngIf="step==='matter'"
+      (nextStep)='nextStep($event)'
+      (prevStep)='prevStep($event)'>
+    </app-contact-matter>
+
+    <app-contact-attorney *ngIf="step==='attorney'"
+      (nextStep)='nextStep($event)'
+      (prevStep)='prevStep($event)'>
+    </app-contact-attorney>
+    <app-contact-scheduling *ngIf="step==='scheduling'"
+      (nextStep)='nextStep($event)'
+      (prevStep)='prevStep($event)'>
+    </app-contact-scheduling>
+    <app-contact-notes *ngIf="step==='notes'"
+      (nextStep)='nextStep($event)'
+      (prevStep)='prevStep($event)'>
+    </app-contact-notes>
+  </div>
+</div>

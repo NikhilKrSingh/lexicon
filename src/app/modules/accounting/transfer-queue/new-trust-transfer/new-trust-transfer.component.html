@@ -1,0 +1,155 @@
+<div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/accounting/transfer-queue']">Accounting</a></li>
+        <li class="breadcrumb-item active" aria-current="page">New Trust Transfer</li>
+      </ol>
+      <div class="heading">
+        <h1>New Trust Transfer</h1>
+      </div>
+        <app-trust-transfer-source></app-trust-transfer-source>
+    </div>
+</div>
+
+
+
+<ng-template #SelectTransferType let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Select Transfer Type</h3>
+      <button type="button" id="actselecttrnsfrtype-close-btn" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body pb-8">
+        <div class="step-radio mb-24">
+            <div class="d-flex align-items-start">
+                <label class="cust-radio text-base mr-8">
+                    <input type="radio" name="steptype" id="actselecttransfrtypebank">
+                    <span class="radio-style"></span>
+                </label>
+                <div>
+                    <strong class="d-block font-weight-medium mb-4">Bank Transfer</strong>
+                    <p class="m-0 helper-text font-weight-normal lh-20">This includes transfers from firm-level bank accounts and operating accounts.</p>
+                </div>
+            </div>
+        </div>
+        <div class="step-radio mb-24">
+            <div class="d-flex align-items-start">
+                <label class="cust-radio text-base mr-8">
+                    <input type="radio" name="steptype" id="actselecttransfrtypetrust">
+                    <span class="radio-style"></span>
+                </label>
+                <div>
+                    <strong class="d-block font-weight-medium mb-4">Trust Transfer</strong>
+                    <p class="m-0 helper-text font-weight-normal lh-20">This includes transfers from client- and matter-level trust accounts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="actselecttransfrtypecancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="actselecttransfrtypenext-btn">Next</button>
+    </div>
+</ng-template>
+
+
+<ng-template #TrustTransfer let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Trust Transfer</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" id="acttransfertrust-close-btn" aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body pb-0">
+        <p>Specify a source account for the transfer.</p>
+        <div class="form-group">
+            <label>Client <sup>*</sup></label>
+            
+        </div>
+        <div class="form-group">
+            <label>Matter <sup>*</sup></label>
+            
+        </div>
+        <div class="form-group">
+            <label>Trust <sup>*</sup></label>
+            <select class="custom-select" disabled id="acttransfertrust-trut-select">
+                <option>Select trust</option>
+                <option>Select trust 1</option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="acttransfertrust-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-outline-primary" id="acttransfertrust-back-btn">Back</button>
+        <button type="button" class="btn btn-primary" id="acttransfertrust-save-btn">Save Source</button>
+    </div>
+</ng-template>
+
+
+<ng-template #BankTransfer let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Bank Transfer</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" id="acttransferbank-close-btn" aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body pb-0">
+        <p>Specify a source account for the transfer.</p>
+        <div class="pb-16">
+            <div class="custom-control custom-radio pr-0 mb-12">
+                <input type="radio" id="btfoa-1" name="bank-transfer" class="custom-control-input">
+                <label class="custom-control-label" for="btfoa-1">Firm Operating Account</label>
+            </div>
+            <div class="custom-control custom-radio pr-0 mb-12">
+                <input type="radio" id="btftba-2" name="bank-transfer" class="custom-control-input">
+                <label class="custom-control-label" for="btftba-2">Firm Trust Bank Account</label>
+            </div>
+            <div class="custom-control custom-radio pr-0 mb-12">
+                <input type="radio" id="btfcctba-3" name="bank-transfer" class="custom-control-input">
+                <label class="custom-control-label" for="btfcctba-3">Firm Credit Card Trust Bank Account</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Trust Bank Account <sup>*</sup></label>
+            <select class="custom-select" id="acttransfertrustbankact">
+                <option>Select trust bank account</option>
+                <option>Select trust bank account 1</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Credit Card Trust Bank Account <sup>*</sup></label>
+            <select class="custom-select" id="acttransfercctrustbankact">
+                <option>Select credit card trust bank account</option>
+                <option>Select credit card trust bank account 1</option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')"  id="acttransfertrustbankact-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-outline-primary" id="acttransfertrustbankact-back-btn">Back</button>
+        <button type="button" class="btn btn-primary" id="acttransfertrustbankact-save-btn">Save Source</button>
+    </div>
+</ng-template>
+
+
+<ng-template #TrustTransferAlert let-modal>
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Trust Transfer</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" id="acttrusttransfer-close-btn" aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div class="d-flex align-items-start">
+            <em class="icon icon-info text-danger fs-24"></em>
+            <div class="lh-20 ml-16">
+                <p class="m-0">The transfer cannot be completed as selected, because you must select a bank account as a Transfer Target.</p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="acttrusttransfer-rttt-btn">Return to Trust Transfer</button>
+    </div>
+</ng-template>
+

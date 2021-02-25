@@ -1,0 +1,779 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a [routerLink]="['/dashboard']" href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item"><a [routerLink]="['/firm/account-settings']" href="javascript:void(0)">Accounting Settings</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add Bank Account</li>
+        </ol>
+        <div class="heading">
+            <h1>Add Bank Account</h1>
+        </div>
+        <ng-container [formGroup]="merchantAccountForm">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-24">New Bank Account</h3>
+                    <div class="row gutter-24">
+                        <div class="col-4">
+                            <div class="form-group"  [class.has-error]="f['name']?.errors && formSubmitted || nameErr">
+                                <label>Account Name <sup>*</sup></label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter account name" (keyup)="clearNameErr()"  
+                                    formControlName="name" id="account-name">
+                                <span class="field-message text-danger"  *ngIf="f['name'].errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.trust_bank_account_name_error }}
+                                </span>
+                                <span class="field-message text-danger"  *ngIf="f['name'].errors?.maxlength">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.usio_length_name }}
+                                </span>
+                                <span class="field-message text-danger"  *ngIf="nameErr">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ nameErr }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="custom-control custom-radio mb-12 pr-0">
+                                    <input type="radio" id="abaRadio-1"  (change)="manageFormControl($event,'true'); visibleFullFormControl = false" class="custom-control-input" value="true" formControlName="isMerchantAccount">
+                                    <label class="custom-control-label" for="abaRadio-1">
+                                        This is a merchant processing account
+                                        <span class="helper-text font-weight-normal small lh-16 d-block">Inbound transactions on the account will be<br>automatically processed using a payment gateway.</span>
+                                    </label>
+                                </div>
+                                <div class="custom-control custom-radio mb-0 pr-0">
+                                    <input type="radio" id="abaRadio-2" (change)="manageFormControl($event,'false'); visibleFullFormControl = false"  class="custom-control-input" value="false" formControlName="isMerchantAccount">
+                                    <label class="custom-control-label" for="abaRadio-2">This is a non-merchant processing account</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-2 pr-0 pl-0" *ngIf="isMerchant">
+                            <div class="form-group" [class.has-error]="transactionTypeError && formSubmitted && visibleFullFormControl">
+                                <label class="mb-20">Transaction Type <sup>*</sup></label>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="TT-1" [readonly]="merchantAccountForm.value.usioAccountTypeId == 3" [checked]="merchantAccountForm.value.isCreditCardAccount" (change)="checkErrorTransaction()" formControlName="isCreditCardAccount">
+                                    <label class="custom-control-label" for="TT-1">Credit Card</label>
+                                </div>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="TT-2"  [readonly]="merchantAccountForm.value.usioAccountTypeId == 3" (change)="checkErrorTransaction()" formControlName="isAchAccount">
+                                    <label class="custom-control-label" for="TT-2">ACH</label>
+                                </div>
+                                <span class="field-message text-danger"  *ngIf="transactionTypeError && formSubmitted && visibleFullFormControl">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please choose transaction type.
+                                  </span>
+                            </div>
+                        </div>
+                        <div class="col-2  pr-0" *ngIf="merchantAccountForm.value.isMerchantAccount != null">
+                            <div class="form-group" [class.has-error]="f['usioAccountTypeId']?.errors && formSubmitted">
+                                <label class="mb-20">Account Type  <sup>*</sup></label>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="AT-1" class="custom-control-input" (change)="changeAccountType(1)" [checked]="merchantAccountForm.value.usioAccountTypeId == 1"  [readonly]="!trustAccountingFlag"  [value]="1" formControlName="usioAccountTypeId">
+                                    <label class="custom-control-label" for="AT-1">Operating</label>
+                                </div>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="AT-2"  class="custom-control-input" [value]="2" (change)="changeAccountType(2)" [checked]="merchantAccountForm.value.usioAccountTypeId == 2" [readonly]="!trustAccountingFlag"  formControlName="usioAccountTypeId">
+                                    <label class="custom-control-label" for="AT-2">Trust</label>
+                                </div>
+                                <div class="custom-control custom-radio pr-0">
+                                    <input type="radio" id="AT-3" class="custom-control-input" (change)="changeAccountType(3)"  [value]="3" [checked]="merchantAccountForm.value.usioAccountTypeId == 3" [readonly]='!trustAccountingFlag' [attr.disabled]='disableCCTrustOption? true : null' formControlName="usioAccountTypeId">
+                                    <label class="custom-control-label" for="AT-3">Credit Card Trust</label>
+                                </div>
+                                <span class="field-message text-danger"  *ngIf="f['usioAccountTypeId'].errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please choose account type.
+                                  </span>
+                            </div>
+                        </div>
+                        <app-loader [active]="loading"></app-loader>
+                    </div>
+                    <div *ngIf="isMerchant">
+                        <h4 class="text-xlarge mb-16">Business Details</h4>
+                        <div class="row gutter-16">
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="(f['businessName']?.errors && formSubmitted && visibleFullFormControl)">
+                                    <label>Business Name (DBA) <sup>*</sup></label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        placeholder="Enter business name" 
+                                        formControlName="businessName" id="business-name">
+                                    <span class="field-message text-danger"  *ngIf="f['businessName'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_business_name }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="f['businessName'].errors?.maxlength || f['businessName'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_length_name }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="f['legalBusinessName']?.errors && formSubmitted && visibleFullFormControl" >
+                                    <label>Legal Business Name <sup>*</sup></label>
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter legal business name" 
+                                    formControlName="legalBusinessName" id="legal-businessname">
+                                    <span class="field-message text-danger"  *ngIf="f['legalBusinessName'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_business_name_legal }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="f['legalBusinessName'].errors?.maxlength || f['legalBusinessName'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_length_name }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="f['email']?.errors && formSubmitted && visibleFullFormControl">
+                                    <label>Email Address <sup>*</sup></label>
+                                    <input 
+                                    type="email" 
+                                    class="form-control" 
+                                    placeholder="Enter email address" 
+                                    formControlName="email" id="email-address">
+                                    <span class="field-message text-danger"  *ngIf="f['email'].errors?.pattern || f['email'].errors?.maxlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.email_not_valid }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="f['email'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_email_address_required }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="f['phoneNo']?.errors && formSubmitted && visibleFullFormControl">
+                                    <label>Phone Number</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        placeholder="Enter phone number" 
+                                        formControlName="phoneNo"
+                                        mask="0000000000" id="phone-number">
+                                    <span class="field-message text-danger" *ngIf="f['phoneNo'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.enter_valid_phone }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="f['website']?.errors && formSubmitted && visibleFullFormControl || urlError">
+                                    <label>Website</label>
+                                    <input type="text" class="form-control" placeholder="Enter website" formControlName="website" id="website">
+                                    <span class="field-message text-danger"  *ngIf="f['website'].errors?.maxlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_url_format }}
+                                    </span>
+                                    <span *ngIf="urlError" class="field-message text-danger" style="display: block;">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Please enter a valid website url
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label> Business Start Date</label>
+                                    <app-date-picker  placeholderText="Select business start date" [maxDate]="currentDate" [isForm]='true' [dateform]='merchantAccountForm' controlName='businessStartDate' [reset]="dateReset" id="business-startdate">
+                                    </app-date-picker>
+                                    
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>Ownership Type</label>
+                                    <ng-select [items]="ownerShip" placeholder="Select ownership type" (change)="selectOwner($event)" formControlName="ownershipTypeId"  [bindValue]="'id'"
+                                    [bindLabel]="'name'"  [selectOnTab]="true"
+                                    [notFoundText]="'No record found'" id="ownership-type">
+                                  </ng-select>
+                                    
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="mccError">
+                                    <label>Merchant Category Code</label>
+                                    <ng-select 
+                                        [items]="merchantCategoryList" 
+                                        placeholder="Select merchant category code" 
+                                        formControlName="merchantCategoryCode"  
+                                        [bindValue]="'code'"
+                                        [bindLabel]="'description'"  
+                                        [selectOnTab]="true"
+                                        [notFoundText]="'No record found'" id="merchant-category-code">
+                                    </ng-select>
+                                    <span class="field-message text-danger" *ngIf="mccError">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_mcc_code }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="naicsError">
+                                    <label>NAICS Code</label>
+                                    <ng-select 
+                                        [virtualScroll]="true"
+                                        appendTo="body"
+                                        [loading]="scrollLoading"
+                                        (scroll)="onScroll($event)"
+                                        (scrollToEnd)="onScrollToEnd()"
+                                        [items]="naicsCodeList" 
+                                        placeholder="Enter NAICS code" 
+                                        formControlName="naicsCode"  
+                                        [bindValue]="'code'"
+                                        [bindLabel]="'description'"  
+                                        [selectOnTab]="true"
+                                        [notFoundText]="'No record found'" id="naics-code">
+                                    </ng-select>
+                                    <span class="field-message text-danger"
+                                        *ngIf="naicsError">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_naics_code }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="f['federalTaxIdOrSsn']?.errors && formSubmitted && visibleFullFormControl">
+                                    <label>Federal Tax ID (or SSN if sole proprietorship)</label>
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    (keypress)="federalTaxDigit($event)"
+                                    placeholder="Enter federal tax ID or SSN" 
+                                    formControlName="federalTaxIdOrSsn" id="federal-tax-id">
+                                    <span class="field-message text-danger"  *ngIf="(f['federalTaxIdOrSsn'].errors?.maxlength || f['federalTaxIdOrSsn'].errors?.minlength) && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.federal_tax_limit }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                <div class="form-group">
+                                    <label>Business Description</label>
+                                    <textarea rows="2" class="form-control non-resize" placeholder="Enter business description" formControlName="businessDescription" id="business-description"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <app-loader [active]="loading"></app-loader>
+                    <div class="pt-8" *ngIf="merchantAccountForm.value.isMerchantAccount == 'true'">
+                        <h4 class="text-xlarge mb-16">Business Address</h4>
+                        <div class="row gutter-16">
+                            <div class="col-4">
+                                <div class="row gutter-16">
+                                    <div class="col-12">
+                                        <div class="form-group" [class.has-error]="f['address1']?.errors && formSubmitted && visibleFullFormControl">
+                                            <label>Street Address <sup>*</sup></label>
+                                            <input 
+                                            type="text" 
+                                            class="form-control" 
+                                            placeholder="Enter street address" 
+                                            formControlName="address1" id="address1">
+                                            <span class="field-message text-danger"  *ngIf="f['address1'].errors?.maxlength || f['address1'].errors?.minlength && visibleFullFormControl">
+                                                <em class="icon icon-error mr-4"></em>
+                                                {{ errorData?.usio_length_address }}
+                                            </span>
+                                            <span class="field-message text-danger"  *ngIf="f['address1'].errors?.required && visibleFullFormControl">
+                                                <em class="icon icon-error mr-4"></em>
+                                                {{ errorData?.street_address_error }}
+                                            </span>
+                                        </div>        
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group" [class.has-error]="f['address2']?.errors && formSubmitted && visibleFullFormControl">
+                                            <label>Apt, Suite, Unit</label>
+                                            <input 
+                                            type="text" 
+                                            class="form-control" 
+                                            placeholder="Enter apartment, suite, or unit number" 
+                                            formControlName="address2" id="address2">
+                                            <span class="field-message text-danger"  *ngIf="f['address2'].errors?.maxlength || f['address2'].errors?.minlength && visibleFullFormControl">
+                                                <em class="icon icon-error mr-4"></em>
+                                                {{ errorData?.usio_length_address }}
+                                            </span>
+                                        </div>        
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group" [class.has-error]="((f['postalCode'].errors && (f['postalCode'].touched || formSubmitted) && !validZipErr) || (formSubmitted && validZipErr)) && visibleFullFormControl">
+                                            <label>Zip Code <sup>*</sup></label>
+                                            <input 
+                                            type="text" 
+                                            minlength="3"
+                                            maxlength="6" 
+                                            (keypress)="checkNumber($event)"
+                                            class="form-control" 
+                                            placeholder="Enter zip code" 
+                                            formControlName="postalCode" 
+                                            (keyup)="getCityState($event.target.value)" id="zipcode">
+                                            <span class="field-message text-danger"
+                                                *ngIf="(f['postalCode'].errors && (f['postalCode'].touched || formSubmitted)) && !validZipErr && visibleFullFormControl">
+                                                <em class="icon icon-error mr-4"></em>
+                                                    {{ errorData?.zip_code_required }}
+                                                </span>
+                                                <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr && visibleFullFormControl">
+                                                    <em class="icon icon-error mr-4"></em>
+                                                        {{errorData?.zip_code_error}}
+                                                    </span>
+                                        </div>        
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label>State <sup>*</sup></label>
+                                            <ng-select *ngIf="stateList?.length > 1"
+                                                [items]="stateList" 
+                                                placeholder="State" 
+                                                (change)='selectState($event)' 
+                                                formControlName="stateCode"
+                                                [bindValue]="'code'" 
+                                                [bindLabel]="'name'"
+                                                [clearable]="false" 
+                                                [notFoundText]="'No record found'" 
+                                                [selectOnTab]="true" 
+                                                id="state">
+                                            </ng-select>
+                                            <input *ngIf="stateList?.length <= 1" 
+                                                type="text" 
+                                                class="form-control" 
+                                                placeholder="State"
+                                                [(ngModel)]="singleState" 
+                                                [ngModelOptions]="{standalone: true}"
+                                                [readOnly]='true' id="state">
+                                        </div>        
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label>City <sup>*</sup></label>
+                                            <ng-select *ngIf="cityList?.length > 1" 
+                                                [items]="cityList" 
+                                                placeholder="City" 
+                                                formControlName="city"
+                                                [clearable]="false"
+                                                [notFoundText]="'No record found'" 
+                                                [selectOnTab]="true" id="city">
+                                              </ng-select>
+                                            <input *ngIf="cityList?.length <= 1"
+                                            type="text" 
+                                            class="form-control" 
+                                            placeholder="City" 
+                                            formControlName="city" 
+                                            [readOnly]='true'
+                                            id="city">
+                                        </div>        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-8" *ngIf="isMerchant">
+                        <h4 class="text-xlarge mb-16">Settlement Account Information</h4>
+                        <div class="row gutter-16">
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="merchantAccountForm.controls.isSettlementPersonal.errors && formSubmitted && visibleFullFormControl">
+                                    <label class="mb-20">Account Type <sup>*</sup></label>
+                                    <div class="custom-control custom-radio pr-0">
+                                        <input type="radio" id="ATt-1" value="true" class="custom-control-input" formControlName="isSettlementPersonal">
+                                        <label class="custom-control-label" for="ATt-1">Personal</label>
+                                    </div>
+                                    <div class="custom-control custom-radio pr-0">
+                                        <input type="radio" id="ATt-2" value="false" class="custom-control-input" formControlName="isSettlementPersonal">
+                                        <label class="custom-control-label" for="ATt-2">Business</label>
+                                    </div>
+                                    <span class="field-message text-danger"  *ngIf="merchantAccountForm.controls.isSettlementPersonal.errors && merchantAccountForm.controls.isSettlementPersonal.errors.required  && formSubmitted && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Please choose settlement account type.
+                                      </span>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="f['settlementAccountName']?.errors && formSubmitted && visibleFullFormControl">
+                                    <label>Name on Settlement Account <sup>*</sup></label>
+                                    <input type="text" class="form-control" placeholder="Enter name on settlement account" formControlName="settlementAccountName" id="name-on-settlement-ac">
+                                    <span class="field-message text-danger"  *ngIf="f['settlementAccountName'].errors?.maxlength || f['settlementAccountName'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_length_name }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="f['settlementAccountName'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_settlement_account_name }}
+                                    </span>
+                                </div>        
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="(f['settlementAccountRoutingNumber']?.errors && formSubmitted && visibleFullFormControl) || settlmentRoutingError">
+                                    <label>Settlement Account Routing Number <sup>*</sup></label>
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter account routing number" 
+                                    formControlName="settlementAccountRoutingNumber"
+                                    mask="000000000"
+                                    id="settlement-ac-routing-number"
+                                    >
+                                    <span class="field-message text-danger" *ngIf="f['settlementAccountRoutingNumber'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ this.errorData?.routing_number_required }}
+                                    </span>
+                                    
+                                    <span class="field-message text-danger"  *ngIf="f['settlementAccountRoutingNumber'].errors?.maxlength || f['settlementAccountRoutingNumber'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_length_routing_number_code }}
+                                    </span>
+                                    <span *ngIf="settlmentRoutingError && !(f['settlementAccountRoutingNumber'].errors?.maxlength || f['settlementAccountRoutingNumber'].errors?.minlength)" class="field-message text-danger" style="display: block;">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Please enter valid routing number.
+                                    </span>
+                                </div>        
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="(f['settlementAccountNumber']?.errors && formSubmitted && visibleFullFormControl) || settlmentAccountError || accountErr">
+                                    <label>Settlement Account Number <sup>*</sup></label>
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter account number" 
+                                    formControlName="settlementAccountNumber" 
+                                    (keypress)="numberWithMaxDigit($event)"
+                                    (keyup)="clearAccountErr()" 
+                                    id="settlement-ac-number">
+                                    <span class="field-message text-danger"  *ngIf="f['settlementAccountNumber'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_settlement_account_number_required }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="f['settlementAccountNumber'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_account_limit }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="accountErr">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ accountErr }}
+                                    </span>
+
+                                    
+                                    <span class="field-message text-danger"  *ngIf="f['settlementAccountNumber'].errors?.maxlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_account_limit }}
+                                    </span>
+                                    <span *ngIf="settlmentAccountError" class="field-message text-danger" style="display: block;">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_account_limit }}
+                                    </span>
+                                </div>        
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-8" *ngIf="isMerchant">
+                        <h4 class="text-xlarge mb-16">Fees Settlement Account Information</h4>
+                        <div class="row gutter-16">
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="merchantAccountForm.controls.isFeesSettlementPersonal.errors && formSubmitted && visibleFullFormControl">
+                                    <label class="mb-20">Fees Settlement Account Type <sup>*</sup></label>
+                                    <div class="custom-control custom-radio pr-0">
+                                        <input type="radio" id="FSAT-1" value="true" class="custom-control-input" formControlName="isFeesSettlementPersonal">
+                                        <label class="custom-control-label" for="FSAT-1">Personal</label>
+                                    </div>
+                                    <div class="custom-control custom-radio pr-0">
+                                        <input type="radio" id="FSAT-2" value="false" class="custom-control-input" formControlName="isFeesSettlementPersonal">
+                                        <label class="custom-control-label" for="FSAT-2">Business</label>
+                                    </div>
+                                    <span class="field-message text-danger"  *ngIf="merchantAccountForm.controls.isFeesSettlementPersonal.errors && merchantAccountForm.controls.isFeesSettlementPersonal.errors.required  && formSubmitted && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Please choose fees settlement account type.
+                                      </span>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="f['feesSettlementAccountName']?.errors && formSubmitted && visibleFullFormControl">
+                                    <label>Name on Fees Account <sup>*</sup></label>
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter name on fees account" 
+                                    formControlName="feesSettlementAccountName"
+                                    id="name-on-fees-ac">
+                                    <span class="field-message text-danger"  *ngIf="f['feesSettlementAccountName'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_fees_settlement_account_name }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="f['feesSettlementAccountName'].errors?.maxlength || f['feesSettlementAccountName'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_length_name }}
+                                    </span>
+                                </div>        
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="(f['feesSettlementAccountRoutingNumber']?.errors && formSubmitted && visibleFullFormControl) || feesRoutingError">
+                                    <label>Fees Settlement Account Routing Number <sup>*</sup></label>
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter account routing number" 
+                                    formControlName="feesSettlementAccountRoutingNumber"
+                                    mask="000000000"
+                                    id="fees-settlement-ac-routing-number"
+                                   >
+                                    <span class="field-message text-danger" *ngIf="f['feesSettlementAccountRoutingNumber'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ this.errorData?.routing_number_required }}
+                                    </span>
+                                    
+                                    <span class="field-message text-danger"  *ngIf="f['feesSettlementAccountRoutingNumber'].errors?.maxlength || f['feesSettlementAccountRoutingNumber'].errors?.minlength && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.usio_length_routing_number_code }}
+                                    </span>
+                                    <span *ngIf="feesRoutingError && !(f['feesSettlementAccountRoutingNumber'].errors?.maxlength || f['feesSettlementAccountRoutingNumber'].errors?.minlength)" class="field-message text-danger" style="display: block;">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Please enter valid routing number.
+                                    </span>
+                                </div>        
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group" [class.has-error]="(f['feesSettlementAccountNumber']?.errors && formSubmitted && visibleFullFormControl) || feesAccountError">
+                                    <label>Fees Settlement Account Number <sup>*</sup></label>
+                                    <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter account number" 
+                                    formControlName="feesSettlementAccountNumber" 
+                                    (keypress)="numberWithMaxDigit($event)"
+                                    id="fees-settlement-ac-number">
+                                        <span class="field-message text-danger"  *ngIf="f['feesSettlementAccountNumber'].errors?.required && visibleFullFormControl">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.usio_fees_settlement_account_number_required }}
+                                        </span>
+                                        <span class="field-message text-danger"  *ngIf="f['feesSettlementAccountNumber'].errors?.minlength && visibleFullFormControl">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.usio_account_limit }}
+                                        </span>
+                                        
+                                        <span class="field-message text-danger"  *ngIf="f['feesSettlementAccountNumber'].errors?.maxlength && visibleFullFormControl">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.usio_account_limit }}
+                                        </span>
+                                        <span *ngIf="feesAccountError" class="field-message text-danger" style="display: block;">
+                                            <em class="icon icon-error mr-4"></em>
+                                            {{ errorData?.usio_account_limit }}
+                                        </span>
+                                        
+                                </div>        
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-24" *ngIf="isMerchant">
+                        <h3 class="mb-16">Owner Details <sup class="text-danger ml-4 fs-24">*</sup></h3>
+                        <p class="lh-20">Specify details about person who owns at least a 25% stake in the company.</p>
+                       
+                        <div class="row">
+                            <div class="form-group col-md-3"  [class.has-error]="f['ownerEmail1']?.errors && formSubmitted && visibleFullFormControl">
+                                <label>Owner Email Address <sup>*</sup></label>
+                                <input 
+                                type="text" 
+                                class="form-control" 
+                                placeholder="Enter owner email address" 
+                                formControlName="ownerEmail1"
+                                id="owner-email-address">
+                                <span class="field-message text-danger"  *ngIf="f['ownerEmail1'].errors?.pattern">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.email_not_valid }}
+                                </span>
+                                <span class="field-message text-danger"  *ngIf="f['ownerEmail1'].errors?.maxlength">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.usio_length_name }}
+                                </span>
+                                <span class="field-message text-danger"  *ngIf="f['ownerEmail1'].errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    {{ errorData?.usio_email_address_required }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-8" *ngIf="isMerchant == false">
+                        <h4 class="text-xlarge mb-16">Account Information</h4>
+                        <div class="row gutter-16">
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="f['nonMerchaneAccountRountingNumber'].errors && formSubmitted && visibleFullFormControl">
+                                    <label>Account Routing Number <sup>*</sup></label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        placeholder="Enter account routing number"  
+                                        formControlName="nonMerchaneAccountRountingNumber"
+                                        mask="000000000"
+                                        id="account-routing-number">
+                                    <span class="field-message text-danger" *ngIf="f['nonMerchaneAccountRountingNumber'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ this.errorData?.routing_number_required }}
+                                    </span>
+                                    <span class="field-message text-danger" *ngIf="f['nonMerchaneAccountRountingNumber'].errors && !f['nonMerchaneAccountRountingNumber'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ this.errorData?.valid_routing_number_required }}
+                                    </span>
+                                </div>        
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group" [class.has-error]="(f['nonMerchaneAccountNumber']?.errors && formSubmitted && visibleFullFormControl) || accountErr">
+                                    <label>Account Number <sup>*</sup></label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        placeholder="Enter account number" 
+                                        formControlName="nonMerchaneAccountNumber"
+                                        (keypress)="numberWithMaxDigit($event)"
+                                        (keyup)="clearAccountErr()" id="enter-ac-number">
+                                    <span class="field-message text-danger"  *ngIf="f['nonMerchaneAccountNumber'].errors?.required && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.account_number_required }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="f['nonMerchaneAccountNumber'].errors?.minlength && !f['nonMerchaneAccountNumber'].errors?.pattern && visibleFullFormControl">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ errorData?.acc_min_length }}
+                                    </span>
+                                    <span class="field-message text-danger"  *ngIf="accountErr">
+                                        <em class="icon icon-error mr-4"></em>
+                                        {{ accountErr }}
+                                    </span>
+                                </div>        
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end pb-24" *ngIf="merchantAccountForm.value.isMerchantAccount != null">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-light" [disabled]="loading" (click)="cancelClick()">Cancel</button>
+                    <button type="button" class="btn btn-primary" [disabled]="loading" (click)="saveAccount()" id="submit-btn">Submit</button>
+                </div>
+              </div>
+        </ng-container>
+        
+    </div>
+</div>
+
+<ng-template #AddOwners let-modal>
+    <div class="modal-header pb-8">
+        <h3 class="modal-title mb-0">Add Owners</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p class="mb-20 lh-20">Enter an email address for each person who owns at least a 25% stake in the company.</p>
+        <ng-container  [formGroup]="ownerForm" *ngIf="ownersList.length < 4">
+            <div class="form-group"  *ngIf="ownersList.length <= 0"  [class.has-error]="o['ownerEmail1']?.errors && oformSubmitted">
+                <label>Owner Email Address <sup>*</sup></label>
+                <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Enter owner email address" 
+                formControlName="ownerEmail1"
+                id="owner-email1">
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail1'].errors?.pattern">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.email_not_valid }}
+                </span>
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail1'].errors?.maxlength">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.usio_length_name }}
+                </span>
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail1'].errors?.required">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.usio_email_address_required }}
+                </span>
+            </div>
+            <div class="form-group" *ngIf="ownersList.length <= 1" [class.has-error]="o['ownerEmail2']?.errors && oformSubmitted">
+                <label>Owner Email Address</label>
+                <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Enter owner email address" 
+                formControlName="ownerEmail2"
+                id="owner-email2">
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail2'].errors?.pattern">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.email_not_valid }}
+                </span>
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail2'].errors?.maxlength">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.usio_length_name }}
+                </span>
+            </div>
+            <div class="form-group" *ngIf="ownersList.length <= 2" [class.has-error]="o['ownerEmail3']?.errors && oformSubmitted">
+                <label>Owner Email Address</label>
+                <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Enter owner email address" 
+                formControlName="ownerEmail3"
+                id="owner-email3">
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail3'].errors?.pattern">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.email_not_valid }}
+                </span>
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail3'].errors?.maxlength">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.usio_length_name }}
+                </span>
+            </div>
+            <div class="form-group" *ngIf="ownersList.length  <= 3" [class.has-error]="o['ownerEmail4']?.errors && oformSubmitted">
+                <label>Owner Email Address</label>
+                <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Enter owner email address" 
+                formControlName="ownerEmail4"
+                id="owner-email4">
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail4'].errors?.pattern">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.email_not_valid }}
+                </span>
+                <span class="field-message text-danger"  *ngIf="o['ownerEmail4'].errors?.maxlength">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ errorData?.usio_length_name }}
+                </span>
+            </div>
+        </ng-container>
+         <p *ngIf="ownersList.length == 4"> Sorry! you have added maximum owner email address</p>
+       
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click');" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveOwners();" id="save-btn">Save</button>
+    </div>
+</ng-template>
+
+
+<ng-template #EditOwners let-modal>
+    <div class="modal-header pb-32">
+        <h3 class="modal-title mb-0">Edit Owner</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group mb-0" [class.has-error]="editableRow?.errors && oformSubmitted">
+            <label>Owner Email Address <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Enter owner email address" [formControl]="editableRow" id="edit-owner-email">
+            <span class="text-danger"  *ngIf="editableRow.errors?.pattern && oformSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.email_not_valid }}
+            </span>
+            <span class="text-danger"  *ngIf="editableRow.errors?.required && oformSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.usio_email_address_required }}
+            </span>
+            <span class="text-danger"  *ngIf="editableRow.errors?.maxlength && !editableRow.errors?.pattern && oformSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                {{ errorData?.usio_length_name }}
+            </span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="EditOwner();" id="save-btn">Save</button>
+    </div>
+</ng-template>

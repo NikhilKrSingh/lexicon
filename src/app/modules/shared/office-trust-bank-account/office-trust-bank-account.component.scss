@@ -1,0 +1,23 @@
+.custom-cross {
+    position: absolute;
+    top: -24px;
+    right: -23px;
+}
+
+.custom-height {
+    .ngx-datatable .datatable-body {
+        min-height: 50px !important;
+    }
+}
+
+.custom-radio-position {
+    top: -3px;
+}
+
+.ngx-datatable {
+    .dropdown-hover-table {
+        &:after{
+            display: none;
+        }
+    }
+}

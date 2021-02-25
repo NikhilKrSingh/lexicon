@@ -1,0 +1,1613 @@
+<div #invoicePDF>
+  <div class="pdf" [class.is-legacy]='invoiceDetails?.isLegacyTemplate'>
+    <div class="invoice-scroll custom-style-scroll">
+      <ng-container *ngIf='invoiceHTML'>
+        <div style="padding-top: 24px" [innerHTML]='invoiceHTML | safeHTML'></div>
+      </ng-container>
+      <ng-container *ngIf='!invoiceHTML'>
+      </ng-container>
+    </div>
+    <app-loader [active]="printLoading"></app-loader>
+  </div>
+
+</div>
+<div class="d-none">
+  <ng-container *ngIf="trustAccountEnabled">
+    <html lang='en'>
+
+    <head>
+      <meta charset='utf-8'>
+      <title>Invoice</title>
+      <style>
+        @page {
+          margin: 1in;
+          size: 8.27in 11.69;
+        }
+
+        body {
+          margin: 0;
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class='wrapper' style='width: 8.27in;margin-left: auto;margin-right: auto;' #trustAccountContent>
+        <table style="width: 100%;border-collapse: collapse;">
+          <tbody>
+            <tr>
+              <td style="height: 25px;vertical-align: top;"></td>
+            </tr>
+          </tbody>
+        </table>
+        <table
+          style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+          <tr>
+            <td style='text-align: left;vertical-align: top;'>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tbody>
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                      MONIES ON HAND:</td>
+                  </tr>
+                </tbody>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tbody>
+                  <tr>
+                    <td style="height: 25px;vertical-align: top;"></td>
+                  </tr>
+                </tbody>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tbody>
+                  <tr>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                      {{invoiceDetails?.primaryRetainerTrust?.name}}</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                      <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                              $</td>
+                            <td
+                              style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                              {{invoiceDetails?.primaryRetainerTrust?.currentBalance | number : '1.2-2'}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let account of invoiceDetails?.trustAccounts;trackBy: trackByFn">
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                      {{account.name}}</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                      <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                              $</td>
+                            <td
+                              style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                              {{account.currentBalance | number : '1.2-2'}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                      Total Trust on Hand</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                      <table style="width: 100px;border-collapse: collapse;margin-left: auto;border-top: 1px solid;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                              $</td>
+                            <td
+                              style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                              {{trustAccountDetails?.totalAmount | number : '1.2-2'}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="height: 25px;vertical-align: top;"></td>
+                  </tr>
+                  <tr>
+                    <td
+                      style="text-align: right;vertical-align: middle;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 24px;padding-right: 10px;padding-left: 10px;width: 50%;font-weight: bold">
+                      TOTAL MONIES ON HAND</td>
+                    <td
+                      style="text-align: right;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                      <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                              $</td>
+                            <td
+                              style="text-align: right;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                              {{trustAccountDetails?.totalAmount | number : '1.2-2'}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="height: 25px;vertical-align: top;"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </body>
+
+    </html>
+  </ng-container>
+</div>
+
+<div #invoiceDetailsPage>
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        margin: 1in;
+        size: 8.27in 11.69;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style="text-align: left;vertical-align: top;">
+            <div class="d-none" #mainContent>
+              <ng-container *ngIf='invoiceDetails?.isFixedFee'>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 45px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+                      For Fixed Fee Services Through {{(invoiceDetails?.generated || today) | date: 'longDate'}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+                      Matter # {{invoiceDetails?.matter?.id}} <br>
+                      {{invoiceDetails?.matter?.name}}
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 45px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;" *ngIf='invoiceDetails?.fixedFeeService'>
+                  <tr *ngFor='let fixedFee of invoiceDetails.fixedFeeService;trackBy: trackByFn'>
+                    <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tr>
+                          <td
+                            style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                            <span *ngIf='matterBillingSettings?.fixedFeeIsFullAmount'>
+                              {{invoiceDetails.matterOpenDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeBillOnWorkComplete'>
+                              {{invoiceDetails.generated | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeDueDate'>
+                              {{matterBillingSettings?.fixedFeeDueDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                          </td>
+                          <td
+                            style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                            <table style="width: auto;border-collapse: collapse;">
+                              <tr>
+                                <td
+                                  style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                                </td>
+                                <td
+                                  style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                                  <span *ngIf='(fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) >= 0'>
+                                    {{(fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) | number : '1.2-2'}}
+                                  </span>
+                                  <span *ngIf='(fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) < 0'>
+                                    ({{((fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) * -1) | number : '1.2-2'}})
+                                  </span>
+                                  {{fixedFee?.description}}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;" *ngIf='invoiceDetails?.addOnServices?.length > 0'>
+                  <tr *ngFor='let addon of invoiceDetails?.addOnServices;trackBy: trackByFn'>
+                    <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tr>
+                          <td
+                            style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                            <span *ngIf='matterBillingSettings?.fixedFeeIsFullAmount'>
+                              {{invoiceDetails.matterOpenDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeBillOnWorkComplete'>
+                              {{invoiceDetails.generated | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeDueDate'>
+                              {{matterBillingSettings?.fixedFeeDueDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                          </td>
+                          <td
+                            style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                            <table style="width: auto;border-collapse: collapse;">
+                              <tr>
+                                <td
+                                  style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                                </td>
+                                <td
+                                  style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                                  <span *ngIf='(addon.serviceAmount - (addon.writeDown || 0)) >= 0'>
+                                    {{(addon.serviceAmount - (addon.writeDown || 0)) | number : '1.2-2'}}
+                                  </span>
+                                  <span *ngIf='(addon.serviceAmount - (addon.writeDown || 0)) < 0'>
+                                    ({{((addon.serviceAmount - (addon.writeDown || 0)) * -1) | number : '1.2-2'}})
+                                  </span>
+                                  {{addon.serviceName}}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </ng-container>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="height: 45px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+                    For Legal Services Rendered Through {{(invoiceDetails?.generated || today) | date: 'longDate'}}
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+                    Matter # {{invoiceDetails?.initialConsult ? 'N/A' : invoiceDetails?.matter?.id}} <br>
+                    {{invoiceDetails?.matter?.name}}
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="height: 45px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr *ngFor='let timeEntry of invoiceDetails?.timeEntries;trackBy: trackByFn'>
+                  <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                          {{timeEntry?.date | date : 'MM/dd/yyyy'}} {{timeEntry?.person?.name}}
+                        </td>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 60%;">
+                          <ng-container *ngIf='timeEntry.hoursBilled; else noHoursBilled'>
+                            <span *ngIf='timeEntry.hoursBilled >= 0'> {{timeEntry.hoursBilled | number : '1.2-2'}}
+                            </span>
+                            <span *ngIf='timeEntry.hoursBilled < 0'>
+                              ({{(timeEntry.hoursBilled * -1) | number: '1.2-2'}})
+                            </span>
+                          </ng-container>
+
+                          <ng-template #noHoursBilled>
+                            <span *ngIf='!timeEntry.isNegative'>
+                              {{timeEntry?.hours?.value?.totalHours | number : '1.2-2'}} </span>
+                            <span *ngIf='timeEntry.isNegative'>
+                              ({{timeEntry?.hours?.value?.totalHours | number: '1.2-2'}})
+                            </span>
+                          </ng-template>
+
+                          <span>{{timeEntry?.description}}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: right;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 80%;padding-right: 20px;">
+                          Total Hours
+                        </td>
+                        <td
+                          style="vertical-align: top;text-align: right;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                          <span *ngIf='totalHours >= 0'> {{totalHours | number : '1.2-2'}} </span>
+                          <span *ngIf='totalHours < 0'>
+                            ({{(totalHours * -1) | number: '1.2-2'}})
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="height: 5px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 80%;padding-right: 20px;">
+                    Total Fees for Legal Services
+                  </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                    <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                      <tr>
+                        <td
+                          style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                          $</td>
+                        <td
+                          style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                          <span *ngIf='totalFees >= 0'>{{totalFees | number: '1.2-2'}}</span>
+                          <span *ngIf='totalFees < 0'>
+                            ({{(totalFees * -1) | number: '1.2-2'}})
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td style="height: 45px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+                    For Disbursements Through {{(invoiceDetails?.generated || today) | date: 'longDate'}}
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+                    Matter # {{invoiceDetails?.matter?.id}} <br>
+                    {{invoiceDetails?.matter?.name}}
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td style="height: 45px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr *ngFor='let disbursement of disbursements;trackBy: trackByFn'>
+                  <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                          {{disbursement?.date | date : 'MM/dd/yyyy'}}
+                        </td>
+                        <td
+                          style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                          <table style="width: auto;border-collapse: collapse;">
+                            <tr>
+                              <td
+                                style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 15px;">
+                                $</td>
+                              <td
+                                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                                <span
+                                  *ngIf='(disbursement?.amount - (disbursement?.writeDownAmount || 0)) >= 0'>{{(disbursement?.amount - (disbursement?.writeDownAmount || 0)) | number : '1.2-2'}}</span>
+                                <span *ngIf='(disbursement?.amount - (disbursement?.writeDownAmount || 0)) < 0'>
+                                  ({{(disbursement?.amount - (disbursement?.writeDownAmount || 0)) * -1 | number : '1.2-2'}})
+                                </span>
+                                {{disbursement?.note?.content}}
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 80%;padding-right: 20px;">
+                    Total Disbursements
+                  </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                    <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                      <tr>
+                        <td
+                          style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                          $</td>
+                        <td
+                          style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                          <span *ngIf='totalDisbursements >= 0'>{{totalDisbursements | number: '1.2-2'}}</span>
+                          <span *ngIf='totalDisbursements < 0'>
+                            ({{totalDisbursements * -1 | number: '1.2-2'}})
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </table>
+
+              <ng-container *ngIf='trustAccountEnabled'>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+                      For Trust Transactions through {{invoiceDetails?.lastTransactionDate | date: 'longDate'}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+                      Matter # {{invoiceDetails?.matter?.id}} <br>
+                      {{invoiceDetails?.matter?.name}}
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 45px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+                <table
+                  style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                  <tr>
+                    <td style='text-align: left;vertical-align: top;'>
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                              Primary Retainer Trust</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tbody>
+                          <tr>
+                            <td style="height: 25px;vertical-align: top;"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              Beginning Balance
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr>
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      {{invoiceDetails?.primaryRetainerTrustSummary?.startingBalance | number : '1.2-2'}}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              Additions
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr>
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      {{invoiceDetails?.primaryRetainerTrustSummary?.credits | number : '1.2-2'}}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              Withdrawals
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr style="border-bottom: 1px solid #000;">
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      <span *ngIf='invoiceDetails?.primaryRetainerTrustSummary?.debits > 0'>
+                                        ({{invoiceDetails?.primaryRetainerTrustSummary?.debits | number : '1.2-2'}})
+                                      </span>
+                                      <span *ngIf='invoiceDetails?.primaryRetainerTrustSummary?.debits == 0'>
+                                        {{invoiceDetails?.primaryRetainerTrustSummary?.debits | number : '1.2-2'}}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: middle;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 24px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              ENDING BALANCE AS OF {{invoiceDetails?.lastTransactionDate| date: 'longDate'}}
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr>
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      {{invoiceDetails?.primaryRetainerTrustSummary?.endingBalance | number : '1.2-2'}}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 25px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+                <table
+                  style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                  <tr>
+                    <td style='text-align: left;vertical-align: top;'>
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                              Trust Only</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tbody>
+                          <tr>
+                            <td style="height: 25px;vertical-align: top;"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              Beginning Balance
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr>
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      {{(invoiceDetails?.trustOnlyAccountsSummary?.startingBalance || 0) | number : '1.2-2'}}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              Additions
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr>
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      {{(invoiceDetails?.trustOnlyAccountsSummary?.credits || 0) | number : '1.2-2'}}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              Withdrawals
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr style="border-bottom: 1px solid #000;">
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      <span *ngIf='invoiceDetails?.trustOnlyAccountsSummary?.debits > 0'>
+                                        ({{invoiceDetails?.trustOnlyAccountsSummary?.debits | number : '1.2-2'}})
+                                      </span>
+                                      <span *ngIf='!invoiceDetails?.trustOnlyAccountsSummary?.debits'>
+                                        {{(invoiceDetails?.trustOnlyAccountsSummary?.debits || 0) | number : '1.2-2'}}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="text-align: left;vertical-align: middle;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 24px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                              ENDING BALANCE AS OF {{invoiceDetails?.lastTransactionDate| date: 'longDate'}}
+                            </td>
+                            <td
+                              style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                              <table style="width: 100px;border-collapse: collapse;">
+                                <tbody>
+                                  <tr>
+                                    <td
+                                      style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      $</td>
+                                    <td
+                                      style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                                      {{(invoiceDetails?.trustOnlyAccountsSummary?.endingBalance || 0) | number : '1.2-2'}}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 25px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+
+</div>
+
+<div #timeEntryDetailsPage class="d-none">
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        margin: 1in;
+        size: 8.27in 11.69;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style="text-align: left;vertical-align: top;">
+            <div class="d-none">
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+                    For Legal Services Rendered Through {{(invoiceDetails?.generated || today) | date: 'longDate'}}
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+                    Matter # {{invoiceDetails?.initialConsult ? 'N/A' : invoiceDetails?.matter?.id}} <br>
+                    {{invoiceDetails?.matter?.name}}
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="height: 45px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr *ngFor='let timeEntry of invoiceDetails?.timeEntries;trackBy: trackByFn'>
+                  <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                          {{timeEntry?.date | date : 'MM/dd/yyyy'}} {{timeEntry?.person?.name}}
+                        </td>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 60%;">
+                          <ng-container *ngIf='timeEntry.hoursBilled; else noHoursBilled'>
+                            <span *ngIf='timeEntry.hoursBilled >= 0'> {{timeEntry.hoursBilled | number : '1.2-2'}}
+                            </span>
+                            <span *ngIf='timeEntry.hoursBilled < 0'>
+                              ({{(timeEntry.hoursBilled * -1) | number: '1.2-2'}})
+                            </span>
+                          </ng-container>
+
+                          <ng-template #noHoursBilled>
+                            <span *ngIf='!timeEntry.isNegative'>
+                              {{timeEntry?.hours?.value?.totalHours | number : '1.2-2'}} </span>
+                            <span *ngIf='timeEntry.isNegative'>
+                              ({{timeEntry?.hours?.value?.totalHours | number: '1.2-2'}})
+                            </span>
+                          </ng-template>
+
+                          <span>{{timeEntry?.description}}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: right;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 80%;padding-right: 20px;">
+                          Total Hours
+                        </td>
+                        <td
+                          style="vertical-align: top;text-align: right;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                          <span *ngIf='totalHours >= 0'> {{totalHours | number : '1.2-2'}} </span>
+                          <span *ngIf='totalHours < 0'>
+                            ({{(totalHours * -1) | number: '1.2-2'}})
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td style="height: 5px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.isFixedFee">
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 80%;padding-right: 20px;">
+                    Total Fees for Legal Services
+                  </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                    <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                      <tr>
+                        <td
+                          style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                          $</td>
+                        <td
+                          style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                          <span *ngIf='totalFees >= 0'>{{totalFees | number: '1.2-2'}}</span>
+                          <span *ngIf='totalFees < 0'>
+                            ({{(totalFees * -1) | number: '1.2-2'}})
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+</div>
+
+<div #fixedFeeDetailsPage class="d-none">
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        margin: 1in;
+        size: 8.27in 11.69;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style="text-align: left;vertical-align: top;">
+            <div class="d-none">
+              <ng-container *ngIf='invoiceDetails?.isFixedFee'>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+                      For Fixed Fee Services Through {{(invoiceDetails?.generated || today) | date: 'longDate'}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+                      Matter # {{invoiceDetails?.matter?.id}} <br>
+                      {{invoiceDetails?.matter?.name}}
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 45px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr *ngFor='let fixedFee of invoiceDetails.fixedFeeService;trackBy: trackByFn'>
+                    <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tr>
+                          <td
+                            style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                            <span *ngIf='matterBillingSettings?.fixedFeeIsFullAmount'>
+                              {{invoiceDetails.matterOpenDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeBillOnWorkComplete'>
+                              {{invoiceDetails.generated | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeDueDate'>
+                              {{matterBillingSettings?.fixedFeeDueDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                          </td>
+                          <td
+                            style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                            <table style="width: auto;border-collapse: collapse;">
+                              <tr>
+                                <td
+                                  style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                                </td>
+                                <td
+                                  style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                                  <span *ngIf='(fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) >= 0'>
+                                    {{(fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) | number : '1.2-2'}}
+                                  </span>
+                                  <span *ngIf='(fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) < 0'>
+                                    ({{((fixedFee?.rateAmount - (fixedFee?.writeDown || 0 )) * -1) | number : '1.2-2'}})
+                                  </span>
+                                  {{fixedFee?.description}}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;" *ngIf='invoiceDetails?.addOnServices?.length > 0'>
+                  <tr *ngFor='let addon of invoiceDetails?.addOnServices;trackBy: trackByFn'>
+                    <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                      <table style="width: 100%;border-collapse: collapse;">
+                        <tr>
+                          <td
+                            style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                            <span *ngIf='matterBillingSettings?.fixedFeeIsFullAmount'>
+                              {{invoiceDetails.matterOpenDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeBillOnWorkComplete'>
+                              {{invoiceDetails.generated | date : 'MM/dd/yyyy'}}
+                            </span>
+                            <span
+                              *ngIf='!matterBillingSettings?.fixedFeeIsFullAmount && matterBillingSettings?.fixedFeeDueDate'>
+                              {{matterBillingSettings?.fixedFeeDueDate | date : 'MM/dd/yyyy'}}
+                            </span>
+                          </td>
+                          <td
+                            style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                            <table style="width: auto;border-collapse: collapse;">
+                              <tr>
+                                <td
+                                  style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                                </td>
+                                <td
+                                  style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                                  <span *ngIf='(addon.serviceAmount - (addon.writeDown || 0)) >= 0'>
+                                    {{(addon.serviceAmount - (addon.writeDown || 0)) | number : '1.2-2'}}
+                                  </span>
+                                  <span *ngIf='(addon.serviceAmount - (addon.writeDown || 0)) < 0'>
+                                    ({{((addon.serviceAmount - (addon.writeDown || 0)) * -1) | number : '1.2-2'}})
+                                  </span>
+                                  {{addon.serviceName}}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 25px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+</div>
+
+<div #disbursementDetailsPage class="d-none">
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        margin: 1in;
+        size: 8.27in 11.69;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style="text-align: left;vertical-align: top;">
+            <div class="d-none">
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+                    For Disbursements Through {{(invoiceDetails?.generated || today) | date: 'longDate'}}
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+                    Matter # {{invoiceDetails?.matter?.id}} <br>
+                    {{invoiceDetails?.matter?.name}}
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td style="height: 45px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr *ngFor='let disbursement of disbursements;trackBy: trackByFn'>
+                  <td style="text-align: left;vertical-align: top;padding-bottom: 5px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 40%;padding-right: 20px;">
+                          {{disbursement?.date | date : 'MM/dd/yyyy'}}
+                        </td>
+                        <td
+                          style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                          <table style="width: auto;border-collapse: collapse;">
+                            <tr>
+                              <td
+                                style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 15px;">
+                                $</td>
+                              <td
+                                style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                                <span
+                                  *ngIf='(disbursement?.amount - (disbursement?.writeDownAmount || 0)) >= 0'>{{(disbursement?.amount - (disbursement?.writeDownAmount || 0)) | number : '1.2-2'}}</span>
+                                <span *ngIf='(disbursement?.amount - (disbursement?.writeDownAmount || 0)) < 0'>
+                                  ({{(disbursement?.amount - (disbursement?.writeDownAmount || 0)) * -1 | number : '1.2-2'}})
+                                </span>
+                                {{disbursement?.note?.content}}
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;" *ngIf="!invoiceDetails?.initialConsult">
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 80%;padding-right: 20px;">
+                    Total Disbursements
+                  </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;">
+                    <table style="width: 100px;border-collapse: collapse;margin-left: auto;">
+                      <tr>
+                        <td
+                          style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 10px;">
+                          $</td>
+                        <td
+                          style="text-align: right;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+                          <span *ngIf='totalDisbursements >= 0'>{{totalDisbursements | number: '1.2-2'}}</span>
+                          <span *ngIf='totalDisbursements < 0'>
+                            ({{totalDisbursements * -1 | number: '1.2-2'}})
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+</div>
+
+<div #trustAccountSummary class="d-none">
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        margin: 1in;
+        size: 8.27in 11.69;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+      <table style="width: 100%;border-collapse: collapse;">
+        <tr>
+          <td
+            style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-top: 5px;padding-bottom: 15px;">
+            For Trust Transactions through {{invoiceDetails?.lastTransactionDate | date: 'longDate'}}
+          </td>
+        </tr>
+        <tr>
+          <td
+            style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-left: 72px;">
+            Matter # {{invoiceDetails?.matter?.id}} <br>
+            {{invoiceDetails?.matter?.name}}
+          </td>
+        </tr>
+      </table>
+      <table style="width: 100%;border-collapse: collapse;">
+        <tr>
+          <td style="height: 45px;vertical-align: top;"></td>
+        </tr>
+      </table>
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style='text-align: left;vertical-align: top;'>
+            <table style="width: 100%;border-collapse: collapse;">
+              <tbody>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                    Primary Retainer Trust</td>
+                </tr>
+              </tbody>
+            </table>
+            <table style="width: 100%;border-collapse: collapse;">
+              <tbody>
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </tbody>
+            </table>
+            <table style="width: 100%;border-collapse: collapse;">
+              <tbody>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    Beginning Balance
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            {{invoiceDetails?.primaryRetainerTrustSummary?.startingBalance | number : '1.2-2'}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    Additions
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            {{invoiceDetails?.primaryRetainerTrustSummary?.credits | number : '1.2-2'}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    Withdrawals
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr style="border-bottom: 1px solid #000;">
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            <span *ngIf='invoiceDetails?.primaryRetainerTrustSummary?.debits > 0'>
+                              ({{invoiceDetails?.primaryRetainerTrustSummary?.debits | number : '1.2-2'}})
+                            </span>
+                            <span *ngIf='invoiceDetails?.primaryRetainerTrustSummary?.debits == 0'>
+                              {{invoiceDetails?.primaryRetainerTrustSummary?.debits | number : '1.2-2'}}
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: middle;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 24px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    ENDING BALANCE AS OF {{invoiceDetails?.lastTransactionDate| date: 'longDate'}}
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            {{invoiceDetails?.primaryRetainerTrustSummary?.endingBalance | number : '1.2-2'}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <table style="width: 100%;border-collapse: collapse;">
+        <tr>
+          <td style="height: 25px;vertical-align: top;"></td>
+        </tr>
+      </table>
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style='text-align: left;vertical-align: top;'>
+            <table style="width: 100%;border-collapse: collapse;">
+              <tbody>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 16px;line-height: 22px;text-decoration: underline;">
+                    Trust Only</td>
+                </tr>
+              </tbody>
+            </table>
+            <table style="width: 100%;border-collapse: collapse;">
+              <tbody>
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </tbody>
+            </table>
+            <table style="width: 100%;border-collapse: collapse;">
+              <tbody>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    Beginning Balance
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            {{(invoiceDetails?.trustOnlyAccountsSummary?.startingBalance || 0) | number : '1.2-2'}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    Additions
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            {{(invoiceDetails?.trustOnlyAccountsSummary?.credits || 0) | number : '1.2-2'}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    Withdrawals
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr style="border-bottom: 1px solid #000;">
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            <span *ngIf='invoiceDetails?.trustOnlyAccountsSummary?.debits > 0'>
+                              ({{invoiceDetails?.trustOnlyAccountsSummary?.debits | number : '1.2-2'}})
+                            </span>
+                            <span *ngIf='!invoiceDetails?.trustOnlyAccountsSummary?.debits'>
+                              {{(invoiceDetails?.trustOnlyAccountsSummary?.debits || 0) | number : '1.2-2'}}
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: middle;color: #000;font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 24px;padding-right: 10px;padding-left: 10px;width: 50%;">
+                    ENDING BALANCE AS OF {{invoiceDetails?.lastTransactionDate| date: 'longDate'}}
+                  </td>
+                  <td
+                    style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 100px;padding-right: 10px;padding-left: 10px;">
+                    <table style="width: 100px;border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                          <td
+                            style="text-align: left;width: 20%;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            $</td>
+                          <td
+                            style="text-align: left;vertical-align: middle;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+                            {{(invoiceDetails?.trustOnlyAccountsSummary?.endingBalance || 0) | number : '1.2-2'}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <table style="width: 100%;border-collapse: collapse;">
+        <tr>
+          <td style="height: 25px;vertical-align: top;"></td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+</div>
+
+<div #invoiceHeader class="d-none">
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        margin: 1in;
+        size: 8.27in 11.69;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style="text-align: left;vertical-align: top;">
+            <div class="d-none">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="text-align: left;vertical-align: top;border-bottom: 1px solid #000;padding-bottom: 15px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 65%;padding-right: 20px;padding-top: 15px;">
+                          {{invoiceDetails?.tenantProfile?.tenantName}} Invoice # {{invoiceDetails?.id}}
+                        </td>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 35%;">
+                          {{(invoiceDetails?.generated || today) | date : 'longDate'}}
+                          <div style="padding-top: 15px;">Client # {{invoiceDetails?.client?.id}}</div>
+                          <div style="padding-top: 15px;">Page PAGENUMBER</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+</div>
+<div>
+
+</div>
+<div #invoiceFooter class="d-none">
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        margin: 1in;
+        size: 8.27in 11.69;
+      }
+
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+      <table
+        style="width: 100%;border-collapse: collapse;color: #000;background: #fff; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;">
+        <tr>
+          <td style="text-align: left;vertical-align: top;">
+            <div class="d-none">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="text-align: left;vertical-align: top;border-top: 1px solid #000;padding-bottom: 15px;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 65%;padding-right: 20px;padding-top: 15px;"
+                          colspan="2">
+                          {{customContent?.disclaimerText}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #000; font-family: 'Times New Roman', Times, serif; font-size: 14px;line-height: 20px;width: 65%;padding-right: 20px;padding-top: 15px;"
+                          colspan="2">
+                          <span [innerHTML]='customContent?.paymentText | safeHTML'></span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+
+  </html>
+</div>
+
+
+<button type="button" class="btn btn-outline-primary fixed-btn" *ngIf='print == 1' (click)='printPDF()' [disabled]='printLoading'>
+  Print
+</button>

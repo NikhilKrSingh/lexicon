@@ -1,0 +1,395 @@
+<div class="container">
+  <div class="main-content">
+
+    <div>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/matter/list']">Matter</a></li>
+        <li class="breadcrumb-item" (click)="isAssociationsEditMode=false;" [class.active]="!isAssociationsEditMode" aria-current="page" [title]='matterDetails?.matterName'>
+          <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+            {{matterDetails?.matterName}} -
+          </ng-container>
+          <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+            {{matterDetails?.matterName?.slice(0, 25)}}... -
+          </ng-container>
+          {{matterDetails?.matterNumber}}
+        </li>
+        <li class="breadcrumb-item active" *ngIf="isAssociationsEditMode"><a href="javascript:void(0)">Edit Associations</a></li>
+      </ol>
+      <div class="d-flex align-items-end justify-content-between mb-32" *ngIf="!isAssociationsEditMode">
+        <div class="profile-content d-flex align-items-start profile-client">
+          <div class="profile-heading mr-16">
+            <div class="d-flex align-items-center">
+              <h2 class="mt-0 mb-2" *ngIf='matterDetails?.matterName?.length < 30'>{{matterDetails?.matterName}}</h2>
+              <div *ngIf='matterDetails?.matterName?.length >= 30'>
+                <div class="info-hover position-relative">
+                  <h2 class="mt-0 mb-2" innerHTML="{{matterDetails?.matterName?.slice(0, 25)}}...">
+                  </h2>
+                  <div class="tooltip bs-tooltip-bottom" role="tooltip">
+                    <div class="arrow"></div>
+                    <div class="tooltip-inner tooltip-lg">
+                      <p>{{matterDetails?.matterName}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center small font-weight-medium mt-4">
+              <div class="d-flex align-items-center mr-16"*ngIf="matterDetails && matterDetails?.matterStatus?.name == 'Open'">
+                <em class="icon icon-check text-primary mr-8 text-large mt-n2"></em>
+                <span id="matter-status">Active</span>
+              </div>
+              <div class="d-flex align-items-center mr-16"*ngIf="matterDetails && matterDetails?.matterStatus?.name == 'Closed'">
+                <em class="icon icon-archived text-primary mr-8 text-large mt-n2"></em>
+                <span id="matter-status">Closed</span>
+              </div>
+              <div class="d-flex align-items-center mr-16" *ngIf='matterDetails && matterDetails?.displayClientName'>
+                <em class="icon icon-user-circle text-primary mr-8 text-large mt-n2"></em>
+                <span id="matter-client-name">
+                  <ng-container *ngIf='matterDetails?.displayClientName?.length < 50'>
+                    <span> {{matterDetails?.displayClientName}} </span>
+                  </ng-container>
+                  <div class="d-inline-flex justify-content-between" *ngIf='matterDetails?.displayClientName?.length >= 50'>
+                    <div class="info-hover position-relative">
+                      <a href="javascript:void(0)">
+                        <span>{{matterDetails?.displayClientName?.slice(0, 50)}}...</span>
+                      </a>
+                      <div class="tooltip bs-tooltip-bottom center" role="tooltip">
+                        <div class="arrow"></div>
+                        <div class="tooltip-inner tooltip-lg">
+                          <p>{{matterDetails?.displayClientName}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </span>
+              </div>
+              <div class="d-flex align-items-center mr-16" *ngIf="matterDetails && matterDetails?.isFixedFee">
+                <em class="icon icon-private text-primary mr-8 text-large mt-n2"></em>
+                <span id="matter-type">Fixed Fee Matter</span>
+              </div>
+              <div class="d-flex align-items-center mr-16" *ngIf="matterDetails && !matterDetails?.isFixedFee">
+                <em class="icon icon-clock text-primary mr-8 text-large mt-n2"></em>
+                <span id="matter-type">Hourly Matter</span>
+              </div>
+              <div class="d-flex align-items-center mr-16" *ngIf="matterDetails && matterDetails?.isWorkComplete">
+                <em class="icon icon-info icon-color mr-8 text-large mt-n2"></em>
+                <span id="matter-type">Work Complete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-container *ngIf="matterDetails?.matterStatus?.name != closeMatterStatus?.name">
+          <div class="btn-group"
+            *ngIf='matterDetails && permissionList.MATTER_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisEdit || isResponsibleAttorney || isBillingAttorney'>
+
+            <div class="d-inline-block ml-16" ngbDropdown>
+              <button class="btn btn-primary bulk-btn" ngbDropdownToggle
+                *ngIf="permissionList.MATTER_MANAGEMENTisAdmin || permissionList?.MATTER_MANAGEMENTisEdit || isResponsibleAttorney || isBillingAttorney" id="matter-actions-btn">Matter Actions</button>
+              <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+                <button ngbDropdownItem type="button" *ngIf="postPaymentBtn"
+                  [routerLink]="['/matter/refund-client-trust']" [queryParams]="{matterId:matterDetails.id}" id="refund-client-btn" id="refund-client-btn">Refund Client</button>
+                <button ngbDropdownItem type="button" (click)="openEditMatterPopup(AddCorporateContact)" id="edit-matter-btn"
+                  >Edit
+                  Matter</button>
+                <button ngbDropdownItem type="button"
+                  [routerLink]="['/matter/reassign']" [queryParams]="{matterId: matterId}" id="reassign-matter-btn">Reassign Matter</button>
+                <button ngbDropdownItem type="button" (click)='closeMatterWarnModal(CloseMatterWarn)' id="close-matter-btn"
+                  >Close
+                  Matter</button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="matterDetails?.matterStatus?.name == closeMatterStatus?.name">
+          <div class="btn-group"
+            *ngIf='matterDetails && !permissionList?.CLIENT_CONTACT_MANAGEMENTisNoVisibility && (permissionList.MATTER_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisEdit)'>
+            <button type="button" class="btn btn-primary" (click)="reopenMatter()" id="re-open-matter-btn">Reopen Matter</button>
+          </div>
+        </ng-container>
+      </div>
+      <div class="d-flex align-items-end justify-content-between mb-32" *ngIf="isAssociationsEditMode">
+        <div class="profile-content d-flex align-items-start profile-client">
+          <div class="profile-heading mr-16">
+            <div class="d-flex align-items-center">
+              <h2 class="mt-0 mb-2" >Edit Associations</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+      <app-loader [active]="loadingdashboard"></app-loader>
+    </div>
+
+    <div class="alert alert-success d-flex justify-content-between" *ngIf='reopenSuccess' role="alert">
+      <div class="d-flex">
+        <em class="alert-icon icon icon-check-circle"></em>
+        <div class="d-flex align-items-center flex-wrap">
+          <h4 class="mr-36 my-0">Success</h4>
+          {{msg_reopen}}
+        </div>
+      </div>
+      <span class="alert-close" (click)='reopenSuccess = false' id="close-re-open-succ"><em class="icon icon-close"></em></span>
+    </div>
+
+    <div class="row" *ngIf="showTaskBuilder && isTuckerAllenUser && !isAssociationsEditMode">
+      <div class="col-12 pb-4 pt-4">
+        <app-matter-progress *ngIf="isWorkFlowCreated" [matterId]="matterId"></app-matter-progress>
+      </div>
+      <app-loader [active]="taskBuilder_loader"></app-loader>
+    </div>
+    <div *ngIf="!isAssociationsEditMode">
+      <div class="navtab-wrap" >
+        <button type="button" class="tab-btn tab-btn-left d-flex align-items-center " id="tab-btn-left" *ngIf="leftMoreBtn" (click)="leftSlide()">
+          <em class="icon icon-angle-left mr-12"></em>
+          <span>More (<span class="more-num">{{leftTabCount}}</span>)</span>
+        </button>
+        <button type="button" class="tab-btn tab-btn-right d-flex align-items-center" id="tab-btn-right" (click)="rightSlide()" *ngIf="rightMoreBtn">
+          <span>More (<span class="more-num">{{righTabCount}}</span>)</span>
+          <em class="icon icon-angle-right ml-12"></em>
+        </button>
+        <div class="nav-tab-scroll" [ngStyle]="{'max-width':windowWidth+'px'}">
+          <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist" id="menu-tab">
+            <!-- <a *ngIf="'Corporate Contacts' === mytabs && !matterDetails?.clientName?.isCompany" href="javascript:void(0);" (click)="changeTab(mytabs)" *ngFor="let mytabs of alltabs;let i=index" role="tab"
+              class="nav-link flex-fill anchor-tab" [hidden]="'Corporate Contacts' === mytabs && !matterDetails?.clientName?.isCompany"
+              [class.active]="selecttabs1 === mytabs" id="matter-dashboard-tab-{{idArr[mytabs] || i}}">{{ mytabs }}</a> -->
+              <a href="javascript:void(0);" (click)="changeTab(mytabs)" *ngFor="let mytabs of alltabs;trackBy: trackByFn;let i=index" role="tab"
+              class="nav-link flex-fill anchor-tab" [hidden]="'Corporate Contacts' === mytabs && !matterDetails?.clientName?.isCompany"
+              [class.active]="selecttabs1 === mytabs" id="matter-dashboard-tab-{{idArr[mytabs] || i}}">{{ mytabs }}</a>
+          </div>
+        </div>
+
+      </div>
+      <div class="card tlr-0" id="panel-width" *ngIf='matterDetails'>
+        <div class="card-body p-0">
+          <div class="tab-content p-32 min-h-500">
+            <div *ngIf="selecttabs1 === 'Overview'" class="tab-pane fade show active" role="tabpanel">
+              <app-matter-dashboard-overview (gotoDocs)="gotoDocuments($event)"
+                [isTrustAccountEnabled]="isTrustAccountEnabled"
+                (gotoTrustAccountDashboard)="gotoTrustAccountDashboard($event)"
+                (matterDueBalance)="matterDueBalance($event)" [matterDetails]='matterDetails'>
+              </app-matter-dashboard-overview>
+            </div>
+            <div *ngIf="selecttabs1 === 'Associations'" class="tab-pane fade show active" role="tabpanel">
+              <app-matter-dashboard-associations [matterId]='matterDetails.id' (enterEditMode)="isAssociationsEditMode=true;" [isEditMode]="false">
+              </app-matter-dashboard-associations>
+            </div>
+            <div *ngIf="selecttabs1 === 'Corporate Contacts'" class="tab-pane fade show active" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-24">
+                <h2 class="mb-0">Corporate Contacts</h2>
+                <button type="button" class="btn btn-primary"
+                        *ngIf="permissionList.MATTER_MANAGEMENTisEdit || permissionList.MATTER_MANAGEMENTisAdmin || isResponsibleAttorney || isBillingAttorney"
+                        (click)="openCorporateContact()" id="add-edit-corporate-contact-btn">Add/Edit Corporate Contacts</button>
+              </div>
+              <div class="info-block">
+                <app-corporate-contact-view [clientId]="matterDetails.clientName.id"></app-corporate-contact-view>
+              </div>
+            </div>
+            <div *ngIf="selecttabs1 === 'Billing' && (!permissionList.BILLING_MANAGEMENTisNoVisibility || isRaOrBA)"
+              class="tab-pane fade show active" role="tabpanel">
+              <app-billing-details
+                [(rateTables)]="rateTables"
+                [(isCustomBillingRate)]="isCustomBillingRate"
+                [(isEditRateTable)]="isEditRateTableModeOn"
+                [type]="type"
+                [balanceDue]="matterBalanceDue.balanceDue"
+                [matterDetails]="matterDetails"
+                [invoiceId]="invoiceId"
+                [clientId]="matterDetails?.clientName?.id"
+                [prebillId]="prebillId"
+                [paymentPlanEnabled]="paymentPlanEnabled"
+                (markAsWorkComplete)="markWorkAsComplete()"
+                (goToInvoicesTab)="selecttabs1 = 'Invoices'"
+                *ngIf="matterDetails?.isFixedFee"
+                >
+              </app-billing-details>
+              <app-new-billing-details
+                [(rateTables)]="rateTables"
+                [(isCustomBillingRate)]="isCustomBillingRate"
+                [(isEditRateTable)]="isEditRateTableModeOn"
+                [type]="type"
+                [balanceDue]="matterBalanceDue.balanceDue"
+                [matterDetails]="matterDetails"
+                [invoiceId]="invoiceId"
+                [clientId]="matterDetails?.clientName?.id"
+                [prebillId]="prebillId"
+                [paymentPlanEnabled]="paymentPlanEnabled"
+                (markAsWorkComplete)="markWorkAsComplete()"
+                (refreshMatterDetails)="getMatterDetails()"
+                (goToLedgerHistoryTab)="selecttabs1 = 'Ledger History'"
+                (goToInvoicesTab)="selecttabs1 = 'Invoices'"
+                *ngIf="!(matterDetails?.isFixedFee)">
+              </app-new-billing-details>
+            </div>
+            <div
+              *ngIf="selecttabs1 === 'Invoices' && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisEdit || hasAccountingPermission)"
+              class="tab-pane fade show active" role="tabpanel">
+              <app-matter-invoices [matterId]='matterDetails.id'></app-matter-invoices>
+            </div>
+            <div
+              *ngIf="selecttabs1 === 'Ledger History'  && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisEdit || hasAccountingPermission)"
+              class="tab-pane fade show active" role="tabpanel">
+              <app-transaction-history [matterDetails]="matterDetails" [matterId]='matterDetails.id'></app-transaction-history>
+            </div>
+            <div
+              *ngIf="selecttabs1 === 'Trust Accounting' && isTrustAccountEnabled"
+              class="tab-pane fade show active" role="tabpanel">
+              <app-trust-accounting-matter-dashboard [clientId]="matterDetails?.clientName?.id"
+              [matterId]='matterDetails.id'[officeId]="matterDetails.matterPrimaryOffice.id" [matterAdmin]="permissionList.MATTER_MANAGEMENTisAdmin"
+              [matterAdminEdit]="permissionList.MATTER_MANAGEMENTisEdit" [permissionList]="permissionList" [matterDetails]='matterDetails'></app-trust-accounting-matter-dashboard>
+            </div>
+            <div *ngIf="selecttabs1 === 'Timekeeping' && permissionList?.TIMEKEEPING_SELFisEdit" class="tab-pane fade show active" role="tabpanel">
+              <h2>Timekeeping</h2>
+            </div>
+            <div *ngIf="selecttabs1 === 'Calendar'" class="tab-pane fade show active" role="tabpanel">
+              <h2>Calendar</h2>
+            </div>
+            <div *ngIf="selecttabs1 === 'Documents'" class="tab-pane fade show active" role="tabpanel">
+              <app-matter-documents [matterId]="matterDetails.id" [matterDetails]="matterDetails" [matterFolderDetails]="matterFolderDetail">
+              </app-matter-documents>
+            </div>
+            <div *ngIf="selecttabs1 === 'Notes'" class="tab-pane fade show active" role="tabpanel">
+              <app-matter-dashboard-notes [matterId]='matterId'></app-matter-dashboard-notes>
+            </div>
+            <div *ngIf="selecttabs1 === 'Blocked Users'" class="tab-pane fade show active" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-32">
+                <h3 class="mb-0">Blocked Users</h3>
+                <button type="button" class="btn btn-primary" (click)="addBlockuser()" id="add-blocked-user-btn">Add
+                  Blocked Users</button>
+              </div>
+              <div class="custom-table">
+                <div class="custom-table matter-list">
+                  <ngx-datatable #table class="material common-table datatable-auto-height" [rows]="blockUserList"
+                    [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" rowHeight="auto"
+                    [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size" [scrollbarH]="true" id="blocked-user-listing">
+                    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop='lastName' name="Name" [width]="100">
+                      <ng-template let-row="row" ngx-datatable-cell-template>
+                        {{(row.lastName) ? row.lastName + ', ' + row.firstName : row.firstName}}
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="email" name="Email" [width]="160">
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" [sortable]="true" name="Description" prop="description" [width]="250">
+                      <ng-template let-value="value" ngx-datatable-cell-template>
+                        {{ value ? value : 'No description available.'}}
+                      </ng-template>
+                    </ngx-datatable-column>
+                    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100">
+                      <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                        <div class="icon-group d-flex justify-content-end">
+                          <span>
+                            <em class="icon icon-remove icon-color" (click)="removeBlockUser(row,$event)" id="remove-blocked-employee-index-{{rowIndex}}"></em>
+                          </span>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                  </ngx-datatable>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card " *ngIf="isAssociationsEditMode">
+      <div class="card-body">
+        <app-matter-dashboard-associations [matterId]="matterDetails.id"  (exitEditMode)="isAssociationsEditMode = false;" [isEditMode]="true">
+        </app-matter-dashboard-associations>
+        </div>
+      </div>
+
+    <ng-container *ngIf="matterDetails && selecttabs1 != 'Billing'">
+      <app-matter-activity-history></app-matter-activity-history>
+    </ng-container>
+  </div>
+</div>
+
+
+<ng-template #AddCorporateContact let-modal>
+  <div class="modal-header pb-32 d-block">
+    <h3 class="modal-title mb-0">Edit Matter Info</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row gutter-16" *ngIf='matterDetails' [formGroup]='matterForm'>
+      <div class="col-12">
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="form-group">
+              <label>Matter Number <sup>*</sup></label>
+              <input type="text" class="form-control " formControlName='matterNumber' id="matter-number">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]='matterFormError.matterName'>
+              <label>Matter Name <sup>*</sup></label>
+              <input class="form-control" type="text" formControlName='matterName' id="matter-name">
+              <app-validation-message [errorMessage]='matterFormError.matterNameMessage' *ngIf='matterFormError && matterFormError.matterName'>
+              </app-validation-message>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="form-group" [class.has-error]='matterFormError.matterDate'>
+              <label>Matter Open Date <sup>*</sup> </label>
+              <app-date-picker [isForm]='true' [dateform]='matterForm' controlName='matterOpenDate' id="matter-open-date">
+              </app-date-picker>
+              <app-validation-message [errorMessage]='matterFormError.matterDateMessage' *ngIf='matterFormError && matterFormError.matterDate'>
+              </app-validation-message>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]='matterFormError.caseNumbers'>
+              <label>Case Numbers</label>
+              <input type="text" class="form-control" formControlName='caseNumbers' id="case-number">
+              <app-validation-message [errorMessage]='matterFormError.caseNumbersMessage' *ngIf='matterFormError && matterFormError.caseNumbers'>
+              </app-validation-message>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mb-2">
+        <div class="custom-control custom-checkbox m-0 pr-0">
+          <input type="checkbox" class="custom-control-input" id="contingent-1" value="1"
+            formControlName='isContingentCase'>
+          <label class="custom-control-label" for="contingent-1">This is a contingent case</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group mb-0 mt-16">
+          <label class="tb-8">You may leave change notes for the audit history (optional).</label>
+          <textarea class="form-control mt-12" formControlName="changeNotes" placeholder="Enter change notes (optional)" rows="4" id="change-notes"></textarea>
+        </div>
+    </div>
+  </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="update()" id="update-save-btn">Save</button>
+  </div>
+  <app-loader [active]="iseditMaterLoading"></app-loader>
+</ng-template>
+
+<ng-template #CloseMatterWarn let-modal>
+    <div class="modal-header pb-24">
+      <h3 class="modal-title mb-0">Close Matter</h3>
+    </div>
+    <div class="modal-body pb-16">
+        <div>
+            <div class="d-flex align-items-start">
+                <em class="icon icon-error text-danger f-s-20"></em>
+                <div class="lh-20 ml-20">
+                    <p  class="m-0">You cannot close this matter, because it still has a Primary Retainer Trust or Trust-Only balance greater than $0. You must refund the client via the matter dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="cancel-btn">Okay</button>
+    </div>
+</ng-template>

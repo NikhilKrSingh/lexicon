@@ -1,0 +1,42 @@
+
+<div class="modal-header d-block">
+  <h3 class="modal-title">Edit Reporting Relationships</h3>
+  <button type="button" class="close" (click)="dismiss('Cross click')" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+
+<form class="modal-body" *ngIf='reportingRelations' #relationForm="ngForm">
+
+  <div class="form-group">
+    <label>Direct Manager</label>
+    <ng-select [items]="employeeList" placeholder="Direct Manager" [(ngModel)]="selectedDirectManager"
+      [bindValue]="'id'" [bindLabel]="'name'" [selectOnTab]="true" [clearable]="true" name="directManager"
+      [notFoundText]="'No record found'" id="direct-manager-select">
+    </ng-select>
+  </div>
+
+  <div class="form-group">
+    <label>Approving Manager</label>
+    <ng-select [items]="employeeList" placeholder="Approving Manager" [(ngModel)]="selectedApprovingManager"
+      [bindValue]="'id'" [bindLabel]="'name'" [selectOnTab]="true" [clearable]="true" name="approvingManager"
+      [notFoundText]="'No record found'" id="approving-manager-select">
+    </ng-select>
+  </div>
+
+  <div class="form-group mb-0">
+    <label>Practice Manager</label>
+    <ng-select [items]="employeeList" placeholder="Practice Manager" [(ngModel)]="selectedPracticeManager"
+      [bindValue]="'id'" [bindLabel]="'name'" [selectOnTab]="true" [clearable]="true" name="practiceManager"
+      [notFoundText]="'No record found'" id="practice-manager-select">
+    </ng-select>
+  </div>
+
+  <app-loader [active]="loading"></app-loader>
+
+</form>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="dismiss('Cancel')" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id='save-btn'>Save</button>
+</div>

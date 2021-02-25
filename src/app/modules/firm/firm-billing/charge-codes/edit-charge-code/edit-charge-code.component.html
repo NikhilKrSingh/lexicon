@@ -1,0 +1,51 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Edit Hourly Code - {{chargeCode.code}}</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="form-group">
+    <label>Type <sup>*</sup></label>
+    <ng-select id="editBillingCodeHourlyType" [items]="typeList" placeholder="Select Type" [(ngModel)]="selectedType" [bindValue]="'id'"
+      [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [readonly]="true">
+    </ng-select>
+  </div>
+  <div class="form-group">
+    <label>Code <sup>*</sup></label>
+    <input id="editBillingCodeHourlyCode" type="text" class="form-control" [value]="chargeCode.code" disabled>
+  </div>
+  <div class="form-group position-relative" [class.has-error]='chargeCodeError.name'>
+    <label>Name <sup>*</sup></label>
+    <span class="count-char">{{250 - (chargeCode?.description?.length || 0)}}/50</span>
+    <input id="editBillingCodeHourlyName" type="text" class="form-control" [(ngModel)]='chargeCode.description' maxlength='50'
+      placeholder="Enter a name">
+    <app-validation-message [errorMessage]='chargeCodeError.nameMessage' *ngIf='chargeCodeError.name'>
+    </app-validation-message>
+  </div>
+  <div class="form-group" [class.has-error]='chargeCodeError.billableTo'>
+    <label>Billable To <sup>*</sup></label>
+    <ng-select
+      id="editBillingCodeHourlyBillableTo"
+      [items]="billingToList"
+      placeholder="Select billable To"
+      [(ngModel)]="chargeCode.billingTo.id"
+      (change)="selectBillableTo($event)"
+      [bindValue]="'id'"
+      [selectOnTab]="true"
+      [bindLabel]="'name'"
+      [notFoundText]="'No record found'">
+    </ng-select>
+    <app-validation-message [errorMessage]='chargeCodeError.billableToMessage' *ngIf='chargeCodeError.billableTo'>
+    </app-validation-message>
+  </div>
+  <div class="form-group position-relative">
+    <label>Change Note (optional)</label>
+    <span class="count-char">{{changeNotes?.length || 0}}/1000</span>
+    <textarea id="editBillingCodeHourlyChangeNote" class="form-control" maxlength='1000' rows="4" [(ngModel)]='changeNotes'></textarea>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" id="editBillingCodeHourlyCancelBtn" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn-primary" id="editBillingCodeHourlySaveBtn" [disabled]="disable" (click)="save()">Save Changes</button>
+</div>

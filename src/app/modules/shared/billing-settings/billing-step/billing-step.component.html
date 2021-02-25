@@ -1,0 +1,364 @@
+<div class="card">
+  <div class="card-body">
+    
+    <div class="info-block mb-24" *ngIf="!matterDetails?.isFixedFee">
+      <app-billing-rate-table
+        [matterDetails]="matterDetails"
+        (sendRateList)="sendRateList($event)"
+        [clientId]='clientId'>
+      </app-billing-rate-table>
+    </div>
+
+    <div class="info-block" *ngIf="matterDetails?.isFixedFee">
+      <div>
+
+        <div class="mb-48">
+          <div [class]="fixedFeeList?.length > 0 ? 'd-flex align-items-start justify-content-between pb-16' : ''">
+            <div>
+              <h2 class="mb-16">Fixed Fee Services <span class="text-danger font-weight-medium ml-8">*</span></h2>
+            </div>
+            <div class="row gutter-16" *ngIf="showFixedFeeError" id="fixed-free-error">
+              <div class="col-8">
+                <div class="alert alert-danger d-inline-flex justify-content-between mb-24 mt-8" role="alert">
+                  <div class="d-flex align-items-center">
+                      <em class="alert-icon icon icon-error mr-12 text-large"></em>
+                      <div class="d-flex align-items-center flex-wrap">
+                          <h4 class="mr-16 mt-0 mb-4">Error</h4>
+                          You are missing a fixed fee service. To add one, please click on the Add Fixed Fee button below.
+                      </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button *ngIf="fixedFeeList?.length === 0" class="btn btn-primary btn-icon" type="button" (click)="createService('fixedFeeservice')" id="create-fixed-fee">
+              <i class="icon icon-plus" ></i>
+              Add Fixed Fee
+            </button>
+          </div>
+
+          <div *ngIf="fixedFeeList?.length > 0"class="custom-table section-area">
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="custom-table matter-list">
+                  <ngx-datatable
+                    #table
+                    class="material common-table c-table"
+                    [class.matter-no-data]="fixedFeeList?.length === 0"
+                    [rows]="fixedFeeList"
+                    [columnMode]="ColumnMode.force"
+                    [headerHeight]="50"
+                    [footerHeight]="0"
+                    rowHeight="auto"
+                    id="feexed-fee-listing-tbl">
+
+                    <ngx-datatable-column [resizeable]="false"
+                      prop="code"
+                      name="Code"
+                      [width]="100">
+                    </ngx-datatable-column>
+
+                    <ngx-datatable-column [resizeable]="false"
+                      prop="description"
+                      name="Name"
+                      [width]="300">
+                    </ngx-datatable-column>
+
+                    <ngx-datatable-column [resizeable]="false"
+                      prop="amount"
+                      name="Rate"
+                      [width]="100">
+                      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                          <span [class]="row?.isCustom ? 'text-danger' : ''">
+                            {{value  | currency : 'USD': 'symbol': '1.2-2'}}
+                          </span>
+                      </ng-template>
+                    </ngx-datatable-column>
+
+                    <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" name="Action" [sortable]="false" [width]="100">
+                      <ng-template let-row="row" let-rowIndex="rowIndex" let-value="value" let-rowIndex="i" ngx-datatable-cell-template>
+                        <div class="icon-group d-flex justify-content-end">
+                          <span (click)="editList($event, row, FixedFeeEdit, 'fixedFeeservice')"
+                            *ngIf="permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" id="edit-fixed-fee-index-{{rowIndex}}">
+                            <em class="icon icon-edit icon-color"></em>
+                          </span>
+                          <span (click)="deleteList(row, 'fixedFeeservice')" id="delete-fixed-fee-index-{{rowIndex}}">
+                            <em class="icon icon-remove icon-color"></em>
+                          </span>
+                        </div>
+                      </ng-template>
+                    </ngx-datatable-column>
+                  </ngx-datatable>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mb-48">
+          <div [class]="addOnList?.length > 0 ? 'd-flex align-items-start justify-content-between' : ''">
+            <div>
+              <h3 class="mb-8">Add-On Services</h3>
+              <p class="mb-16 lh-20 helper-text font-weight-normal">Search for and select as many add-on services as needed</p>
+            </div>
+            <button class="btn btn-primary btn-icon" type="button" (click)="createService('addOn')" id="create-addon">
+              <i class="icon icon-plus" ></i>
+              Add Add-On
+            </button>
+          </div>
+
+            
+            <table *ngIf="addOnList?.length > 0"
+              class="table table-striped table-borderless" id="addon-listing-tbl">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Rate</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody *ngIf="addOnList?.length > 0">
+                <tr *ngFor="let item of addOnList;trackBy: trackByFn;let i=index" id="addon-row-{{i}}">
+                  <td> {{item.code}}</td>
+                  <td>{{ item.description }}</td>
+                  <td><span [class]="item?.isCustom ? 'text-danger' : ''">{{ item.amount  | currency : 'USD': 'symbol': '1.2-2' }}</span></td>
+                  <td class="text-right">
+                    <div class="icon-group d-flex justify-content-end">
+                      <span
+                        (click)="editList($event, i, FixedFeeEdit, 'addOn')"
+                        *ngIf="permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.CLIENT_CONTACT_MANAGEMENTisAdmin" id="edit-addon-index-{{i}}">
+                        <em class="icon icon-edit icon-color"></em>
+                      </span>
+                      <span
+                        (click)="deleteList(i, 'addOn')" id="delete-addon-index-{{i}}">
+                        <em class="icon icon-remove icon-color"></em>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+      </div>
+      <app-loader [active]="ipLoading"></app-loader>
+    </div>
+
+    <div class="info-block pt-8" *ngIf="matterDetails?.isFixedFee">
+      <div class="mt-8">
+          <h3 class="mb-24">Billing Timing</h3>
+          <div class="form-group">
+            <label class="mb-16">Bill Now</label>
+            <div class="custom-control custom-radio pr-0">
+              <input type="radio" [value]="1" id="pay-1" name="pay" class="custom-control-input" [(ngModel)]='paymentMode' (ngModelChange)='deferModeChange()'>
+              <label class="custom-control-label" for="pay-1">{{rateAmount | currency : 'USD': 'symbol': '1.2-2'}}</label>
+            </div>
+          </div>
+          <div class="row pt-8">
+            <div class="col-4">
+              <div class="form-group">
+                <label class="mb-16">Defer Until</label>
+                <div class="custom-control custom-radio pr-0">
+                  <input type="radio" id="defer-1" name="pay" class="custom-control-input" [value]='2' [(ngModel)]='paymentMode' (ngModelChange)='deferModeChange()'>
+                  <label class="custom-control-label" for="defer-1">Date</label>
+                </div>
+                <div class="form-group date-picker mb-0">
+                  <app-date-picker [placeholderText]="'Enter due date'" [isNgModel]='true' [minDate]="minDate" [(data)]='deferDate' [isDisabled]='paymentMode != 2' id="due-date"></app-date-picker>
+                </div>
+                <span class="d-block small mt-3 lh-20">The client will be billed on this date.</span>
+                <div class="custom-control custom-radio pr-0 mt-16">
+                  <input type="radio" id="defer-2" name="pay" class="custom-control-input" [value]='3' [(ngModel)]='paymentMode' (ngModelChange)='deferModeChange()'>
+                  <label class="custom-control-label" for="defer-2">Work Complete</label>
+                </div>
+                <span class="d-block small mt-8 lh-20">The client will be billed when the Fixed Fee Service’s milestone is marked as complete.</span>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <div class="info-block pt-16">
+      <h2 class="mb-24">Invoice Preferences</h2>
+      <div class="form-group section-area">
+        <label class="mb-12">How does the client want to receive invoices? <sup>*</sup></label>
+        <div class="custom-control custom-radio pr-0" *ngFor="let preference of invoicedeliveryList;trackBy :trackByFn;">
+          <input type="radio" id="ClientInvoice1_{{preference.name}}" name="invoiceDelivery"
+            [(ngModel)]="invoiceDelivery" [value]="preference.id" (change)="selectInvoicePref(invoiceDelivery)"
+            class="custom-control-input" [disabled]="!hasEmailExist && (preference.code == 'ELECTRONIC' || preference.code == 'PAPER_AND_ELECTRONIC')">
+          <label class="custom-control-label" for="ClientInvoice1_{{preference.name}}">{{preference.name}}</label>
+        </div>
+        <app-loader [active]="ipLoading"></app-loader>
+      </div>
+    </div>
+    <div class="info-block pt-20" *ngIf="selectedInvoicePref && (selectedInvoicePref.code === 'PAPER_AND_ELECTRONIC' || selectedInvoicePref.code == 'PAPER')">
+      <h2 class="mb-24">Invoice Address</h2>
+      <div class="form-group">
+        <label class="mb-12">Is your invoice address the same as your primary address?</label>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="InvoiceAdd1" name="InvoiceAdd" [(ngModel)]="invoiceAddress" [value]="true" class="custom-control-input">
+          <label class="custom-control-label" for="InvoiceAdd1">Yes</label>
+        </div>
+        <div class="custom-control custom-radio pr-0">
+          <input type="radio" id="InvoiceAdd2" name="InvoiceAdd" [(ngModel)]="invoiceAddress" class="custom-control-input" [value]="false">
+          <label class="custom-control-label" for="InvoiceAdd2">No</label>
+        </div>
+      </div>
+      <div class="row gutter-16" *ngIf="!invoiceAddress">
+        <div class="col-4">
+          <div class="row gutter-16">
+            <div class="col-12">
+              <div class="form-group" [class.has-error]='addressFormError.address'>
+                <label>Invoice Address 1 <sup>*</sup></label>
+                <input type="text" name="address1" [(ngModel)]="address"  class="form-control" placeholder="Enter Street Address" id="invoice-add-1">
+                <app-validation-message [errorMessage]='addressFormError.addressMessage' *ngIf='addressFormError.address'>
+                </app-validation-message>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group" [class.has-error]='addressFormError.address2'>
+                <label>Apt, Suite, Unit </label>
+                <input type="text" name="address2" [(ngModel)]="address2" class="form-control" placeholder="Enter Unit or Suite #" id="invoice-add-2">
+                <app-validation-message [errorMessage]='addressFormError.address2Message' *ngIf='addressFormError.address2'>
+                </app-validation-message>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group" [class.has-error]='addressFormError.city'>
+                <label>City <sup>*</sup></label>
+                <input type="text" name="city" [(ngModel)]="city" class="form-control" placeholder="Enter City" id="city">
+                <app-validation-message [errorMessage]='addressFormError.cityMessage' *ngIf='addressFormError.city'>
+                </app-validation-message>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]='addressFormError.state'>
+                <label>State <sup>*</sup></label>
+                <ng-select
+                  [items]="stateList"
+                  placeholder="Select State"
+                  [(ngModel)]="state"
+                  [bindValue]="'code'"
+                  [bindLabel]="'name'"
+                  [clearable]="false"
+                  [selectOnTab]='true'
+                  [notFoundText]="'No record found'"
+                  id="state">
+                </ng-select>
+                <app-validation-message [errorMessage]='addressFormError.stateMessage' *ngIf='addressFormError.state'>
+                </app-validation-message>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]='addressFormError.zipCode'>
+                <label>Zip Code <sup>*</sup></label>
+                <input type="text" name="zipcode" [(ngModel)]="zip" minlength='5' maxlength="6" class="form-control" placeholder="Enter Zip Code" (keypress)="checkNumber($event)" id="zip-code">
+                <app-validation-message [errorMessage]='addressFormError.zipCodeMessage' *ngIf='addressFormError.zipCode'>
+                </app-validation-message>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="info-block mb-24">
+      <h2 class="mb-24">Payment Methods</h2>
+      <app-payment-method-create-matter
+        [clientId]="clientId"
+        [officeId]="officeId"
+        [matterId]="matterId"
+        [pageType]="pageType"
+        [states]="stateList"
+        [paymentMethodeText]="true"
+        (getPaymentMethodList)="getPaymentMethodList($event)">
+      </app-payment-method-create-matter>
+    </div>
+    <div class="info-block pt-20" *ngIf='!isTrustAccountEnabled'>
+      <h2 class="mb-24">Minimum Retainer Trust Balance</h2>
+      <div class="row">
+        <div class="col-4">
+          <div class="form-group">
+            <label>Minimum Retainer Trust Amount</label>
+            <input type="text" class="form-control" name="minimumTrustBalance" prefix="$" mask="separator.2" thousandSeparator="," [(ngModel)]="minimumTrustBalance" placeholder="Enter minimum retainer trust amount" id="min-trust-balance">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="info-block pt-24" *ngIf="!matterDetails?.isFixedFee">
+      <h2 class="mb-8">Bill Issuance Frequency</h2>
+      <div class="row gutter-16">
+        <div class="col-7">
+          <p class="lh-20">This is how often the client wants to be invoiced. When this frequency ends, an invoice
+            for all unbilled time and disbursements will be queued on the Matter Law Office’s next Bill Generation
+            Period end date.</p>
+        </div>
+      </div>
+      <ng-container *ngIf="billingSettings">
+        <app-billing-period
+          (sendValue)="getValue($event);"
+          [isFormSubmitted]="formSubmitted"
+          [pageType]="pageType"
+          [officeId]="officeId"
+          [billingSettings]="billingSettings">
+        </app-billing-period>
+      </ng-container>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-end pb-24">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light"(click)="prev()" id="cancel-btn">Cancel</button>
+    <button type="button" (click)="saveNext()" class="btn btn-primary" id="next-btn">Next</button>
+  </div>
+</div>
+<app-loader [active]="loading"></app-loader>
+
+<ng-template #FixedFeeEdit let>
+  <div class="modal-header d-block pb-20">
+    <h3 *ngIf="custom" class="modal-title">{{modalType === 'addOn' ? 'Edit Custom Add-On' : 'Edit Custom Fixed Fee Service'}}</h3>
+    <h3 *ngIf="!custom" class="modal-title">{{modalType === 'addOn' ? 'Edit Add-On Service' : 'Edit Fixed Fee Service'}}</h3>
+    <button type="button"
+      class="close"
+      (click)="close()"
+      aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0">
+    <form [formGroup]="FixedFeeEditForm">
+      <div *ngIf="custom" class="form-group w-35 p-0">
+        <label>Generated Code</label>
+        <input type="text" class="form-control f-c" formControlName="code" [readonly]="true" id="generated-code">
+      </div>
+
+      <div *ngIf="custom" [class]="(f['description']?.errors && f['description']?.touched) || (f['description']?.errors && formSubmitted) ? 'form-group has-error text-dark' : 'form-group'">
+        <label>Name <sup>*</sup></label>
+        <span class="char-counter f-c">{{ FixedFeeEditForm?.controls['description']?.value?.length || 0 }}/50</span>
+        <input type="text" class="form-control" formControlName="description"  maxlength="50" placeholder="Enter name" id="name-text">
+        <span class="field-message text-danger" *ngIf="f['description'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          Please enter a name
+        </span>
+      </div>
+
+      <div [class]="(f['amount']?.errors && f['amount']?.touched) || (f['amount']?.errors && formSubmitted) ? 'form-group has-error text-dark' : 'form-group'">
+        <label>Amount <sup>*</sup></label>
+        <div class="position-relative">
+          <input type="text" class="form-control" formControlName="amount" placeholder="Enter an amount"
+            (keyup)="removePrefix($event)" (focusout)="removePrefix($event);addCent();" prefix="$" mask="separator.2"
+            thousandSeparator="," id="amount">
+            <span class="close-abs" *ngIf="displayCrossIcn">
+              <em class="icon icon-close icon-color small" (click)="originalRate()" id="original-rate"></em>
+            </span>
+        </div>
+        <span class="field-message text-danger" *ngIf="f['amount'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          Please provide a valid rate.
+        </span>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveChanges()" [disabled]="loading" id="save-changes">Save Changes</button>
+  </div>
+</ng-template>

@@ -1,0 +1,971 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb" *ngIf="type=='calendar'">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li *ngIf="!isEditMode" class="breadcrumb-item active" aria-current="page">Create Calendar Event</li>
+      <li *ngIf="isEditMode" class="breadcrumb-item active" aria-current="page">Edit Calendar Event</li>
+    </ol>
+    <div class="heading">
+      <h1 *ngIf="!isEditMode" class="d-flex justify-content-between"><span>Create Calendar Event</span>
+        <button type="button" *ngIf="type!='calendar'" class="close popup-close"
+                (click)="close()" aria-label="Close"><em class="icon icon-close" id="create-event-close"></em></button>
+      </h1>
+      <h1 *ngIf="isEditMode" class="d-flex justify-content-between"><span>Edit Calendar Event</span>
+        <button type="button" *ngIf="type!='calendar'" class="close popup-close"
+                (click)="close()" aria-label="Close"><em class="icon icon-close" id="edit-event-close"></em></button>
+      </h1>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-body">
+          <div class="row gutter-16">
+            <div class="col-7">
+              <div class="row gutter-16">
+                <div class="col-11" *ngFor="let proposal of proposals; trackBy: trackByFn;let i = index;" id="proposal-index-{{i}}">
+                  <div class="alert alert-warning d-flex justify-content-between mb-32 align-items-start" role="alert">
+                    <div class="d-flex">
+                      <em class="alert-icon icon icon-warning fs-14"></em>
+                      <div>
+                        <h5 class="mr-0 mt-0 mb-4">This event has a proposed change</h5>
+                        <p class="m-0 lh-20"><strong>Current Event Time:</strong> {{eventTimeString}}<br>
+                          <strong>Proposed Event Time:</strong> {{proposal.proposalTimeString}<br>
+                          Proposal Sender: {{proposal.personName}}<br>
+                          <span *ngIf="proposal.description">Proposal Message: {{proposal.description}}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center pr-8">
+                      <a class="font-weight-medium mr-16" href="javascript:void(0);" (click)="acceptProposal(proposal)" id="accept-proposal-index-{{i}}">Accept Proposal</a>
+                      <span class="alert-close" (click)="deleteProposal(proposal)" id="delete-proposal-index-{{i}}"><em class="icon icon-close icon-color"></em></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <form [formGroup]="eventForm" class="row gutter-16">
+                <div class="col-12 mb-32 pb-12">
+                  <div class="d-flex justify-content-between align-items-center bdr-btm"
+                       [class.has-error]="f.title.errors && submitted">
+                    <input type="text" id="event-title" class="edit-events" formControlName="title"
+                           placeholder="Add event title *" [readonly]="inviteeType === 'invitee'">
+                    <button type="button" *ngIf="eventForm.value.title" (click)="removeTilte()" class="btn btn-link">
+                      <em class="icon icon-close" *ngIf="inviteeType === 'hostorganiser'"></em>
+                    </button>
+                    <app-validation-message [errorMessage]='eventFormError.titleMessage' *ngIf='eventFormError.title'>
+                    </app-validation-message>
+                  </div>
+                  <span class="d-flex justify-content-between field-message text-danger"
+                        *ngIf="submitted && f.title.errors">
+                    <span *ngIf="f.title.errors?.required">
+                      <em class="icon icon-error mr-4"></em>
+                      Please add event title.
+                    </span>
+                  </span>
+                </div>
+                <div class="col-10">
+                  <div class="form-group" [class.has-error]="f.eventType.errors && submitted">
+                    <label for="">Event Type <sup>*</sup></label>
+                    <ng-select [items]="matterTypeList" placeholder="Event Type" formControlName="eventType"
+                               id="select-event-type"
+                               (remove)="setFieldsRequired()" [bindValue]="'id'" (change)="setFieldsRequired($event)"
+                               [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'"
+                               [readonly]="inviteeType === 'invitee' && isEditMode">
+                    </ng-select>
+                    <span class="field-message text-danger" *ngIf="submitted && f.eventType.errors">
+                      <span *ngIf="f.eventType.errors?.required">
+                        <em class="icon icon-error mr-4"></em>
+                        Please select event type.
+                      </span>
+                    </span>
+                  </div>
+                  <div class="row gutter-16">
+                    <div class="col-6">
+                      <div class="row gutter-16">
+                        <div class="col-7">
+                          <div class="form-group" [class.has-error]="f.startDate.errors && submitted">
+                            <label for="">Start Date <sup>*</sup></label>
+                            <app-date-picker [isForm]='true' [id]="'event-start-date'" [dateform]='eventForm'
+                                             controlName='startDate'
+                                             (dataChange)='setEndDate($event)'></app-date-picker>
+                            <span class="field-message text-danger" *ngIf="submitted && f.startDate.errors">
+                              <span *ngIf="f.startDate.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Required start date.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="col-5">
+                          <div class="form-group" [class.has-error]="f.startTime.errors && submitted">
+                            <label for="">Start Time <sup>*</sup></label>
+                            <input type="text" class="form-control cust-readonlyinput"
+                                   (ngModelChange)="changeEndTime($event)" name="startTime"
+                                   [(ngModel)]="startTime" formControlName="startTime" placeholder="Start time"
+                                   [owlDateTimeTrigger]="dt2" [owlDateTime]="dt2" readonly id="event-start-time">
+                            <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt2></owl-date-time>
+                            <span class="field-message text-danger" *ngIf="submitted && f.startTime.errors">
+                              <span *ngIf="f.startTime.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Required time.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="row gutter-16">
+                        <div class="col-5">
+                          <div class="form-group" [class.has-error]="f.endTime.errors && submitted">
+                            <label for="">End Time <sup>*</sup></label>
+                            <input type="text" class="form-control cust-readonlyinput" name="endTime"
+                                   (ngModelChange)="setEndDate($event)"
+                                   [(ngModel)]="endTime" formControlName="endTime" placeholder="End time"
+                                   [owlDateTimeTrigger]="dt3" [owlDateTime]="dt3" readonly [min]="startTime"
+                                   id="event-end-time">
+                            <owl-date-time [pickerType]="'timer'" [hour12Timer]="true" #dt3></owl-date-time>
+                            <span class="field-message text-danger" *ngIf="submitted && f.endTime.errors">
+                              <span *ngIf="f.endTime.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Required time.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="col-7">
+                          <div class="form-group" [class.has-error]="f.endDate.errors && submitted">
+                            <label for="">End Date <sup>*</sup></label>
+                            <app-date-picker [id]="'event-end-date'" [isForm]='true'
+                                             [minDate]='eventForm.value.startDate' [dateform]='eventForm'
+                                             controlName='endDate'></app-date-picker>
+                            <span class="field-message text-danger" *ngIf="submitted && f.endDate.errors">
+                              <span *ngIf="f.endDate.errors?.required">
+                                <em class="icon icon-error mr-4"></em>
+                                Required end date.
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="row">
+                        <div class="col-6">
+                          <div class="form-group">
+                            <label for="">Employee Travel Time (before event)</label>
+                            <ng-select
+                              class="custom-hours"
+                              placeholder="Enter travel time"
+                              [items]="hoursArray"
+                              [bindValue]="'id'"
+                              [bindLabel]="'name'"
+                              formControlName="beforeTravelTimeHours"
+                              [selectOnTab]="true"
+                              (change)="travelTime();travelTimeBeforEvent(CustomHoursBeforEvent)"
+                              id="emp-travel-time-before-event">
+                            </ng-select>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="form-group">
+                            <label for="">Employee Travel Time (after event)</label>
+                            <ng-select
+                              placeholder="Enter travel time"
+                              class="custom-hours"
+                              [items]="hoursArray2"
+                              [bindValue]="'id'"
+                              [bindLabel]="'name'"
+                              formControlName="afterTravelTimeHours"
+                              [selectOnTab]="true"
+                              (change)="travelTime();travelTimeAfterEvent(CustomHoursAfterEvent)"
+                              id="emp-travel-time-after-event">
+                            </ng-select>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-12">
+                      <div class="row">
+                        <div class="col-9">
+                          <div class="form-group">
+                            <label for="">Recurring Event</label>
+                            <ng-select
+                              [items]="recurringTypesList"
+                              placeholder="Recurring Event"
+                              formControlName="recurringType"
+                              [bindValue]="'id'"
+                              (clear)="removeOption();"
+                              [bindLabel]="'name'"
+                              (change)="changeRecurring($event)"
+                              [notFoundText]="'No record found'"
+                              [selectOnTab]="true"
+                              id="event-recurring-event">
+                            </ng-select>
+                          </div>
+                          <div class="row" *ngIf="eventForm.value.recurringType === 1">
+                            <div class="col-12  ">
+                              <div class="form-group" [class.has-error]="f.recurringEndDate.errors && submitted">
+                                <label for="">Recurring End Date</label>
+                                 <app-date-picker
+                                  [id]="'recurring-end-date1'"
+                                  [isForm]='true'
+                                  [minDate]='minDate'
+                                  [dateform]='eventForm'
+                                  [disableInput]='true'
+                                  [placeholderText]='"Recurring End Date"'
+                                  controlName='recurringEndDate'>
+                                </app-date-picker>
+                                <span class="field-message text-danger" *ngIf="submitted && f.recurringEndDate.errors">
+                                  <span *ngIf="f.recurringEndDate.errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please select recurring end date.
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row" *ngIf="eventForm.value.recurringType === 10">
+                            <div class="col-6">
+                              <div class="form-group" [class.has-error]="f.repeatEvery.errors && submitted">
+                                <label for="">Repeat Every</label>
+                                <input type="text" class="form-control" formControlName="repeatEvery"
+                                       placeholder="Repeat Every" (keypress)="checkNumber($event)"
+                                       id="event-repeat-every">
+                                <span class="field-message text-danger" *ngIf="submitted && f.repeatEvery.errors">
+                                  <span *ngIf="f.repeatEvery.errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please enter repeat every.
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="form-group" [class.has-error]="f.recurringEventEvery.errors && submitted">
+                                <label for="">&nbsp;</label>
+                                <ng-select
+                                  [items]="recurringEventArr"
+                                  placeholder="Recurring Every"
+                                  formControlName="recurringEventEvery"
+                                  [bindValue]="'value'"
+                                  [bindLabel]="'name'"
+                                  (change)="changedRecurringEvery($event)"
+                                  [notFoundText]="'No record found'"
+                                  [selectOnTab]="true"
+                                  id="event-recurring-every">
+                                </ng-select>
+                                <span class="field-message text-danger"
+                                      *ngIf="submitted && f.recurringEventEvery.errors">
+                                  <span *ngIf="f.recurringEventEvery.errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please select recurring events.
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="col-12">
+                              <div class="form-group" [class.has-error]="f.daysOfWeek.errors && submitted"
+                                   *ngIf="eventForm.value.recurringEventEvery && eventForm.value.recurringEventEvery !== 'Daily'">
+                                <label for="">Repeats on</label>
+                                <ul class="list-unstyled mb-0 day-list d-flex" id="event-repeats-on">
+                                  <li (click)="getDaySelected(0)" [class.active]="dayofweekArray[0].checked">S</li>
+                                  <li (click)="getDaySelected(1)" [class.active]="dayofweekArray[1].checked">M</li>
+                                  <li (click)="getDaySelected(2)" [class.active]="dayofweekArray[2].checked">t</li>
+                                  <li (click)="getDaySelected(3)" [class.active]="dayofweekArray[3].checked">w</li>
+                                  <li (click)="getDaySelected(4)" [class.active]="dayofweekArray[4].checked">t</li>
+                                  <li (click)="getDaySelected(5)" [class.active]="dayofweekArray[5].checked">f</li>
+                                  <li (click)="getDaySelected(6)" [class.active]="dayofweekArray[6].checked">s</li>
+                                </ul>
+                                <span class="field-message text-danger" *ngIf="submitted && f.daysOfWeek.errors">
+                                  <span *ngIf="f.daysOfWeek.errors?.required">
+                                    <em class="icon icon-error mr-4"></em>
+                                    Please select day of the week.
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="col-12  ">
+                              <div class="form-group">
+                                <label for="" class="mb-16">Ends</label>
+                                <div class="row gutter-16 mb-8">
+                                  <div class="col-5">
+                                    <div class="custom-control custom-radio pr-0">
+                                      <input class="custom-control-input" name="ends" value="on" formControlName="ends"
+                                             id="event-recuring-ends-on" type="radio" (change)="changeEnds($event)">
+                                      <label class="custom-control-label" for="event-recuring-ends-on">On</label>
+                                    </div>
+                                  </div>
+                                  <div class="col-7" *ngIf="eventForm.value.ends === 'on'"
+                                       [class.has-error]="f.recurringEndDate.errors && submitted">
+                                    <app-date-picker
+                                      [id]="'recurring-end-date2'"
+                                      [isForm]='true'
+                                      [minDate]='minDate'
+                                      [dateform]='eventForm'
+                                      [disableInput]='true'
+                                      [placeholderText]='"Recurring End Date"'
+                                      controlName='recurringEndDate'>
+                                    </app-date-picker>
+                                    <span class="field-message text-danger"
+                                          *ngIf="submitted && f.recurringEndDate.errors">
+                                      <span *ngIf="f.recurringEndDate.errors?.required">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Please select recurring end date.
+                                      </span>
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="row gutter-16">
+                                  <div class="col-5">
+                                    <div class="custom-control custom-radio pr-0">
+                                      <input class="custom-control-input" name="ends" value="after"
+                                             formControlName="ends" id="event-recuring-ends-after" type="radio"
+                                             (change)="changeEnds($event)">
+                                      <label class="custom-control-label" for="event-recuring-ends-after">After</label>
+                                    </div>
+                                  </div>
+                                  <div class="col-7" *ngIf="eventForm.value.ends === 'after'"
+                                       [class.has-error]="f.numberOfOccurancesEnd.errors && submitted">
+                                    <div class="position-relative occu-grp">
+                                      <input type="text" formControlName="numberOfOccurancesEnd" class="form-control"
+                                             (keypress)="checkNumber($event)" id="event-recuring-after-occurrences">
+                                      <span>occurrences</span>
+                                    </div>
+                                    <span class="field-message text-danger"
+                                          *ngIf="submitted && f.numberOfOccurancesEnd.errors">
+                                      <span *ngIf="f.numberOfOccurancesEnd.errors?.required">
+                                        <em class="icon icon-error mr-4"></em>
+                                        Please enter number of occurrences.
+                                      </span>
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="d-flex justify-content-end pt-24">
+                                  <div class="btn-group">
+                                    <button type="button" (click)="removeRecuringEvent()"
+                                            class="btn btn-light" id="event-recurring-cancel">Cancel
+                                    </button>
+                                    <button type="button" (click)="saveRecuringEvent()" class="btn btn-primary"
+                                            id="event-recurring-save">Save
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-3">
+                          <div class="form-group">
+                            <label class="mb-12" for="">&nbsp;</label>
+                            <div class="custom-control custom-checkbox pr-0">
+                              <input class="custom-control-input" (change)="disableEventTime($event)"
+                                     formControlName="isAllDayEvent"
+                                     type="checkbox" id="event-recurring-all-day">
+                              <label class="custom-control-label" for="event-recurring-all-day">All day</label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="justify-content-end col-5 pb-24 d-flex align-items-start">
+              <button type="button" class="btn btn-primary" id="event-remove-button" *ngIf="isEditMode && inviteeType === 'hostorganiser'"
+                      (click)="removeEvent()"> Remove Event
+              </button>
+            </div>
+          </div>
+          <div class="row gutter-50">
+            <div class="col-8">
+              <div class="nav nav-tabs nav-tabs-unerline d-inline-flex flex-nowrap justify-content-start"
+                   role="tablist">
+                <a href="javascript:void(0);" (click)="selectftabs = myfirsttabs"
+                   *ngFor="let myfirsttabs of myfirsttab; trackBy: trackByFn;let i=index;"
+                   role="tab" class="nav-link" [class.active]="selectftabs === myfirsttabs"
+                   id="event-create-tab-{{i}}">{{ myfirsttabs }}</a>
+              </div>
+              <div class="tab-content pt-32">
+                <div *ngIf="selectftabs === myfirsttab[0]" class="tab-pane fade show active" role="tabpanel">
+                  <div class="icon-form">
+                    <div class="icon-form-item  d-flex icon-form justify-content-start align-items-start">
+                      <em class="icon icon-clients icon-color"></em>
+                      <div class="flex-fill">
+                        <div class="form-group" [class.has-error]='eventFormError.selctedClentName'>
+                          <label>Client and Potential Client <sup
+                            *ngIf="isClientRequired || isAnyClientRequired">*</sup></label>
+                          <div class="advance-search flex-fill">
+                            <form action="">
+                              <div class="advance-search-wrapper" appAutoCloseOutsideClick
+                                   (outsideClick)='showSearchResults = false'>
+
+                                <div class="dropdown dropdown-hover-table dropdown-toggle d-flex align-items-center"
+                                     data-toggle="dropdown" id="client-display-drp-dwn" [class.active]="openMenuClientSearchActive" (click)="openMenuClientSearch()" appAutoCloseOutsideClick
+                                     (outsideClick)="openMenuClientSearchOutside($event)">
+                                  <span class="dropdown-label">{{clientTypeArr[selectedFilterValue]}}</span>
+
+                                  <div class="dropdown-menu dropdown-menu-left" id="client-select-drp-dwn"
+                                       aria-labelledby="dropdownMenuButton" id="client-potential-client">
+                                    <a class="dropdown-item" (click)="selectType('0')" href="javascript:void(0)"
+                                       id="client-slect-all-option">All</a>
+                                    <a class="dropdown-item" (click)="selectType('1')"
+                                       href="javascript:void(0)" id="client-slect-clients-option">Client</a>
+                                    <a class="dropdown-item" (click)="selectType('2')"
+                                       href="javascript:void(0)" id="client-slect-potential-clients-option">Potential Client</a>
+                                  </div>
+                                </div>
+                                <input type="text" class="form-control search-input" id="client-search-input-text"
+                                       name="selctedClentName"
+                                       [(ngModel)]="selctedClentName" (keyup)="searchClients($event.target.value)"
+                                       placeholder="Search for a client or potential client" autocomplete="off"
+                                       [disabled]="canEditClient && isEditMode">
+                                <button class="btn" type="submit">Search</button>
+                                <div class="search-result-box pt-8 pb-8 pr-8"
+                                     [class.d-none]="!showSearchResults || !selctedClentName">
+                                  <div class="search-result custom-style-scroll" *ngIf="clientList && clientList.length"
+                                       >
+                                    <div class="result-item pr-0" *ngFor="let client of clientList; trackBy: trackByFn;let i=index;">
+                                      <div class="result-title d-flex justify-content-between align-items-start">
+                                        <em  class="icon icon-color" [ngClass]="client?.role=== 'Potential Client' ? 'icon-contacts' : 'icon-clients'"></em>
+                                        <h4 (click)="selectClient(client, 'search')" class="flex-fill"
+                                            id="client-list-name-{{i}}">
+                                          <label class="cursor-pointer d-inline-block font-weight-normal m-0"
+                                            [innerHTML]='client.name | highlightText : selctedClentName'>
+                                          </label>
+                                          <span *ngIf="client.doNotContact">
+                                            <i class="icon icon-close-fill"></i> Do Not Contact
+                                          </span>
+                                        </h4>
+                                        <i class="icon p-2"
+                                           [ngClass]="(client.view) ? 'icon-angle-up': 'icon-angle-down'"
+                                           (click)="client.view = !client.view"></i>
+                                      </div>
+                                      <div class="result-detail" [class.show]="client.view">
+                                        <div class="row w-100">
+                                        <div class="w-30" *ngIf="client.role == 'Potential Client'">
+                                          <span class="small helper-text d-block mb-8">Contact Number</span>
+                                          <span>{{ client.uniqueNumber ? client.uniqueNumber : null }}</span>
+                                        </div>
+                                        <div class="w-30">
+                                          <span class="small helper-text d-block mb-8">Contact Type</span>
+                                          <span>{{ client.role }}</span>
+                                        </div>
+                                        <div class="w-40" *ngIf="!client.doNotContact && client.role == 'Potential Client'">
+                                          <span class="small helper-text d-block mb-8">Preferred Contact</span>
+                                          <span>{{(client.preferredContactMethod==="Email") ? client.email : (client.phoneNumber | phoneFormatter) }}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    </div>
+                                  </div>
+                                  <div class="search-result"
+                                       *ngIf="clientList && clientList?.length === 0 && !isSearchLoading">
+                                    <div class="py-8 px-16">
+                                      <h5 class="mb-8 mt-0">We couldn’t find anything matching your search.</h5>
+                                      <p class="m-0">Try again with a different term.</p>
+                                    </div>
+                                  </div>
+                                  <app-search-loader [active]="isSearchLoading"
+                                                     [loaderMessage]="'Loading Search Results'"></app-search-loader>
+
+                                </div>
+
+                              </div>
+                            </form>
+                          </div>
+                          <span class="field-message d-block text-danger"
+                                *ngIf="submitted && !selectedClient && (isClientRequired || isAnyClientRequired)">
+                            <em class="icon icon-error mr-4"></em>
+                            Please select a client or potential client
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="icon-form-item  d-flex icon-form justify-content-start align-items-start">
+                      <em class="icon icon-matters icon-color"></em>
+                      <div class="flex-fill">
+                        <div class="form-group">
+                          <label for="">Matter</label>
+                          <input type="text" *ngIf="!selctedClentName " placeholder="Select matter" disabled
+                                 class="form-control" id="matter-search-input-text">
+                          <ng-select *ngIf="selctedClentName"
+                                     [items]="matterList" placeholder="Select matter" id="matter-select-drp-dwn"
+                                     [searchFn]="customSearchFn"
+                                     [(ngModel)]="clientMatter" [bindValue]="'id'" [bindLabel]="'matterName'"
+                                     [selectOnTab]="true"
+                                     [notFoundText]="'No record found'"
+                                     [readonly]="canEditMatter && isEditMode || selectedClient?.role == 'Potential Client' ">
+                            <ng-template ng-option-tmp let-item="item">
+                              <h4 class="m-0">{{ item.matterName ? item.matterName : '--'}}</h4>
+                              <span
+                                class="small helper-text font-weight-regular d-block">Matter Number: {{ item.matterNumber }}</span>
+                            </ng-template>
+                          </ng-select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="icon-form-item  d-flex icon-form justify-content-start align-items-start">
+                      <em class="icon icon-building icon-color"></em>
+                      <div class="flex-fill">
+                        <div class="form-group" [class.has-error]='eventFormError.eventLocation'>
+                          <label for="">Location</label>
+                          <div class="search-group position-relative">
+                            <form action="#">
+                              <div>
+                                <span class="search-icn"></span>
+                                <input type="text" class="form-control border-radius-20" id="office-search-input-text"
+                                       name="officeSearchBox" (focus)="officeSearchBoxFocused = true;"
+                                       (keydown.tab)="onLocationKeyPress()"
+                                       [(ngModel)]="eventLocation" (keyup)="searchOffice($event.target.value)"
+                                       placeholder="Search for an office or enter a custom address" autocomplete="off">
+                              </div>
+                            </form>
+                            <div class="search-group-result pt-0 px-0" id="office-search-result"
+                                 *ngIf="officeSearchBoxFocused && !officeSearchResultsLoading && showOfficeSearchResults && eventLocation.length > 2">
+                              <div class="search-collapse custom-style-scroll" *ngIf="officeSearchResults.length">
+                                <div class="search-panel px-16 pt-16 pb-2" *ngFor="let office of officeSearchResults; trackBy: trackByFn; let i = index;">
+                                  <div class="search-panel-head pl-24" (click)="selectOffice(office)" id="select-employee-record-{{i}}">
+                                    <em class="search-res-icon icon icon-building pt-2"></em>
+                                    <span>
+                                      <span [innerHTML]="office.officeName | highlightText : eventLocation"></span>
+                                    </span>
+                                    <span class="small helper-text font-weight-normal d-block mt-4">
+                                      {{office.address1}}{{office.address2 ? ', ' + office.address2 : ''}}
+                                      {{office.city ? ', ' + office.city : ''}}{{office.state ? ', ' + office.state : ''}}
+                                      {{office.zipCode}}{{timeZoneEnum[office.timeZone] ? ' (' + timeZoneEnum[office.timeZone] + ')' : ''}}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="search-collapse custom-style-scroll cursor-default" *ngIf="!officeSearchResults.length" id="office-no-result">
+                                <div class="search-panel px-16 pt-16 pb-2">
+                                  <div class="search-panel-head pl-24 cursor-default">
+                                    <div class="py-8 px-16">
+                                      <h5 class="mb-8 mt-0">We couldn’t find anything matching your search.</h5>
+                                      <p class="m-0">Try again with a different term.</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="search-group-result px-0" *ngIf="officeSearchResultsLoading">
+                              <app-search-loader [active]="officeSearchResultsLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                            </div>
+                          </div>
+                          <app-validation-message [errorMessage]='eventFormError.eventLocationMessage'
+                                                  *ngIf='eventFormError.eventLocation'>
+                          </app-validation-message>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="icon-form-item  d-flex icon-form justify-content-start align-items-start">
+                      <em class="icon icon-busy icon-color"></em>
+                      <div class="flex-fill">
+                        <div class="row">
+                          <div class="col-3">
+                            <div class="form-group">
+                              <label for="">Status</label>
+                              <ng-select [items]="eventStatusList" placeholder="Select status" [(ngModel)]="eventStatus"
+                                         id="event-status"
+                                         [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'"
+                                         [selectOnTab]="true">
+                              </ng-select>
+                            </div>
+                          </div>
+                          <div class="col-3">
+                            <div class="form-group">
+                              <label for="">Privacy</label>
+                              <ng-select [items]="eventPrivacyList" placeholder="Select privacy" id="event-privacy"
+                                         [(ngModel)]="eventPrivacy" [bindValue]="'id'" [bindLabel]="'name'"
+                                         [notFoundText]="'No record found'" [selectOnTab]="true">
+                              </ng-select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="icon-form-item  d-flex icon-form justify-content-start align-items-start">
+                      <em class="icon icon-description icon-color"></em>
+                      <div class="flex-fill">
+                        <div class="form-group" [class.has-error]='eventFormError.description'>
+                          <label for="">Description</label>
+                          <tinymce [(ngModel)]="description" #mouseenter id="event-description" [config]="config"
+                                   [placeholder]="'Enter a description'">{{addCssEditor}}</tinymce>
+                          <app-validation-message [errorMessage]='eventFormError.descriptionMessage'
+                                                  *ngIf='eventFormError.description'>
+                          </app-validation-message>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="selectftabs === myfirsttab[1]" class="tab-pane fade show active app-calendar-timeline-view"
+                     role="tabpanel">
+                  <app-calendar-timeline-view
+                    (calendarDate)="calendarDate($event)" [eventsArr]="calendarEvents"
+                    [eventsLoading]="eventLoading" (dateClicked)="setDateTime($event)"
+                    [startDateTime]="startTime" [endDateTime]="endTime"
+                    [resourceArr]="resourceArray">
+                  </app-calendar-timeline-view>
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="nav nav-tabs nav-tabs-unerline d-inline-flex flex-nowrap justify-content-start"
+                   role="tablist">
+                <a href="javascript:void(0);" (click)="selecttabs = mytabs" *ngFor="let mytabs of mytab;trackBy: trackByFn" role="tab"
+                   class="nav-link" [class.active]="selecttabs === mytabs">{{ mytabs }}</a>
+              </div>
+              <div class="tab-content pt-32">
+                <div *ngIf="selecttabs === mytab[0]" class="tab-pane fade show active" role="tabpanel">
+                  <div class="form-group" [class.has-error]="isInvalidEmail">
+                    <label for="">Invitee</label>
+                    <div class="invite-result-cover" appAutoCloseOutsideClick (outsideClick)='inviteeListDisplay = false'>
+                      <input type="text" [(ngModel)]="searchInvitee" (ngModelChange)="selectEmpType($event)"
+                             autocomplete="off"
+                             (keydown)="enterInvitee($event)" placeholder="Add Invitee" id="event-invitee-search"
+                             class="form-control" [disabled]="inviteeType === 'invitee' && isEditMode">
+                      <span class="field-message text-danger" *ngIf="isInvalidEmail">
+                          <em class="icon icon-error mr-4"></em>
+                          Please enter valid email address.
+                      </span>
+                      <div class="invite-result-box" *ngIf="inviteeList.length>0 && !isInviteeSearchLoading" [class.d-none]="!inviteeListDisplay">
+                        <h4 class="mb-0 p-16 lh-20" *ngIf="inviteeList">{{inviteeList.length}} Results</h4>
+                        <div class="invite-result-overflow" malihu-scrollbar [scrollbarOptions]="scrollbarOptions">
+                          <div class="result-item" *ngFor="let invitee of inviteeList;trackBy: trackByFn;let i=index" [ngClass]="(invitee.showGrid)?'search-panel-open':''">
+                            <em class="icon icon-employees icon-color"></em>
+                            <div id="invitee-select-{{i}}" class="result-detail flex-fill cursor-pointer">
+                              <div class="search-panel-head pl-0">
+                                <div class="d-flex align-items-start" (click)="selectUser(invitee)">
+                                  <span [innerHTML]="invitee.lastName ? invitee.lastName + ', ' + invitee.firstName : invitee.firstName | highlightText : searchInvitee"></span>
+                                  <span *ngIf="f.eventType.value == consultationId && invitee.doNotSchedule" class="text-nowrap ml-8 sh-badge sh-badge-danger font-weight-medium">Do Not Schedule</span>
+                                  <span *ngIf="invitee.doNotContact" class="text-danger ml-8 d-flex align-items-center font-weight-medium small text-nowrap">
+                                    <i class="icon icon-close-fill mr-4 text-large mt-n3"></i>Do Not Contact</span>
+                                </div>
+                                <span class="arrow" (click)="invitee.showGrid=invitee.showGrid ?!invitee.showGrid:true">
+                                  <em class="icon icon-angle-down"></em>
+                                </span>
+                              </div>
+                              <div class="search-panel-body pl-0">
+                                <div class="d-flex justify-content-between pt-8">
+                                  <div class="mt-0 flex-fill" style="max-width: 60%;">
+                                    <span class="small helper-text d-block mb-4 font-weight-medium lh-16">
+                                      Email Address
+                                    </span>
+                                    <span class="d-block small lh-16">{{invitee.email}} </span>
+                                  </div>
+                                  <div class="mt-0 pl-20">
+                                    <span class="small helper-text d-block mb-4 font-weight-medium lh-16">
+                                      Primary Office
+                                    </span>
+                                    <span class="d-block small lh-16">{{invitee.primaryOffice}}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="invite-result-box"
+                           *ngIf="inviteeListDisplay && inviteeList && inviteeList?.length === 0 && !isInviteeSearchLoading">
+                        <div class="py-8 px-16">
+                          <h5 class="mb-8 mt-0">We couldn’t find anything matching your search.</h5>
+                          <p class="m-0">Try again with a different term.</p>
+                        </div>
+                      </div>
+                      <div class="invite-result-box" *ngIf="isInviteeSearchLoading">
+                        <div class="invite-result-overflow ">
+                          <app-search-loader [active]="isInviteeSearchLoading"
+                                             [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="guests-row" *ngIf="selectedInvite?.length > 0">
+                      <div class="guests-heading">
+                        <h5 class="mb-0"> {{selectedInvite.length}}
+                          {{(selectedInvite.length === 1) ? 'guest' : 'guests'}} </h5>
+                      </div>
+                      <div class="guests-list" *ngFor="let guest of selectedInvite; trackBy: trackByFn;let i = index">
+                        <div class="guests-item d-flex justify-content-between align-items-center">
+                          <div class="custom-control custom-checkbox pr-0" *ngIf="(!guest.isExternal || !guest.personEmail) && selectftabs === myfirsttab[1]"
+                               [ngClass]="guest.isOrganiser || guest.isHost ||  guest.isOptional ? 'mb-15' : 'mb-0'">
+                            <input class="custom-control-input" id="chk_event_type_{{guest.id}}" type="checkbox"
+                                   (ngModelChange)="toggleTimelineData($event, guest)" [ngModelOptions]="{standalone: true}"
+                                   [(ngModel)]="guest.checked">
+                            <label class="custom-control-label lh-18 add_color_{{guest.id}}"
+                                   for="chk_event_type_{{guest.id}}">
+                            </label>
+                          </div>
+                          <div class="custom-control custom-checkbox pr-0 mb-0" *ngIf="(guest.isExternal && guest.personEmail) && selectftabs === myfirsttab[1]">
+                            <input class="custom-control-input" id="chk_event_type_{{guest.personEmail}}" type="checkbox"
+                                   [ngModelOptions]="{standalone: true}"
+                                   (ngModelChange)="mangeColorOnCheckbox(guest.personEmail, guest.eventBorderColor)"
+                                   [(ngModel)]="guest.checked">
+                            <label class="custom-control-label lh-18 add_color_{{guest.personEmail}}"
+                                   for="chk_event_type_{{guest.personEmail}}">
+                            </label>
+                          </div>
+                          <div class="flex-fill">
+                            <div class="d-flex align-items-center justify-content-between">
+                              <h5 *ngIf="!guest.doNotContact">
+                                {{(guest?.firstName && guest?.lastName) ? guest?.firstName + ' ' + guest?.lastName : guest?.email ? guest?.email : guest?.companyName ? guest?.companyName : guest?.personEmail ? guest?.personEmail : guest?.userName}}
+                                <span>
+                                  <i *ngIf="guest.isOrganiser"> Organizer</i>
+                                  <i *ngIf="guest.isHost">Host</i>
+                                  <i *ngIf="guest.isOptional">Optional</i>
+                                  <i *ngIf="guest?.personEmail">External</i>
+                                  <i *ngIf="guest.doNotContact">Do Not Contact</i>
+                                  <i *ngIf="guest.doNotSchedule">Do Not Schedule</i>
+                                </span>
+                              </h5>
+                              <h5 *ngIf="guest.doNotContact">
+                                <div>
+                                  <span class="mb-2 text-ellipsis">
+                                    {{(guest?.firstName && guest?.lastName) ? guest?.firstName + ' ' + guest?.lastName : guest?.email ? guest?.email : guest?.companyName ? guest?.companyName : guest?.personEmail ? guest?.personEmail : guest?.userName}}
+                                  </span>
+                                  <div
+                                    class="text-danger d-flex align-items-center font-weight-medium small text-nowrap"><em
+                                    class="icon icon-close-fill mr-4 text-large mt-n3"></em>Do Not Contact</div>
+                                </div>
+                                <span><i>{{guest?.email}}</i></span>
+                                <span>
+                                  <i *ngIf="guest.isOrganiser"> Organizer</i>
+                                  <i *ngIf="guest.isHost">Host</i>
+                                  <i *ngIf="guest.isOptional">Optional</i>
+                                  <i *ngIf="guest?.personEmail">External</i>
+                                  <i *ngIf="guest.doNotSchedule">Do Not Schedule</i>
+                                </span>
+                              </h5>
+                              <div class="edit-close-guests position-relative py-0">
+                                <div class="d-flex align-items-center mt-2 lh-16" *ngIf="!isEditMode || inviteeType === 'hostorganiser'">
+                                  <a href="javascript:void(0);" appAutoCloseOutsideClick
+                                     (outsideClick)="onClickedOutside($event, i)" (click)="openMenu(i)"><em
+                                    class="icon icon-dot-verti icon-color"></em></a>
+                                  <a (click)="deleteInvitee(guest)" href="javascript:void(0);" class="ml-12"><em
+                                    class="icon icon-close icon-color"></em></a>
+                                </div>
+                                <div class="dropdown-menu dropdown-menu-right d-block mr-20 mt-4" *ngIf="currentIndex==i">
+                                  <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('host',i)" *ngIf="!guest.isHost">
+                                    Mark as Host
+                                  </a>
+                                  <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('host',i)" *ngIf="guest.isHost">
+                                    Remove as Host
+                                  </a>
+                                  <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('optional',i)" *ngIf="!guest.isOptional">
+                                    Mark as Optional
+                                  </a>
+                                  <a class="dropdown-item" href="javascript:void(0);" (click)="addOptions('optional',i)" *ngIf="guest.isOptional">
+                                    Mark as Required
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="d-flex align-items-center proposal-hover position-relative" *ngIf="guest.proposedEvent">
+                              <span class="small font-weight-medium text-primary proposal-text">Proposal: {{guest.getProposalTimeString}}</span>
+                              <span class="proposal-delete" *ngIf="!guest.proposedEvent?.isAccepted" (click)="deleteProposal(guest.proposedEvent)">
+                                <em class="icon icon-remove text-primary cursor-pointer"></em>
+                              </span>
+                            </div>
+                            <div class="small helper-text mt-1" *ngIf="guest?.proposedEvent?.isAccepted">Save event to accept</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="" class="mb-8">Select Invitees</label>
+                    <div class="custom-control custom-checkbox pr-0">
+                      <input class="custom-control-input" name="employee" [(ngModel)]="employee"
+                             id="select-invitee-employee"
+                             (ngModelChange)="checkInviteeType($event, 'employee')" id="employee" type="checkbox">
+                      <label class="custom-control-label" for="employee">Employee</label>
+                    </div>
+                    <div class="custom-control custom-checkbox  pr-0">
+                      <input class="custom-control-input" name="client" [(ngModel)]="client" id="select-invitee-client"
+                             (click)="checkInviteeType($event, 'client')" id="client" type="checkbox">
+                      <label class="custom-control-label" for="client">Client</label>
+                    </div>
+                    <div class="custom-control custom-checkbox pr-0">
+                      <input class="custom-control-input" name="potentialClient" [(ngModel)]="potentialClient"
+                             id="select-invitee-potential-Client"
+                             (click)="checkInviteeType($event, 'potentialClient')" id="potential" type="checkbox">
+                      <label class="custom-control-label" for="potential">Potential Client</label>
+                    </div>
+                    <div class="custom-control custom-checkbox pr-0">
+                      <input class="custom-control-input" name="associations" [(ngModel)]="associations"
+                             id="select-invitee-client-associations"
+                             (click)="checkInviteeType($event, 'associations')" id="associations" type="checkbox">
+                      <label class="custom-control-label" for="associations">Client Associations</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end">
+      <div class="btn-group">
+        <button type="button" *ngIf="!isEditMode && type=='calendar'" [routerLink]="['/calendar']"
+                class="btn btn-light" id="cancel-event-btn">Cancel
+        </button>
+        <button type="button" *ngIf="isEditMode && type=='calendar'" [routerLink]="['/calendar']"
+                class="btn btn-light" id="cancel-event-edit-btn">Cancel
+        </button>
+        <button type="button" *ngIf="isEditMode && type!=='calendar'" (click)="close()"
+                class="btn btn-light" id="cancel-event-edit-close-btn">Cancel
+        </button>
+        <button type="button" *ngIf="!isEditMode && type!=='calendar'" (click)="close()"
+                class="btn btn-light" id="cancel-event-close-btn">Cancel
+        </button>
+        <button type="button" (click)="createEvent()" *ngIf="!isEditMode"
+                class="btn btn-primary " id="save-event-btn">Save
+          Event
+        </button>
+        <button type="button" (click)="createEvent('update')" class="btn btn-primary "
+                *ngIf="isEditMode" id="save-event-edit-btn">Save
+          Changes
+        </button>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]="saveLoading"></app-loader>
+</div>
+<ng-template #CustomHoursBeforEvent let-modal>
+  <form [formGroup]="customeHoursBeforEventForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Custom Travel Time</h3>
+      <button type="button" class="close"
+              (click)="modal.dismiss('Cross click');eventForm.patchValue({beforeTravelTimeHours:null});"
+              aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="row gutter-16">
+        <div class="col-6" [class.has-error]="fBeforEvent.hours.errors && formBeforEvent">
+          <input type="text" class="form-control" id="before-travel-time-custom-hours" (keypress)="checkNumber($event)"
+                 (keyup)="validateBeforHours()"
+                 (focusout)="addHoursLabelBeforeEvent(customeHoursBeforEventForm.value.hours)" placeholder="hours"
+                 formControlName="hours">
+          <span class="field-message text-danger" *ngIf="formBeforEvent && fBeforEvent.hours.errors">
+          <span *ngIf="fBeforEvent.hours.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required hour.
+          </span>
+        </span>
+        </div>
+        <div class="col-6 custom-control custom-checkbox mb-4"
+             [class.has-error]="fBeforEvent.minutes.errors && formBeforEvent">
+          <input type="text" class="form-control" id="before-travel-time-custom-minutes"
+                 (keypress)="checkNumber($event)" (keyup)="validateBeforMinutes()"
+                 (focusout)="addMinutesLabelBeforeEvent(customeHoursBeforEventForm.value.minutes)" placeholder="minutes"
+                 formControlName="minutes">
+          <span class="field-message text-danger" *ngIf="formBeforEvent && fBeforEvent.minutes.errors">
+          <span *ngIf="fBeforEvent.minutes.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required minute.
+          </span>
+        </span>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light"
+              (click)="modal.dismiss('Cross click');eventForm.patchValue({beforeTravelTimeHours:null});"
+              id="before-travel-time-custom-cancel-btn">Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" *ngIf="!customeHoursBeforEventForm.valid"
+              (click)="saveCustomHoursBeforEvent();" id="before-travel-time-custom-save-btn">Save
+      </button>
+      <button type="submit" class="btn btn-primary" *ngIf="customeHoursBeforEventForm.valid"
+              (click)="saveCustomHoursBeforEvent();modal.dismiss('Cross click')"
+              id="before-travel-time-custom-save-btn-valid">Save
+      </button>
+    </div>
+  </form>
+</ng-template>
+<ng-template #CustomHoursAfterEvent let-modal>
+  <form [formGroup]="customeHoursAfterEventForm">
+    <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Custom Travel Time</h3>
+      <button type="button" class="close"
+              (click)="modal.dismiss('Cross click'); eventForm.patchValue({afterTravelTimeHours:null});"
+              aria-label="Close">
+        <em class="icon icon-close"></em>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="row gutter-16">
+        <div class="col-6" [class.has-error]="fAfterEvent.hours.errors && formAfterEvent">
+          <input type="text" class="form-control" id="after-travel-time-custom-hours" placeholder="hours"
+                 (keypress)="checkNumber($event)"
+                 (focusout)="addHoursLabelAfterEvent(customeHoursAfterEventForm.value.hours)"
+                 (keyup)="validateAfterHours()" formControlName="hours">
+          <span class="field-message text-danger" *ngIf="formAfterEvent && fAfterEvent.hours.errors">
+          <span *ngIf="fAfterEvent.hours.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required hour.
+          </span>
+        </span>
+        </div>
+        <div class="col-6 custom-control custom-checkbox mb-4"
+             [class.has-error]="fAfterEvent.minutes.errors && formAfterEvent">
+          <input type="text" class="form-control" id="after-travel-time-custom-minutes" placeholder="minutes"
+                 (keypress)="checkNumber($event)"
+                 (focusout)="addMinutesLabelAfterEvent(customeHoursAfterEventForm.value.minutes)"
+                 (keyup)="validateAfterMinutes()" formControlName="minutes">
+          <span class="field-message text-danger" *ngIf="formAfterEvent && fAfterEvent.minutes.errors">
+          <span *ngIf="fAfterEvent.minutes.errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            Required minute.
+          </span>
+        </span>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light"
+              (click)="modal.dismiss('Cross click');eventForm.patchValue({afterTravelTimeHours:null});"
+              id="after-travel-time-custom-cancel-btn">Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" *ngIf="!customeHoursAfterEventForm.valid"
+              (click)="saveCustomHoursAfterEvent();" id="after-travel-time-custom-save-btn">Save
+      </button>
+      <button type="submit" class="btn btn-primary" *ngIf="customeHoursAfterEventForm.valid"
+              (click)="saveCustomHoursAfterEvent();modal.dismiss('Cross click')"
+              id="after-travel-time-custom-save-btn-valid">Save
+      </button>
+    </div>
+  </form>
+</ng-template>
+<ng-template #recurringDataUpdate let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Recurring Event</h3>
+    <button type="button" class="close" (click)="modal.dismiss()" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    {{this.errorData.confirm_proposal}}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-primary"
+            (click)="modal.close(2)"
+            id="after-travel-time-custom-cancel-btn">
+      All future events
+    </button>
+    <button type="submit" class="btn btn-primary"
+            (click)="modal.close(1);" id="after-travel-time-custom-save-btn">
+      This event only
+    </button>
+  </div>
+</ng-template>

@@ -1,0 +1,43 @@
+<div *ngIf="isCustomBillingRate && !rateTables.length">
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Rate Table Required</h3>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-error text-danger"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">You've selected to customize rates, but did not set a rate table.</p>
+        <p class="m-0">You must either <strong>Set Rate Table</strong> or revert back to the default settings of using employee's base rates before saving.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-primary" id="use-employee" (click)="useEmployeeBaseRate()">Use Employee's Base Rate</button>
+    <button type="button" class="btn btn-primary" id="set-table" (click)="setRateTable()">Set Rate Table</button>
+  </div>
+</div>
+<div *ngIf="!isCustomBillingRate || (isCustomBillingRate && rateTables.length)">
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Unsaved Changes</h3>
+    <button type="button" class="close" (click)="closeModal()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning"></em>
+      <div class="lh-20 ml-16">
+        <p class="m-0">
+          Are you sure you want to navigate away without saving these Rate Table changes?
+          This will remove any edits you’ve made.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="closeModal()" id="cancel-rate">Cancel</button>
+    <button type="button" class="btn btn-primary" id="save-rate" (click)="closeModalWithoutSave()">Yes, continue without saving</button>
+  </div>
+</div>
+
+

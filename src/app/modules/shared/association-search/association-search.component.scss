@@ -1,0 +1,19 @@
+
+  .custom-table {
+    .datatable-scroll {
+      vertical-align: middle;
+      overflow-x: hidden;
+    }
+  }
+
+  .ngx-datatable.scroll-horz .datatable-body {
+    max-height: 400px;
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+  }
+
+.email-cell {
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+}

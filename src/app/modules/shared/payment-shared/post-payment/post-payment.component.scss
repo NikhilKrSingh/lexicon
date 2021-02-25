@@ -1,0 +1,47 @@
+.display-not-visible {
+  height: 0;
+  overflow: hidden;
+}
+
+@print {
+  .display-not-visible {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.checkPayment {
+  border-radius: 5px;
+  background-color: #f4f7f9;
+  margin-left: 11px;
+  padding: 5px 0;
+}
+
+.lblPaymentCheck {
+  margin-top: 11px !important;
+}
+
+.lblPaymentCheckErr {
+  float: right;
+}
+
+.lblPayementCheckDanger {
+  border-color: #f44236 !important;
+  background-color: #fdd9d7 !important;
+  border: solid;
+}
+
+.lblViewCheckImage {
+  float: right;
+  color: blueviolet;
+}
+
+.custom-radio{
+  .tooltip-inner{
+    min-width: 246px;
+  }
+}
+
+.custom-radio-position {
+  top: -3px;
+}

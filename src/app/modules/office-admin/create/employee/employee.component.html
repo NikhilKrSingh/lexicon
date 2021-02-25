@@ -1,0 +1,230 @@
+<div class="card">
+  <div class="card-body">
+    <h2>Employees</h2>
+    <div class="d-flex align-items-center justify-content-between mb-16">
+      <div class="header-search w-100">
+        <form action="#" class="small-search">
+          <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" name="q" autocomplete="off" placeholder="Search name or email to add employee" [(ngModel)]="searchString" (keyup)="updateFilter($event)" [disabled]="loading" id="search-add-employee">
+            <button class="btn" type="submit" id="search-btn">Search</button>
+
+            <div class="search-result-box pt-8 pb-8 pr-8" appAutoCloseOutsideClick
+            (outsideClick)="onsearchResultOutsideClick($event)"  *ngIf="showSearchBox">
+              
+              <div class="search-result" slimScroll [options]="opts" [scrollEvents]="scrollEvents">
+                <div class="mt-6 mb-6 pr-16 pl-16" *ngIf="filterEmployeeList.length==0 && !isSearchLoading">
+                  <h5><b>We couldn't find anything matching your search.</b></h5>
+                  <p>Try again with a different term.</p>
+                </div>
+                <ng-container *ngIf="filterEmployeeList && filterEmployeeList.length">
+                <h4 class="d-inline-block mt-8 mb-8 pr-16 pl-16">{{filterEmployeeList.length}} results</h4>
+
+                <div class="result-row d-flex p-16" *ngFor="let item of filterEmployeeList; trackBy: trackByFn;let i = index"
+                  (click)="selectEmployee(item)" id="employe-data-index-{{i}}">
+                  <div class="result-icon pr-32">
+                    <i class="icon icon-employees"></i>
+                  </div>
+                  <div class="result-content d-flex flex-column flex-fill">
+                    <div class="result-title mb-8">
+                      <span id="searched-employee-fullname"> {{(item.firstName) ? item.lastName + ', ' + item.firstName : item.lastName}}</span>
+                    </div>
+                    <div class="result-content-row d-flex align-items-center">
+                      <div class="row w-100">
+                        <div class="w-60">
+                          <span class="small helper-text d-block mb-8">Email</span> <span id="searched-employee-email">{{item.email}}</span>
+                        </div>
+                        <div class="w-25">
+                          <span class="small helper-text d-block mb-8">Job Title</span> <span id="searched-employee-jobtitle">{{item.jobTitle}}</span>
+                        </div>
+                        <div class="w-25">
+                          <span class="small helper-text d-block mb-8">Status</span> <span id="searched-employee-status">{{(!item.isActivated && item.isVisible) ? 'Pending' : (item.isActivated && item.isVisible) ? 'Active' : 'Inactive'}}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="custom-table">
+      <ngx-datatable #table class="material common-table" [rows]="gridEmployeeList" [columnMode]="ColumnMode.force"
+        [headerHeight]="50" [class.no-data]="!gridEmployeeList.length" [messages]="messages" rowHeight="auto" id="employee-listing-table">
+        <ngx-datatable-column [resizeable]="false" prop="lastName" name="Name" [width]="183">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            {{(row.lastName) ? row.lastName + ', ' + row.firstName : row.firstName}} </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="230"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [width]="140"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="officeAssociation" name="Office Association" [width]="180"> </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" name="Status" [width]="113">
+          <ng-template let-value="value" ngx-datatable-cell-template>Active </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" name="Action" prop="id" [headerClass]="'text-right'" [sortable]="false"
+          name="Actions" [width]="100">
+          <ng-template let-rowIndex="rowIndex" let-id="value" ngx-datatable-cell-template>
+            <div class="d-flex justify-content-end">
+              <button class="btn btn-sm" (click)="delete(id)" id="delete-employee-index-{{rowIndex}}"><em class='icon icon-remove'></em> </button>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </div>
+    <div class="info-block mt-24" [hidden]="!gridEmployeeList?.length">
+      <h2>Responsible Attorneys</h2>
+      <div class="row">
+        <div class="col-auto">
+          <div class="form-group">
+            <label>List Type</label>
+            <div class="custom-control custom-checkbox mt-8 pr-8">
+              <input type="checkbox" class="custom-control-input" [(ngModel)]="responsibleAttorneyType" (change)="listRank($event, 'Responsible')" id="rank" checked>
+              <label class="custom-control-label" for="rank">Ranked</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label>Visibility</label>
+            <select class="custom-select" [(ngModel)]="responsibleVisibilityId" id="visibility-select">
+              <option value="1">Administrators and Schedulers Only</option>
+              <option value="2">All Employee</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless" id="responsible-attorney-tbl">
+            <thead>
+              <tr>
+                <th *ngIf="responsibleAttorneyType">Ranking</th>
+                <th>Name</th>
+                <th>Email Address</th>
+                <th>Job Title</th>
+                <th>Office Association</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="responsible-attorneys-sortable">
+              <tr *ngFor="let at of attorneysList;trackBy: trackByFn;let i=index" [class.row-disable]="at.isDisabled" id="responsible-attorneys-index-{{i}}">
+                <td *ngIf="responsibleAttorneyType"> {{at?.rank !== -1 ? at?.rank : '-'}}</td>
+                <td>{{ (at.lastName) ? at.lastName + ', '+ at.firstName : at.firstName }}</td>
+                <td>{{at?.email}}</td>
+                <td>{{at?.jobTitle}}</td>
+                <td>{{at?.officeAssociation}}</td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span *ngIf="at?.rank != -1">
+                      <button class="btn btn-sm" type="button" (click)="removeAttorneyRank(i)" id="remove-rank-index-{{i}}"><em
+                          class='icon icon-eye-slash'></em>
+                      </button>
+                    </span>
+                    <span *ngIf="at?.rank == -1">
+                      <button class="btn btn-sm" type="button" (click)="setRank('attorneysList', i)" id="set-rank-{{i}}">
+                        <em class='icon icon-eye'></em>
+                      </button>
+                    </span>
+                    <span>
+                      <button class="btn btn-sm" draggable="true" [disabled]="at.isDisabled"
+                        (mouseover)="startStorting($event)"
+                        (mouseout)="endSorting($event)" type="button" id="attorney-sorting-btn-{{i}}">
+                        <em class='icon icon-move-2'></em>
+                      </button>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="attorneysList.length === 0" id="no-data-found-attorneylist">
+                <td colspan="7" class="text-center">No data found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-block mt-24" [hidden]="!gridEmployeeList?.length">
+      <h2>Consult Attorneys</h2>
+      <div class="row">
+        <div class="col-auto">
+          <div class="form-group">
+            <label>List Type</label>
+            <div class="custom-control custom-checkbox mt-8 pr-8">
+              <input type="checkbox" class="custom-control-input" [(ngModel)]="consultAttorneyType" (change)="listRank($event, 'Consult')" id="consult-rank" checked>
+              <label class="custom-control-label" for="consult-rank">Ranked</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label>Visibility</label>
+            <select class="custom-select" [(ngModel)]="consultVisibilityId" id="visibility-c-attorney-select">
+              <option value="1">Administrators and Schedulers only</option>
+              <option value="2">All Employees</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="custom-table">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless" id="consult-attorneys-tbl">
+            <thead>
+              <tr>
+                <th *ngIf="consultAttorneyType">Ranking</th>
+                <th>Name</th>
+                <th>Email Address</th>
+                <th>Job Title</th>
+                <th>Office Association</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="consult-attorneys-sortable-add">
+              <tr *ngFor="let at of consultAttorneyList;trackBy: trackByFn;let i=index" [class.row-disable]="at.isDisabled" id="consult-attorney-index-{{i}}">
+                <td *ngIf="consultAttorneyType"> {{at?.consultRank !== -1 ? at?.consultRank : '-'}}</td>
+                <td>{{ (at.lastName) ? at.lastName + ', '+ at?.firstName : at?.firstName }}</td>
+                <td>{{at?.email}}</td>
+                <td>{{at?.jobTitle}}</td>
+                <td>{{at?.officeAssociation}}</td>
+                <td class="text-right">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span *ngIf="at?.consultRank != -1">
+                      <button class="btn btn-sm" type="button" (click)="removeAttorneyConRank(i)" id="remove-attorney-con-index-{{i}}">
+                        <em class='icon icon-eye-slash'></em>
+                      </button>
+                    </span>
+                    <span *ngIf="at?.consultRank == -1">
+                      <button class="btn btn-sm" type="button" (click)="setRank('consultAttorneyList', i)" id="remove-attorney-con-setrank-index-{{i}}">
+                        <em class='icon icon-eye'></em>
+                      </button>
+                    </span>
+                    <span>
+                      <button class="btn btn-sm" [disabled]="at.isDisabled" draggable="true"
+                        (mouseover)="startStortingCon($event)" (mouseout)="endSortingCon($event)"
+                        type="button" id="remove-attorney-con-sorting-index-{{i}}">
+                        <em class='icon icon-move-2'></em>
+                      </button>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="consultAttorneyList.length === 0" id="no-data-found-consult-attorneylist">
+                <td colspan="7" class="text-center">No data found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-end">
+  <div class="btn-group">
+    <button type="button" class="btn btn-light" (click)='prev()' id="cancel-employee-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='next()' id="next-employee-btn">Next</button>
+
+  </div>
+</div>

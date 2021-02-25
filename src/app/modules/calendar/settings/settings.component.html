@@ -1,0 +1,209 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Settings</li>
+    </ol>
+    <div class="heading">
+      <h1>Settings</h1>
+    </div>
+    <div>
+      <div>
+        <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+          <a href="javascript:void(0);" (click)="selectTab(mytabs)" *ngFor="let mytabs of alltabs; trackBy: trackByFn;let i = index;" role="tab"
+            class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs" id="tab-{{i}}">{{ mytabs }}</a>
+        </div>
+        <div class="card tlr-0">
+          <div class="card-body p-0">
+            <div class="tab-content p-32 min-h-380">
+              <div *ngIf="selecttabs1 === alltabs[0]" class="tab-pane fade show active" role="tabpanel">
+                <h2 class="mb-8">Calendar Settings</h2>
+                <p *ngIf="calendarArr.length">Users can update their external calendar connection on-demand from their
+                  settings page.</p>
+                <h3 *ngIf="calendarArr.length">Connected Calendars</h3>
+                <div class="calsett-row" *ngIf="calendarArr.length">
+                  <ng-container *ngFor="let cal of calendarArr;trackBy :trackByFn;let i = index;">
+                    <div class="calsett-item d-flex align-items-center justify-content-between">
+                      <div class="calsett-cap d-flex align-items-center justify-content-start">
+                        <figure>
+                          <img [src]="cal.icon" alt="" width="30px;">
+                        </figure>
+                        <p>{{(cal.authorize) ? cal.connected : cal.name}}<br><small>{{cal.email}}</small></p>
+                      </div>
+                      <div class="calsett-btn">
+                        <em class="lbl-txt" *ngIf="cal.authorize">Authorized <i
+                            class="icon icon-check-circle icon-success "></i></em>
+                        <a class="btn btn-light" *ngIf="!cal.authorize" [class.disabled]="existCalendar"
+                          href="{{authUrl+'&provider_name='+cal.code}}" (click)="selectAuthorize()" id="select-autorize-index-{{i}}">Authorize</a>
+                        <a class="btn btn-light" (click)="revoke(cal)" *ngIf="cal.authorize"
+                          href="javascript:void(0);" id="disconnect-index-{{i}}">Disconnect</a>
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+                <div class="info-block pt-24">
+                  <h3 class="mb-16">Time Zone</h3>
+                  <div class="row">
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label for="">Time Zone</label>
+                        <ng-select [items]="timeZones" placeholder="Select Time Zone"
+                          [(ngModel)]='calendarSettings.timeZoneId' (ngModelChange)="onTimeZoneChange($event)"
+                          [bindValue]="'id'" [bindLabel]="'name'" [clearable]='false' [selectOnTab]="true" id="timezone-select">
+                        </ng-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-block pt-32">
+                  <app-work-day-and-hours headerText='Personal Work Days & Hours' [calendarSettings]='calendarSettings'
+                    [personId]='userDetails.id' (save)='saveWorkingHours($event)'></app-work-day-and-hours>
+                </div>
+                <div class="info-block pt-32">
+                  <h3 class="mb-16">Event Notifications</h3>
+                  <div class="row">
+                    <div class="col-8">
+                      <div class="row">
+                        <div class="col-6">
+                          <div class="form-group">
+                            <label for="">Upcoming events with travel time</label>
+                          </div>
+                          <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                              <input class="custom-control-input" id="enable" type="checkbox"
+                                [ngModel]='calendarSettings.eventWithTravelEnable'
+                                (ngModelChange)="withTravelChange($event)">
+                              <label class="custom-control-label" for="enable">Enable</label>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label for="">Quantity</label>
+                                <input type="text" class="form-control" mask='00'
+                                  [(ngModel)]='calendarSettings.eventWithTravelQuantity' id="q-u-with-t">
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label for="">Units</label>
+                                <ng-select [items]="eventNotificationUnits" placeholder="Select"
+                                  [(ngModel)]='calendarSettings.eventWithTravelUnits' [bindValue]="'code'"
+                                  [bindLabel]="'name'" [clearable]='false' [selectOnTab]="true"
+                                  (change)="selectUnits()" id="u-u-with-t">
+                                </ng-select>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="form-group">
+                            <label for="">Upcoming events without travel time</label>
+                          </div>
+                          <div class="form-group">
+                            <div class="custom-control custom-checkbox pr-0">
+                              <input class="custom-control-input" id="enableq" type="checkbox"
+                                [ngModel]='calendarSettings.eventWithoutTravelEnable'
+                                (ngModelChange)="withoutTravelChange($event)">
+                              <label class="custom-control-label" for="enableq">Enable</label>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label for="">Quantity</label>
+                                <input type="text" class="form-control" mask='00'
+                                  [(ngModel)]='calendarSettings.eventWithoutTravelQuantity' id="q-u-without-t">
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="form-group">
+                                <label for="">Units</label>
+                                <ng-select [items]="eventNotificationUnits" placeholder="Select"
+                                  [(ngModel)]='calendarSettings.eventWithoutTravelUnits' [bindValue]="'code'"
+                                  [bindLabel]="'name'" [clearable]='false' [selectOnTab]="true" id="u-u-without-t">
+                                </ng-select>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="selecttabs1 === alltabs[1]" class="tab-pane fade show active" role="tabpanel">
+                <h2 class="mb-28">Set Email Notifications</h2>
+                <div class="custom-control custom-checkbox pr-0 mb-40">
+                  <input class="custom-control-input" id="po-1" type="checkbox" [value]="true"
+                    [(ngModel)]="employee.isInheritNotification" (ngModelChange)='changeNotificationFlag()'>
+                  <label class="custom-control-label lh-20" for="po-1">Inherit Defaults</label>
+                </div>
+                <div class="email-notify-wrap">
+                  <div class="email-notify-block" *ngFor="let emailTemplate of groupByEmailTemplateList;trackBy: trackByFn;let i = index;">
+                    <h4 class="mb-8 mt-0">{{emailTemplate.templateGroupName}}</h4>
+                    <div class="custom-table">
+                      <div class="table-responsive">
+                        <table class="table table-striped table-borderless">
+                          <thead>
+                            <tr>
+                              <th>Description</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <ng-container
+                              *ngFor="let template of emailTemplate.templateGroupData;trackBy: trackByFn;let templateIndex = index;">
+                              <tr *ngIf='!template.isReadOnly && !employee.isInheritNotification'>
+                                <td>{{template.description}}</td>
+                                <td>
+                                  <div class="toggle-switch">
+                                    <label>
+                                      <input type="checkbox" [value]="true" [(ngModel)]="template.isVisible"
+                                        [disabled]="template.isReadOnly">
+                                      <span class="switch-style"></span>
+                                    </label>
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr *ngIf='employee.isInheritNotification'>
+                                <td>{{template.description}}</td>
+                                <td>
+                                  <div class="toggle-switch">
+                                    <label>
+                                      <input type="checkbox" [value]="true" checked disabled>
+                                      <span class="switch-style"></span>
+                                    </label>
+                                  </div>
+                                </td>
+                              </tr>
+                            </ng-container>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <app-loader [active]='emailTemplateLoading && !loading'></app-loader>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="d-flex justify-content-end">
+      <div class="btn-group" *ngIf="selecttabs1 === alltabs[0]">
+        <button type="button" class="btn btn-light" routerLink='/dashboard' id="cancel-calendar">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)='saveChanges()'
+          [disabled]='!calendarSettings?.personId || disable' id="save-calendar">Save Changes</button>
+      </div>
+      <div class="btn-group" *ngIf="selecttabs1 === alltabs[1]">
+        <button type="button" class="btn btn-light" routerLink='/dashboard' id="cancel-email-notification">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]='emailDisable' (click)='saveEmailNotifications()' id="save-email-notification">Save
+          Changes</button>
+      </div>
+    </div>
+  </div>
+  <app-loader [active]='loading || calendarLoading || syncing'></app-loader>
+</div>

@@ -1,0 +1,22 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">Unsaved Changes</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="d-flex align-items-start missing-data">
+    <em class="icon icon-warning text-warning"></em>
+    <div class="lh-20 ml-16">
+      <p *ngIf="!isEditChargeDialog" class="m-0">Are you sure you want to continue without saving these changes?
+        This will remove any edits you’ve made.
+      </p>
+      <p *ngIf="isEditChargeDialog" class="m-0">Are you sure you want to leave this page? Any charge you have not changed will remain in WIP and will be billed as part of the next, regularly scheduled billing cycle.
+      </p>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="continueWithoutSaving();" id="continue-without-saving-btn">{{(isEditChargeDialog) ? 'Yes, Leave Page' : 'Yes, continue without saving'}}</button>
+</div>

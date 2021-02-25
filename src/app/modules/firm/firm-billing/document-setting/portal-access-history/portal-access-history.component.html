@@ -1,0 +1,92 @@
+<h2 class="mb-24">Portal Access History</h2>
+<div class="header-search flex-fill d-flex mb-24">
+    <form action="#" class="small-search">
+        <div class="header-search-wrapper">
+            <input type="text" class="form-control search-input" name="q1" id="q1"
+            placeholder="Search by email address, or IP address..." required="" [(ngModel)]="searchTerm" (keyup)="applyFilter($event)">
+            <button class="btn" type="submit">Search</button>
+        </div>
+    </form>
+</div>
+<div class="row gutter-16">
+    <div class="col-3">
+        <div class="form-group">
+            <label>Type</label>
+            <app-multiselect-dropdown [title]="title" [selections]="selectedType" [displaySubItem]="typeList"
+            [filterName]="filterName" (onSelectionChanged)="getSelectedType($event)"
+            (clearFilter)="clearFilter('type')" (applyFilter)="applyFilter()" id="type-multi"></app-multiselect-dropdown>
+        </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group date-picker">
+        <label>Date/Time Range</label>
+        <app-date-picker [isNgModel]='true' [(data)]='startDate' (dataChange)='applyFilter()' id="date-time-start"></app-date-picker>
+        
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group date-picker margin-top-20">
+        <app-date-picker [isNgModel]='true' [(data)]='endDate' [minDate]="startDate" (dataChange)='applyFilter()' id="date-time-end"></app-date-picker>
+        
+      </div>
+    </div>
+</div>
+<div class="custom-table">
+    <div class="custom-table matter-list position-relative">
+      <ngx-datatable #table class="material common-table no-min-height" [class.matter-no-data]="historyList?.length === 0"
+        [rows]="historyList" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight"
+        [messages]="messages" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber" [limit]="page.size"
+        [scrollbarH]="true" [sorts]="[{prop: 'name', dir: 'asc'}]" (sort)="updateDatatableFooterPage()" id="historylist-tbl">
+        <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [sortable]="true" [width]="300">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="type" name="Type" [sortable]="true" [width]="100">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="ipaddress" name="IP Address" [sortable]="true">
+        </ngx-datatable-column>
+        <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Date/Time" [sortable]="true" [width]="100">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+            <strong>{{row.lastUpdated | date: 'MMM.  dd, yyyy'}}</strong><br>
+            {{row.lastUpdated | date:'hh:mm'}}{{ row.lastUpdated | date : 'a' | lowercase }}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-footer>
+          <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+            let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+            <div class="d-flex justify-content-between flex-fill">
+              <div class="d-flex align-items-center">
+                <div class="table-items d-flex align-items-center mr-36">
+                  Items per page:
+                  <div class=" ml-8">
+                    <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                      <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                    </select>
+                  </div>
+                </div>
+                <span>
+                  {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                  {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                  {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                </span>
+              </div>
+  
+              <div class="d-flex align-items-center">
+                <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                  <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                    of {{page.totalPages}}</option>
+                </select>
+                <div class="ml-8">
+                  <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                    [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                    [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                    [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                    (change)="table.onFooterPage($event);pageChange($event)">
+                  </datatable-pager>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </ngx-datatable-footer>
+      </ngx-datatable>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+  </div>

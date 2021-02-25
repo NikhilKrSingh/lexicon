@@ -1,0 +1,69 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)">Admin Settings</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/access-management/list']">Groups</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Group Audit History</li>
+    </ol>
+    <div class="heading">
+      <h1>Group Audit History</h1>
+    </div>
+    
+    <div class="card">
+      <div class="card-body">
+        <div class="custom-table">
+          <div class="table-responsive">
+            <ngx-datatable #auditHistory class="material common-table no-min-height" [rows]="rows" [columnMode]="ColumnMode.force"
+              [headerHeight]="50" [footerHeight]="footerHeight" [messages]="'No rows found'" rowHeight="auto"
+              [count]="page.totalElements" [offset]="page.pageNumber" [scrollbarH]="true" [limit]="page.size" id="audit-history-tbl">
+              <ngx-datatable-column [resizeable]="false" prop="bandName" name="EventType"></ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="personName" name="Created By"></ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="createdTime" name="Created At"></ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="description" name="History"> </ngx-datatable-column>
+              <ngx-datatable-footer>
+                <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                  let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                  <div class="d-flex justify-content-between flex-fill">
+                    <div class="d-flex align-items-center">
+                      <div class="table-items d-flex align-items-center mr-36">
+                        Items per page:
+                        <div class=" ml-8">
+                          <select class="custom-select border-less" [formControl]="pageSelector"
+                            (change)="changePageSize()">
+                            <option *ngFor="let limit of limitArray; trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span>
+                          {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                          {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+                      </span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <select class="custom-select border-less" [(ngModel)]="pangeSelected" (change)="changePage()">
+                        <option *ngFor='let num of page.totalPages | counterPipe; trackBy: trackByFn;let i= index' [value]="i+1">
+                          Page {{ i+1 }} of {{page.totalPages}}
+                        </option>
+                      </select>
+                      <div class="ml-8">
+                        <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                          [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                          [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                          [page]="curPage" [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                          (change)="table.onFooterPage($event);pageChange($event)">
+                        </datatable-pager>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ngx-datatable-footer>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="loading"></app-loader>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

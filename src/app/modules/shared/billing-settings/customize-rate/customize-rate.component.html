@@ -1,0 +1,40 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Customize Rate</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="form-group">
+    <label>Rate Code</label>
+    <input type="text" class="form-control" [value]="rate?.code" disabled id="rate-code">
+  </div>
+  <div class="form-group">
+    <label>Rate Description</label>
+    <input type="text" class="form-control" [value]="rate?.description" disabled id="rate-description">
+  </div>
+  <div class="form-group">
+    <label>Original Rate</label>
+    <input type="text" class="form-control" [value]="rate?.rateAmount | currency : 'USD' : 'symbol' : '1.2-2'" disabled id="original-rate">
+  </div>
+  <div class="form-group" [class.has-error]='customRateError.customRate'>
+    <label>Custom Rate <sup>*</sup></label>
+    <input type="text" class="form-control" placeholder="Enter custom rate" prefix="$" mask="separator.2" thousandSeparator="," [(ngModel)]='customRate' id="custom-rate">
+    <app-validation-message [errorMessage]='customRateError.customRateMessage' *ngIf='customRateError.customRate'>
+    </app-validation-message>
+  </div>
+  <div class="form-group position-relative" [class.has-error]='customRateError.changeNotes'>
+    <label class="d-flex justify-content-between char-limit">
+      <span>Change Note (optional)</span>
+      <span> {{changeNotes?.length || 0}}/1000</span>
+    </label>
+    <textarea class="form-control min-h-180" placeholder="Enter Change notes" [(ngModel)]="changeNotes" maxlength='1000' id="change-notes"></textarea>
+    <app-validation-message [errorMessage]='customRateError.changeNotesMessage'
+      *ngIf='customRateError.changeNotes'>
+    </app-validation-message>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" id="save-changes">Save Changes</button>
+</div>

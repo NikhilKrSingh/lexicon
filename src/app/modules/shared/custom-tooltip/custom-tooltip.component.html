@@ -1,0 +1,22 @@
+<ng-container *ngIf='text; else noText'>
+  <ng-container *ngIf='text?.length < maxLength'>
+    <span> {{text}} </span>
+  </ng-container>
+  <div class="d-inline-flex justify-content-between" *ngIf='text?.length >= maxLength'>
+    <div class="info-hover position-relative">
+      <a href="javascript:void(0)" class="text-decoration">
+        <span>{{text?.slice(0, maxLength - 3)}}...</span>
+      </a>
+      <div class="tooltip bs-tooltip-{{position}}" role="tooltip">
+        <div class="arrow"></div>
+        <div class="tooltip-inner tooltip-lg">
+          <p>{{text}} </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #noText>
+  <span></span>
+</ng-template>

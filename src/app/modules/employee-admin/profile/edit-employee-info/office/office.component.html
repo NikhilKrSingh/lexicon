@@ -1,0 +1,40 @@
+
+<div class="modal-header d-block">
+  <h3 class="modal-title">Edit Offices</h3>
+  <button type="button" class="close" (click)="dismiss('Cross click')" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body" *ngIf='employee'>
+  <div class="form-group" [class.has-error]="!primaryOffice && formSubmitted">
+    <label>Primary Office <sup>*</sup></label>
+    <ng-select [items]="officeList" placeholder="Primary Office" (change)='onPrimaryOfficeChange()'
+      [(ngModel)]="primaryOffice" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'"
+      [notFoundText]="'No record found'" id="office-select" [clearable]="false">
+    </ng-select>
+    <span class="field-message text-danger" *ngIf="!primaryOffice && formSubmitted">
+      <em class="icon icon-error mr-4"></em>
+      {{errorData.select_primary_office}}
+    </span>
+  </div>
+  <div class="form-group mb-0" *ngIf='selections'>
+    <label> Secondary OffIce(s)</label>
+    <app-multiselect-dropdown
+      [title]="title"
+      [selections]="selections"
+      [displaySubItem]="officeList"
+      [filterName]="filterName"
+      (onSelectionChanged)="getDropdownSelected($event)"
+      (onMultiSelectSelectedOptions)="onMultiSelectSelectedOptions($event)"
+      (clearFilter)="clearFilter()"
+      (applyFilter)="applyFilter()"
+      [selectedMessage]="selectedMessage"
+      id="secondary-office-multi">
+    </app-multiselect-dropdown>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="dismiss('Cross click')" id="cancelempo-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">Save</button>
+</div>
+<app-loader [active]="loading"></app-loader>

@@ -1,0 +1,186 @@
+
+<div class="npc-block pb-0">
+
+    <h2 class="mb-24">Notes</h2>
+    <div *ngIf="originalNotes.length">
+      <div class="d-flex align-items-center mb-24 w-100 justify-content-between">
+        <div class="header-search flex-fill mr-20">
+          <form class="table-data-search">
+            <div class="header-search-wrapper">
+              <input type="text" class="form-control search-input" placeholder="Search by author or note text"
+                     (keyup)='searchFilter($event)' id="search-by-auther-note-text">
+              <button class="btn" type="submit" id="note-search-btn">Search</button>
+            </div>
+          </form>
+        </div>
+        <button
+          class="btn btn-primary btn-icon d-flex align-items-center" type="button"
+          (click)="openModal(notesModal, '', 'modal-slg')" id="create-note-btn">
+          <i class="icon icon-plus"></i>
+          Create New Note
+        </button>
+      </div>
+      <div class="row gutter-16" [formGroup]='searchForm'>
+        <div class="col-3">
+          <div class="form-group">
+            <label>Author</label>
+            <ng-select [items]="authorList" placeholder="Select an Author"
+                       formControlName='author' [bindValue]="'id'"
+                       [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'" id="authorId">
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-5">
+          <div class="form-group">
+            <label>Date Created Range</label>
+            <div class="row gutter-16">
+                <div class="col-6">
+                  <app-date-picker
+                    [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select start date'"
+                    controlName='createdStartDate' id="createdStartDateId"></app-date-picker>
+                </div>
+                <div class="col-6">
+                  <app-date-picker
+                    [isForm]='true' [dateform]='searchForm' [placeholderText]="'Select end date'"
+                    controlName='createdEndDate' id="createdEndDateId"></app-date-picker>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-2">
+          <div class="form-group">
+            <div class="custom-control custom-checkbox mt-32 pr-0">
+              <input type="checkbox" class="custom-control-input" id="dropcheck-1"
+                     formControlName="isVisibleToClient">
+              <label class="custom-control-label" for="dropcheck-1">Visible To Client</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="custom-table pt-24">
+
+          <ngx-datatable
+            #table class="material common-table datatable-auto-height ngtable-align-top" [rows]="noteList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50"
+            [messages]="messages"
+            rowHeight="auto"
+            id="noteListId">
+            <ngx-datatable-column [resizeable]="false" prop="content" name="Note Text" [width]="334">
+              <ng-template let-value="value" ngx-datatable-cell-template>
+                <div class="note-table-text user-prof-note">
+                  <app-read-more [text]='value' [maxLines]='2'> </app-read-more>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="applicableDate" name="Applicable Date" [width]="156">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <span class="d-block font-weight-medium">{{row.applicableDate | date}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="lastUpdated" name="Written Date" [width]="220">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <span class="d-block font-weight-medium mb-4">{{row.lastUpdated | date}}</span>
+                <span class="small helper-text font-weight-regular d-block lh-20">{{row.lastUpdated | date: 'hh:mm a'}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="createdBy.name" name="Author" [width]="240">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <span class="d-block font-weight-medium mb-4">{{row.createdBy.name}}</span>
+                <span class="small helper-text font-weight-regular d-block lh-20">{{row.createdBy.email}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="isVisibleToClient" name=" " [width]="136" [sortable]="false">
+              <ng-template let-row="row" ngx-datatable-cell-template>
+                <span *ngIf="row.isVisibleToClient"
+                      class="sh-badge text-nowrap font-weight-medium sh-badge-primary">Visible To Client</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="" name="Action" [width]="120"
+                                  [headerClass]="'text-right'" [sortable]="false">
+              <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                <div class="icon-group d-flex justify-content-end">
+                  <span (click)='editNote(row, notesModal)' id="edit-note-index-{{rowIndex}}">
+                    <em class="icon icon-edit icon-color"></em>
+                  </span>
+                  <span (click)="deleteNote(row,$event)" id="delete-note-index-{{rowIndex}}">
+                    <em class="icon icon-remove icon-color"></em>
+                  </span>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+
+        <app-loader [active]="notesLoading"></app-loader>
+      </div>
+    </div>
+    <button
+      *ngIf="!originalNotes.length"
+      class="btn btn-primary btn-icon d-flex align-items-center mt-24" type="button"
+      (click)="openModal(notesModal, '', 'modal-slg')" id="create-note-btn">
+      <i class="icon icon-plus"></i>
+      Create New Note
+    </button>
+
+</div>
+<ng-template #notesModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0" *ngIf="!editRecord">Create New Note</h3>
+    <h3 class="modal-title mb-0" *ngIf="editRecord">Edit Note</h3>
+    <button type="button" class="close" (click)="cancelNote()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="noteForm">
+      <div class="row gutter-16">
+        <div class="col-12">
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group"
+                   [class.has-error]="noteForm.controls.applicableDate.errors && noteForm.controls.applicableDate.errors.required && noteFormSubmitted">
+                <label>Applicable Date <sup>*</sup></label>
+                <app-date-picker [isForm]='true' [dateform]='noteForm' controlName='applicableDate' id="applicableDateId"></app-date-picker>
+                <span class="field-message text-danger">
+                  Please select applicable date.
+                </span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group position-relative"
+                   [class.has-error]="noteForm.controls.content.errors && noteForm.controls.content.errors.required && noteFormSubmitted">
+                <label>Note Text <sup>*</sup></label>
+                <span class="count-char">{{noteForm?.controls['content']?.value?.length || 0}}/1000</span>
+                <textarea class="form-control height-2" maxlength="1000" rows="4" placeholder="Enter Note Text"
+                          formControlName="content" id="contentId"></textarea>
+                <span class="field-message text-danger">
+                  Please enter note text.
+                </span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-group mb-0">
+                <label class="mb-12">Visible to Client</label>
+                <div class="custom-control custom-radio pr-0">
+                  <input type="radio" id="invoiceAddress1" name="isVisibleToClient" class="custom-control-input"
+                         formControlName="isVisibleToClient" [value]='true'>
+                  <label class="custom-control-label" for="invoiceAddress1">Yes</label>
+                </div>
+                <div class="custom-control custom-radio pr-0 mb-0">
+                  <input type="radio" id="invoiceAddress2" name="isVisibleToClient" class="custom-control-input"
+                         formControlName="isVisibleToClient" [value]='false'>
+                  <label class="custom-control-label" for="invoiceAddress2">No</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="cancelNote()" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='save()' id="save-btn">
+      Save
+    </button>
+  </div>
+</ng-template>

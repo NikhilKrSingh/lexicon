@@ -1,0 +1,15 @@
+.read-more-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow-wrap: normal;
+}
+
+.read-more-element {
+  height: 40px !important;
+}
+
+.ngx-ellipsis-more {
+  font-weight: 500;
+  text-decoration: underline !important;
+}

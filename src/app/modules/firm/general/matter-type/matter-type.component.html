@@ -1,0 +1,36 @@
+<div class="modal-header pb-24">
+  <h3 class="modal-title" *ngIf='!matterType?.id'>Add Matter Type</h3>
+  <h3 class="modal-title" *ngIf='matterType?.id > 0'>Edit Matter Type</h3>
+  <button type="button" class="close" (click)='dismiss()' id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="form-group" [ngClass]="{'has-error': matterTypeNameErrMsg && matterTypeName.invalid}">
+      <label>Matter Type Name <sup>*</sup></label>
+      <input type="text" class="form-control" placeholder="Enter matter type name" [(ngModel)]='matterType.name'
+        #matterTypeName="ngModel" required id="matter-type">
+      <span class="field-message text-danger"
+        *ngIf="matterTypeNameErrMsg || (matterTypeName.invalid && (matterTypeName.dirty || matterTypeName.touched))">
+        <em class="icon icon-error mr-4"></em>
+        {{ matterTypeNameErrMsg }}
+      </span>
+    </div>
+
+    <div class="form-group" [ngClass]="{'has-error': matterTypePracticeAreasErrMsg && matterTypePracticeArea.invalid}">
+      <label>Associated Practice Area <sup>*</sup></label>
+      <ng-select [items]="practiceAreas" [clearable]='false' placeholder="Choose an associated practice area"
+        #matterTypePracticeArea="ngModel" required [(ngModel)]="matterType.practiceId" [bindValue]="'id'"
+        [bindLabel]="'name'" [selectOnTab]="true" [notFoundText]="'No record found'" id="practice-area-select">
+      </ng-select>
+      <span class="field-message text-danger"
+        *ngIf="matterTypePracticeAreasErrMsg || (matterTypePracticeArea.invalid && (matterTypePracticeArea.dirty || matterTypePracticeArea.touched))">
+        <em class="icon icon-error mr-4"></em>
+        {{ matterTypePracticeAreasErrMsg }}
+      </span>
+    </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='ok()' id="save-btn">Save</button>
+</div>

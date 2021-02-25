@@ -1,0 +1,34 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+            <li class="breadcrumb-item active" aria-current="page">AR/Account Ledger History Report</li>
+        </ol>
+        <div class="heading">
+            <h1>AR/Account Ledger History Report</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-8">Generate Report</h2>
+                <p class="lh-20">Generate your report by selecting the options below.</p>
+                <div class="row gutter-16">
+                    <div class="col-5">
+                        <app-date-range-report (startDate)="startDate($event)" (endDate)="endDate($event)"></app-date-range-report>
+                        
+                    </div>
+                </div>
+
+                
+            </div>
+            <p *ngIf="noDataToDisplay == true" class="helper-text font-weight-normal lh-20">{{message}}</p> 
+        </div>
+        <div class="d-flex justify-content-end pt-8">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="submitArLedgerReport('Ar Ledger History Report')" [disabled]="!exportCsvFlag" id="export-to-csv">Export to CSV</button>
+            </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+    </div>
+</div>

@@ -1,0 +1,188 @@
+<div class="billing-new-des">
+  <div class="pb-24">
+    <div class="d-flex align-items-start justify-content-between mb-40">
+      <h2 class="m-0">Billing Summary</h2>
+      <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" (click)="billNow(billNowReview)"
+          *ngIf="isConsultAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin">
+          Bill Now
+        </button>
+        <button *ngIf="isConsultAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin" type="button" class="btn btn-primary" [routerLink]="['/contact/refund-potential-client']"
+          [queryParams]="{clientId:clientDetails?.id}" id="refund-client-btn">
+          Refund Client
+        </button>
+        <button *ngIf="isConsultAttorney || permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin" type="button" class="btn btn-primary"  [routerLink]="['/contact/post-payment']"
+          [queryParams]="{matterId:clientDetail?.matterId,clientId:clientDetail?.id, officeId: clientDetail?.consultationLawOffice?.id,type:'potential-client'}"
+          id="record-payment" >
+          Record Payment
+        </button>
+      </div>
+    </div>
+    <div class="row gutter-24">
+      <div class="col-6">
+        <div class="card gray-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-12">
+              <h4 class="text-xlarge mb-0">Billed Balance</h4>
+            </div>
+            <div class="bill-white-wrap mb-12">
+              <div class="d-flex align-items-center justify-content-between billed-head pb-12 mb-8">
+                <span class="font-weight-medium">Balance as of last statement</span>
+                <span class="font-weight-medium" [class.text-danger]="billedBalance?.lastInvoiceAmount < 0"
+                  *ngIf="billedBalance?.lastInvoiceAmount != 0">
+                  {{billedBalance?.lastInvoiceAmount | currency : 'USD': 'symbol': '1.2-2'}}
+                </span>
+                <span class="font-weight-medium"
+                  *ngIf="!billedBalance?.lastInvoiceAmount || billedBalance?.lastInvoiceAmount == 0">
+                  {{0 | currency : 'USD': 'symbol': '1.2-2'}}
+                </span>
+              </div>
+              <div class="billed-bdy">
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <a class="helper-text font-weight-normal" href="javascript:void(0);"
+                    (click)="goToLedgerHistoryTab.emit()">
+                    Payments received since last invoice
+                  </a>
+                  <span [class.text-danger]="billedBalance?.latestPayments > 0">
+                    {{(billedBalance?.latestPayments > 0) ? '-' : ''}}{{billedBalance?.latestPayments | currency :
+                    'USD': 'symbol': '1.2-2'}}
+                  </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <a class="helper-text font-weight-normal" href="javascript:void(0);"
+                    (click)="scrollToWriteOff(writeOffSection)">Write-Offs and Credits</a>
+                  <span [class.text-danger]="billedBalance?.latestWriteOffs > 0">
+                    {{(billedBalance?.latestWriteOffs > 0) ? '-' : ''}}{{billedBalance?.latestWriteOffs | currency :
+                    'USD': 'symbol': '1.2-2'}}
+                  </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <a class="helper-text font-weight-normal" href="javascript:void(0);"
+                    (click)="goToLedgerHistoryTab.emit()">Refunds</a>
+                  <span [class.text-danger]="billedBalance?.latestRefunds < 0">
+                    {{billedBalance?.latestRefunds | currency : 'USD': 'symbol': '1.2-2'}}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="bill-green-wrap">
+              <div class="d-flex align-items-center justify-content-between billed-head">
+                <span class="font-weight-medium">Total Outstanding Balance</span>
+                <span class="font-weight-medium" [class.text-danger]="billedBalance?.outstandingBalance < 0">
+                  {{billedBalance?.outstandingBalance | currency : 'USD': 'symbol': '1.2-2'}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <app-loader [active]="billedBalanceLoading"></app-loader>
+      </div>
+      <div class="col-6">
+        <div class="card gray-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-12">
+              <h4 class="text-xlarge m-0">Unbilled Balance</h4>
+              <h4 class="m-0" [class.text-danger]="unbilledBalance?.unbilledConsultationFee < 0">
+                {{unbilledBalance?.unbilledConsultationFee | currency : 'USD' : 'symbol' : '1.2-2' }}
+              </h4>
+            </div>
+            <div class="bill-white-wrap">
+              <div class="billed-bdy">
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <a class="helper-text font-weight-normal" href="javascript:void(0);"
+                    (click)="scrollToFees(cfSection)">Consultation Fees</a>
+                  <span [class.text-danger]="unbilledBalance?.unbilledConsultationFee < 0">
+                    {{unbilledBalance?.unbilledConsultationFee | currency : 'USD' : 'symbol' : '1.2-2' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <app-loader [active]="unbilledBalanceLoading"></app-loader>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bill-detail-wrap">
+    <div class="d-flex align-items-start justify-content-between mb-32">
+      <h2 class="m-0">Billing Details</h2>
+    </div>
+
+    <div class="full-length-blocks" #cfSection id="cfSection">
+      <div class="card gray-card">
+        <app-new-consulation-fee [clientDetails]="clientDetails" (refreshBillingWidget)='refreshBillingWidget()'
+          [(consulationFeesToggle)]="feesAccordian" [(unbilledFeeStatus)]="unbilledFeeStatus">
+        </app-new-consulation-fee>
+      </div>
+    </div>
+
+    <div class="full-length-blocks" #writeOffSection id="writeOffSection">
+      <div class="card gray-card">
+        <app-new-write-offs [invoiceId]="invoiceId" [prebillId]='prebillId' [(toggleViewButton)]="writeOffAccordian"
+          (refreshBilledBalance)="getBalances()" [balanceDue]="billedBalance?.outstandingBalance"
+          [clientDetail]="clientDetails" [type]="'client'">
+        </app-new-write-offs>
+      </div>
+    </div>
+
+    <div class="full-length-blocks">
+      <div class="card gray-card mb-0">
+        <app-new-billing-payment-method [potentialClientDetails]="clientDetails"></app-new-billing-payment-method>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<ng-template #billNowReview let-modal>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title mb-0" *ngIf='chargesBillNow'>Bill Now</h3>
+    <h3 class="modal-title mb-0" *ngIf='!chargesBillNow'>No Unbilled Fees</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning" style="font-size: 22px;"></em>
+      <div class="lh-20 ml-16">
+        <p class="mb-0" id="bill-now-message">{{billNowMessage}}</p>
+        <div class="mt-20" *ngIf="!chargesBillNow">
+          <div class="custom-control custom-checkbox mb-0 pr-0" *ngIf="isEmailPresent">
+            <input type="checkbox" class="custom-control-input" id="customCheck1_email" [value]='true'
+              [(ngModel)]='sendEmail'>
+            <label class="custom-control-label text-case-none" for="customCheck1_email">Email invoice to client</label>
+          </div>
+          <div class="custom-control custom-checkbox mb-0 pr-0">
+            <input type="checkbox" class="custom-control-input" id="customCheck2_print" [value]='true'
+              [(ngModel)]='print'>
+            <label class="custom-control-label text-case-none" for="customCheck2_print">Print invoice</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancel">Cancel</button>
+
+    <button type="button" class="btn btn-primary" *ngIf="chargesBillNow" (click)="modal.close(true)"
+      id="yes-bill-now-btn">
+      Yes, Bill Now
+    </button>
+
+    <button type="button" class="btn btn-primary" *ngIf="!chargesBillNow" (click)="modal.close('zeroInvoice')"
+      id="yes-generate-invoice-btn">
+      Yes, Generate Invoice
+    </button>
+  </div>
+</ng-template>
+
+<div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice'
+    [invoiceTemplateDetails]='invoiceTemplateDetails'
+    [matterBillingSettings]='billToClientResponse.matterBillingSettings' [tenantDetails]='tenantDetails'
+    [loggedinuserId]='loginUser.id' [default_logo_url]='default_logo_url'
+    (invoiceHTMLDetails)='sendEmailAndPrint($event)'>
+  </app-invoice-extended-pdf>
+</div>

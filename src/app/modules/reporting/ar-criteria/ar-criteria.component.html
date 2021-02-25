@@ -1,0 +1,163 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+            <li class="breadcrumb-item active" aria-current="page">AR by Criteria Report</li>
+        </ol>
+        <div class="heading">
+            <h1>AR by Criteria Report</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-8">Generate Report</h2>
+                <p class="lh-20">Generate your report by selecting the options below.</p>
+                <div class="row gutter-16">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <form [formGroup]="arCriteriaReportForm">
+                                <label>As of Date <sup>*</sup></label>
+                                
+                                    <app-date-picker [isForm]='true' [dateform]='arCriteriaReportForm' controlName='arReportDate' id="as-of-date"></app-date-picker>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <form [formGroup]="arCriteriaReportForm">
+                        <label class="mb-16">Select aging buckets</label>
+                        <div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="customRadio1" formControlName="agingBracket" #matter
+                                    class="custom-control-input" value="1" (change)="matterChange($event)">
+                                <label class="custom-control-label" for="customRadio1">Matter</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="pl-24 mb-16 " *ngIf="matter.checked">
+                                        <ng-select [items]="matterList" 
+                                        formControlName="selectedMatterName" [bindValue]="'matterId'" [bindLabel]="'matterName'"
+                                        placeholder="Select Matter" [notFoundText]="'No record found'" id="matter-select">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="customRadio2" formControlName="agingBracket" #responsible
+                                    class="custom-control-input" value="2" (change)="responsibleAttorneyChange()">
+                                <label class="custom-control-label" for="customRadio2">Responsible
+                                    Attorney</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="pl-24 mb-16 " *ngIf="responsible.checked">
+                                        <ng-select [items]="responsibleAttorneyList"  
+                                        formControlName="selectedResponsibleAttorney" [bindValue]="'responsibleAttorneyID'" [bindLabel]="'responsibleAttorneyName'"
+                                        placeholder="Select Responsible Attorney" [notFoundText]="'No record found'" id="responsible-select">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="customRadio3" formControlName="agingBracket" #billable
+                                    class="custom-control-input" value="3" (change)="billingAttorneyChange()">
+                                <label class="custom-control-label" for="customRadio3">Billable Attorney</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="pl-24 mb-16 " *ngIf="billable.checked">
+                                        <ng-select [items]="billingAttorneyList" placeholder="Select Billing Attorney" 
+                                        formControlName="selectedBillingAttorney" [bindValue]="'billingAttorneyID'" [bindLabel]="'billingAttorneyName'"
+                                            [notFoundText]="'No record found'" id="billing-attorney-select">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="customRadio4" formControlName="agingBracket" #timekeeper
+                                    class="custom-control-input" value="4" (change)="timekeeperChange($event)">
+                                <label class="custom-control-label" for="customRadio4">Timekeeper</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="pl-24 mb-16 " *ngIf="timekeeper.checked">
+                                        <ng-select [items]="timeKeeperList" placeholder="Select Timekeeper" 
+                                        formControlName="selectedtimeKeeper" [bindValue]="'timeKeeperID'" [bindLabel]="'name'"
+                                            [notFoundText]="'No record found'" id="time-keeping-list">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="customRadio5" formControlName="agingBracket" #office
+                                    class="custom-control-input" value="5" (change)="officeChange($event)">
+                                <label class="custom-control-label" for="customRadio5">Office</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="pl-24 mb-16 " *ngIf="office.checked">
+                                        <ng-select [items]="officeList" placeholder="Select Office" 
+                                        formControlName="selectedOffice" [bindValue]="'officeId'" [bindLabel]="'officeName'"
+                                            [notFoundText]="'No record found'" id="office-select">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="customRadio6" formControlName="agingBracket" #practiceArea
+                                    class="custom-control-input" value="6" (change)="practiceAreaChanege($event)">
+                                <label class="custom-control-label" for="customRadio6">Practice Area</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="pl-24 mb-16 " *ngIf="practiceArea.checked">
+                                        <ng-select [items]="practiceAreaList" placeholder="Select Practice Area" 
+                                        formControlName="selectedpracticeArea" [bindValue]="'practiceAreaId'" [bindLabel]="'practiceAreaName'"
+                                            [notFoundText]="'No record found'" id="practice-area-select">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="custom-control custom-radio pr-0">
+                                <input type="radio" id="customRadio7" formControlName="agingBracket" #matterType
+                                    class="custom-control-input" value="7" (change)="matterTypeChanege($event)">
+                                <label class="custom-control-label" for="customRadio7">Matter Type</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="pl-24 mb-16 " *ngIf="matterType.checked">
+                                        <ng-select [items]="matterTypeList" placeholder="Select Matter Type" 
+                                        formControlName="selectedmatterType" [bindValue]="'matterTypeId'" [bindLabel]="'matterTypeName'"
+                                            [notFoundText]="'No record found'" id="matter-type-select">
+                                        </ng-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pt-8">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="!arCriteriaReportForm.valid"
+                    (click)="submitARCriteriaReport()" id="export-to-csv">Export to CSV</button>
+            </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+    </div>
+</div>

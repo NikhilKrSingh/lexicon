@@ -1,0 +1,31 @@
+.search-result-box .search-result {
+  max-height: 338px;
+  overflow: auto;
+}
+
+.fc-toolbar.fc-header-toolbar {
+  box-shadow: none;
+  height: 50px;
+  border-bottom: 1px solid #C4CCD4;
+}
+
+.fc-button {
+  height: 10px !important;
+  padding-bottom: 0 !important;
+  &.fc-prev-button,
+  &.fc-next-button{
+    height: auto !important;
+    padding-bottom: 5px !important;
+  }
+  &:focus {
+    outline: none;
+    border-color: transparent !important;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
+
+  &:hover, &.fc-button-active {
+    background: transparent;
+    border-bottom-color: transparent !important;
+  }
+}

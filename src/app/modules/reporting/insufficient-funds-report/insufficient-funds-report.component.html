@@ -1,0 +1,53 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Insufficient Funds Report</li>
+        </ol>
+        <div class="heading">
+            <h1>Insufficient Funds Report</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-8">Generate Report</h2>
+                <p class="lh-20">Generate your report by selecting the options below.</p>
+                <div class="row">
+                    <div class="col-5">
+                        <div class="mb-16">
+                            <div class="form-group mb-20" [class.has-error]="!selectedDateRange && formSubmitted">
+                                <label>Date Range Type <sup>*</sup></label>
+                                <ng-select 
+                                placeholder="Select Date Range Type"
+                                [items]="dateRangeList" 
+                                [(ngModel)]="selectedDateRange" 
+                                [bindValue]="'id'" 
+                                [bindLabel]="'name'"
+                                [notFoundText]="'No record found'"
+                                [clearable]="false">
+                                </ng-select>
+                                <span class="field-message text-danger" *ngIf="!selectedDateRange">
+                                    <em class="icon icon-error mr-4"></em>
+                                    <span>{{ errorData?.select_date_range_type }}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-5">
+                        <app-date-range-report [startDateError]="startDateError" (startDate)="startDate($event)" [startEndDateAsTodayFlag]="true" [title]="'Date Range'" (endDate)="endDate($event)"></app-date-range-report>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pt-8">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light" [routerLink]="['../../reporting']">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="submitInsufficientFundsReport()">Export to CSV</button>
+            </div>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+    </div>
+</div>

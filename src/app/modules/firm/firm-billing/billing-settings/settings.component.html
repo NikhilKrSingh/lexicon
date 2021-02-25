@@ -1,0 +1,68 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a [routerLink]="['/dashboard']" href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Billing Settings</li>
+    </ol>
+    <div class="heading">
+      <h1>Billing Settings</h1>
+    </div>
+    <div class="section-area">
+      <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+        <a href="javascript:void(0);" (click)="changeTab(mytabs)" *ngFor="let mytabs of alltabs; trackBy: trackByFn;let i = index;" role="tab"
+          class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs" id="tab-index-{{i}}">{{ mytabs }}</a>
+      </div>
+      <div class="card tlr-0">
+        <div class="card-body p-0">
+          <div class="tab-content p-32 min-h-380">
+            <div *ngIf="selecttabs1 === 'Operating Account'" class="tab-pane fade show active" role="tabpanel">
+              <app-operating-account [isFormSubmitted]="billingSettingsSubmitted" [billingSettings]='billingSettings'
+                [reset]="dateReset">
+              </app-operating-account>
+            </div>
+            <div *ngIf="selecttabs1 === 'Bill Generation Frequency'" class="tab-pane fade show active" role="tabpanel">
+              <app-bill-gen-frequency [billingSettings]="billingSettings" [isFormSubmitted]="billingSettingsSubmitted"
+                [(editBillUpcoming)]="editBillUpcoming" [(editBill)]="editBill" (editBillFreq)="editBillFreq($event)"
+                (removeUpcomingFreq)="removeUpcomingFreq($event)" (sendValue)="getValue($event);">
+              </app-bill-gen-frequency>
+            </div>
+            <div *ngIf="selecttabs1 === 'Invoices'" class="tab-pane fade show active" role="tabpanel">
+              <app-invoices [billingSettings]='billingSettings'></app-invoices>
+            </div>
+            <div *ngIf="selecttabs1 === 'Time Entry Grace Period'" class="tab-pane fade show active" role="tabpanel">
+              <app-time-entry-grace-period [billingSettings]='billingSettings' [notIsEdit]="notIsEdit"
+                (enableDisabledTimeEntryButton)="enableDisabledTimeEntryButton($event)"></app-time-entry-grace-period>
+            </div>
+            <div *ngIf="selecttabs1 === 'Time Rounding Interval'" class="tab-pane fade show active" role="tabpanel">
+              <app-time-rouding-interval [billingSettings]='billingSettings'></app-time-rouding-interval>
+            </div>
+            <div *ngIf="selecttabs1 === 'Payment Plans'" class="tab-pane fade show active" role="tabpanel">
+              <app-payment-plans [billingSettings]='billingSettings'></app-payment-plans>
+            </div>
+          </div>
+        </div>
+      </div>
+      <app-loader [active]="loading"></app-loader>
+    </div>
+    <div class="d-flex justify-content-end">
+      <div class="btn-group">
+        
+        <button type="button" *ngIf="selecttabs1 === 'Operating Account'" class="btn btn-primary" (click)='save()' id="save-changes">Save
+          Changes</button>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary"
+          *ngIf="selecttabs1 !== 'Operating Account' && selecttabs1 !== 'Bill Generation Frequency' && selecttabs1 !=='Time Entry Grace Period'"
+          (click)='save()' id="save-changes">Save Changes</button>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" *ngIf="selecttabs1 == 'Time Entry Grace Period'"
+          [disabled]="notIsEdit" (click)='save()' id="save-changes">Save Changes</button>
+      </div>
+      <div class="btn-group" *ngIf="selecttabs1 === 'Bill Generation Frequency' && (editBill || editBillUpcoming)">
+        <button type="button" class="btn btn-light" (click)='cancel()' id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)='confirmSave()' id="save-changes">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>

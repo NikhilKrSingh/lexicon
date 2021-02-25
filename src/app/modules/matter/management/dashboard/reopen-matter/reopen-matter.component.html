@@ -1,0 +1,17 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title m-0">Add a change note</h3>
+  <button type="button" class="close" (click)="dismiss()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="form-group position-relative">
+    <label>You may leave changes notes for audit history (optional)</label>
+    <span class="count-char">{{changeNotes?.length || 0}}/1000</span>
+    <textarea class="form-control" maxlength='1000' rows="4" [(ngModel)]='changeNotes' id="change-note"></textarea>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)='dismiss()' id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='close()' id="save-btn">Save</button>
+</div>

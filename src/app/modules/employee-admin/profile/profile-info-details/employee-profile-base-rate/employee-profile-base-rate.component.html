@@ -1,0 +1,58 @@
+<div class="d-flex justify-content-between mb-24">
+  <h2 class="mb-0">Base Rate</h2>
+  <div class="d-flex justify-content-end">
+    <div *ngIf="isEditMode" class="btn-group">
+      <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+      <button
+        type="button"
+        class="btn btn-primary btn-icon"
+        id="save-rate-btn" (click)="saveRate()">
+        <i class="icon icon icon-flopy icon-big"></i>
+        Save Rate
+      </button>
+    </div>
+    <div *ngIf="!isEditMode && permissionList.BILLING_MANAGEMENTisAdmin">
+      <button
+        type="button"
+        [class]="'btn btn-primary btn-icon'"
+        id="edit-cancel-btn" (click)="editRate()">
+        <i class="icon icon icon-edit icon-big"></i>
+        Edit Rate
+      </button>
+    </div>
+  </div>
+</div>
+<div class="custom-table">
+  <div class="table-responsive">
+    <table class="table table-striped table-borderless">
+      <thead>
+      <tr>
+        <th>Job Family</th>
+        <th class="w-218">Rate</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td id="employee-baserate-jobfamilyname">{{employee?.jobFamilyName}}</td>
+        <td class="py-4" *ngIf="!isEditMode" [class.text-danger]="employee?.jobFamilyIsCustom" id="employee-baserate-jobfamilycustom">
+          {{employee?.jobFamilyBaseRate | currency : 'USD': 'symbol': '1.2-2'}}
+        </td>
+        <td class="py-4" *ngIf="isEditMode" >
+          <div class="position-relative form-group" [class.has-error]="!jobFamilyBaseRate && formSubmitted">
+            <input type="text" class="form-control bordred pr-36" [(ngModel)]="jobFamilyBaseRate"
+                   [prefix]="'$'" mask="separator.2" id="job-family-base-rate"
+                   thousandSeparator="," name="jobFamilyBaseRate" (blur)="setCurrencyValue()">
+            <em class="icon icon-close icon-color custom-icon-close cursor-pointer"
+                (click)="setJobFamilyBaseRate()" id="revert-job-family-rate-button"
+                *ngIf="employee?.jobFamilyBaseRate !== jobFamilyBaseRate"></em>
+            <span class="field-message text-danger">
+              Enter a Base Rate
+            </span>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <app-loader [active]="loading"></app-loader>
+</div>

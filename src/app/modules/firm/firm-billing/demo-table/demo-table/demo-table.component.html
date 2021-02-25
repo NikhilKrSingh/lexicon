@@ -1,0 +1,87 @@
+<div class="container">
+    <div class="main-content">
+
+        <div class="heading">
+            <h1>Demo Tables</h1>
+
+
+            <div class="d-flex align-items-center justify-content-between mb-24">
+                <div class="header-search flex-fill d-flex">
+                    <form action="#">
+                        <div class="header-search-wrapper">
+                            <input type="text" class="form-control search-input" placeholder="Search Demo table name and description" id="ratetblssearchinput" name="rateTableSearch">
+                            <button class="btn" type="submit">Search</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="btn-group ml-md-24 ml-0">
+                    <button class="btn btn-primary btn-icon" id="ratetblscnrtbls" type="button">
+            <i class="icon icon-plus"></i> Create New Demo Table
+          </button>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-24">
+                <div class="header-search flex-fill d-flex">
+                    <form action="#">
+                        <div class="header-search-wrapper">
+                            <input type="text" class="form-control search-input" placeholder="Search Demo table name and description" id="ratetblssearchinput" name="rateTableSearch">
+                            <button class="btn" type="submit">Search</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="btn-group ml-md-24 ml-0">
+                    <button class="btn btn-primary btn-icon" id="ratetblscnrtbls" type="button">
+            <i class="icon icon-plus"></i> Create New Demo Table
+          </button>
+                </div>
+            </div>
+        </div>
+
+
+
+	<br>
+<br>
+<br>
+<div class="container">
+    <div class="border">
+    </div>
+    <h1>User List</h1>
+
+    <nav class="navbar">
+        <input class="form-control" type="text" name="name" placeholder="Enter Name to search">
+
+        <button type="button" class="btn btn-secondary">Create User</button>
+    </nav>
+
+    <table class="table table-borderd table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr *ngFor="let com of lstUserList">
+                <td><span>{{com.name}}</span></td>
+                <td><span>{{com.userName}}</span></td>
+                <td><span>{{com.email}}</span></td>
+                <td><span>{{com.phone}}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-warning">
+                <i class="fa fa-edit"></i>
+              </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+<router-outlet></router-outlet>
+    </div>
+</div>

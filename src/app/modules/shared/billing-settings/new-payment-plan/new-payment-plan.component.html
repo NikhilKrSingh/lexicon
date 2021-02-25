@@ -1,0 +1,128 @@
+<div class="card-body" [class.bill-open]="paymentPlanAccordian">
+  <div class="bd-header">
+    <div class="d-flex align-items-start justify-content-between bill-title">
+      <h3 class="fs-22 m-0">Payment Plan</h3>
+      <div class="d-flex" *ngIf="requestCompleted">
+        <div class="btn-group" *ngIf="createdPlan && hasPermissionToAdd">
+          <button type="button" class="btn btn-primary" (click)="deletePaymentPlan()">Delete Payment Plan</button>
+          <button type="button" class="btn btn-primary" (click)="editPaymentPlan()">Edit Payment Plan</button>
+        </div>
+        <div class="btn-group" *ngIf="!createdPlan && hasPermissionToAdd && isPaymentPlanEnabled">
+          <button type="button" (click)="addPaymentPlan()" class="btn btn-primary">Create Payment Plan</button>
+        </div>
+        <span class="cursor-pointer bil-arrow" (click)="changePaymentPlanAccordion()">
+          <em class="icon icon-angle-down"></em>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="bd-body bg-white mx-n24 pt-24 bd-overflow-hidden d-block" *ngIf="paymentPlanAccordian" [class.pt-24]="createdPlan">
+    <div *ngIf="createdPlan">
+      <div class="custom-table">
+        <div class="table-responsive payment-plan-table">
+          <table class="table table-borderless" [class.expanded]='showGrid'>
+            <thead>
+              <tr>
+                <th>Frequency</th>
+                <th>Amount</th>
+                <th class="text-center">Auto-Pay</th>
+                <th>Auto-Pay Method</th>
+                <th>Balance Past Due</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr [class.bordered]='showGrid'
+                  id="payment-planlist-index">
+                <td>
+                  <div class="d-flex align-items-center">
+                      <span class="payment-plan-table-arrow cursor-pointer" (click)="showGrid=!showGrid">
+                        <em [ngClass]="!showGrid?'icon icon-angle-down':'icon icon-angle-up'"></em>
+                      </span>
+                      <span>
+                        Every
+                        <span>{{createdPlan?.billFrequencyQuantity}} {{createdPlan?.billFrequencyLookUpName == 'Months' ? (createdPlan?.billFrequencyQuantity > 1 ? 'months' : 'month') : (createdPlan?.billFrequencyQuantity > 1 ? 'weeks' : 'week')}} </span>
+                        <span *ngIf='selectedRecursDay'> on the {{selectedRecursDay?.name}}</span>
+                        <span *ngIf='selectedDay && !selectedRecursDay'>on the {{selectedDay}}</span>
+                      </span>
+                  </div>
+                </td>
+                <td>{{ createdPlan?.amountToPay | currency : 'USD': 'symbol': '1.2-2' }}</td>
+                <td class="text-center">
+                  <ng-container *ngIf='createdPlan?.cCardId > 0 || createdPlan?.echeckId > 0'>
+                    <div class="text-center" *ngIf='createdPlan?.isAutoPay else notAutoPay'>
+                      <em class="icon icon-check font-10"></em>
+                    </div>
+                    <ng-template #notAutoPay>
+                      <label class="cust-check not-checked">
+                        <input type="checkbox" disabled/>
+                        <span class="check-style"></span>
+                      </label>
+                    </ng-template>
+                  </ng-container>
+                </td>
+                <td>
+                  <ng-container *ngIf='createdPlan?.cCardId > 0 || createdPlan?.echeckId > 0'>
+                      <span *ngIf='createdPlan?.cCardId > 0'>
+                        {{ (createdPlan?.creditCard && createdPlan.creditCard?.cardType ? toTitleCase(createdPlan.creditCard?.cardType): 'Card') +' Ending in ' + createdPlan?.creditCard?.cardNumber }}
+                      </span>
+                    <span *ngIf='createdPlan?.echeckId > 0'>
+                        {{ 'Account Ending in ' + createdPlan?.echeckDetail?.accountNumber?.slice(-4) }}
+                      </span>
+                  </ng-container>
+                </td>
+                <td>{{ (createdPlan?.balanceDue || 0) | currency : 'USD': 'symbol': '1.2-2' }}</td>
+              </tr>
+              <tr class="payment-plan-detail-row"
+                  [ngClass]="!showGrid?'d-none':''" id="payment-planlistindex">
+                <td colspan="6">
+                  <div class="pl-48">
+                    <table class="table table-borderless" [class.month]='selectedRecursDay'
+                           [class.week]='!selectedRecursDay'>
+                      <thead>
+                      <tr>
+                        <th style="width:200px;">Estimated Payoff Date</th>
+                        <th>Next Payment Due Date</th>
+                        <th>&nbsp;</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr class="bdr-btm">
+                        <td>{{createdPlan?.estimatedPayoffDate | date: 'MM/dd/yyyy'}}</td>
+                        <td>{{createdPlan?.nextPaymentDate | date: 'MM/dd/yyyy'}}</td>
+                        <td>&nbsp;</td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <app-loader [active]="loading"></app-loader>
+    <div class="no-record-found d-flex align-items-center justify-content-center" *ngIf="!createdPlan">
+      <span class="helper-text">No payment plan selected</span>
+    </div>
+  </div>
+</div>
+<ng-template #noPositiveMatterBalance let-modal>
+  <div class="modal-header d-block pb-24">
+      <h3 class="modal-title mb-0">Error</h3>
+      <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id='close-btn'>
+          <em class="icon icon-close"></em>
+      </button>
+  </div>
+  <div class="modal-body">
+      <div class="d-flex align-items-start missing-data">
+          <em class="icon icon-info text-danger"></em>
+          <div class="lh-20 ml-16">
+              <p class="m-0">You cannot set this matter up for a payment plan, because it does not currently have a positive balance due.</p>
+          </div>
+      </div>
+  </div>
+  <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+  </div>
+</ng-template>

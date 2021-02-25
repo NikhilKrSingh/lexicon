@@ -1,0 +1,125 @@
+<ng-container *ngIf='employee'>
+  <h2 class="mb-32">Reporting Relations</h2>
+  <div class="d-flex justify-content-between align-items-center">
+    <h3 class="mb-0">User Reports To</h3>
+    <div class="btn-group">
+      <button class="btn btn-primary btn-icon" type="button" *ngIf="permissionList.EMPLOYEE_MANAGEMENTisAdmin"
+        (click)="modelPopup()" id="edit-reporting-relation">
+        <i class="icon icon icon-edit icon-big"></i>
+        Edit Reporting Relationships
+      </button>
+    </div>
+  </div>
+  <div class="row mt-14">
+    <div class="col-2">
+      <span class="small helper-text d-block mb-8">Direct Manager</span>
+      <span id="direct-manager-detail">{{reportingRelations?.reportingManager ? reportingRelations?.reportingManager?.lastName + ', ' +reportingRelations?.reportingManager?.firstName : '-'}}</span>
+    </div>
+    <div class="col-2">
+      <span class="small helper-text d-block mb-8">Approving Manager</span>
+      <span id="approving-manager-detail">{{reportingRelations?.approvingManager ? reportingRelations?.approvingManager?.lastName + ', ' +reportingRelations?.approvingManager?.firstName : '-'}}</span>
+    </div>
+    <div class="col-2">
+      <span class="small helper-text d-block mb-8">Practice Manager</span>
+      <span id="practice-manager-detail">{{reportingRelations?.practiceManager ? reportingRelations?.practiceManager?.lastName + ', ' + reportingRelations?.practiceManager?.firstName : '-'}}</span>
+    </div>
+  </div>
+  <h3 class="mt-32 mb-24">Reporting to this User</h3>
+  <div class="row" *ngIf='originalSubordinates?.length > 0'>
+    <div class="col-3">
+      <div class="form-group">
+        <label>Relationship</label>
+        <ng-select [items]="relationshipTypes" [(ngModel)]="selectedFilter" [clearable]="false"
+          [notFoundText]="'No record found'" (change)="search()" id="relationship-select">
+        </ng-select>
+      </div>
+    </div>
+    <div class="col-5 d-flex align-items-center">
+      <div class="header-search flex-fill d-flex">
+        <form action="#">
+          <div class="header-search-wrapper">
+            <div class="header-search-wrapper">
+              <input type="text" class="form-control search-input" placeholder="Search Employees"
+                [(ngModel)]="searchText" [ngModelOptions]="{standalone: true}" (keyup)="search()" id="search-employee">
+              <button class="btn" type="button" (click)="search()" id="search-btn">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="custom-table" *ngIf='originalSubordinates?.length > 0; else noSubOrdinates'>
+    <ngx-datatable #table class="material common-table no-min-height" [rows]="subordinates" [columnMode]="ColumnMode.force"
+      [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+      [limit]="page.size" [scrollbarH]='true' id="sub-ordinate-tbl" [sorts]="[{prop: 'lastName', dir: 'asc'}]">
+      <ngx-datatable-column [resizeable]="false" prop="fullName" name="Employee" [width]="250">
+        <ng-template let-row="row" ngx-datatable-cell-template>{{row.fullName}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [width]="130"></ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="relationshipTypes" name="Relationship" [width]="275">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <span>
+            {{row.relationshipTypes}}
+          </span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [width]="150">
+        <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <span><a class="text-decoration font-weight-medium" href="mailto:{{row.email}}" id="mail-to-index-{{rowIndex}}">{{row.email}}</a></span>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [resizeable]="false" prop="" name="Action" [width]="120" [sortable]="false" [headerClass]="'text-right'">
+        <ng-template let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <div class="d-flex justify-content-end">
+            <a href="javascript:void(0);" [routerLink]="['/employee/profile']" [queryParams]="{employeeId: row.id}"
+              class="font-weight-medium" id="view-profile-index-{{rowIndex}}">View Profile</a>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-footer>
+        <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+          let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+          <div class="d-flex justify-content-between flex-fill">
+            <div class="d-flex align-items-center">
+              <div class="table-items d-flex align-items-center mr-36">
+                Items per page:
+                <div class=" ml-8">
+                  <select class="custom-select border-less" [formControl]="pageSelector" (change)="changePageSize()">
+                    <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}</option>
+                  </select>
+                </div>
+              </div>
+              <span>
+                {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of
+                {{(rowCount > 1) ? (rowCount) +' items' : (rowCount) +' item'}}
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                <option *ngFor='let num of page.totalPages | counterPipe;trackBy:trackByFn;let i= index' [value]="i+1">Page {{ i+1 }}
+                  of {{page.totalPages}}</option>
+              </select>
+              <div class="ml-8">
+                <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                  [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                  [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                  [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                  (change)="table.onFooterPage($event);pageChange($event)">
+                </datatable-pager>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-footer>
+    </ngx-datatable>
+  </div>
+  <ng-template #noSubOrdinates>
+    <div class="report-no-user lh-20 text-center p-32">
+      No employees report to this user.
+    </div>
+  </ng-template>
+  <app-loader [active]="reportingRelationsLoading"></app-loader>
+</ng-container>

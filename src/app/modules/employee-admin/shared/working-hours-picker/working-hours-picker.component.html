@@ -1,0 +1,18 @@
+<div class="working-hours-picker">
+  <div class="row gutter-16">
+    <div class="col-6">
+      <select class="custom-select" [(ngModel)]='open' (ngModelChange)='oepnChange($event)'>
+        <ng-container *ngFor='let hour of hoursList;trackBy: trackByFn'>
+          <option value="{{hour.key}}">{{hour.value}}</option>
+        </ng-container>
+      </select>
+    </div>
+    <div class="col-6">
+      <select class="custom-select" [(ngModel)]='close' (ngModelChange)='closeChange($event)'>
+        <ng-container *ngFor='let hour of hoursList;trackBy: trackByFn'>
+          <option value="{{hour.key}}">{{hour.value}}</option>
+        </ng-container>
+      </select>
+    </div>
+  </div>
+</div>

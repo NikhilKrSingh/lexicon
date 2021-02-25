@@ -1,0 +1,55 @@
+.source{
+    width: 25%;
+}
+
+.client{
+    width: 18%;
+}
+
+.matter{
+    width: 18%;
+}
+
+.balance{
+    width: 15%;
+}
+
+.amount{
+    width: 15%;
+}
+
+.error{
+    margin-top: 5px;
+    color: red;
+}
+
+.custom-date{
+    width: 50% !important;
+}
+
+.specific-source{
+    color: #413A93 !important;
+    cursor: pointer !important;
+}
+
+.matter-name{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 200px !important;
+}
+
+.custom-input-color{
+    background-color: #f4f7f9 !important;
+}
+
+.bank-dropdown .ng-select .ng-select-container, .bank-dropdown .ng-select-container{
+    background-color: #ffffff !important;
+}
+
+body #acttrusttrnsfrsrc-banktrnsf-sltfoba .ng-dropdown-panel .ng-dropdown-panel-items {
+    max-height: 162px;
+}
+body #acttrusttrnsfrsrc-foba .ng-dropdown-panel .ng-dropdown-panel-items {
+    max-height: 162px;
+}

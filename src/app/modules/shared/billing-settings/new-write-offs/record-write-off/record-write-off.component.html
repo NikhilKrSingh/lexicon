@@ -1,0 +1,61 @@
+<div class="modal-header d-block pb-28">
+    <h2 class="modal-title mb-0">Record Write-Off</h2>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)='close()' id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-0 section-area">
+    <div class="row" [formGroup]='recordWriteOffForm'>
+      <div class="col-12">
+        <div class="form-group" [class.has-error]='recordWriteOffError?.code && formSubmitted'>
+          <label>Type <sup>*</sup></label>
+          <ng-select
+            [items]="writeOffCodes"
+            placeholder="Choose a Type"
+            id="record-write-off-type"
+            [(ngModel)]="selectedType"
+            (change)="changeType()"
+            [bindValue]="'id'" [bindLabel]="'codeName'" [notFoundText]="'No record found'" [selectOnTab]="true"
+            formControlName='type'>
+          </ng-select>
+          <app-validation-message [errorMessage]='recordWriteOffError?.codeMessage' *ngIf='recordWriteOffError?.code && formSubmitted'>
+          </app-validation-message>
+        </div>
+        <div class="form-group" [class.has-error]='recordWriteOffError?.amount && formSubmitted'>
+          <label>Write Off Amount <sup>*</sup></label>
+          <input type="text" class="form-control" placeholder="Enter dollar amount" prefix="$" mask="separator.2"
+            thousandSeparator="," formControlName='writeOffAmount' id="write-off-amount" (change)='validateRecordWriteOff()'>
+          <app-validation-message [errorMessage]='recordWriteOffError?.amountMessage' *ngIf='recordWriteOffError?.amount && formSubmitted'>
+          </app-validation-message>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group date-picker" [class.has-error]='recordWriteOffError?.date && formSubmitted'>
+          <label>Applicable Date <sup>*</sup></label>
+          <app-date-picker [id]="'write-off-applicable-date'" [isForm]='true' [maxDate]="maxDate" [dateform]='recordWriteOffForm'
+            controlName='applicableDate' (dataChange)='validateRecordWriteOff()'></app-date-picker>
+          <app-validation-message [errorMessage]='recordWriteOffError?.dateMessage' *ngIf='recordWriteOffError?.date formSubmitted'>
+          </app-validation-message>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-group position-relative" [class.has-error]='recordWriteOffError?.note  && formSubmitted'>
+          <label>Note to File<sup>*</sup></label>
+          <span class="count-char">{{recordWriteOffForm?.controls['noteToFile']?.value?.length || 0}}/1000</span>
+          <textarea class="form-control" maxlength="1000" rows="4" placeholder="Enter Note to File"
+            formControlName='noteToFile' id="write-off-note-tofile" (change)='validateRecordWriteOff()'></textarea>
+          <app-validation-message [errorMessage]='recordWriteOffError?.noteMessage' *ngIf='recordWriteOffError?.note && formSubmitted'>
+          </app-validation-message>
+        </div>
+      </div>
+    </div>
+    <app-loader [active]="modalLoading"></app-loader>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)='close()' id="write-off-cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)='save()' id="write-off-save-btn">
+      Save Changes
+    </button>
+  </div>
+  <app-loader [active]="loading"></app-loader>

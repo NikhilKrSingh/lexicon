@@ -1,0 +1,411 @@
+<h3 class="mb-8 mt-4">{{ bankType !== 'creditCardTrustBank' ? 'Trust Bank Accounts' : editCreditCard ? 'Edit Credit Card
+  Trust Bank Account' : 'Select Credit Card Trust Bank Account' }}
+  <sup *ngIf="(bankType !== 'creditCardTrustBank') && (originalOfficeBankList?.length > 1) && (mode !== 'view')"
+    class="text-danger">
+    *</sup>
+</h3>
+<div *ngIf="bankType === 'creditCardTrustBank'" class="modal-header d-block pb-0 custom-cross">
+  <button type="button" class="close" (click)="modalService.dismissAll('Cross click')" aria-label="Close"
+    id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<span *ngIf="(bankType !== 'creditCardTrustBank') && (originalOfficeBankList?.length > 1) && (mode !== 'view')">
+  Select at least one trust bank account to apply to the office.
+</span>
+<span *ngIf="bankType === 'creditCardTrustBank'">Select one credit card trust bank account for <b>{{ bankAccountName
+    }}</b>.</span>
+<div *ngIf="(((bankType == 'trustBankAccount') && (mode != 'view')) || isEdit) && !permissionList?.ACCOUNTINGisAdmin"
+  class="alert alert-warning d-flex justify-content-between my-24 no-shadow" id="warning-confirm-ac-department">
+  <div class="d-flex has-error">
+    <em class="alert-icon icon icon-warning ml-12"></em>
+    <div class="d-flex align-items-center flex-wrap">
+      <h4 class="mr-16 mt-0 mb-0">Warning</h4>
+      <span>Please confirm with your accounting department before connecting any accounts to the office.</span>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="(bankType !== 'creditCardTrustBank' && (trustAccountError && !selectedRowsLength))"
+  class="alert alert-danger d-flex justify-content-between my-24 no-shadow" id="warning-sel-trust-ac">
+  <div class="d-flex has-error">
+    <em class="alert-icon icon icon-info ml-12"></em>
+    <div class="d-flex align-items-center flex-wrap">
+      <h4 class="mr-16 mt-0 mb-0">Error</h4>
+      <span>Please select a trust bank account before proceeding.</span>
+    </div>
+  </div>
+</div>
+
+<div class="alert alert-danger d-flex justify-content-between mb-0 mt-12 fs-14" role="alert"
+  *ngIf="matterAssigned>=1 && isEdit && isChecked">
+  <div class="d-flex align-items-center mr-32">
+    <em class="alert-icon icon icon-error fs-14 mt-4"></em>
+    <div class="d-flex align-items-center flex-wrap" *ngIf="matterAssigned>=1">
+      <h5 class="mr-16 mt-0 mb-0">Error</h5>
+      You cannot remove this bank account as it is assigned to at least one matter. Please remove from its assigned
+      matter first.
+    </div>
+  </div>
+  <span class="alert-close" (click)='dismissFaviconError()'><em class="icon icon-close"></em></span>
+</div>
+
+<div *ngIf="(originalOfficeBankList?.length > 1) || (bankType === 'creditCardTrustBank')" class="row my-24">
+  <div class="col-10">
+    <div class="header-search flex-fill d-flex">
+      <form action="#">
+        <div class="header-search-wrapper">
+          <input type="text" class="form-control search-input" name="searchAccount"
+            placeholder="Search by account name or account number" [(ngModel)]="searchText" (keyup)='applyFilter()'
+            [disabled]="loading" id="search-account">
+
+          <button class="btn" type="button" (click)='applyFilter()' [disabled]="loading"
+            id="apply-filter-btn">Search</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div *ngIf="(bankType == 'creditCardTrustBank') && (mode == 'view')" class="row mb-18">
+  <div class="col-3">
+    <div class="form-group">
+      <label>Transaction Type</label>
+      <ng-select [items]="transactionAccountFilterList" placeholder="Choose an option"
+        [(ngModel)]="transactionAccountFilterId" [bindValue]="'id'" [bindLabel]="'name'" [readonly]="loading"
+        [clearable]='false' [selectOnTab]="true" (change)="applyFilter()" id="transactiontype-select">
+      </ng-select>
+    </div>
+  </div>
+</div>
+<div *ngIf="(bankType !== 'creditCardTrustBank') && (originalOfficeBankList?.length > 1)" class="row mb-18">
+  <div class="col-3">
+    <div class="form-group">
+      <label>Merchant Account</label>
+      <ng-select [items]="merchantAccountFilterList" placeholder="Choose an option"
+        [(ngModel)]="merchantAccountFilterId" [bindValue]="'id'" [bindLabel]="'name'" [clearable]="true"
+        [selectOnTab]="true" [readonly]="loading" (change)="applyFilter()" id="merchant-ac-select">
+      </ng-select>
+    </div>
+  </div>
+  <div class="col-3">
+    <div class="form-group">
+      <label>Transaction Account</label>
+      <ng-select [items]="transactionAccountFilterList" placeholder="Choose an option"
+        [(ngModel)]="transactionAccountFilterId" [bindValue]="'id'" [bindLabel]="'name'" [readonly]="loading"
+        [clearable]='true' [selectOnTab]="true" (change)="applyFilter()" id="transaction-acc-select">
+      </ng-select>
+    </div>
+  </div>
+
+</div>
+<div
+  [class]="(originalOfficeBankList?.length == 1) && (bankType != 'creditCardTrustBank') ? 'custom-table custom-height section-area' : 'custom-table section-area'">
+  <ngx-datatable #table id="officebanklist-tabl" class="material common-table datatable-auto-height " [class.fix-col-right]="isView"
+    [class.no-min-height]="!isView" [class.matter-no-data]="officeBankList?.length === 0" [rows]="officeBankList"
+    [columnMode]="'force'" [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto"
+    [selectionType]="SelectionType.checkbox" [count]="page1.totalElements" [offset]="page1.pageNumber"
+    [limit]="page1.size" [selected]="selected" (select)="onSelect($event)" [scrollbarV]="false" [scrollbarH]="true"
+    [sorts]="[{prop: 'name', dir: 'asc'}]">
+    <ngx-datatable-column [resizeable]="false" [sortable]="true" name="Name" [canAutoResize]="false" [width]="300"
+      *ngIf="bankType === 'creditCardTrustBank'">
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <div class="d-flex">
+          <div class="custom-control custom-radio-position custom-radio mb-0 pr-8">
+            <input type="radio" id="select_{{row?.usioBankAccountId}}" [value]="row?.usioBankAccountId"
+              class="custom-control-input" name="creditCardTrustAccount"
+              [checked]="creditCardBankId == row?.usioBankAccountId || row?.matterAssigned == 0"
+              (change)="onSelect(row)">
+            <label class="custom-control-label" for="select_{{row?.usioBankAccountId}}"></label>
+          </div>
+          <span>{{ value }}</span>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" *ngIf="bankType !== 'creditCardTrustBank'" name="Name" prop="name"
+      [width]="120">
+      <ng-template ngx-datatable-cell-template let-value="value" let-row="row" let-isSelected="isSelected"
+        let-rowIndex="rowIndex" let-onCheckboxChangeFn="onCheckboxChangeFn">
+        <div class="d-flex align-items-start">
+          <label [hidden]="(originalOfficeBankList?.length == 0) || (!isEdit && mode === 'view')"
+            class="cust-check mr-12 mt-2">
+            <input
+              [checked]="(isCheckBoxHidden && (isEdit || mode != 'view')) ||(row?.isSelected && isEdit && (mode == 'view')) || ((trustAccountIds  | indexfinder : row.usioBankAccountId) > -1 ) || (row?.isSelected && row?.matterAssigned>=1)"
+              type="checkbox" (change)="onCheckboxChangeFn(row);onCheckBoxChange(row,rowIndex,$event)" [disabled]="isCheckBoxHidden"/>
+            <span class="check-style"></span>
+          </label>
+          {{value}}
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" *ngIf="bankType !== 'creditCardTrustBank'" prop="isMerchantAccount"
+      name="Merchant Account" [width]="160">
+      <ng-template ngx-datatable-cell-template let-value="value">
+        <div *ngIf="value" class="ml-48">
+          <em class="icon icon-check fs-10 icon-color"></em>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" *ngIf="(bankType !== 'creditCardTrustBank') || (mode == 'view')"
+      prop="isCreditCardAccount" name="Credit Card" [width]="120">
+      <ng-template ngx-datatable-cell-template let-value="value">
+        <div *ngIf="value" class="ml-28">
+          <em class="icon icon-check fs-10 icon-color"></em>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" *ngIf="(bankType !== 'creditCardTrustBank') || (mode == 'view')"
+      prop="isAchAccount" name="ACH" [width]="120">
+      <ng-template ngx-datatable-cell-template let-value="value">
+        <div *ngIf="value" class="ml-8">
+          <em class="icon icon-check fs-10 icon-color"></em>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" name="Account Number" [width]="160">
+      <ng-template ngx-datatable-cell-template let-value="value" let-row="row">
+        <span>{{ '---- ---- ---- ' + (row?.merchantAccountNumber || row?.nonMerchantAccountNumber) |
+          slice:(value?.length - 4) }}</span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" prop="lastTransactionDate" name="Last Transaction Date" [width]="190">
+      <ng-template ngx-datatable-cell-template let-value="value">
+        <span>{{ value | date: 'MM/dd/yyyy'}}</span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column [resizeable]="false" [frozenRight]='false' prop="matterAssigned" name="Matter Assigned" [width]="200">
+      <ng-template ngx-datatable-cell-template let-value="value">
+        <span>{{value}}</span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column *ngIf="isView" [resizeable]="false" [headerClass]="'text-right'" [sortable]="false"
+      name="Action" [frozenRight]='true' [width]="96">
+      <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+        <div class="d-flex justify-content-end" *ngIf="row.matterAssigned>=1">
+          <!-- fix actionable menu -->
+          <div ngbDropdown *ngIf="hiddenMenu"></div>
+          <!-- fix actionable menu -->
+          <div ngbDropdown container="body" class="dropdown-hover-table d-flex justify-content-end">
+            <div class="dropdown-hover-table pr-0" ngbDropdownToggle>
+              <em class="icon icon-dot-verti pr-0"></em>
+            </div>
+            <div ngbDropdownMenu class="dropdown-menu dropdown-menu-right overflow-hide custom-height">
+              <div class="dropdown-slimscrol">
+                <a class="dropdown-item" href="javascript:void(0)" (click)="open(addUser,'','modal-xlg',row)"
+                id="edit-group-index-{{rowIndex}}">
+                View Assigned Matters
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-footer>
+      <ng-template let-rowCount="rowCount" ngx-datatable-footer-template let-pageSize="pageSize" let-curPage="curPage"
+        let-offset="offset" let-isVisible="isVisible">
+        <div class="d-flex justify-content-between flex-fill">
+          <div class="d-flex align-items-center">
+            <div class="table-items d-flex align-items-center mr-36">
+              Items per page:
+              <div class=" ml-8">
+                <select class="custom-select border-less" [formControl]="selectPageSize1" (change)="pageSizeChange1()">
+                  <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">
+                    {{ limit }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <span>
+              {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+              {{(rowCount > (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount)}} item(s)
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <select class="custom-select border-less" [(ngModel)]="pageSelected1" (change)="changePage1()">
+              <option *ngFor='let num of page1.totalPages | counterPipe;trackBy: trackByFn;let i= index' [value]="i+1">
+                Page {{ i+1 }} of {{page1.totalPages}}
+              </option>
+            </select>
+            <div class="ml-8">
+              <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)" (change)="table.onFooterPage($event);changePageDropDown1($event)">
+              </datatable-pager>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ngx-datatable-footer>
+  </ngx-datatable>
+  <app-loader [active]="loading"></app-loader>
+  <br *ngIf="officeBankList.length <= 10">
+</div>
+<ng-template #addUser let-modal>
+  <div class="modal-header d-block pb-8">
+    <h3 class="modal-title mb-0">Assigned Matters</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="d-flex">
+    All Matters assigned for&nbsp;<b>{{selectedAccount}}</b>
+  </div>
+  <br>
+  <div *ngIf="isEdit" class="alert alert-primary d-flex justify-content-between mb-32 no-shadow col-12" id="alert">
+    <div class="d-flex">
+      <em class="alert-icon icon icon-info"></em>
+      <div class="d-flex align-items-center flex-wrap">
+        You are currently in edit mode. If you would like to view a matter please save your changes first.
+      </div>
+    </div>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between mb-24">
+          <div class="header-search flex-fill d-flex">
+            <form action="#" class="md-search">
+              <div class="header-search-wrapper">
+                <input type="text" class="form-control search-input"
+                  placeholder="Search by matter name or matter number" (keyup)="searchFilter($event)"
+                  [ngModelOptions]="{standalone: true}" [(ngModel)]="searchString" id="matter-list-search-input">
+                <button class="btn" type="submit" id="search-btn">Search</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="custom-table">
+      <div class="position-relative">
+        <div class="custom-table matter-list">
+          <ngx-datatable #table class="material common-table matter-table" id="matter-list-table"
+            [class.matter-no-data]="matterList?.length === 0" [rows]="matterList" [headerHeight]="50"
+            [footerHeight]="50" rowHeight="auto" [count]="page.totalElements" [offset]="page.pageNumber"
+            [limit]="page.size" [selectionType]="'checkbox'" [scrollbarV]="false" [scrollbarH]="true"
+            (sort)="calcTotalPages()" [sorts]="[{prop: 'matterNumber', dir: 'desc'}]" [class.fix-col-right]="!isEdit">
+            <ngx-datatable-column [resizeable]="false" prop="matterNumber" name="Matter Number" [width]="150"
+              [headerClass]="'checkbox-header'">
+              <ng-template ngx-datatable-header-template let-value="value">
+                <span class="datatable-header-cell-wrapper cursor-default" (click)="$event.stopPropagation()">
+                  <span class="datatable-header-cell-label">Matter Number</span>
+                </span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="matterName" name="Matter Name" [width]="320">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <app-custom-tooltip [text]='value' [maxLength]='45'></app-custom-tooltip>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="cname" name="Client Name" [width]="300">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <app-custom-tooltip [text]='value' [maxLength]='40'></app-custom-tooltip>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="rname" name="Responsible Attorney" [width]="300">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <app-custom-tooltip [text]='value' [maxLength]='35'></app-custom-tooltip>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="billType" name="Bill Type" [width]="150">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <app-custom-tooltip [text]='value' [maxLength]='30'></app-custom-tooltip>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="true" prop="matterType.name" name="Matter Type"
+              [width]="220">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <app-custom-tooltip [text]='value' [maxLength]='30'></app-custom-tooltip>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="matterPrimaryOffice.name" name="Matter Office"
+              [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <app-custom-tooltip [text]='value' [maxLength]='28'></app-custom-tooltip>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="matterOpenDate" name="Matter Open Date" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span>{{value | date : 'MM/dd/yyyy'}} </span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="matterCloseDate" name="Matter Close Date" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span>{{value | date : 'MM/dd/yyyy'}} </span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="matterStatus.name" name="Status" [width]="180">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" name="Action" [frozenRight]='true'
+              [width]="150" *ngIf="!isEdit">
+              <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-end">
+                  <span><a class="font-weight-medium" href="javascript:void(0);" [routerLink]="['/matter/dashboard']"
+                      [queryParams]="{matterId: row.id}" id="matter-view-{{row.id}}" (click)="closeDialog()">View
+                      Matter</a>
+                  </span>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-footer>
+              <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset" let-isVisible="isVisible">
+                <div class="d-flex justify-content-between flex-fill">
+                  <div class="d-flex align-items-center">
+                    <div class="table-items d-flex align-items-center mr-36">
+                      Items per page:
+                      <div class=" ml-8">
+                        <select class="custom-select border-less" [formControl]="pageSelector"
+                          (change)="changePageSize()">
+                          <option *ngFor="let limit of limitArray;trackBy: trackByFn" [value]="limit">{{ limit }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                    <span>
+                      {{(rowCount > 0 ? (( offset * pageSize ) + 1 ) : 0)}} -
+                      {{(rowCount> (curPage*pageSize)) ? (curPage*pageSize):(rowCount)}} of {{(rowCount > 1) ?
+                      (rowCount) +' items' : (rowCount) +' item'}}
+                    </span>
+                  </div>
+
+                  <div class="d-flex align-items-center">
+                    <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                      <option *ngFor='let num of page.totalPages | counterPipe;trackBy: trackByFn;let i= index'
+                        [value]="i+1">
+                        Page {{ i+1 }} of {{page.totalPages}}
+                      </option>
+                    </select>
+                    <div class="ml-8">
+                      <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                        [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                        [pagerPreviousIcon]="'datatable-icon-prev'" [pagerNextIcon]="'datatable-icon-skip'"
+                        [page]="curPage" [size]="pageSize" [count]="rowCount"
+                        (change)="table.onFooterPage($event);changePageDropDown($event)">
+                      </datatable-pager>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-footer>
+          </ngx-datatable>
+        </div>
+        <app-loader [active]="loading"></app-loader>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Close</button>
+  </div>
+</ng-template>

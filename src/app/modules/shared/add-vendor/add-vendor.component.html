@@ -1,0 +1,127 @@
+
+<div style="z-index: 1050" aria-hidden="true" class="modal-backdrop fade show"></div>
+<div class="modal fade show d-block">
+  <div class="modal-dialog modal-dialog-centered modal-xl margin-auto">
+    <div class="modal-content">
+      <div class="modal-header d-block">
+        <h3 class="modal-title mb-0">{{(mode == 'create') ? 'Add ' : 'Edit '}} {{type}}</h3>
+        <button aria-label="Close" class="close" type="button" (click)="close()" id="close-btn"><em class="icon icon-close"></em>
+        </button>
+      </div>
+
+      <div class="modal-body pb-0">
+        <div class="form-group" *ngIf="mode == 'create'">
+          <div class="custom-control custom-radio">
+            <input type="radio" id="cust-rdcrtnewoppoprt" [(ngModel)]="selectOppPartType" value="create"
+              name="customRadio" class="custom-control-input">
+            <label class="custom-control-label" for="cust-rdcrtnewoppoprt">Create new {{type}}</label>
+          </div>
+          <div class="custom-control custom-radio">
+            <input type="radio" id="cust-rdextassocias" [(ngModel)]="selectOppPartType" value="existing"
+              name="customRadio" class="custom-control-input">
+            <label class="custom-control-label" for="cust-rdextassocias">Select from existing Associations</label>
+          </div>
+        </div>
+
+        <form [formGroup]="vendorForm" (ngSubmit)="save()" *ngIf="selectOppPartType === 'create'">
+          <div class="row gutter-16">
+            <div class="col-4">
+              <div class="form-group">
+                <label>Contact Number</label>
+                <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group" [class.has-error]='formSubmitted && f.FirstName.invalid'>
+                <label>First Name <sup>*</sup></label>
+                <input type="text" class="form-control" formControlName="FirstName" placeholder="Enter First Name" id="first-name">
+                <span class="field-message text-danger" *ngIf="f.FirstName.errors && formSubmitted">
+                  <span *ngIf="f.FirstName.errors.required && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    {{error_data.first_name_error}}
+                  </span>
+                </span>
+                <span class="field-message text-danger"
+                  *ngIf="!!f.FirstName.value && formSubmitted && f.FirstName.invalid">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.insecure_input}}
+                </span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group" [class.has-error]='formSubmitted && f.LastName.invalid'>
+                <label>Last Name <sup>*</sup></label>
+                <input type="text" class="form-control" formControlName="LastName" placeholder="Enter Last Name" id="last-name">
+                <span class="field-message text-danger" *ngIf="f.LastName.errors && formSubmitted">
+                  <span *ngIf="f.LastName.errors.required && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    {{error_data.last_name_error}}
+                  </span>
+                </span>
+                <span class="field-message text-danger"
+                  *ngIf="!!f.LastName.value && formSubmitted && f.LastName.invalid">
+                  <em class="icon icon-error mr-4"></em>
+                  {{error_data.insecure_input}}
+                </span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group" [class.has-error]='formSubmitted && (f.Email.invalid || (!!f.Email.value && (!!f.Email.errors && f.Email.errors.pattern)))'>
+                <label>Email Address <sup>*</sup></label>
+                <input type="email" name="email" formControlName="Email" class="form-control"
+                placeholder="Enter Email Address" value="Email Address" required autocomplete="off" id="email-address">
+                  <span class="field-message text-danger" *ngIf="!f.Email.value && formSubmitted">
+                    <span *ngIf="!f.Email.value && formSubmitted">
+                      <em class="icon icon-error mr-4"></em>
+                      {{error_data.email_error}}
+                    </span>
+                  </span>
+                  <span class="field-message text-danger" *ngIf="f['Email'].errors?.pattern && formSubmitted">
+                    <em class="icon icon-error mr-4"></em>
+                    {{ error_data?.email_not_valid }}
+                  </span>
+                  <span class="field-message text-danger"
+                    *ngIf="formSubmitted && (!!f.Email.value && (!!f.Email.errors && f['Email'].errors?.insecure_input))">
+                    <em class="icon icon-error mr-4"></em>
+                    {{error_data.insecure_input}}
+                  </span>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div
+                [ngClass]="(vendorForm.controls.PrimaryPhone.invalid && primaryPhoneBlur)?'form-group has-error':'form-group'">
+                <label>Phone Number</label>
+                <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="false"
+                  formControlName="PrimaryPhone"
+                  (blur)="onBlurMethod(vendorForm.controls.PrimaryPhone.value,'PrimaryPhone')" placeholder="(###) ###-####" id="phone-number"/>
+                <span class="field-message text-danger"
+                  *ngIf="vendorForm.controls.PrimaryPhone.invalid && primaryPhoneBlur"><em
+                    class="icon icon-error mr-4"></em>
+                  Invalid phone number
+                </span>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div *ngIf="selectOppPartType === 'existing'">
+          <app-association-search [associationType]="type" (selectedAssociation)='onAssociationSelect($event)'>
+          </app-association-search>
+        </div>
+      </div>
+      <div class="modal-footer" *ngIf="selectOppPartType === 'create'">
+        <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+        <button type="submit" (click)="save()" class="btn btn-primary" id="save-btn">
+          Save
+        </button>
+      </div>
+      <div class="modal-footer" *ngIf="selectOppPartType === 'existing'">
+        <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="associate()" id="save-btn">Save
+        </button>
+      </div>
+      <app-loader [active]='loading'></app-loader>
+    </div>
+  </div>
+</div>

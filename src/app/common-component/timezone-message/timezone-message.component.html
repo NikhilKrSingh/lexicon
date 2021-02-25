@@ -1,0 +1,45 @@
+<div class="alert alert-warning d-flex justify-content-between align-items-start pr-16" role="alert"
+  *ngIf="displayMismatchedTZAlert">
+  <div class="d-flex">
+    <em class="alert-icon icon icon-warning fs-14"></em>
+    <div>
+      <h5 class="mr-0 mt-0 mb-4">Mismatched Time Zone</h5>
+      <div class="lh-20 timezone-max" *ngIf="!currentTZOutsideUS">
+        <p>The time zone set for your Lexicon profile doesn’t match the time zone set for your machine/device. Your
+          calendar and any events will appear relative to the time zone set for your profile. All other dates/times in
+          Lexicon will appear in your machine/device’s time zone. </p>
+        <span>
+          <strong>Your Lexicon Time Zone:</strong> {{settingsTZ?.name}}
+        </span>
+        <br>
+        <p>
+          <strong>Machine/Device Time Zone:</strong> {{currentTZ?.name}}
+        </p>
+        <p>Visit the <a class="font-weight-medium" (click)="openCalSettings()" href="javascript:void(0);">Calendar
+            Settings</a> page to make any
+          desired changes, or you can dismiss this message.</p>
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="customCheck1" (change)="isSelected($event)">
+          <label class="custom-control-label" for="customCheck1">Don't show me this message again</label>
+        </div>
+      </div>
+      <div class="lh-20 timezone-max" *ngIf="currentTZOutsideUS">
+        <p>The time zone set for your Lexicon profile doesn’t match the time zone set for your machine/device, as you are
+          currently outside of the US. Your
+          calendar and any events will appear relative to the time zone set for your profile. All other dates/times in
+          Lexicon will appear in your machine/device’s time zone. </p>
+        <div class="mb-24">
+          <span>
+            <strong>Your Lexicon Time Zone:</strong> {{settingsTZ.name}}
+          </span>
+        </div>
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="customCheck1" (change)="isSelected($event)">
+          <label class="custom-control-label" for="customCheck1">Don't show me this message again</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="alert-close" (click)="displayMismatchedTZAlert = !displayMismatchedTZAlert; onClose()" aria-label="Close button"><em
+      class="icon icon-close"></em></span>
+</div>

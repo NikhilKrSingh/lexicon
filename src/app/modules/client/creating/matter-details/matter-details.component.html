@@ -1,0 +1,833 @@
+<div class="npc-block base-matt-info-block">
+  <h2 class="mb-24">Matter Details</h2>
+  <form [formGroup]="matterForm">
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="row gutter-16">
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.matterNumber.errors">
+              <label>Matter Number</label>
+              <input type="text" class="form-control disabled" disabled formControlName="matterNumber" id="matter-number">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.matterNumber.errors">
+                <span *ngIf="f.matterNumber.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter matter number
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.matterName.errors">
+              <label>Matter Name <sup>*</sup></label>
+              <input class="form-control" type="text" formControlName="matterName" placeholder="Enter matter name" id="matter-name">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.matterName.errors">
+                <span *ngIf="f.matterName.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter matter name
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.matterOpenDate.errors">
+              <label>Matter Open Date <sup>*</sup> </label>
+              <app-date-picker [isForm]='true' [minDate]='minMatterOpenDate' [maxDate]="currentDate" [dateform]='matterForm'
+                controlName='matterOpenDate' id="matter-open-date"></app-date-picker>
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.matterOpenDate.errors">
+                <span *ngIf="f.matterOpenDate.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select matter open date
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.primaryLawOffice.errors">
+              <label>Matter Law Office <sup>*</sup></label>
+              <ng-select [items]="officeList" placeholder="Select matter law office" formControlName="primaryLawOffice"
+                [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'" (change)='officeChange()'
+                [selectOnTab]="true" id="matter-law-office">
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.primaryLawOffice.errors">
+                <span *ngIf="f.primaryLawOffice.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select matter law office
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.practiceId.errors">
+              <label>Practice Area<sup>*</sup></label>
+              <ng-select [items]="practiceList" placeholder="Select a practice area" formControlName="practiceId"
+                [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true"
+                (change)="changePracticeArea($event, changeJurisdictionMatter, changePracticeAreaDocumentModel)"
+                (open)='setPrevPracticeArea()' [readonly]="!matterForm.value.primaryLawOffice" id="practice-area-select">
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.practiceId.errors">
+                <span *ngIf="f.practiceId.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select practice area
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.matterTypeId.errors">
+              <label>Matter Type <sup>*</sup> </label>
+              <ng-select [items]="matterTypeList" placeholder="Select a matter type" formControlName="matterTypeId"
+                [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true"
+                [readonly]="!matterForm.value.practiceId || matterTypeList.length == 1 || matterTypeLoad" id="matter-type-select">
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.matterTypeId.errors">
+                <span *ngIf="f.matterTypeId.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select matter type
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.juridictionState.errors">
+              <label>Jurisdiction of Matter - State <sup>*</sup></label>
+              <ng-select [items]="stateList" placeholder="Select state" formControlName="juridictionState"
+                [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'"
+                (change)="changeState($event, changeJurisdictionMatter)" [selectOnTab]="true" id="matter-state-select">
+              </ng-select>
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.juridictionState.errors">
+                <span *ngIf="f.juridictionState.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select jurisdiction of matter - state
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.juridictionCounty.errors">
+              <label>Jurisdiction of Matter - County <sup>*</sup></label>
+              <input type="text" class="form-control" formControlName="juridictionCounty" placeholder="County">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.juridictionCounty.errors" id="matter-country-select">
+                <span *ngIf="f.juridictionCounty.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please select jurisdiction of matter - county
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group" [class.has-error]="formSubmitted && f.caseNumbers.errors">
+              <label>Case Number(s)</label>
+              <input type="text" class="form-control" formControlName="caseNumbers" placeholder="Enter case number(s)" id="case-number">
+              <span class="field-message text-danger" *ngIf="formSubmitted && f.caseNumbers.errors">
+                <span *ngIf="f.caseNumbers.errors.required">
+                  <em class="icon icon-error mr-4"></em>
+                  Please enter case number
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-loader [active]="matterLoading"></app-loader>
+
+
+    <div class="info-block pt-24 pb-24" *ngIf="clientType == 'corporate'">
+      <div class="d-flex align-items-center mb-16">
+        <h2 class="mb-0 mr-16">Corporate Contacts</h2>
+        <p class="m-0 lh-20 d-flex align-items-start" *ngIf="displayMessageForcrpc || corporateContactList?.length == 0">
+            <em class="icon icon-info text-primary mr-8 mt-2"></em>
+          An external document portal account will be created for the Primary and Billing contacts and will be sent to
+          their email address.
+        </p>
+      </div>
+      <p class="lh-20">
+          There must be exactly one (1) Primary Contact and Billing Contact assigned to the client.
+        <br />
+        Please ensure both of these roles are assigned to the Corporate Contact (they can be the same person).
+        Multiple General Counsels are permitted.
+      </p>
+      <button class="btn btn-primary btn-icon" type="button"
+        (click)="openAddCorporateContactDialog(AddCorporateContact,'xl','', true)" id="add-corporate-contact">
+        <i class="icon icon-plus"></i> Add Corporate Contact
+      </button>
+
+      <div class="alert alert-danger d-flex justify-content-between mt-24 mb-8"
+        [class.ng-invalid]="formSubmitted && corporateError" [class.has-error]="formSubmitted && corporateError"
+        role="alert" *ngIf="formSubmitted && corporateError" id="corporate-error-log">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-error text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+            Please add exactly one Primary and one Billing Contact. One Person can fill both roles.
+          </div>
+        </div>
+      </div>
+
+      <div class="position-relative pt-24 mb-16" *ngIf='corporateContactList?.length > 0'>
+        <div class="custom-table matter-list corporate-contact section-area">
+          <ngx-datatable #corporatcnttable class="material common-table fix-col-right no-min-height" [rows]="corporateContactList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="0" rowHeight="50"
+            [selectionType]="'checkbox'" [scrollbarV]="false" [scrollbarH]="true" [messages]="messages" id="corporate-contact-tbl">
+
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="uniqueNumber" name="Contact Number" [width]="200">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="name" name="Name" [width]="200">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span>{{row.firstName}}, {{row.lastName}}</span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="jobTitle" name="Job Title" [width]="150">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="email" name="Email Address" [width]="200">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="dispPrimaryPhone" name="Phone Number" [width]="200">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" prop="status" name="Status" [width]="100"></ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-center'" prop="matterCloseDate"
+              name="Primary Contact" [width]="150">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-center">
+                  <div class="custom-control custom-checkbox m-0 pr-0">
+                    <input type="checkbox" class="custom-control-input" id="dropcheck-crp-cnt-prm{{row.uniqueNumber}}"
+                      [(ngModel)]="row.isPrimary" [ngModelOptions]="{standalone: true}" disabled>
+                    <label class="custom-control-label" for="dropcheck-crp-cnt-prm{{row.uniqueNumber}}"></label>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-center'" prop="matterCloseDate"
+              name="Billing Contact" [width]="150">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-center">
+                  <div class="custom-control custom-checkbox m-0 pr-0 text-center">
+                    <input type="checkbox" class="custom-control-input" id="dropcheck-crp-cnt-bill{{row.uniqueNumber}}"
+                      [(ngModel)]="row.isBilling" [ngModelOptions]="{standalone: true}" disabled>
+                    <label class="custom-control-label" for="dropcheck-crp-cnt-bill{{row.uniqueNumber}}"></label>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-center'" prop="matterCloseDate"
+              name="General Counsel" [width]="150">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-center">
+                  <div class="custom-control custom-checkbox m-0 pr-0 text-center">
+                    <input type="checkbox" class="custom-control-input" id="dropcheck-crp-cnt-gene{{row.uniqueNumber}}"
+                      [(ngModel)]="row.generalCounsel" [ngModelOptions]="{standalone: true}" disabled>
+                    <label class="custom-control-label" for="dropcheck-crp-cnt-gene{{row.uniqueNumber}}"></label>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-right'" name="Action"
+              [frozenRight]='true' [width]="100">
+              <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                <div class="d-flex justify-content-end">
+                  <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                    [class.active]="currentActive == rowIndex" (click)="openMenu(rowIndex, $event)"
+                    appAutoCloseOutsideClick (outsideClick)="onClickedOutside($event, rowIndex)">
+                    <div class="icon-group d-flex justify-content-end">
+                      <span (click)="editCorporateContact($event, AddCorporateContact,row, rowIndex)" id="edit-corporate-contact-index-{{rowIndex}}">
+                        <em class="icon icon-edit icon-color"></em>
+                      </span>
+                      <span (click)="deleteClientAssociation($event, row, rowIndex)" id="delete-corporate-contact-index-{{rowIndex}}">
+                        <em class="icon icon-remove icon-color"></em>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+        <app-loader [active]="contactLoading"></app-loader>
+      </div>
+    </div>
+
+
+
+    <div class="pt-8 pb-32">
+      <h3 class="mb-12">Attorney</h3>
+      <p class="lh-20">There must be exactly one (1) Originating Attorney, Responsible Attorney, and Billing Attorney
+        assigned to the matter.</p>
+      <button class="btn btn-primary btn-icon" type="button" (click)="createAttorney()"
+        [disabled]="(attorneyFormGroup?.controls?.length >= 3) ? 'disabled' : ''" id="create-attorney"><i class="icon icon-plus"></i> Assign
+        Attorney</button>
+
+
+      <div class="alert alert-danger d-flex justify-content-between mt-24 mb-8"
+        [class.ng-invalid]="attorneyFormGroup.status === 'INVALID' && formSubmitted && !attorneyFormGroup.errors?.required"
+        role="alert"
+        *ngIf="attorneyFormGroup.status === 'INVALID' && formSubmitted && !attorneyFormGroup.errors?.required">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-error text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+            Please select attorney.
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-danger d-flex justify-content-between mt-24 mb-8"
+        [class.ng-invalid]="attorneyFormGroup.errors?.required && formSubmitted" role="alert"
+        *ngIf="attorneyFormGroup.errors?.required && formSubmitted">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-error text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+            Please assign a Responsible Attorney to the matter.
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-danger d-flex justify-content-between mt-24 mb-8"
+        [class.ng-invalid]="isSelectedEachError && formSubmitted && !attorneyFormGroup.errors?.required && !blankError && !duplicate && attorneyFormGroup.status === 'VALID'"
+        role="alert"
+        *ngIf="isSelectedEachError && formSubmitted && !attorneyFormGroup.errors?.required && !blankError && !duplicate && attorneyFormGroup.status === 'VALID'">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-error text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+            Please assign at least one role to each attorney.
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-danger d-flex justify-content-between mt-24 mb-8"
+        [class.ng-invalid]="formSubmitted  && attorneyFormGroup.status === 'VALID' && ((duplicate && !attorneyFormGroup.errors?.required && !blankError) || (missingTypeAttorney && !blankError))"
+        role="alert"
+        *ngIf="formSubmitted  && attorneyFormGroup.status === 'VALID' && ((duplicate && !attorneyFormGroup.errors?.required && !blankError) || (missingTypeAttorney && !blankError))">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-error text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+            Please select exactly one Originating, one Responsible and one Billing Attorney. One person can fill
+            multiple
+            roles.
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-danger d-flex justify-content-between mt-24 mb-8"
+        [class.ng-invalid]="blankError && formSubmitted && !attorneyFormGroup.errors?.required && attorneyFormGroup.status === 'VALID'"
+        role="alert"
+        *ngIf="blankError && formSubmitted && !attorneyFormGroup.errors?.required && attorneyFormGroup.status === 'VALID'">
+        <div class="d-flex">
+          <em class="alert-icon icon icon-error text-large"></em>
+          <div class="d-flex align-items-center flex-wrap">
+            <h5 class="mr-16 mt-0 mb-0">Error</h5>
+            No roles have been selected. Please assign the Originating, Responsible, and Billing roles by selecting the
+            checkboxes below.
+          </div>
+        </div>
+      </div>
+      <div class="pt-16" *ngIf="attorneyFormGroup?.controls?.length > 0">
+        <div class="table-responsive">
+          <table class="table table-striped table-borderless attorney-cust-table" [formGroup]="attorneyForm">
+            <thead>
+              <tr>
+                <th class="has-sort" (click)="sortAttorney('name')">Name</th>
+                <th class="text-center">Originating</th>
+                <th class="text-center">Responsible</th>
+                <th class="text-center">Billing</th>
+                <th class="has-sort" (click)="sortAttorney('primaryOffice')">Primary office</th>
+                <th class="has-sort" (click)="sortAttorney('officeAssociation')">Office Association</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr formArrayName="attorneys" *ngFor="let attorney of attorneyFormGroup?.controls; trackBy: trackByFn ;let i = index;">
+                <td class="pt-4 pb-4" style="width: 276px;" [formGroupName]="i">
+                  <div class="search-group position-relative attorney-search" (outsideClick)="clearDropDown($event)"
+                    appAutoCloseOutsideClick>
+                    <span class="search-icn"></span>
+                    <input class="form-control bordred" placeholder="Search attorneys" type="text"
+                      formControlName="name" (keyup)="serachAttorny(i)" autocomplete="off" id="searchAttorney-{{i}}">
+                    <div class="search-group-result px-0 pt-0 mt-4 attorney-search-group"
+                      *ngIf="displayDrpDwn[i].display">
+                      <div class="p-16 d-flex align-items-center justify-content-between border-bottom">
+                        <h5 class="lh-20 mt-0 mb-0">{{attorneyList.length}} results</h5>
+                        <a href="javascript:void(0)" class="font-weight-medium lh-16"
+                          (click)="advanceAttorneySearch(changeJurisdictionMatter, i)">Advanced Search</a>
+                      </div>
+                      <div class="search-collapse">
+                        <div class="search-panel p-16" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                          *ngFor="let item of attorneyList; trackBy: trackByFn ;let j = index; let first = first">
+                          <div class="search-panel-head pl-0">
+                            <div class="d-flex align-items-start" (click)="selectAttorny(changeJurisdictionMatter, item, i)">
+                              <span
+                                [innerHTML]="(item.name) | highlightText : attorneyForm?.value?.attorneys[i]?.name"></span>
+                              <span class="text-nowrap ml-8 mt-2 sh-badge sh-badge-danger font-weight-medium" *ngIf="item.doNotSchedule">Do Not Schedule</span>
+                            </div>
+                            <span class="arrow" (click)="item.showGrid=!item.showGrid">
+                              <em class="icon icon-angle-down"></em>
+                            </span>
+                          </div>
+                          <div class="search-panel-body pl-0">
+                            <div class="d-flex justify-content-between pt-8">
+                              <div class="mt-0">
+                                <span class="small helper-text d-block mb-4 font-weight-medium lh-16">
+                                  Email Address
+                                </span>
+                                <span
+                                  [innerHTML]="item.email | highlightText : attorneyForm?.value?.attorneys[i]?.name"></span>
+                              </div>
+                              <div class="mt-0 pl-20 min-w">
+                                <span class="small helper-text d-block mb-4 font-weight-medium lh-16">
+                                  Primary Office
+                                </span>
+                                <span
+                                  [innerHTML]="item.primaryOffice | highlightText : attorneyForm?.value?.attorneys[i]?.name"></span>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                    <div class="search-group-result px-0 pt-0 mt-4 " *ngIf="showLoaderDrpDwn[i].display">
+                        <app-search-loader  [active]="showLoaderDrpDwn[i].display" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+                      </div>
+                  </div>
+                </td>
+                <td class="pt-4 pb-4" [formGroupName]="i">
+                  <div class="d-flex justify-content-center">
+                    <label class="cust-check">
+                      <input type="checkbox" formControlName="IsOriginatingAttorney" id="originating_{{i}}"
+                        (change)="checkAttorny($event, i, 'IsOriginatingAttorney')" />
+                      <span class="check-style"></span>
+                    </label>
+                  </div>
+                </td>
+                <td class="pt-4 pb-4" [formGroupName]="i">
+                  <div class="d-flex justify-content-center">
+                    <label class="cust-check">
+                      <input type="checkbox" formControlName="IsResponsibleAttorney" [attr.disabled]="attorney.value.doNotSchedule ? true : null" id="responsible_{{i}}"
+                        (change)="checkAttorny($event, i, 'IsResponsibleAttorney')" />
+                      <span class="check-style"></span>
+                    </label>
+                  </div>
+                </td>
+                <td class="pt-4 pb-4" [formGroupName]="i">
+                  <div class="d-flex justify-content-center">
+                    <label class="cust-check">
+                      <input type="checkbox" formControlName="IsBillingAttorney" [attr.disabled]="attorney.value.doNotSchedule ? true: null" id="billing_{{i}}"
+                        (change)="checkAttorny($event, i, 'IsBillingAttorney')" />
+                      <span class="check-style"></span>
+                    </label>
+                  </div>
+                </td>
+                <td class="pt-4 pb-4">{{attorneyForm?.value?.attorneys[i]?.primaryOffice}}</td>
+                <td class="pt-4 pb-4">{{attorneyForm?.value?.attorneys[i]?.officeAssociation}}</td>
+                <td class="text-right pt-4 pb-4">
+                  <div class="icon-group d-flex justify-content-end">
+                    <span (click)="removeAttorney(i)">
+                      <em class="icon icon-remove icon-color"></em>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <app-loader [active]="attorneyLoading"></app-loader>
+    </div>
+
+
+    <div class="cust-card pt-32">
+      <div class="cust-card-head d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <h3 class="m-0">Matter Association</h3>
+          <i class="lh-20 ml-8">Optional</i>
+        </div>
+      </div>
+      <div class="cust-card-body">
+        <div class="d-inline-block mt-8" ngbDropdown>
+          <button class="btn btn-primary bulk-btn btn-icon" ngbDropdownToggle><i class="icon icon-plus"></i>Add Matter
+            Association</button>
+          <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+            <button ngbDropdownItem type="button" (click)="addOpposingPartyClick()" id="add-opposing-party">Opposing Party</button>
+            <button ngbDropdownItem type="button" (click)='addOpposingCounselClick()' id="add-opposing-conusel">Opposing Counsel</button>
+            <button ngbDropdownItem type="button" (click)='addExpertWitnessClick()' id="add-expert-witness">Expert Witness</button>
+          </div>
+        </div>
+
+        <div id="matterAssociationTable"
+          class="custom-table matter-list corporate-contact mt-24 hide-datatable-footer-inner datatable-auto-height"
+          *ngIf="matterAssociationList.length > 0">
+          <ngx-datatable class="material common-table matter-table fix-col-right no-min-height" [rows]="matterAssociationList"
+            [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeightM" rowHeight="70"
+            [scrollbarH]="true" id="matter-association-tbl">
+            <ngx-datatable-column [resizeable]="false" prop="uniqueNumber" name="Contact Number" [sortable]="false" [width]="145">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" name="Name" [sortable]="false" [width]="305">
+              <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                {{(row.isCompany) ? row.companyName : row.lastName + ', ' + row.firstName }}
+                <div class="custom-control custom-checkbox pr-0 mt-0 mb-0" *ngIf="row.associationType === 'Opposing Party'">
+                  <input class="custom-control-input" id="po-1_{{rowIndex}}" [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="row.isOpposingPartyRepresentThemselves" type="checkbox"
+                    (change)="checkPro($event, rowIndex)" [disabled]="selectOpposingCouncil">
+                  <label class="custom-control-label" for="po-1_{{rowIndex}}" style="line-height: 22px;">Pro Se</label>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" name="Association" [sortable]="false" [width]="295">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                <span
+                  class="font-weight-medium">{{(row.isOpposingPartyRepresentThemselves) ? 'Opposing Party, Opposing Counsel' : row.associationType }}
+                </span>
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="email" name="Email Address" [sortable]="false" [width]="295">
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" prop="primaryPhone" name="Phone Number" [sortable]="false" [width]="295">
+              <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                {{row.primaryPhone?.name || row.primaryPhone | mask : '(000) 000-0000'}}
+              </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [frozenRight]='true'
+              [width]="105">
+              <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                <div class="icon-group d-flex justify-content-end">
+
+                  <span (click)="deleteMatterAssociations(row, rowIndex)" id="delete-matter-association-index-{{rowIndex}}">
+                    <em class="icon icon-remove icon-color"></em>
+                  </span>
+                </div>
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </div>
+      </div>
+    </div>
+
+    <div class="cust-card mb-8">
+      <div class="cust-card-head d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <h3 class="m-0">Blocked Employee</h3>
+          <i class="lh-20 ml-8">Optional</i>
+        </div>
+      </div>
+      <div class="cust-card-body">
+        <p class="lh-20">Blocked employees cannot see the matter anywhere in the system, including in detail, lists,
+          mentions, or reports, unless otherwise specified.</p>
+        <button class="btn btn-primary btn-icon" type="button" (click)='addBlockedEmployeeClick()' id="add-blocked-employee"><i
+            class="icon icon-plus"></i> Add Blocked Employee </button>
+
+        <div id="blockedEmployeeTable" class="position-relative pt-24" *ngIf="employeesRows?.length > 0">
+          <div class="custom-table matter-list corporate-contact section-area hide-datatable-footer-inner datatable-auto-height">
+            <ngx-datatable class="material common-table matter-table no-min-height" [rows]="employeesRows"
+              [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="footerHeight" rowHeight="auto" id="blocked-employee-tbl">
+              <ngx-datatable-column [resizeable]="false" prop="fullName" name="Name" [sortable]="true" [width]="145">
+                <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <span class="d-block lh-20 font-weight-medium mb-4">{{row.fullName}}</span>
+                  <span class="d-block lh-20 helper-text font-weight-normal">{{row.email}}</span>
+                </ng-template>
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="jobTitle" name="Job Title" [sortable]="true" [width]="125">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="primaryOffice.name" name="Primary Office" [sortable]="true" [width]="145">
+              </ngx-datatable-column>
+              <ngx-datatable-column [resizeable]="false" prop="description" name="Description" [sortable]="true" [width]="305" >
+                <ng-template let-value="value" let-row="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div *ngIf="row.description">
+                    <app-read-more [maxLines]='2' [text]='row.description'></app-read-more>
+                  </div>
+                  <span class="d-block" *ngIf="!row.description">
+                    --
+                  </span>
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column [resizeable]="false" [headerClass]="'text-right'" [sortable]="false" name="Action" [width]="100">
+                <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+                  <div class="icon-group d-flex justify-content-end">
+                    <span (click)="deleteBlockedEmployee(row)" id="delete-blocked-employee-index-{{rowIndex}}">
+                      <em class="icon icon-remove icon-color"></em>
+                    </span>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+          <app-loader [active]="blockedLoading"></app-loader>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<ng-container *ngIf="addOpposingParty">
+  <app-add-opposing-party [uniqueNumber]="uniqueNumber" [mode]='addOpposingPartyMode'
+    [association]='selectedOpposingParty' [associateOpposingParty]="associateOpposingParty" [associateFlag]="'add'"
+    [matterId]="matterId" [addToDb]="addToDb" [opposingPartyList]="[]" (closeModel)="closeOpposingParty($event)">
+  </app-add-opposing-party>
+</ng-container>
+
+
+<ng-container *ngIf='addExpertWitness'>
+  <app-add-expert-witnesses [uniqueNumber]="uniqueNumber" [mode]='addExpertWitnessMode'
+    [association]='selectedExpertWitness' [matterId]="matterId" [addToDb]="addToDb"
+    [associateExpertWitness]="associateExpertWitness" (closeModel)="closeExpertWitness($event)">
+  </app-add-expert-witnesses>
+</ng-container>
+
+
+<ng-container *ngIf='addOpposingCouncel'>
+  <app-add-opposing-counsel [uniqueNumber]="uniqueNumber" [mode]='addOpposingCouncelMode'
+    [association]='selectedOpposingCounsel' [associateOpposingCouncil]="associateOpposingCouncil" [matterId]="matterId"
+    [addToDb]="addToDb" (closeModel)="closeOpposingCouncel($event)">
+  </app-add-opposing-counsel>
+</ng-container>
+
+<ng-template #AddCorporateContact let-modal>
+  <div class="modal-header pb-32 d-block">
+    <h3 class="modal-title mb-0">{{isEdit ? 'Edit': 'Add'}} Corporate Contact</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group" *ngIf="!isEdit">
+      <div class="custom-control custom-radio">
+        <input type="radio" id="customcreateTypeRadio1" name="customRadio" class="custom-control-input"
+          [(ngModel)]="createType" value="create">
+        <label class="custom-control-label" for="customcreateTypeRadio1">Create new Corporate Contact</label>
+      </div>
+      <div class="custom-control custom-radio">
+        <input type="radio" id="customcreateTypeRadio2" name="customRadio" class="custom-control-input"
+          [(ngModel)]="createType" value="existing">
+        <label class="custom-control-label" for="customcreateTypeRadio2">Select from existing Corporate Contact</label>
+      </div>
+    </div>
+    <form [formGroup]="corporateContactForm" *ngIf="createType === 'create'">
+      <div class="row gutter-16">
+        <div class="col-4">
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" class="form-control" formControlName="uniqueNumber" [readOnly]="true" id="contact-number">
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group"
+            [class.has-error]="v['firstName'].errors && (v['firstName'].touched || vendorFormSubmitted)">
+            <label>First Name <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="First name" formControlName="firstName"
+              autocomplete="doNotAutoComplete" id="first-name">
+            <span class="field-message text-danger"
+              *ngIf="v['firstName'].errors && (v['firstName'].touched || vendorFormSubmitted)">
+              <em class="icon icon-error mr-4"></em>
+              Please enter first name
+            </span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group"
+            [class.has-error]="v['lastName'].errors && (v['lastName'].touched || vendorFormSubmitted)">
+            <label>Last Name <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Last name" formControlName="lastName"
+              autocomplete="doNotAutoComplete" id="last-name">
+            <span class="field-message text-danger"
+              *ngIf="v['lastName'].errors && (v['lastName'].touched || vendorFormSubmitted)">
+              <em class="icon icon-error mr-4"></em>
+              Please enter last name
+            </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div
+            [class.has-error]="(v['email'].errors && (v['email'].touched || vendorFormSubmitted)) || localEmailExist">
+            <label>Email Address <sup
+                *ngIf="corporateContactForm.value.isPrimary || corporateContactForm.value.isBilling">*</sup></label>
+            <input type="email" name="email" formControlName="email" class="form-control" placeholder="Email Address"
+              value="Email Address" autocomplete="doNotAutoComplete" id="email-address">
+            <span class="field-message text-danger"
+              *ngIf="v['email']?.errors && (v['email'].touched || vendorFormSubmitted)"><em
+                class="icon icon-error mr-4"></em>
+              {{ v['email']?.errors.pattern ? 'Please enter valid email address' : 'Please enter email address' }}
+            </span>
+            <span class="field-message text-danger" *ngIf="localEmailExist"><em class="icon icon-error mr-4"></em>
+              Email id already exists.
+            </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label>Job Title</label>
+            <input type="text" class="form-control" placeholder="Job Title" formControlName="jobTitle"
+              autocomplete="doNotAutoComplete" id="job-title">
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group"
+            [class.has-error]="v['primaryPhone'].errors && (v['primaryPhone'].touched || vendorFormSubmitted)">
+            <label>Primary Phone<sup
+                *ngIf="corporateContactForm.value.isPrimary || corporateContactForm.value.isBilling">*</sup></label>
+            <input type="text" class="form-control" mask="(000) 000-0000" placeholder="(###) ###-####"
+              formControlName="primaryPhone" autocomplete="doNotAutoComplete" id="primary-phone-number" />
+            <span class="field-message text-danger"
+              *ngIf="v['primaryPhone'].errors && (v['primaryPhone'].touched || vendorFormSubmitted)">
+              <em class="icon icon-error mr-4"></em>
+              Please enter primary phone number
+            </span>
+          </div>
+        </div>
+        <div class="col-6">
+          <div [ngClass]="(corporateContactForm.controls.cellPhone.invalid)?'form-group has-error':'form-group'">
+            <label>Cell Phone</label>
+            <input type="text" class="form-control" mask="(000) 000-0000" [showMaskTyped]="true"
+              placeHolderCharacter=" " formControlName="cellPhone" autocomplete="doNotAutoComplete" id="cell-phone-number" />
+            <span class="field-message text-danger" *ngIf="corporateContactForm.controls.cellPhone.invalid"><em
+                class="icon icon-error mr-4"></em>
+              Invalid phone number
+            </span>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="form-group mb-0">
+            <label class="mb-12">Role(s) <sup>*</sup></label>
+            <p class="lh-20 mb-16">There must be exactly one (1) Primary Contact and Billing Contact per client.
+              Multiple General Counsels are permitted.</p>
+            <div class="custom-control custom-checkbox">
+              <fieldset [disabled]="corporateContactList | corporateContactExist : 'Primary'">
+                <input type="checkbox" class="custom-control-input" id="customCheck1" formControlName="isPrimary">
+                <label class="custom-control-label" for="customCheck1">Primary Contact</label>
+              </fieldset>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <fieldset [disabled]="corporateContactList | corporateContactExist : 'Billing'">
+                <input type="checkbox" class="custom-control-input" id="customCheck2" formControlName="isBilling">
+                <label class="custom-control-label" for="customCheck2">Billing Contact</label>
+              </fieldset>
+            </div>
+            <div class="custom-control custom-checkbox mb-0">
+              <input type="checkbox" class="custom-control-input" id="customCheck3" formControlName="isGeneralCounsel">
+              <label class="custom-control-label" for="customCheck3">General Counsel</label>
+            </div>
+            <span class="field-message text-danger d-block"
+              [ngClass]="!(corporateContactForm.value.isBilling  && corporateContactForm.value.isPrimary && corporateContactForm.value.isGeneralCounsel) ? 'd-block' : ''"
+              *ngIf="!corporateContactForm.value.isBilling  && !corporateContactForm.value.isPrimary && !corporateContactForm.value.isGeneralCounsel && vendorFormSubmitted"><em
+                class="icon icon-error mr-4"></em>
+              Please select one role
+            </span>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div *ngIf="createType === 'existing'">
+      <app-corporate-search (selectedAssociation)='onSelect($event)' [hideHeading]="true"
+        [placeHolderData]="'Search Corporate Contact'">
+      </app-corporate-search>
+      <form [formGroup]="roleForm">
+
+          <div class="form-group mb-0 mt-16">
+            <label class="mb-12">Role(s) <sup>*</sup></label>
+            <p class="lh-20 mb-16">There must be exactly one (1) Primary Contact and Billing Contact per client.
+              Multiple General Counsels are permitted.</p>
+            <div class="custom-control custom-checkbox">
+              <fieldset [disabled]="corporateContactList | corporateContactExist : 'Primary'">
+                <input type="checkbox" class="custom-control-input" id="customCheck1" formControlName="isPrimary">
+                <label class="custom-control-label" for="customCheck1">Primary Contact</label>
+              </fieldset>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <fieldset [disabled]="corporateContactList | corporateContactExist : 'Billing'">
+                <input type="checkbox" class="custom-control-input" id="customCheck2" formControlName="isBilling">
+                <label class="custom-control-label" for="customCheck2">Billing Contact</label>
+              </fieldset>
+            </div>
+            <div class="custom-control custom-checkbox mb-0">
+              <input type="checkbox" class="custom-control-input" id="customCheck3" formControlName="isGeneralCounsel">
+              <label class="custom-control-label" for="customCheck3">General Counsel</label>
+            </div>
+            <span class="field-message text-danger d-block"
+              *ngIf="vendorFormSubmitted && !roleForm.value.isBilling  && !roleForm.value.isPrimary && !roleForm.value.isGeneralCounsel"><em
+                class="icon icon-error mr-4"></em>
+              Please select one role
+            </span>
+          </div>
+
+      </form>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="saveCorporateContact()" *ngIf="!isEdit" id="save-btn">Save</button>
+    <button type="button" class="btn btn-primary" (click)="updateClientAssociation()" *ngIf="isEdit"
+      [disabled]="!corporateContactForm.valid" id="update-btn">Update</button>
+  </div>
+</ng-template>
+
+<ng-template #changeJurisdictionMatter let-modal>
+  <div class="modal-body pb-0">
+    <div class="d-flex align-items-start pt-8">
+      <em class="icon icon-error text-danger fs-32"></em>
+      <div class="pl-16">
+        <h3 class="modal-title mb-20">
+          {{(openPopup === 'attorneyState') ? 'Select Attorney' : (openPopup ===  'practicearea') ? 'Change Practice Area' : 'Change Jurisdiction of Matter'}}
+        </h3>
+        <p class="lh-20">{{changeJurisdictionMatterMsg}}</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+
+
+    <ng-container *ngIf="openPopup === 'attorneyState'">
+      <button type="button" class="btn btn-outline-primary" (click)="modal.close('Save click');" id="keep-btn">
+        Keep
+      </button>
+      <button type="button" class="btn btn-primary" (click)="modal.close('Cross click')" id="remove-btn">
+        Remove
+      </button>
+    </ng-container>
+
+
+
+    <ng-container *ngIf="openPopup === 'practicearea'">
+      <button type="button" class="btn btn-outline-primary" (click)="modal.close('DoNotApplyPracticeArea');" id="do-not-apply-btn">
+        Do Not Apply Practice Area
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="modal.close('RemoveAttorneys')" id="remove-attorney-btn">
+        Remove Attorneys
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="openPopup === 'state' ">
+      <button type="button" class="btn btn-outline-primary" (click)="modal.close('Save click');" id="keep-attorney-btn">
+        Keep Attorney
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="modal.close(null)" id="remove-attorney-btn">
+        Remove Attorney
+      </button>
+    </ng-container>
+
+  </div>
+</ng-template>
+
+<ng-template #changePracticeAreaDocumentModel let-modal>
+  <div class="modal-body pb-0">
+    <div class="d-flex align-items-start pt-8">
+      <em class="icon icon-error text-danger fs-32"></em>
+      <div class="pl-16">
+        <h3 class="modal-title mb-20">
+          Change Practice Area
+        </h3>
+        <p class="lh-20">
+          {{errorData.change_practice_area_remove_doc_warning}}
+        </p>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-primary" (click)="modal.close(null)" id="cancel-btn">
+      Cancel
+    </button>
+    <button type="button" class="btn btn-primary" (click)="modal.close(true)" id="yes-continue-btn">
+      Yes, Continue
+    </button>
+  </div>
+</ng-template>

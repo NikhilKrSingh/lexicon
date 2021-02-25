@@ -1,0 +1,132 @@
+.th-module {
+  width: 60%;
+}
+.wc-wrap {
+  .col-2 {
+    flex: 0 0 20%;
+    max-width: 20%;
+  }
+}
+
+.ewc-wrap {
+  .btn-outline-primary {
+    padding: 5px 24px;
+    line-height: 18px;
+  }
+}
+
+gridster {
+  background-color: transparent !important;
+  padding: 24px 0 !important;
+}
+gridster-item {
+  background-color: transparent !important;
+  overflow: visible !important;
+}
+
+.dash-card {
+  height: 100%;
+}
+
+/* clears the ‘X’ from Internet Explorer */
+input[type='search']::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+input[type='search']::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+/* clears the ‘X’ from Chrome */
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+  display: none;
+}
+
+.required-switch {
+  input {
+    &:checked {
+      &:disabled {
+        ~ .switch-style {
+          background-color: #cbc9e9 !important;
+          opacity: 0.5;
+          &:after {
+            background-color: #9f9dc6 !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+.edit-selection-btn {
+  line-height: normal;
+}
+
+.selected-widget-area {
+  min-height: 400px;
+}
+
+.background-purple {
+  background-color: #ecebf5;
+}
+
+.br-12 {
+  border-radius: 1em;
+}
+
+.widgetNames {
+  text-align: left;
+}
+
+.tooltip-inner-widget {
+  padding: 8px 16px;
+  color: #fff;
+  text-align: center;
+  background-color: #353b4b;
+  border-radius: 2px;
+  text-align: left;
+}
+
+.tooltip-inner-security-group {
+  padding: 8px 16px;
+  color: #fff;
+  text-align: center;
+  background-color: #353b4b;
+  border-radius: 2px;
+  text-align: left;
+}
+
+.wc-block-caption-name {
+  .tooltip.bs-tooltip-bottom.left {
+    right: auto;
+    top: 92%;
+  }
+}
+
+.wc-block-caption {
+  .tooltip.bs-tooltip-bottom.left {
+    left: 10px;
+  }
+}
+
+app-dashboard-configuration {
+  .widget-area.firm-widget-wrap {
+    overflow-x: hidden;
+  }
+
+  .widget-card-header-info  {
+    margin: 20px 0 -10px 20px;
+    .sh-badge {
+      margin-right: 10px;
+    }
+  }
+}
+
+.tooltip-security-group-name {
+    top: 92% !important;
+}

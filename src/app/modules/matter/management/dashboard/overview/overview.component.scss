@@ -1,0 +1,145 @@
+.primary-trust {
+  background-color: #f4f7f9;
+  padding: 20px 16px 12px;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  .table {
+    tbody {
+      td {
+        border-top: none;
+      }
+    }
+    td {
+      &:first-child {
+        padding-left: 0;
+      }
+      &:last-child {
+        padding-right: 0;
+      }
+    }
+  }
+}
+
+.balance-table {
+  margin-bottom: 16px;
+  td {
+    padding: 10px 16px;
+  }
+}
+
+.alert-text {
+  margin-bottom: 0;
+  align-self: normal;
+}
+
+.case-number {
+  white-space: pre;
+}
+
+.cursor-pointer-edt {
+  position: absolute;
+  right: 55px;
+  top: 16px;
+  font-size: 13px;
+  padding: 5px 6px 3px;
+  background-color: #ffff;
+  border-radius: 4px;
+}
+
+.modal-body .lh-20 {
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.btn-group {
+  margin-top: auto;
+}
+.attor-info {
+  color: #413a93;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.time-overview-badges {
+  .badge {
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: #413a93;
+    padding: 4px 10px;
+    line-height: 16px;
+    opacity: 0.6;
+    transition: all 0.5s ease-in-out;
+    + .badge {
+      margin-left: 10px;
+    }
+    &.selected {
+      background-color: #d9d8e9;
+      opacity: 1;
+    }
+  }
+}
+
+.time-overview-description {
+  .recorded {
+    height: 12px;
+    width: 12px;
+    background-color: #4752d6;
+  }
+
+  .approved {
+    height: 12px;
+    width: 12px;
+    background-color: #37c2cf;
+  }
+
+  .billed {
+    height: 12px;
+    width: 12px;
+    background-color: #fa7959;
+  }
+
+  .description-title {
+    color: #353b4b;
+    font-size: 12px;
+    font-weight: 500;
+  }
+}
+.today-timelogged {
+  .sh-badge {
+    border-radius: 2px;
+  }
+}
+
+.notes-max-height {
+  max-height: 380px;
+}
+
+.drop-td {
+  .dropdown-hover {
+    min-width: 30px !important;
+    min-height: 30px;
+    text-align: center;
+    padding-top: 7px;
+  }
+}
+.drop-td {
+  .dropdown {
+    .dropdown-hover-table {
+        &:after{
+          display: none;
+      }
+    }
+  }
+}
+
+.note-action-td {
+  .dropdown {
+    .dropdown-hover-table {
+        &:after{
+          display: none;
+      }
+    }
+  }
+}

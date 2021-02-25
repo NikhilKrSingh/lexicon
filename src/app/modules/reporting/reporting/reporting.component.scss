@@ -1,0 +1,27 @@
+.reporting-table{
+    td{
+        padding: 10px 32px;
+    }
+}
+.repo-arrow{
+    width: 12px;
+    text-align: center;
+    font-size: 9px;
+    em{
+        display: block;
+    }
+}
+.report-open{
+    .repo-arrow{
+        em{
+            transform: rotate(180deg);
+        }
+    }    
+    .report-body{
+        display: block;
+    }
+}
+.report-body{
+    padding-top: 18px;
+    display: none;
+}

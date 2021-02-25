@@ -1,0 +1,81 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0">Edit Disbursement Type - {{disbursement?.code}}</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0" >
+  <div class="form-group">
+    <label>Type <sup>*</sup></label>
+    <ng-select id="editBillingCodeDisbursementType" [items]="typeList" placeholder="Select Type" [(ngModel)]="selectedType"  [bindValue]="'id'"
+      [bindLabel]="'name'" [notFoundText]="'No record found'" [selectOnTab]="true" [readonly]="true">
+    </ng-select>
+  </div>
+  <ng-container [formGroup]='disbursementForm'>
+    <div class="form-group">
+      <label>Code <sup>*</sup></label>
+      <input id="editBillingCodeDisbursementCode" type="text" class="form-control" formControlName='code'>
+    </div>
+    <div class="form-group position-relative" [class.has-error]='disbursementError?.name'>
+      <label>Name <sup>*</sup></label>
+      <span class="count-char">{{disbursementForm?.controls['description']?.value?.length || 0}}/50</span>
+      <input id="editBillingCodeDisbursementName" type="text" class="form-control" formControlName="description" maxlength='50' placeholder="Enter a name" formControlName="description">
+      <app-validation-message [errorMessage]='disbursementError?.nameMessage' *ngIf='disbursementError?.name'></app-validation-message>
+    </div>
+    <div class="row gutter-16">
+      <div class="col-4">
+        <div class="form-group">
+          <label class="mb-12">Bill Type <sup>*</sup></label>
+          <div class="custom-control custom-radio pr-0" *ngFor="let bill of billingTypeList;trackBy :trackByFn;">
+            <input id="editBillingCodeDisbursementBillType" type="radio" id="billtype_{{bill.id}}" name="billType" class="custom-control-input" [value]='bill.id'
+              formControlName='billType' (change)='changeBillType()'>
+            <label class="custom-control-label" for="billtype_{{bill.id}}">{{bill.name}}</label>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="form-group">
+          <label class="mb-12">Disbursement Type <sup>*</sup></label>
+          <div class="custom-control custom-radio pr-0" *ngFor="let dis of disbursementTypeList;trackBy :trackByFn;">
+            <input id="editBillingCodeDisbursementDisbursementType" type="radio" id="disbursementType_{{dis.id}}_{{dis.code}}" name="disbursementType"
+              class="custom-control-input" [value]='dis.id' formControlName='disbursementType'
+              (change)='changeDisbursementType()'>
+            <label class="custom-control-label" for="disbursementType_{{dis.id}}_{{dis.code}}">{{dis.name}}</label>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="form-group">
+          <label class="mb-12">Billable to Client <sup>*</sup></label>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="billable1" name="billingTo" class="custom-control-input" value="1"
+              formControlName='billingTo'>
+            <label class="custom-control-label" for="billable1">Yes</label>
+          </div>
+          <div class="custom-control custom-radio pr-0">
+            <input type="radio" id="billable2" name="billingTo" class="custom-control-input" value="0"
+              formControlName='billingTo'>
+            <label class="custom-control-label" for="billable2">No</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group" *ngIf='!isBillTypeOpen' [class.has-error]='disbursementError?.rate'>
+      <label>Initial Rate <sup>*</sup></label>
+      <input id="editBillingCodeDisbursementInitalRate" type="text" class="form-control" prefix="$" mask="separator.2" thousandSeparator=","
+        formControlName='rateAmount' (blur)="formatRate()">
+      <app-validation-message [errorMessage]='disbursementError?.rateMessage' *ngIf='disbursementError?.rate'></app-validation-message>
+    </div>
+    <div class="form-group position-relative">
+      <label>Change Note (optional)</label>
+      <span class="count-char">{{disbursementForm?.controls['changeNotes']?.value?.length || 0}}/1000</span>
+      <textarea id="editBillingCodeDisbursementChangeNote" class="form-control" rows="4" maxlength="1000" formControlName='changeNotes'></textarea>
+    </div>
+  </ng-container>
+
+</div>
+<div class="modal-footer">
+  <button type="button" id="editBillingCodeDisbursementCancelBtn" class="btn btn-light" (click)="close()">Cancel</button>
+  <button type="button" id="editBillingCodeDisbursementSaveBtn" class="btn btn-primary" [disabled]='disable' (click)='save()'>Save
+    Changes</button>
+</div>

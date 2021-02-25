@@ -1,0 +1,777 @@
+<div class="billing-new-des">
+  <div class="pb-24">
+    <div class="d-flex align-items-start justify-content-between mb-40">
+      <h2 class="m-0">Billing Summary</h2>
+      <div class="btn-group">
+        <div class="d-inline-block ml-16" ngbDropdown>
+          <button class="btn btn-primary bulk-btn" ngbDropdownToggle
+                  *ngIf="(permissionList?.MATTER_MANAGEMENTisAdmin || permissionList?.MATTER_MANAGEMENTisEdit|| permissionList?.BILLING_MANAGEMENTisAdmin || permissionList?.BILLING_MANAGEMENTisEdit || isRaOrBa)" id="matter-actions-btn">Billing Actions</button>
+          <div class="w-100 bulk-dropdown" ngbDropdownMenu aria-labelledby="dropdownConfig">
+            <button type="button" (click)='billNow(billNowReview)' ngbDropdownItem
+                    *ngIf="(!disableBillNow || !(matterDetails?.isFixedFee && !fixedFreebillingSettings))">Bill Now
+            </button>
+            <button type="button" ngbDropdownItem
+                    [routerLink]="['/matter/refund-client-trust']" [queryParams]="{matterId:matterDetails.id}">Refund Client
+            </button>
+            <button type="button" ngbDropdownItem
+                    [routerLink]="['/matter/post-payment']"
+                    [queryParams]="{matterId:matterDetails.id, clientId:clientId, officeId: matterDetails?.matterPrimaryOffice?.id,type:'matter'}"
+                    id="record-payment">Record Payment
+            </button>
+            <button type="button" ngbDropdownItem (click)="billNow(billNowReview, true)"
+                    *ngIf="!matterDetails?.isFixedFee && matterDetails.matterStatus.name !== 'Closed'"
+                    [disabled]="matterDetails?.isWorkComplete"
+                    id="mark-as-complete">
+              Mark as Work Complete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row gutter-24">
+      <div class="col-6">
+        <div class="card gray-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-12">
+              <h4 class="text-xlarge mb-0">Billed Balance</h4>
+            </div>
+            <div class="bill-white-wrap mb-12">
+              <div class="d-flex align-items-center justify-content-between billed-head pb-12 mb-8">
+                <span class="font-weight-medium">Balance as of last statement</span>
+                <span class="font-weight-medium" [class.text-danger]="billedBalance?.lastInvoiceAmount < 0"
+                      *ngIf="billedBalance?.lastInvoiceAmount != 0">
+                  {{billedBalance?.lastInvoiceAmount | currency : 'USD': 'symbol': '1.2-2'}}
+                </span>
+                <span class="font-weight-medium"
+                      *ngIf="!billedBalance?.lastInvoiceAmount || billedBalance?.lastInvoiceAmount == 0">
+                  {{0 | currency : 'USD': 'symbol': '1.2-2'}}
+                </span>
+              </div>
+              <div class="billed-bdy">
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <a (click)="goToLedgerHistoryTab.emit()" class="helper-text font-weight-normal"
+                     href="javascript:void(0);">
+                    Payments received since last invoice
+                  </a>
+                  <span [class.text-danger]="billedBalance?.latestPayments > 0">
+                    {{(billedBalance?.latestPayments > 0) ? '-' : ''}}{{billedBalance?.latestPayments | currency : 'USD': 'symbol': '1.2-2'}}
+                  </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <a class="helper-text font-weight-normal" href="javascript:void(0);"
+                     (click)="scrollToWriteOff(writeOffSection)">Write-Offs and Credits</a>
+                  <span [class.text-danger]="billedBalance?.latestWriteOffs > 0">
+                    {{(billedBalance?.latestWriteOffs > 0) ? '-' : ''}}{{billedBalance?.latestWriteOffs | currency : 'USD': 'symbol': '1.2-2'}}
+                  </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <a (click)="goToLedgerHistoryTab.emit()" class="helper-text font-weight-normal"
+                     href="javascript:void(0);">Refunds</a>
+                  <span [class.text-danger]="billedBalance?.latestRefunds < 0">
+                    {{billedBalance?.latestRefunds | currency : 'USD': 'symbol': '1.2-2'}}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="bill-green-wrap">
+              <div class="d-flex align-items-center justify-content-between billed-head">
+                <span class="font-weight-medium">Total Outstanding Balance</span>
+                <span class="font-weight-medium" [class.text-danger]="billedBalance?.outstandingBalance < 0">
+                  {{billedBalance?.outstandingBalance | currency : 'USD': 'symbol': '1.2-2'}}
+                </span>
+              </div>
+            </div>
+            <app-loader [active]="billedBalanceLoading"></app-loader>
+          </div>
+        </div>
+        <div class="card gray-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-12">
+              <h4 class="text-xlarge m-0">Unbilled Balance</h4>
+              <h4 class="m-0" [class.text-danger]="unbilledCharges?.total < 0">
+                {{unbilledCharges?.total  | currency : 'USD': 'symbol': '1.2-2'}}
+              </h4>
+            </div>
+            <div class="bill-white-wrap">
+              <div class="billed-bdy">
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <span class="helper-text font-weight-normal cursor-pointer"
+                        (click)="scrollToFees(timeSection)">Time</span>
+                  <span
+                    [class.text-danger]="unbilledCharges?.timeAmount < 0">{{unbilledCharges?.timeAmount  | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between py-4">
+                  <span class="helper-text font-weight-normal cursor-pointer"
+                        (click)="scrollToDisbursement(disbursementSection)">Disbursements</span>
+                  <span
+                    [class.text-danger]="unbilledCharges?.disbursementAmount < 0">{{unbilledCharges?.disbursementAmount  | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                </div>
+              </div>
+            </div>
+            <app-loader [active]="unbilledChargesLoading"></app-loader>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card gray-card" *ngIf="showInvoiceAddress">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-12">
+              <h4 class="text-xlarge m-0 has-edit-hvr">Invoice Address
+                <em class="icon icon-edit small"
+                    *ngIf="invoiceDeliveryList.length > 0 && (isRaOrBa || (permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit))"
+                    (click)="editInvoiceAddress()"></em></h4>
+            </div>
+            <div class="bill-white-wrap text-large" *ngIf='billingAddress'>
+              {{billingAddress?.address1}}<span *ngIf='billingAddress?.address2'>, {{billingAddress?.address2}}</span> <br>
+              {{billingAddress?.city}}, {{billingAddress?.state}} {{billingAddress?.zipCode}}
+            </div>
+            <app-loader [active]="billingAddressLoading"></app-loader>
+          </div>
+        </div>
+        <div class="card gray-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-12">
+              <h4 class="text-xlarge m-0">Billing Preferences</h4>
+            </div>
+            <div class="bill-pref-wrap">
+              <div class="bill-pref-block d-flex align-items-center justify-content-between">
+                <div class="helper-text font-weight-normal position-relative has-edit-hvr">Auto-Pay
+                  <em class="icon icon-edit small"
+                      *ngIf="isRaOrBa || (permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit)"
+                      (click)="scrollToPaymentMethod(paymentMethod)"></em>
+                </div>
+                <div class="text-right" *ngIf="autoPayDetails">
+                  <div class="d-flex align-items-center justify-content-end"
+                       *ngIf="autoPayDetails?.cardNumber && !autoPayDetails?.suspendAutoPay">
+                    <img [src]="'../../../../..' + cardImageIcon[autoPayDetails?.cardType]" alt=""
+                         width="24">
+                    <span class="ml-8">---- ---- ----</span><span
+                    class="ml-4">{{autoPayDetails?.cardNumber}}</span>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-end"
+                       *ngIf="autoPayDetails?.accountNumber && !autoPayDetails?.suspendAutoPay">
+                    <span class="ml-8">E-Check ending in</span><span
+                    class="ml-4">{{autoPayDetails?.accountNumber?.slice(-4)}}</span>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-end"
+                     *ngIf="autoPayDetails && autoPayDetails.suspendAutoPay">
+                  Suspended
+                </div>
+                <div class="text-right"
+                     *ngIf="!autoPayDetails || (!autoPayDetails?.cardNumber && !autoPayDetails?.accountNumber)">
+                  None
+                </div>
+              </div>
+              <div class="bill-pref-block d-flex align-items-center justify-content-between"
+                   *ngIf="isPaymentPlanEnabled">
+                <div class="helper-text font-weight-normal position-relative has-edit-hvr">Payment Plan
+                  <em class="icon icon-edit small"
+                      *ngIf="isRaOrBa || (permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit)"
+                      (click)="scrollToPaymentPlan(paymentPlan)"></em></div>
+                <div class="text-right" *ngIf="paymentPlanList?.length">
+                  Yes, {{paymentPlanList[0].amountToPay | currency : 'USD': 'symbol': '1.2-2'}} per period
+                </div>
+                <div class="text-right" *ngIf="!paymentPlanList || !paymentPlanList?.length">
+                  None
+                </div>
+              </div>
+              <div class="bill-pref-block d-flex align-items-center justify-content-between">
+                <div class="helper-text font-weight-normal position-relative has-edit-hvr">Invoice Method Preference <em
+                  class="icon icon-edit small"   *ngIf="invoiceDeliveryList.length > 0 && (isRaOrBa || (permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit))"
+                  (click)="editInvoiceAddress()"></em></div>
+                <div class="text-right">
+                  {{billingSettings?.invoiceDelivery?.name}}
+                </div>
+              </div>
+              <div class="bill-pref-block d-flex align-items-center justify-content-between">
+                <div class="helper-text font-weight-normal position-relative has-edit-hvr">Bill Issuance Frequency
+                  <em class="icon icon-edit small" (click)="editIssuanceFrequency()"
+                      *ngIf="isRaOrBa || (permissionList.BILLING_MANAGEMENTisAdmin || permissionList.BILLING_MANAGEMENTisEdit)"></em>
+                </div>
+                <div class="info-hover position-relative text-right">
+                  <span>{{(BillIssueFrequencyMessage && BillIssueFrequencyMessage.length > 32) ? BillIssueFrequencyMessage.substr(0, 32)+'...' : BillIssueFrequencyMessage}}</span>
+                  <div class="tooltip bs-tooltip-bottom right" *ngIf="BillIssueFrequencyMessage.length > 32"
+                    role="tooltip">
+                    <div class="arrow"></div>
+                    <div class="tooltip-inner tooltip-md">
+                      {{BillIssueFrequencyMessage}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <app-loader [active]="billingSettingsLoading"></app-loader>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bill-detail-wrap">
+    <div class="d-flex align-items-start justify-content-between mb-32">
+      <h2 class="m-0">Billing Details</h2>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <app-new-charges-breakdown [matterDetails]="matterDetails" #chargesBreakdownComponent></app-new-charges-breakdown>
+      </div>
+      <div class="col-6">
+        <app-new-total-hours
+          [isResponsibleOrBillingAttorney]="isRaOrBa"
+          [matterDetails]="matterDetails" #totalHoursComponent></app-new-total-hours>
+      </div>
+    </div>
+    <div class="full-length-blocks pt-32">
+      <div class="card gray-card" #timeSection id="timeSection">
+        <div class="card-body" [ngClass]="{'bill-open':feesToggle}"><!-- " bill-open " for open detail -->
+          <div class="bd-header">
+            <div class="d-flex align-items-start justify-content-between bill-title">
+              <h3 class="fs-22 m-0">Fees</h3>
+              <div class="d-flex">
+                <span class="cursor-pointer bil-arrow" (click)="toggleFees()"><em
+                  class="icon icon-angle-down"></em></span>
+              </div>
+            </div>
+            <div class="row gutter-16">
+              <div class="col-6">
+                <div class="row gutter-16">
+                  <div class="col-6">
+                    <div class="form-group mb-0">
+                      <ng-select [items]="feesStatusList" [selectOnTab]="true" placeholder="Select status"
+                                 [(ngModel)]="selectedFeeStatus"
+                                 [clearable]="false" id="acttq-selectstatus"
+                                 [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'"
+                                 (change)="applyFilterForList()">
+                      </ng-select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="form-group mb-0">
+                      <app-date-range-picker (dateChange)='choosedDate($event)' appAutoCloseOutsideClick [(lifeofMatter)]="lifeOfMatterFees" (lifeofMatterChange)="lifeOfMatterChange($event)"
+                       (outsideClick)="onClickedOutsideDatePicker()"></app-date-range-picker>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 d-flex justify-content-end">
+                <div class="d-flex align-items-end">
+                  <span class="helper-text">Total</span>
+                  <span class="fs-22 font-weight-medium ml-8" [class.text-danger]="feesTotal < 0">{{feesTotal| currency : 'USD' : 'symbol': '1.2-2'}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bd-body d-block" *ngIf="feesToggle">
+            <div class="row gutter-16">
+              <div class="col-9">
+                <div class="header-search-wrapper mb-24">
+                  <input type="text" class="form-control search-input"
+                         placeholder="Search for code, name, entered by, note to file, or timekeeper"
+                         (keyup)="applyFilterForList()" [(ngModel)]="feeSearchString"
+                         [ngModelOptions]="{standalone: true}">
+                  <button class="btn" type="submit">Search</button>
+                </div>
+              </div>
+            </div>
+            <div class="custom-table bg-white mx-n24">
+              <ngx-datatable #feesTable1 class="material common-table disburst-new-table prbill-tables" [rows]="feesList" [class.fix-col-right]='tables?.frozenRightArr[0]'
+                             [columnMode]="ColumnMode.force" [offset]="page.pageNumber" [limit]="page.size"
+                             [footerHeight]="50" [headerHeight]="50" rowHeight="auto" [scrollbarH]='true'
+                             [summaryHeight]="50" [summaryRow]='true' [summaryPosition]="'bottom'"
+                             [selectionType]="'checkbox'" [sorts]="[{prop: 'feeDetail.dateOfService', dir: 'desc'}]" 
+                             id="feeslist-tbl">
+
+                <ngx-datatable-row-detail rowHeight="auto" #myDetailRow (toggle)="onDetailToggle($event)">
+                  <ng-template let-row="row" ngx-datatable-row-detail-template>
+
+                    <div class="pl-48">
+                      <div class="static-tab-group">
+                        <ul class="static-tabs list-unstyled d-flex align-items-center mb-0">
+                          <li class="pl-0" (click)="row.writeDownDetailListFlag  = false"
+                              [ngClass]="!row.writeDownDetailListFlag   ? 'active': ''"><a
+                            href="javascript:void(0);">Entry Details</a></li>
+                          <li (click)="row.writeDownDetailListFlag   = true" [ngClass]="row.writeDownDetailListFlag   ? 'active': ''" *ngIf='row?.writeDownDetailList.length > 0 && row.feeDetail.originalAmount >= 0'><a
+                            href="javascript:void(0);">Write-Down</a></li>
+                        </ul>
+                        <div class="static-tab-content" *ngIf="!row.writeDownDetailListFlag ">
+                          <div class="static-tab">
+                            <div class="table-responsive">
+                              <table class="table table-striped table-borderless">
+                                <thead>
+                                <tr>
+                                  <th style="width: 30%;">Date/Time Entered</th>
+                                  <th style="width: 30%">Timekeeper</th>
+                                  <th style="width: 20%;">Entered By</th>
+                                  <th style="width: 20%;">Note To File</th>
+                                  <th style="min-width: 200px;"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <ng-container>
+                                  <tr>
+                                    <td>{{row?.feeDetail?.timeEntered | date: 'MM/dd/yyyy, h:mm a'}}</td>
+                                    <td>{{row?.feeDetail?.timeKeeper}}</td>
+                                    <td>{{row?.feeDetail?.enterBy}}</td>
+                                    <td>{{row?.feeDetail?.description}}</td>
+                                    <td></td>
+                                  </tr>
+                                </ng-container>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="static-tab-content" *ngIf="row.writeDownDetailListFlag">
+                          <div class="static-tab">
+                            <div class="table-responsive">
+                              <table class="table table-striped table-borderless">
+                                <thead>
+                                <tr>
+                                  <th style="width: 20%">Write Down Date/Time</th>
+                                  <th style="width: 10%;">Code</th>
+                                  <th style="width: 30%;">Name</th>
+                                  <th style="width: 15%;">Write Down Amount</th>
+                                  <th style="width: 15%;">Original Amount</th>
+                                  <th class="text-right" style="width: 10%;">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <ng-container *ngIf="row.writeDownDetailList.length > 0">
+                                  <tr *ngFor="let detsils of row.writeDownDetailList; trackBy :trackByFn;let i=index"
+                                      id="write-down-index-{{i}}">
+                                    <td>{{detsils.writeDownDateTime | date: 'MM/dd/yy, h:mm a'}}</td>
+
+                                    <td>{{detsils?.code}}</td>
+                                    <td>{{detsils?.name}}</td>
+                                    <td class="due-date-passed">
+                                      -{{detsils.writeDownAmount | currency : 'USD': 'symbol': '1.2-2'}}</td>
+                                    <td>{{detsils.originalAmount | currency : 'USD': 'symbol': '1.2-2'}}</td>
+                                    <td class="text-right">
+                                      <div class="d-flex justify-content-end">
+                                        <div class="dropdown dropdown-hover-table"
+                                             [class.active]="currentActiveDetls == i"
+                                             (click)="openMenudetls(i, $event)" appAutoCloseOutsideClick
+                                             (outsideClick)="onClickedOutsidedetls($event, i)">
+                                                <span class="icon-area">
+                                                  <em class="icon icon-dot-verti"></em>
+                                                </span>
+                                          <div class="dropdown-menu dropdown-menu-right"
+                                               aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                               (click)="timeWriteDown(row, 'view', detsils)"
+                                               id="view-write-down-index-{{i}}">
+                                              View Write-Down
+                                            </a>
+                                            <a
+                                              *ngIf="(permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin) && row.feeDetail.status != 'Billed'"
+                                              class="dropdown-item" href="javascript:void(0)"
+                                              (click)="timeWriteDown(row, 'edit', detsils)"
+                                              id="edit-write-down-index-{{i}}">
+                                              Edit Write-Down
+                                            </a>
+                                            <a
+                                              *ngIf="(permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin) && row.feeDetail.status != 'Billed'"
+                                              class="dropdown-item" href="javascript:void(0)"
+                                              (click)="removeWriteDown(detsils)" id="delete-write-down-index-{{i}}">
+                                              Delete Write-Down
+                                            </a>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </ng-container>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-row-detail>
+                <ngx-datatable-column [resizeable]="false" prop="feeDetail.chargeType" name="Charge Type" [width]="120">
+                  <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                          <span class="payment-plan-table-arrow cursor-pointer" (click)="toggleExpandRow(row)">
+                            <em [ngClass]="!expanded?'icon icon-angle-down':'icon icon-angle-up'"></em>
+                          </span>
+                      <span>{{value}}</span>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column [resizeable]="false" prop="feeDetail.dateOfService" name="Date of Service"
+                                      [width]="140">
+                  <ng-template let-row="row" let-value="value" let-expanded="expanded" ngx-datatable-cell-template>
+                    <span class="ml-5">{{value | date : 'MM/dd/yyyy'}}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column [resizeable]="false" prop="feeDetail.code" name="Code"
+                                      [width]="100"></ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="feeDetail.name" name="Name" [width]="180">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="feeDetail.status" name="Status" [width]="100">
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" prop="feeDetail.displayAmount" name="Charge" [width]="160">
+                  <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                      <span [class.text-danger]="value<0"> {{(value || 0)  | currency : 'USD': 'symbol': '1.2-2'}} </span>
+                      <div class="info-hover position-relative ml-12" *ngIf="row.feeDetail.writeDownAmount > 0 && row.feeDetail.originalAmount >= 0">
+                        <img src="assets/images/bullet-list.svg">
+                        <div class="tooltip bs-tooltip-top left" role="tooltip">
+                          <div class="arrow"></div>
+                          <div class="tooltip-inner">
+                            <div class="d-flex pb-4 align-items-center justify-content-between">
+                              <span class="font-weight-medium small">Originial Amount</span>
+                              <span
+                                class="lh-20">{{row.feeDetail.originalAmount | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                            </div>
+                            <div class="d-flex pb-4 align-items-center justify-content-between">
+                              <span class="font-weight-medium small">Write-Down</span>
+                              <span
+                                class="lh-20">{{(row.feeDetail.displayAmount - row.feeDetail.originalAmount) | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                            </div>
+                            <div class="d-flex pt-8 align-items-center border-top-white justify-content-between">
+                              <span class="font-weight-medium small">To Be Billed</span>
+                              <span
+                                class="lh-20">{{row.feeDetail.displayAmount | currency : 'USD': 'symbol': '1.2-2'}}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                </ngx-datatable-column>
+                <ngx-datatable-column [resizeable]="false" [sortable]="false" [headerClass]="'text-center pr-2'" [frozenRight]='tables?.frozenRightArr[0]' name="Action" [width]="100">
+                  <ng-template let-row="row" let-value="value" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+
+                    <!-- <div class="dropdown dropdown-hover-table d-flex justify-content-end"
+                         [class.active]="currentActive ==  rowIndex" appAutoCloseOutsideClick
+                         (outsideClick)="onClickedOutside()"
+                         > -->
+                         <div ngbDropdown container="body" class="d-flex justify-content-end">
+                            <!-- <span class="icon-area" (click)="openMenu(rowIndex, $event)"> -->
+                            <div class="dropdown-hover-table pr-0" ngbDropdownToggle>
+                              <em class="icon icon-dot-verti"></em>
+                            </div>
+                            <!-- </span> -->
+                            <div ngbDropdownMenu class="dropdown-menu dropdown-menu-right overflow-hide custom-height">
+                        <a class="dropdown-item"
+                           (click)="ViewTime(ViewTimeEntry,row)">View
+                          Fee Details</a>
+
+                        <a
+                          *ngIf="(row.feeDetail.status != 'Approved' && row.feeDetail.status != 'Billed') && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisAdmin || permissionList.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisEdit || permissionList.TIMEKEEPING_OTHERSisViewOnly)"
+                          class="dropdown-item"
+                          (click)="addTimeEntry('edit', row)">Edit
+                          Fee</a>
+                        <a
+                          *ngIf="(row.feeDetail.status == 'Approved' && row.feeDetail.status != 'Billed') && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin)"
+                          class="dropdown-item"
+                          (click)="addTimeEntry('edit', row)">Edit
+                          Fee</a>
+
+                        <a class="dropdown-item"
+                           *ngIf="(row.feeDetail.status != 'Approved' && row.feeDetail.status != 'Billed') && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin || permissionList.MATTER_MANAGEMENTisAdmin || permissionList.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisEdit || permissionList.TIMEKEEPING_OTHERSisViewOnly)"
+                           (click)="deleteTime(row)">Delete Fee</a>
+                        <a class="dropdown-item"
+                           *ngIf="(row.feeDetail.status == 'Approved' && row.feeDetail.status != 'Billed') && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin)"
+                           (click)="deleteTime(row)">Delete Fee</a>
+
+                        <a class="dropdown-item"
+                           *ngIf="(row.feeDetail.status != 'Billed') && (permissionList.BILLING_MANAGEMENTisEdit || permissionList.BILLING_MANAGEMENTisAdmin)"
+                           (click)="timeWriteDown(row, 'add', null)">Write Down Fee</a>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-footer>
+                  <ng-template ngx-datatable-footer-template let-rowCount="rowCount" let-pageSize="pageSize"
+                               let-selectedCount="selectedCount" let-curPage="curPage" let-offset="offset"
+                               let-isVisible="isVisible">
+                    <div class="d-flex justify-content-between flex-fill">
+                      <div class="d-flex align-items-center">
+                        <div class="table-items d-flex align-items-center mr-36">
+                          Items per page:
+                          <div class=" ml-8">
+                            <select class="custom-select border-less" [formControl]="pageSelector"
+                                    (change)="changePageSize()">
+                              <option *ngFor="let limit of limitArray; trackBy: trackByFn"
+                                      [value]="limit">{{ limit }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <span>
+                              {{(rowCount > 0 ? ((offset * pageSize) + 1) : 0)}} -
+                          {{(rowCount > (curPage * pageSize)) ? (curPage * pageSize) : (rowCount)}} of {{(rowCount)}}
+                          item(s)
+                            </span>
+                      </div>
+
+                      <div class="d-flex align-items-center">
+                        <select class="custom-select border-less" [(ngModel)]="pageSelected" (change)="changePage()">
+                          <option *ngFor='let num of page.totalPages | counterPipe; trackBy: trackByFn ;let i= index'
+                                  [value]="i+1">Page
+                            {{ i + 1 }} of {{page.totalPages}}</option>
+                        </select>
+                        <div class="ml-8">
+                          <datatable-pager [pagerLeftArrowIcon]="'datatable-icon-left icon icon-angle-left'"
+                                           [pagerRightArrowIcon]="'datatable-icon-right icon icon-angle-right'"
+                                           [pagerPreviousIcon]="'datatable-icon-prev'"
+                                           [pagerNextIcon]="'datatable-icon-skip'" [page]="curPage"
+                                           [size]="pageSize" [count]="rowCount" [hidden]="!((rowCount / pageSize) > 1)"
+                                           (change)="feesTable.onFooterPage($event);pageChange($event)">
+                          </datatable-pager>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-footer>
+
+              </ngx-datatable>
+            </div>
+          </div>
+          <app-loader [active]="feesLoading"></app-loader>
+        </div>
+      </div>
+      <div class="card gray-card" #disbursementSection id="disbursementSection">
+        <app-new-billing-disbursements
+          [rateTables]="rateTables"
+          (rateTablesChange)="rateTablesChange.emit($event)"
+          [isCustomBillingRate]="isCustomBillingRate"
+          (isCustomBillingRateChange)="isCustomBillingRateChange.emit($event)"
+          [isEditRateTable]="isEditRateTable"
+          (isEditRateTableChange)="isEditRateTableChange.emit($event)"
+          [officeBillingSettings]='officeBillingSettings'
+          [matterDetails]='matterDetails'
+          [updateDisbursMent]='updateDisbursMent'
+          [firmDetails]='firmDetails'
+          (refreshUnbilledBalance)="getUnbilledCharges(); chargesBreakdownComponent.getChargesBreakdown()"
+          [(lifeOfMatter)]="lifeOfMatterDisbursement"
+          [(selectedFilter)]="selectedDisbursementFilter"
+          [(isShow)]="disbursementSectionAccordion"
+        ></app-new-billing-disbursements>
+      </div>
+      <div class="card gray-card" #writeOffSection id="writeOffSection">
+        <app-new-write-offs [invoiceId]="invoiceId" [prebillId]='prebillId'
+                            [(toggleViewButton)]="writeOffAccordian"
+                            (refreshBilledBalance)="getBilledBalance()"
+                            [balanceDue]="balanceDue"
+                            [matterDetails]='matterDetails'>
+        </app-new-write-offs>
+      </div>
+      <div class="card gray-card" #paymentMethod>
+        <app-new-billing-payment-method
+          [paymentPlanList]='paymentPlanList'
+          [rateTables]="rateTables"
+          (rateTablesChange)="rateTablesChange.emit($event)"
+          [isCustomBillingRate]="isCustomBillingRate"
+          (isCustomBillingRateChange)="isCustomBillingRateChange.emit($event)"
+          [isEditRateTable]="isEditRateTable"
+          [(showPayementMethod)]="paymentMethodAccordian"
+          (isEditRateTableChange)="isEditRateTableChange.emit($event)"
+          [paymentMethodeText]='matterDetails?.isFixedFee'
+          [matterDetails]='matterDetails'
+          (refreshBillingPreference)="getPaymentMethods()"
+          [type]='type'></app-new-billing-payment-method>
+      </div>
+      <div #paymentPlan>
+        <div class="card gray-card" *ngIf="isPaymentPlanEnabled" id="payment-plan">
+          <app-new-billing-plan-plan
+            [matterDetails]='matterDetails'
+            [balanceDue]='balanceDue'
+            [(paymentPlanAccordian)]="paymentPlanAccordian"
+            (refreshBillingPreference)="getPaymentPlanList()"
+            [billingSettings]='billingSettings'
+            [paymentPlanEnabled]='paymentPlanEnabled'>
+          </app-new-billing-plan-plan>
+        </div>
+      </div>
+      <div class="card gray-card">
+        <app-new-billing-rate-table
+          [rateTables]="rateTables"
+          (rateTablesChange)="rateTablesChange.emit($event)"
+          [isCustomBillingRate]="isCustomBillingRate"
+          (isCustomBillingRateChange)="isCustomBillingRateChange.emit($event)"
+          [isEditRateTable]="isEditRateTable"
+          (isEditRateTableChange)="isEditRateTableChange.emit($event)"
+          [matterDetails]='matterDetails'>
+        </app-new-billing-rate-table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #ViewTimeEntry let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">View Time Entry</h3>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="closeId">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row gutter-16">
+      <div class="col-3">
+        <div class="form-group" id="clientId">
+          <label class="d-block">Client</label>
+          {{feeDetails?.client}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="matterId">
+          <label class="d-block">Matter</label>
+          {{feeDetails?.matterName}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="dateTimeEnteredId">
+          <label class="d-block">Date/Time Entered</label>
+          {{feeDetails?.dateTimeEntered | date: 'MM/dd/yyyy, hh:mm aa'}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="dateOfServiceId">
+          <label class="d-block">Date of Service</label>
+          {{feeDetails?.dateOfService | date: 'MM/dd/yyyy'}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="enteredById">
+          <label class="d-block">Timekeeper</label>
+          {{feeDetails?.timeKeeper}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="chargeCodeId">
+          <label class="d-block">Charge Code</label>
+          {{feeDetails?.chargeCode}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="chargeCodeDescriptionId">
+          <label class="d-block">Charge Code Description</label>
+          {{feeDetails?.chargeCodeDescription}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="timeRecordedId">
+          <label class="d-block">Time Recorded</label>
+          {{feeDetails?.timeWorked}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="billableId">
+          <label class="d-block">Billable</label>
+          {{feeDetails?.isBillable ? 'Yes' : 'No'}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="rateId">
+          <label class="d-block">Rate</label>
+          {{feeDetails?.rate | currency : 'USD' : 'symbol' : '1.2-2'}}
+          <!-- <span *ngIf='viewTimeEntryobj?.billType?.code == "HOURLY"'>per Hour</span>
+          <span *ngIf='viewTimeEntryobj?.billType?.code == "FIXED"'></span> -->
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="calculatedChargeId">
+          <label class="d-block">Calculated Charge</label>
+          {{feeDetails?.calculatedCharge | currency : 'USD' : 'symbol' : '1.2-2'}}
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" id="statusId">
+          <label class="d-block">Status</label>
+          {{feeDetails?.status}}
+        </div>
+      </div>
+    </div>
+
+    <hr class="mt-0 mb-24">
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="d-flex justify-content-between">
+          <h4 class="mb-16 mt-0">Billing Narrative</h4>
+        </div>
+        <div class="form-group" id="billingNarrativeId">
+          <label class="d-block">Billing Narrative</label>
+          <p class="lh-20 m-0 word-wrap"> {{feeDetails?.billingNarrative}} </p>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="d-flex justify-content-between">
+          <h4 class="mb-16 mt-0">Note to File</h4>
+          <div class="text-right visble-to-client mt-n12">
+            <div class="custom-control custom-checkbox pr-0 ml-auto">
+              <label class="custom-control-label" for="visibletoclient">Visible to Client</label>
+            </div>
+            Date of Service: {{feeDetails?.dateOfService | date: 'MM/dd/yyyy'}}
+          </div>
+        </div>
+        <div class="form-group" id="notesId">
+          <label class="d-block">Notes</label>
+          <p class="lh-20 m-0 word-wrap"> {{feeDetails?.note}} </p>
+        </div>
+      </div>
+    </div>
+    <hr class="m-0">
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="closeBottomId">Close
+    </button>
+  </div>
+
+</ng-template>
+<ng-template #billNowReview let-modal>
+  <div class="modal-header pb-24">
+    <h3 class="modal-title mb-0">Bill Now Review</h3>
+    <button type="button" class="close" (click)="modal.close(null)" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-12">
+    <div class="d-flex align-items-start missing-data">
+      <em class="icon icon-warning text-warning" style="font-size: 22px;"></em>
+      <div class="lh-20 ml-16">
+        <p class="mb-0" id="bill-now-message" [innerHtml]="billNowMessage"></p>
+        <div class="mt-20" *ngIf="!chargesBillNow">
+          <div class="custom-control custom-checkbox mb-0 pr-0"
+               *ngIf='billingSettings?.invoiceDelivery?.id == electronicInvoice?.id || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+            <input type="checkbox" class="custom-control-input" id="customCheck1_email" [value]='true'
+                   [(ngModel)]='sendEmail'>
+            <label class="custom-control-label" for="customCheck1_email">Email invoice to client</label>
+          </div>
+          <div class="custom-control custom-checkbox mb-0 pr-0"
+               *ngIf='billingSettings?.invoiceDelivery?.id == paperInvoice?.id  || billingSettings?.invoiceDelivery?.id == paperAndElectronicInvoice?.id'>
+            <input type="checkbox" class="custom-control-input" id="customCheck2_print" [value]='true'
+                   [(ngModel)]='print'>
+            <label class="custom-control-label" for="customCheck2_print">Print invoice</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close(null)" id="cancel">Cancel</button>
+    <button type="button" class="btn btn-primary" *ngIf="chargesBillNow" (click)="modal.close(true)"
+            id="yes-bill-now-btn">Yes, Bill Now
+    </button>
+    <button type="button" class="btn btn-primary" *ngIf="!chargesBillNow" (click)="modal.close('zeroInvoice')"
+            id="yes-generate-invoice-btn">
+      <span>Yes, Generate Invoice</span>
+    </button>
+  </div>
+</ng-template>
+<div class="d-none" *ngIf='billToClientResponse && invoiceTemplateDetails'>
+  <app-invoice-extended-pdf [invoicedata]='billToClientResponse.invoice'
+                            [invoiceTemplateDetails]='invoiceTemplateDetails' [matterBillingSettings]='billingSettings'
+                            [tenantDetails]='tenantDetails' [loggedinuserId]='loginUser.id'
+                            [default_logo_url]='default_logo_url' (invoiceHTMLDetails)='sendEmailAndPrint($event)'>
+  </app-invoice-extended-pdf>
+</div>

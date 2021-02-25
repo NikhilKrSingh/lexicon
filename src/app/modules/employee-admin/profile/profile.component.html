@@ -1,0 +1,311 @@
+<div class="container" *ngIf='employee'>
+  <div class="main-content">
+    <ol class="breadcrumb mb-32">
+      <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/employee/list']"><a href="javascript:void(0)">Employee Directory</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Employee Profile</li>
+    </ol>
+
+    <div class="d-flex align-items-center justify-content-between mb-32">
+      <div class="profile-header">
+        <div class="profile-content d-flex align-items-center">
+          <div class="user-prof-img position-relative">
+            <img *ngIf='!profileImage' src="assets/images/user.png" class="prfile-img">
+            <img *ngIf='profileImage' [src]="profileImage | safeResource" class="prfile-img">
+            <span class="profile-edit" *ngIf="permissionList?.EMPLOYEE_MANAGEMENTisAdmin"
+              (click)='openProfilePicPopup(ProfilePicture)' id="edit-profile-click"><em class="icon icon-edit"></em></span>
+            <form id="imageForm"><input type="file" accept="image/*" hidden #profilePictureInput (change)="previewProfilePicture()" id="change-upload-picture"></form>
+          </div>
+          <div class="profile-heading mr-16">
+            <div class="d-flex">
+              <div class="info-hover position-relative">
+                <h2 class="mt-0 mb-2" id="employee-fullname">{{employee?.firstName}} {{employee?.lastName}}</h2>
+                <div class="tooltip bs-tooltip-bottom" role="tooltip" *ngIf="nameLength > 24">
+                  <div class="arrow"></div>
+                  <div class="tooltip-inner tooltip-lg">
+                    <p>{{employee?.firstName}} {{employee?.lastName}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="schedule-label mt-0"  *ngIf="employee?.doNotSchedule">
+              <span class="schedule-text font-weight-medium mb-8">
+                <span class="py-4 px-8 text-nowrap ml-8  sh-badge sh-badge-danger font-weight-medium">Do Not Schedule</span>
+              </span>
+            </div>
+            <span class="text-small font-weight-medium d-block">
+              <span *ngIf="!employee.isVisible">Inactive | </span>
+              <span *ngIf='employee?.employmentStartDate' id="employee-start-date">
+                Employed
+                {{ (!lessEmployementEndDate) ? ' since '+ (employee?.employmentStartDate | date) :  ' From ' +(employee?.employmentStartDate | date) +' To '+ (employee?.employmentEndDate | date) }}
+              </span>
+              <em  class="icon icon-edit ml-8"
+                (click)="openDialog('EditDates')" *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin' id="edit-date"></em>
+            </span>
+          </div>
+
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline-primary btn-icon" type="button" *ngIf="((employee.id === loggedInUser.id && permissionList.TIMEKEEPING_SELFisEdit) || ((permissionList?.TIMEKEEPING_OTHERSisAdmin || permissionList.TIMEKEEPING_OTHERSisViewOnly) && employee.id != loggedInUser.id))"
+                (click)="timesheet()" id="view-timesheet-btn">
+          <i class="icon icon-alarm icon-big"></i>
+          View Timesheet
+        </button>
+        <button class="btn btn-outline-primary btn-icon" type="button" (click)="calendar()">
+          <i class="icon icon-calendar-invitation icon-big" id="view-calendar-btn"></i>
+          View Calendar
+        </button>
+        <button class="btn btn-outline-primary" *ngIf="employee.isVisible && permissionList?.EMPLOYEE_MANAGEMENTisAdmin"
+          (click)="empDeactivate(DeactivateModal)" type="button" id="deactivate-user-btn">Deactivate User</button>
+      </div>
+    </div>
+    <div class="row section-area">
+      <div class="col-4">
+        <div class="card card-full-h">
+          <div class="card-body">
+              <h3 class="mb-24 d-flex align-items-center justify-content-between">General Information
+                  <a href="javascript:void(0);"
+                    (click)="openDialog('PersonalInfo','lg')" class="ml-8 px-4 lh-20" *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin' id="open-general">
+                    <em class="icon icon-edit icon-color small"></em>
+                  </a>
+                </h3>
+            <div class="row">
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">First Name</span>
+                  <span id="employee-firstname">{{employee.firstName}}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Middle Name</span>
+                  <span id="employee-middlename">{{(employee.middleName) ? employee.middleName : "N/A" }}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Last Name</span>
+                  <span id="employee-lastname">{{employee.lastName}}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Maiden Name</span>
+                  <span id="employee-maidenname">{{(employee.maidenName) ? employee.maidenName : "N/A"}}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Common Name</span>
+                  <span id="employee-commonname">{{(employee.commonName) ? employee.commonName : "N/A"}}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Nickname</span>
+                  <span id="employee-nickname">{{(employee.nickName) ? employee.nickName : "N/A"}}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Job Family</span>
+                  <span id="employee-jobfamilyname">{{employee.jobFamilyName}}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Job Title</span>
+                  <span id="employee-jobtitle">{{employee.jobTitle}}</span>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Client Assignment</span>
+                  <ng-container *ngIf='employee?.retainerPracticeAreas?.length > 0'>
+                    <div class="d-flex flex-wrap">
+                      <div class="mb-4 mr-4" *ngFor='let area of employee.retainerPracticeAreas; let i = index;last as isLast;trackBy: trackByFn' id="retainer-preactice-index-{{i}}"> {{area.name}}{{(isLast) ? '' : ','}} </div>
+                    </div>
+                  </ng-container>
+                  <span id="employee-retainer" *ngIf="employee?.retainerPracticeAreas?.length == 0">Do not schedule</span>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Initial Consultations</span>
+                  <ng-container *ngIf='employee?.initialConsultPracticeAreas?.length > 0'>
+                    <div class="d-flex flex-wrap">
+                      <div class="mb-4 mr-4" *ngFor='let area of employee.initialConsultPracticeAreas;let i = index;last as isLast;trackBy: trackByFn' id="consult-preactice-index-{{i}}"> {{area.name}}{{(isLast) ? '' : ','}} </div>
+                    </div>
+                  </ng-container>
+                  <span id="employee-retainer" *ngIf="employee?.initialConsultPracticeAreas?.length == 0">Do not schedule</span>
+                </div>
+              </div>
+              <!-- <div class="col-12">
+                <div class="mb-8"><span class="small helper-text d-block">Practice Area(s)</span></div>
+              </div> -->
+              <!-- <ng-container *ngIf='employee?.retainerPracticeAreas?.length > 0'>
+                <div class="col-6">
+                  <div class="mb-4" *ngFor='let area of employee.retainerPracticeAreas; let i = index;trackBy: trackByFn' id="retainer-preactice-index-{{i}}">{{area.name}}</div>
+                </div>
+              </ng-container>
+              <ng-container *ngIf='employee?.initialConsultPracticeAreas?.length > 0'>
+                <div class="col-6">
+                  <div class="mb-4" *ngFor='let area of employee.initialConsultPracticeAreas;let i = index;trackBy: trackByFn' id="consult-preactice-index-{{i}}">{{area.name}}</div>
+                </div>
+              </ng-container> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card card-full-h">
+          <div class="card-body">
+              <h3 class="mb-24 d-flex align-items-center justify-content-between">Contact Information
+                  <a href="javascript:void(0);"
+                    (click)="openDialog('EditContact','')" class="ml-8 px-4 lh-20" *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin' id="open-contact-info">
+                    <em class="icon icon-edit icon-color small"></em>
+                  </a>
+                </h3>
+            <div class="row">
+              <div class="col-12">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Email Address</span>
+                  <a class="text-decoration font-weight-medium" href="mailto:{{employee.email}}" id="employee-email-mailto"> {{employee.email}}</a>
+                  <span class="copy-file" (click)='copyEmail(employee?.email)' id="employee-email-copy"> <i class="icon icon-file-copy"></i></span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Primary Phone</span>
+                  <span id="employee-primary-phone">{{primaryPhoneNumber | phoneFormatter}}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Cell Phone</span>
+                  <span id="employee-primary-cellphone">{{cellphone ? (cellphone | phoneFormatter) : "-"}}</span>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="mb-24"><span class="small helper-text d-block mb-8">Fax</span>
+                  <span id="employee-fax">{{fax ? (fax | phoneFormatter) : "-"}}</span>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="mb-24 d-flex align-items-center justify-content-between">Calendar Settings
+                <a href="javascript:void(0);"
+                  (click)="openDialog('WorkingHours', 'modal-lmd')" class="ml-8 px-4 lh-20" *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin' id="open-calander-setting">
+                  <em class="icon icon-edit icon-color small"></em>
+                </a>
+              </h3>
+            <div class="mb-24"><span class="small helper-text d-block mb-8">Time Zone</span>
+              <span id="employee-timezone">{{calendarSettings?.timeZoneId | timezoneLabel}}</span>
+            </div>
+            <div class="mb-24"><span class="small helper-text d-block mb-8">Working Hours</span>
+              <div class="d-flex justify-content-between mb-12" *ngFor='let day of workingHoursList;let i = index; trackBy: trackByFn' id="workingday-index-{{i}}">
+                <div id="employee-day-display">{{day.name}}</div>
+                <div *ngIf="day.openDisplay == 'Off' && day.closeDisplay == 'Off' else otherDay" id="employee-day-display">Off</div>
+                <ng-template #otherDay>
+                  <div id="employee-day-display">{{day.openDisplay}} - {{day.closeDisplay}}</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="nav nav-tabs d-flex flex-nowrap" role="tablist">
+          <a href="javascript:void(0);" (click)="selecttabs = mytabs" *ngFor="let mytabs of officetab;trackBy: trackByFn ;let i = index;" role="tab"
+            class="nav-link flex-fill" [class.active]="selecttabs === mytabs" id="tab-index-{{i}}">
+            {{ mytabs }}
+          </a>
+        </div>
+        <div class="card card-full-h withtab tlr-0">
+          <div class="card-body p-0">
+            <div class="tab-content info-tab-content p-32">
+              <div *ngIf="selecttabs === officetab[0]" class="tab-pane fade show active" role="tabpanel">
+                  <h3 class="mb-24 d-flex align-items-center justify-content-between">Offices
+                      <a href="javascript:void(0);"
+                        (click)="openDialog('Office')" class="ml-8 px-4 lh-20" *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin' id="open-office-info">
+                        <em class="icon icon-edit icon-color small"></em>
+                      </a>
+                    </h3>
+                <div class="mb-24">
+                  <span class="small helper-text d-block mb-8">Primary Office</span>
+                  <span id="employee-primary-office">{{employee?.primaryOffice?.name}}</span>
+                </div>
+
+                <hr class="mt-32 mb-32">
+
+                <div class="mb-8 d-flex justify-content-between align-items-center">
+                  <span class="small helper-text d-block">Licensed to Practice in the following States:</span>
+                  <a href="javascript:void(0);"
+                    (click)="openDialog('EditState','xl')" class="ml-8 px-4 lh-16" *ngIf='permissionList?.EMPLOYEE_MANAGEMENTisAdmin' id="change-practice-state">
+                    <em class="icon icon-edit icon-color small"></em>
+                  </a>
+                </div>
+                <ng-container *ngFor='let state of employee?.states; let i = index; trackBy: trackByFn'>
+                  <div class="mb-8" id="employee-state-index-{{i}}">{{state.name}}</div>
+                </ng-container>
+              </div>
+              <div *ngIf="selecttabs === officetab[1]" class="tab-pane fade show active" role="tabpanel">
+                <h3 class="mb-24">Secondary Offices</h3>
+                <ng-container *ngFor="let office of employee?.secondaryOffices;let i = index;trackBy :trackByFn;">
+                  <div class="mb-24" id="employee-secondary-office-index">
+                    <span class="small helper-text d-block mb-8">Secondary Office</span>
+                    <span id="employee-sec-index-{{i}}">{{office?.name}}</span>
+                  </div>
+
+                  <div class="mt-16 mb-16"></div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <app-loader [active]="infoLoading"></app-loader>
+    </div>
+    <app-profile-info-details [permissionList]='permissionList' [employee]='employee'
+                              (reloadEmployee)="reloadEmployeeInfo(employee)"
+                              (openEditModel)="openEditModel($event)">
+    </app-profile-info-details>
+  </div>
+
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<div *ngIf='!employee' style="height: 85vh;">
+  <app-loader [active]="loading"></app-loader>
+</div>
+
+<ng-template #DeactivateModal let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Deactivate User</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-24">
+    <div class="d-flex">
+      <em class="icon-alert icon icon-error text-danger fs-22 mr-16"></em>
+      <p class="m-0 lh-20">{{ deactivateMsg }}</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="modal.dismiss('Cross click')" id="close-btn">Close</button>
+  </div>
+</ng-template>
+
+<ng-template #ProfilePicture let-modal>
+  <div class="modal-header d-block pb-24">
+    <h3 class="modal-title mb-0">Edit Profile Photo</h3>
+
+    <button type="button" class="close" (click)="modal.dismiss('Cross click');removeProfilePicture()" aria-label="Close" id="close-btn">
+      <em class="icon icon-close"></em>
+    </button>
+  </div>
+  <div class="modal-body pb-16">
+    <div class="prof-photo-upload">
+      <div class="prof-photo-main">
+        <img *ngIf='!newProfileImage' src="assets/images/user.png" class="user-placehold">
+        <img *ngIf='newProfileImage' [src]="newProfileImage | safeResource">
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer d-block">
+    <button class="btn btn-outline-primary btn-block" (click)="editProfilePicture()" type="button">Upload Photo</button>
+    <button class="btn btn-light btn-block mt-16 ml-0" (click)="removeProfilePicture()" type="button">Remove Photo</button>
+    <button class="btn btn-primary btn-block mt-16 ml-0" (click)='saveProfilePicture();modal.close()' type="button">Save Changes</button>
+  </div>
+</ng-template>

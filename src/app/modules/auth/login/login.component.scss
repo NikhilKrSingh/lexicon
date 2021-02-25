@@ -1,0 +1,44 @@
+.login-row{
+    &.redirecting{
+        .login-ftr{
+            padding-top: 185px;
+            padding-bottom: 136px;
+        }
+        // p{
+        //     font-size: 16px;
+        //     line-height: 20px;
+        //     font-weight: 500;
+        // }
+        .login-wraps{
+            min-height: 540px;
+            &:before{
+                display: none;
+            }
+        }
+    }
+}
+.login-section {
+  z-index: 2;
+}
+
+.welcomeSection{
+    margin-top: -70px;
+    h1{
+        font-size: 28px; 
+        font-weight: 500;
+        &::before{
+            left: calc(50% - 20px);
+        }
+        margin-bottom: 25px;
+    }
+    p{
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+    }
+    .spinner{
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+}

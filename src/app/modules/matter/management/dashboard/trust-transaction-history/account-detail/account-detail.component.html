@@ -1,0 +1,74 @@
+<ng-container *ngIf='row'>
+  <ng-container *ngIf='isSource'>
+    <span class="font-weight-medium d-block" *ngIf="row.sourceAccountDetails?.accountType != 'Firm Operating Account'">{{row?.sourceAccountDetails?.accountType}}</span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.sourceAccountDetails?.accountType === 'Check' && row?.sourceAccountDetails?.checkNumber">
+      Check ending in {{row?.sourceAccountDetails.checkNumber | slice : -4}}
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.sourceAccountDetails?.accountType === 'E-Check' && row?.sourceAccountDetails?.eCheckDetails?.name">
+      Account ending in {{row?.sourceAccountDetails?.eCheckDetails?.name | slice : -4}}
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.sourceAccountDetails?.accountType === 'Credit Card' && row?.sourceAccountDetails?.ccDetails?.name">
+      Card ending in {{row?.sourceAccountDetails?.ccDetails?.name}}
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.sourceAccountDetails?.accountType === 'Firm Operating Account'">
+      <span class="font-weight-medium d-block">
+        {{row?.sourceAccountDetails?.usioBankAccount?.accountName}}
+      </span>
+      <span *ngIf='row?.sourceAccountDetails?.usioBankAccount?.accountNumber'>
+        Account ending in {{row?.sourceAccountDetails?.usioBankAccount?.accountNumber | slice : -4}}
+      </span>
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.sourceAccountDetails?.accountType === '1 - Primary Retainer Trust' && row.sourceAccountDetails?.primaryRetainerTrustBankAccount?.accountNumber">
+      Account ending in {{row.sourceAccountDetails?.primaryRetainerTrustBankAccount?.accountNumber | slice : -4}}
+    </span>
+    <span class="helper-text font-weight-normal"
+    *ngIf="row.sourceAccountDetails?.accountType === 'Trust-Only Account' && row.sourceAccountDetails?.trustOnlyAccount">
+      <span *ngIf='row.sourceAccountDetails?.trustOnlyAccount?.trustNumber'>{{row.sourceAccountDetails?.trustOnlyAccount?.trustNumber}} -</span>
+      {{row.sourceAccountDetails?.trustOnlyAccount?.name}}
+    </span>
+  </ng-container>
+
+  <ng-container *ngIf='!isSource'>
+    <span class="font-weight-medium d-block" *ngIf="row.targetAccountDetails?.accountType != 'Firm Operating Account'">
+      {{row?.targetAccountDetails?.accountType}}
+    </span>
+    <span class="helper-text font-weight-normal" *ngIf="row.targetAccountDetails?.accountType === 'Check'">
+      <span *ngIf='row.targetAccountDetails?.checkNumber'>
+        Check ending in {{row?.targetAccountDetails.checkNumber | slice: -4}}
+      </span>
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.targetAccountDetails?.accountType === 'E-Check' && row?.targetAccountDetails?.eCheckDetails?.name">
+      Account ending in {{row?.targetAccountDetails?.eCheckDetails?.name | slice : -4}}
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.targetAccountDetails?.accountType === 'Credit Card' && row?.targetAccountDetails?.ccDetails?.name">
+      Card ending in {{row?.targetAccountDetails?.ccDetails?.name}}
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.targetAccountDetails?.accountType === 'Firm Operating Account'">
+      <span class="font-weight-medium d-block">
+        {{row?.targetAccountDetails?.usioBankAccount?.accountName}}
+      </span>
+      <span *ngIf='row?.targetAccountDetails?.usioBankAccount?.accountNumber'>
+        Account ending in {{row?.targetAccountDetails?.usioBankAccount?.accountNumber | slice : -4}}
+      </span>
+    </span>
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.targetAccountDetails?.accountType === '1 - Primary Retainer Trust' && row.targetAccountDetails?.primaryRetainerTrustBankAccount?.accountNumber">
+      Account ending in
+      {{ row.targetAccountDetails?.primaryRetainerTrustBankAccount?.accountNumber | slice : -4}}
+    </span>
+
+    <span class="helper-text font-weight-normal"
+      *ngIf="row.targetAccountDetails?.accountType === 'Trust-Only Account' && row.targetAccountDetails?.trustOnlyAccount">
+      <span *ngIf='row.targetAccountDetails?.trustOnlyAccount?.trustNumber'>
+        {{row.targetAccountDetails?.trustOnlyAccount?.trustNumber}} -
+      </span> {{row.targetAccountDetails?.trustOnlyAccount?.name}}
+    </span>
+  </ng-container>

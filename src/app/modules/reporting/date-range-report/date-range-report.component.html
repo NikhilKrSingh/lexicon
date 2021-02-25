@@ -1,0 +1,25 @@
+<div class="form-group mb-0">
+    <label>{{title}} <sup>*</sup></label>
+    <div class="row gutter-16">
+        <div class="col-6">
+            <div class="form-group mb-20" [class.has-error]="startDateError">
+                <form [formGroup]="DateRangeReportForm">
+                    <app-date-picker [isForm]='true' [maxDate]="DateRangeReportForm.value.endDate" 
+                    [dateform]='DateRangeReportForm' placeholderText="Select Start Date" controlName='startDate' (dataChange)="startDateChange()"
+                     [reset]="reset" id="report-start-date"></app-date-picker>
+                </form>
+                <span class="field-message text-danger" *ngIf="startDateError">
+                    <em class="icon icon-error mr-4"></em>
+                    <span>{{ errorData?.select_start_date }}</span>
+                </span>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group mb-20">
+                <form [formGroup]="DateRangeReportForm">
+                    <app-date-picker [isForm]='true' [maxDate]="currentDate" [dateform]='DateRangeReportForm' controlName='endDate' (dataChange)="endDateChange()" id="report-end-date"></app-date-picker>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

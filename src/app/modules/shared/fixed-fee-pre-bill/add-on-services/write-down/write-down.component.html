@@ -1,0 +1,133 @@
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0" *ngIf='add'>Add-On Write Down</h3>
+  <h3 class="modal-title mb-0" *ngIf='edit'>Edit Add-On Write Down</h3>
+  <h3 class="modal-title mb-0" *ngIf='!edit && !add'>View Add-On Write Down</h3>
+  <button type="button" class="close" (click)="close()" aria-label="Close" id="close-btn">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body" *ngIf='edit || add'>
+  <p class="mb-24">
+    Enter either the write-down amount or the actual amount to be billed. The system will calculate the
+    other value.
+  </p>
+  <form [formGroup]="writeDownForm">
+    <div class="row">
+      <div class="col-5">
+        <div class="form-group pb-20"  [class.has-error]="f['writeDownCodeId'].errors && formSubmitted">
+          <label>Type <sup>*</sup></label>
+          <ng-select [items]="writeDownList"
+                    placeholder="Select write-down type"
+                    formControlName="writeDownCodeId"
+                    [bindValue]="'id'"
+                    [(ngModel)]="jselected"
+                    [bindLabel]="'codeName'"
+                    [selectOnTab]="true"
+                    [clearable]="false"
+                    [notFoundText]="'No record found'"
+                    id="type-select">
+          </ng-select>
+          <span class="field-message text-danger" *ngIf="f['writeDownCodeId'].errors && formSubmitted">
+            <span *ngIf="f.writeDownCodeId.errors?.required" >
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.writedown_type_error}}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-borderless mb-24">
+        <tbody>
+          <tr class="bdr-btm">
+            <th>Code</th>
+            <th width="150">Amount</th>
+          </tr>
+          <tr class="bg-light">
+            <td>{{service?.serviceName}}</td>
+            <td class="small-padding">{{rateAmount  | currency : 'USD': 'symbol': '1.2-2'}}</td>
+          </tr>
+          <tr class="bg-white bdr-btm">
+            <td><strong>Write-Down Amount</strong></td>
+            <td class="pl-0 pt-1 pb-1">
+                <input class="form-control bordred gray-form-control" type="text" formControlName="writeDownAmount" prefix="$" mask="separator.2" thousandSeparator=","  (input)="onWriteDownValueChange($event.target.value, 'writedown')" id="write-down-amount">
+            </td>
+          </tr>
+          <tr class="bg-white">
+            <td>
+              <strong>Amount to be billed</strong>
+            </td>
+            <td class="pl-0 pt-1 pb-1">
+              <input class="form-control bordred gray-form-control" type="text" placeholder=""  (input)="onWriteDownValueChange($event.target.value, 'amounttobilled')" prefix="$"
+              mask="separator.2" thousandSeparator="," name="billedAmount" [(ngModel)]="billedAmount" [ngModelOptions]="{standalone: true}" id="amount-to-filled">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="form-group mb-0" [class.has-error]="f['writeDownNarrative'].errors && formSubmitted">
+          <label>Reason <sup>*</sup></label>
+          <textarea class="form-control" formControlName="writeDownNarrative" placeholder="Enter reason for write down" id="reason"></textarea>
+          <span class="field-message text-danger" *ngIf="f['writeDownNarrative'].errors && formSubmitted">
+            <span *ngIf="f.writeDownNarrative.errors?.required" >
+              <em class="icon icon-error mr-4"></em>
+              {{errorData.writedown_narrative_error}}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer" *ngIf='edit || add'>
+  <button type="button" class="btn btn-light" (click)="close()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="save()" id="save-btn">Save</button>
+</div>
+
+<div class="modal-body" *ngIf='!edit && !add'>
+  <div class="row">
+    <div class="col-5">
+      <div class="form-group pb-10" >
+        <label>Type</label>
+        <div>{{writeDownRow?.writeDownCode?.code}} - {{writeDownRow?.writeDownCode?.name}}</div>
+      </div>
+    </div>
+  </div>
+  <table class="table table-borderless mb-24">
+    <tbody>
+      <tr class="bdr-btm">
+        <th>Service Name</th>
+        <th width="115">Amount</th>
+      </tr>
+      <tr class="bg-light">
+        <td>{{service?.serviceName}}</td>
+        <td>{{service?.serviceAmount  | currency : 'USD': 'symbol': '1.2-2'}}</td>
+      </tr>
+      <tr class="bg-white bdr-btm">
+        <td><strong>Write-Down Amount</strong></td>
+        <td class="small-padding">
+          {{writeDown  | currency : 'USD': 'symbol': '1.2-2'}}
+        </td>
+      </tr>
+      <tr class="bg-white">
+        <td>
+          <strong>Amount to be billed</strong>
+        </td>
+        <td class="small-padding">
+          {{amountToBeBilled  | currency : 'USD': 'symbol': '1.2-2'}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pt-32">
+    <label class="d-block mb-16">Reason</label>
+    <p class="lh-20">{{service.writeDownReason}}</p>
+  </div>
+</div>
+<div class="modal-footer" *ngIf='!edit && !add'>
+  <button type="button" class="btn btn-light" (click)="close()" id="close-btn">Close</button>
+</div>

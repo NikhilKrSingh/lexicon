@@ -1,0 +1,71 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item" ><a href="javascript:void(0)">Contact Directory</a></li>
+            <li class="breadcrumb-item" ><a href="javascript:void(0)">Contact Profile</a></li>
+            <li class="breadcrumb-item" ><a href="javascript:void(0)">Manage Initial Consultation</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Reschedule Initial Consultation</li>
+        </ol>
+        <div class="profile-content d-flex align-items-center profile-client mb-32">
+            <div class="profile-heading mr-16">
+                <h2 class="mt-0 mb-2">Brian McAhn Takt</h2>
+                <span class="text-small font-weight-medium d-flex align-items-center">Individual Contact</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-24">Reschedule Initial Consultation</h2>
+                <div class="questions-group mb-24">
+                    <p class="mb-12">Who requested the reschedule?</p>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="wrr-1" name="wrr" class="custom-control-input" checked>
+                        <label class="custom-control-label" for="wrr-1">Potential Client</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="wrr-2" name="wrr" class="custom-control-input">
+                        <label class="custom-control-label" for="wrr-2">Firm</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="wrr-3" name="wrr" class="custom-control-input">
+                        <label class="custom-control-label" for="wrr-3">Do Not Increment a Flag</label>
+                    </div>
+                </div>
+                <div class="questions-group mb-24">
+                    <p class="mb-12">The initial consultation date of 9/3/19 has passed. Was this potential client a no-show?</p>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="noShow-1" name="noShow" class="custom-control-input" checked>
+                        <label class="custom-control-label" for="noShow-1">Yes</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="noShow-2" name="noShow" class="custom-control-input">
+                        <label class="custom-control-label" for="noShow-2">NO</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" id="noShow-3" name="noShow" class="custom-control-input">
+                        <label class="custom-control-label" for="noShow-3">Do Not Increment a Flag</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-7">
+                        <div class="form-group mb-0">
+                            <label>Change Notes</label>
+                            <textarea class="form-control" placeholder="Enter change notes (optional)" rows="4"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-24">Scheduling</h2>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end pb-24">
+            <div class="btn-group">
+                <button type="button" class="btn btn-light">Cancel</button>
+                <button type="button" class="btn btn-primary">Save</button> 
+            </div>
+        </div>
+    </div>
+</div>

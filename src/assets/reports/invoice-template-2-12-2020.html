@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice</title>
+  <style>
+    @page {
+      margin: 0cm 0cm;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
+
+    /* Define the header rules */
+    header {
+      /* position: fixed;            top: 0cm;            left: 0cm;            right: 0cm;            height: 3cm; */
+      padding: 0 0 10px;
+      border-bottom: 1px solid #353B4B;
+    }
+
+    /* Define the footer rules */
+    footer {
+      position: absolute;
+      bottom: 24px;
+      left: 0;
+      width: 100%;
+      padding: 0;
+    }
+
+    .footer-inner {
+      padding: 17px 9px 0;
+      border-top: 1px solid #353B4B;
+    }
+
+    .text-right {
+      text-align: right !important;
+    }
+
+    .clearfix:after,
+    .clearfix:before {
+      content: "";
+      clear: both;
+      display: table;
+    }
+
+    .hours-table th,
+    .hours-table td {
+      padding: 4px 10px;
+      vertical-align: top;
+      font-size: 8px;
+      line-height: 11px;
+    }
+
+    .hours-table th {
+      border-bottom: 1px solid #353B4B;
+      padding-bottom: 2px;
+      padding-top: 0;
+      line-height: 12px;
+    }
+
+    .hours-table tr:nth-child(even) {
+      background-color: #F4F7F9;
+    }
+
+    .hours-table tfoot {
+      background-color: #494949;
+      color: #fff;
+    }
+
+    .pull-left {
+      float: left;
+    }
+
+    .pull-right {
+      float: right;
+    }
+
+    .dos-left {
+      width: 100px;
+      text-align: left;
+    }
+
+    .tkpr-td {
+      padding-left: 20px;
+    }
+
+    .dos-td {
+      width: 350px;
+    }
+
+    .hr-td {
+      min-width: 70px;
+    }
+
+    .hrrt-td {
+      min-width: 100px;
+    }
+
+    .sbtl-td {
+      min-width: 100px;
+    }
+
+    .dis-table {
+      display: table;
+    }
+
+    .dis-table>div {
+      display: table-cell;
+    }
+
+    .wrapper .card {
+      margin-bottom: 24px;
+      border-radius: 0;
+      position: relative;
+    }
+
+    .box-shadow {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .wrapper .card .card-body {
+      height: 1000px;
+      position: relative;
+      padding: 32px;
+    }
+
+    .wrapper {
+      width: 100% !important;
+      max-width: 8.27in;
+      min-height: 100%;
+      position: relative;
+    }
+
+    .d-none {
+      display: none;
+    }
+
+    .d-block {
+      display: block;
+    }
+
+    .invoice-scroll footer {
+      padding: 0 24px;
+    }
+
+    .invoice-prev-block footer {
+      padding: 0 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper" style="width: 8.27in;margin-left: auto;margin-right: auto;">
+    <header class="d-none" id='header-div'>
+      <table style="width: 100%;border-collapse: collapse;">
+        <tr>
+          <td style="text-align: left;vertical-align: bottom;"> <img src="[TenantLogo]"
+              style="max-width: 200px;max-height: 70px; display: inline-block;vertical-align: middle;" alt="">
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+              Invoice #[InvoiceNumber]</p>
+          </td>
+          <td style="text-align: right;vertical-align: bottom;">
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+              [CurrentDate]</p>
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+              Client #[ClientNumber]</p>
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+              Page #PAGENUMBER</p>
+          </td>
+        </tr>
+      </table>
+    </header>
+    <footer class="d-none " id='footer-div'>
+      <div class="footer-inner">
+        <p
+          style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+          [DisclaimerText]</p>
+        <div class='payment-instructions-text'
+          style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+          [PaymentInstructionText] </div>
+        <p
+          style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;font-weight: 700;">
+          Please include the Client, Matter, or Invoice Number with all payments. </p>
+      </div>
+    </footer>
+    <div class="card box-shadow" id='cover-page'>
+      <div class="card-body">
+        <table
+          style="width: 100%;border-collapse: collapse;color: #353B4B;background: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+          <tr>
+            <td style="text-align: left;vertical-align: top;">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="text-align: center;vertical-align: top;"> <img src="[TenantLogo]"
+                      style="max-width: 200px;max-height: 70px; display: inline-block;vertical-align: middle;" alt="">
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 13px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="vertical-align: top;text-align: center;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;width: 65%;font-weight: 700;text-transform: uppercase;">
+                    EMPLOYER IDENTIFICATION NUMBER: [EIN] </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 16px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="text-align: left;vertical-align: top;">
+                    <table style="width: 100%;border-collapse: collapse;">
+                      <tr>
+                        <td
+                          style="padding-left: 10px; vertical-align: top;text-align: left;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;width: 65%;padding-right: 20px;">
+                          [ClientName] <br> [Address1] <br> [Address2] <br> [City], [State] [Zip] </td>
+                        <td
+                          style="vertical-align: top;text-align: left;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;width: 35%;">
+                          [CurrentDate] <br> Invoice #[InvoiceNumber] <br> Client #[ClientNumber]
+                          <span class="matter-number"><br> Matter #[MatterNumber]</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 25px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: center;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;text-decoration: underline;font-weight: 700;">
+                    REMITTANCE ADVICE </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 13px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;background-color: #F4F7F9;font-weight: 700;padding: 4px 10px;text-transform: uppercase;">
+                    BALANCE FORWARD</td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 4px;">
+                    Balance per Last Statement </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 4px;white-space: nowrap;">
+                    $ [BalanceAmount] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;">
+                    Payments and Other Credits </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;white-space: nowrap;">
+                    $ [PaymentAmount] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;font-weight: 700;">
+                    Balance Forward </td>
+                  <td
+                    style="text-align: right;vertical-align: middle;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;font-weight: 700;white-space: nowrap;">
+                    $ [TotalBalance] </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 18px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;background-color: #F4F7F9;font-weight: 700;padding: 4px 10px;text-transform: uppercase;">
+                    CURRENT CHARGES FOR MATTER</td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr class="matter-number">
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 4px;">
+                    Matter #[MatterNumber] </td>
+                </tr>
+                <tr class="matter-name">
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;">
+                    [MatterName] </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 8%;padding-left: 10px;width: 90%;padding-top: 4px;">
+                    Total Fees for Legal Service this bill </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;white-space: nowrap;min-width: 125px;padding-top: 4px;">
+                    $ [TotalFees] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 8%;padding-left: 10px;width: 90%;">
+                    Total Disbursements this bill </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;white-space: nowrap;min-width: 125px;">
+                    $ [TotalDisbursements] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 8%;padding-left: 10px;padding-bottom: 10px;width: 90%;padding-bottom: 6px;">
+                    Total this bill </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-bottom: 10px; white-space: nowrap;min-width: 125px;padding-bottom: 6px;">
+                    $ [TotalFeesAndDisbursements] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: middle;color: #fff;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 14px;padding-right: 8%;padding-left: 10px;width: 90%;font-weight: bold;background-color: #494949;text-transform: uppercase;">
+                    TOTAL CHARGES THIS INVOICE </td>
+                  <td
+                    style="text-align: right;vertical-align: middle;color: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 14px;padding-right: 10px;padding-left: 10px;padding-top: 4px;padding-bottom: 4px; background-color: #494949;white-space: nowrap;font-weight: 700;min-width: 125px;">
+                    $ [TotalFeesAndDisbursements] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 8%;padding-left: 10px;width: 90%;padding-top: 9px;">
+                    Statement Total Including Balance Forward</td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;white-space: nowrap;min-width: 125px;padding-top: 9px;">
+                    $ [Total] </td>
+                </tr>
+              </table>
+              <div id='trust-accounting-section'>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 18px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td
+                      style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;background-color: #F4F7F9;font-weight: 700;padding: 4px 10px;text-transform: uppercase;">
+                      MONIES ON HAND</td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td style="height: 4px;vertical-align: top;"></td>
+                  </tr>
+                </table>
+                <table style="width: 100%;border-collapse: collapse;">
+                  <tr>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 8%;padding-left: 10px;padding-top: 10px; width: 90%;">
+                      Primary Retainer Trust</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 10px;white-space: nowrap;min-width: 125px;">
+                      $ [PrimaryRetainerTrustBalance] </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 8%;padding-left: 10px;width: 90%;">
+                      Total Trust on Hand</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;white-space: nowrap;min-width: 125px;">
+                      $ [TotalTrustOnHand] </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 8%;padding-left: 10px;padding-bottom: 10px;width: 90%;font-weight: 700;">
+                      Total Monies on Hand</td>
+                    <td
+                      style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-bottom: 10px; white-space: nowrap;font-weight: 700;border-top: 1px solid #353B4B;min-width: 125px;">
+                      $ [TotalMoniesOnHand] </td>
+                  </tr>
+                </table>
+              </div>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 36px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: center;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;text-decoration: underline;background-color: #F4F7F9;font-weight: 700;padding: 4px 10px;text-transform: uppercase;">
+                    <span
+                      style="display: inline-block;vertical-align: middle;text-decoration: underline;">DISCLAIMER</span>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 10px;padding-top: 4px;">
+                    [DisclaimerText]</td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 18px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: center;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;text-decoration: underline;background-color: #F4F7F9;font-weight: 700;padding: 4px 10px;text-transform: uppercase;">
+                    <span style="display: inline-block;vertical-align: middle;text-decoration: underline;">PAYMENT
+                      INSTRUCTIONS</span> </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 10px;padding-top: 4px;">
+                    [PaymentInstructionText]</td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 18px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;font-weight: 700;">
+                    Please include the Client, Matter, or Invoice Number with all payments.</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="card box-shadow" id='page-hourly-matter'>
+      <div class="card-body">
+        <header>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="text-align: left;vertical-align: bottom;"> <img src="[TenantLogo]"
+                  style="max-width: 200px;max-height: 70px; display: inline-block;vertical-align: middle;" alt="">
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Invoice #[InvoiceNumber]</p>
+              </td>
+              <td style="text-align: right;vertical-align: bottom;">
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  [CurrentDate]</p>
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Client #[ClientNumber]</p>
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Page #[PageNumber]</p>
+              </td>
+            </tr>
+          </table>
+        </header>
+        <table
+          style="width: 100%;border-collapse: collapse;color: #353B4B;background: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+          <tr id='hourly-page-container'>
+            <td style="text-align: left;vertical-align: top;">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 18px 10px 10px;">
+                    <h4
+                      style="margin: 0 0 4px;font-weight: 700;font-size: 9px;line-height: 12px;text-transform: uppercase;">
+                      LEGAL SERVICES RENDERED <span
+                        style="font-size: 7px;margin-left: 5px;font-weight: normal;text-transform: none;">through
+                        [LastTransactionDate]</span> </h4>
+                    <p class="matter-number"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      Matter #[MatterNumber]</p>
+                    <p class="matter-name"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      [MatterName]</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table class="hours-table hours-table-container" style="width: 100%;border-collapse: collapse;">
+                      <thead>
+                        <tr>
+                          <th class="dos-td">
+                            <div class="dis-table">
+                              <div class="dos-left">Date of Service</div>
+                              <div class="tkpr-td">Timekeeper</div>
+                            </div>
+                          </th>
+                          <th class="hr-td text-right">Hours</th>
+                          <th class="hrrt-td text-right">Hourly Rate</th>
+                          <th class="sbtl-td text-right">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody class="hours-table-body">
+                        <tr class="hours-table-row">
+                          <td>
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                              <div class="tkpr-td">[Lastname, Firstname]</div>
+                            </div>
+                            <p style="margin: 0;padding-top: 3px;">[BillingNarrative]</p>
+                          </td>
+                          <td class="text-right">[Hours]</td>
+                          <td class="text-right">$ [HourlyRate]</td>
+                          <td class="text-right">$ [HoursXRate]</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                              <div class="tkpr-td">[Lastname, Firstname]</div>
+                            </div>
+                            <p style="margin: 0;padding-top: 3px;">[BillingNarrative]</p>
+                          </td>
+                          <td class="text-right">[Hours]</td>
+                          <td class="text-right">$ [HourlyRate]</td>
+                          <td class="text-right">$ [HoursXRate]</td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td class="text-right" colspan="2">[TotalHours]</td>
+                          <td class="text-right">–</td>
+                          <td class="text-right">$ [TotalDollars]</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr id='disbursement-page-container'>
+            <td style="text-align: left;vertical-align: top;">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 18px 10px 10px;">
+                    <h4
+                      style="margin: 0 0 4px;font-weight: 700;font-size: 9px;line-height: 12px;text-transform: uppercase;">
+                      DISBURSEMENTS<span
+                        style="font-size: 7px;margin-left: 5px;font-weight: normal;text-transform: none;">through
+                        [LastTransactionDate]</span> </h4>
+                    <p class="matter-number"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      Matter #[MatterNumber]</p>
+                    <p class="matter-name"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      [MatterName]</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table class="hours-table dis-table-container" style="width: 100%;border-collapse: collapse;">
+                      <thead>
+                        <tr>
+                          <th class="dos-td">
+                            <div class="dis-table">
+                              <div class="dos-left">Date of Service</div>
+                            </div>
+                          </th>
+                          <th class="hr-td text-right">Quantity</th>
+                          <th class="hrrt-td text-right">Rate per Unit</th>
+                          <th class="sbtl-td text-right">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody class="dis-table-body">
+                        <tr class="dis-table-row">
+                          <td>
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                            </div>
+                            <p style="margin: 0;padding-top: 3px;">[BillingNarrative]</p>
+                          </td>
+                          <td class="text-right">[Quantity]</td>
+                          <td class="text-right">$ [FixedorAmount]</td>
+                          <td class="text-right">$ [QuantityXRPU]</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                            </div>
+                            <p style="margin: 0;padding-top: 3px;">[BillingNarrative]</p>
+                          </td>
+                          <td class="text-right">[Quantity]</td>
+                          <td class="text-right">$ [FixedorAmount]</td>
+                          <td class="text-right">$ [QuantityXRPU]</td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td class="text-right" colspan="2">[TotalQuantity]</td>
+                          <td class="text-right">–</td>
+                          <td class="text-right">$ [TotalDollars]</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <footer>
+          <div class="footer-inner">
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+              [DisclaimerText]</p>
+            <div class='payment-instructions-text'
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+              [PaymentInstructionText] </div>
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;font-weight: 700;">
+              Please include the Client, Matter, or Invoice Number with all payments. </p>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <div class="card box-shadow" id='page-fixed-fee-matter'>
+      <div class="card-body">
+        <header>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="text-align: left;vertical-align: bottom;"> <img src="[TenantLogo]"
+                  style="max-width: 200px;max-height: 70px; display: inline-block;vertical-align: middle;" alt="">
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Invoice #[InvoiceNumber]</p>
+              </td>
+              <td style="text-align: right;vertical-align: bottom;">
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  [CurrentDate]</p>
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Client #[ClientNumber]</p>
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Page #[PageNumber]</p>
+              </td>
+            </tr>
+          </table>
+        </header>
+        <table
+          style="width: 100%;border-collapse: collapse;color: #353B4B;background: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+          <tr id='fixed-fee-page-container'>
+            <td style="text-align: left;vertical-align: top;">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 18px 10px 10px;">
+                    <h4
+                      style="margin: 0 0 4px;font-weight: 700;font-size: 9px;line-height: 12px;text-transform: uppercase;">
+                      FIXED FEE SERVICES <span
+                        style="font-size: 7px;margin-left: 5px;font-weight: normal;text-transform: none;">through
+                        [LastTransactionDate]</span> </h4>
+                    <p class="matter-number"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      Matter #[MatterNumber]</p>
+                    <p class="matter-name"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      [MatterName]</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table class="hours-table fixed-fee-table-container" style="width: 100%;border-collapse: collapse;">
+                      <thead>
+                        <tr>
+                          <th class="dos-td">
+                            <div class="dis-table">
+                              <div class="dos-left">Date of Service</div>
+                              <div class="tkpr-td">Description</div>
+                            </div>
+                          </th>
+                          <th class="sbtl-td text-right">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody class="fixed-fee-body">
+                        <tr class="fixed-fee-row">
+                          <td style="width: 80%;">
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                              <div class="tkpr-td">[FixedFeeServiceDescription]</div>
+                            </div>
+                          </td>
+                          <td class="text-right">$ [ServiceAmount]</td>
+                        </tr>
+                        <tr>
+                          <td style="width: 80%;">
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                              <div class="tkpr-td">[FixedFeeServiceDescription]</div>
+                            </div>
+                          </td>
+                          <td class="text-right">$ [ServiceAmount]</td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td class="text-right">[Total]</td>
+                          <td class="text-right">$ [TotalDollars]</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr id='disbursement-page-container'>
+            <td style="text-align: left;vertical-align: top;">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 18px 10px 10px;">
+                    <h4
+                      style="margin: 0 0 4px;font-weight: 700;font-size: 9px;line-height: 12px;text-transform: uppercase;">
+                      DISBURSEMENTS<span
+                        style="font-size: 7px;margin-left: 5px;font-weight: normal;text-transform: none;">through
+                        [LastTransactionDate]</span> </h4>
+                    <p class="matter-number"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      Matter #[MatterNumber]</p>
+                    <p class="matter-name"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      [MatterName]</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table class="hours-table dis-table-container" style="width: 100%;border-collapse: collapse;">
+                      <thead>
+                        <tr>
+                          <th class="dos-td">
+                            <div class="dis-table">
+                              <div class="dos-left">Date of Service</div>
+                            </div>
+                          </th>
+                          <th class="hr-td text-right">Quantity</th>
+                          <th class="hrrt-td text-right">Rate per Unit</th>
+                          <th class="sbtl-td text-right">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody class="dis-table-body">
+                        <tr class="dis-table-row">
+                          <td>
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                            </div>
+                            <p style="margin: 0;padding-top: 3px;">[BillingNarrative]</p>
+                          </td>
+                          <td class="text-right">[Quantity]</td>
+                          <td class="text-right">$ [FixedorAmount]</td>
+                          <td class="text-right">$ [QuantityXRPU]</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="dis-table">
+                              <div class="dos-left">[DateService]</div>
+                            </div>
+                            <p style="margin: 0;padding-top: 3px;">[BillingNarrative]</p>
+                          </td>
+                          <td class="text-right">[Quantity]</td>
+                          <td class="text-right">$ [FixedorAmount]</td>
+                          <td class="text-right">$ [QuantityXRPU]</td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td class="text-right" colspan="2">[TotalQuantity]</td>
+                          <td class="text-right">–</td>
+                          <td class="text-right">$ [TotalDollars]</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <footer>
+          <div class="footer-inner">
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+              [DisclaimerText]</p>
+            <div class='payment-instructions-text'
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+              [PaymentInstructionText] </div>
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;font-weight: 700;">
+              Please include the Client, Matter, or Invoice Number with all payments. </p>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <div class="card box-shadow" id='page-trust-accounting'>
+      <div class="card-body">
+        <header>
+          <table style="width: 100%;border-collapse: collapse;">
+            <tr>
+              <td style="text-align: left;vertical-align: bottom;"> <img src="[TenantLogo]"
+                  style="max-width: 200px;max-height: 70px; display: inline-block;vertical-align: middle;" alt="">
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Invoice #[InvoiceNumber]</p>
+              </td>
+              <td style="text-align: right;vertical-align: bottom;">
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  [CurrentDate]</p>
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Client #[ClientNumber]</p>
+                <p
+                  style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 2px;white-space: nowrap;">
+                  Page #[PageNumber]</p>
+              </td>
+            </tr>
+          </table>
+        </header>
+        <table
+          style="width: 100%;border-collapse: collapse;color: #353B4B;background: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+          <tr>
+            <td style="text-align: left;vertical-align: top;">
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 18px 10px 10px;">
+                    <h4
+                      style="margin: 0 0 4px;font-weight: 700;font-size: 9px;line-height: 12px;text-transform: uppercase;">
+                      TRUST TRANSACTIONS <span
+                        style="font-size: 7px;margin-left: 5px;font-weight: normal;text-transform: none;">through
+                        [LastTransactionDate]</span> </h4>
+                    <p class="matter-number"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      Matter #[MatterNumber]</p>
+                    <p class="matter-name"
+                      style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;">
+                      [MatterName] </p>
+                  </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 18px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;background-color: #F4F7F9;font-weight: 700;padding:4px 10px;text-transform: uppercase;">
+                    PRIMARY RETAINER TRUST</td>
+                </tr>
+              </table>
+              <table style="width: 75%;border-collapse: collapse;" id='primary-retainer-trust-balance'>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 4px;">
+                    Beginning Balance </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;padding-top: 4px;white-space: nowrap;">
+                    $ [BeginningBalance] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;">
+                    Additions</td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;white-space: nowrap;">
+                    $ [Additions] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;">
+                    Withdrawals</td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;white-space: nowrap;">
+                    $ [Withdrawals] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-bottom: 10px;font-weight: 700;">
+                    ENDING BALANCE as of [CurrentDate]</td>
+                  <td
+                    style="text-align: right;vertical-align: middle;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;padding-bottom: 10px;font-weight: 700;white-space: nowrap;border-top: 1px solid #353B4B;">
+                    $ [EndingBalance] </td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td style="height: 18px;vertical-align: top;"></td>
+                </tr>
+              </table>
+              <table style="width: 100%;border-collapse: collapse;">
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 10px;line-height: 12px;background-color: #F4F7F9;font-weight: 700;padding: 4px 10px;text-transform: uppercase;">
+                    TRUST ONLY</td>
+                </tr>
+              </table>
+              <table style="width: 75%;border-collapse: collapse;" id='trust-only-balance'>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-top: 4px;">
+                    Beginning Balance </td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;padding-top: 4px;white-space: nowrap;">
+                    $ [BeginningBalance] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;">
+                    Additions</td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;white-space: nowrap;">
+                    $ [Additions] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;">
+                    Withdrawals</td>
+                  <td
+                    style="text-align: right;vertical-align: top;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;white-space: nowrap;">
+                    $ [Withdrawals] </td>
+                </tr>
+                <tr>
+                  <td
+                    style="text-align: left;vertical-align: top;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 10px;padding-left: 10px;padding-bottom: 10px;font-weight: 700;">
+                    ENDING BALANCE as of [CurrentDate]</td>
+                  <td
+                    style="text-align: right;vertical-align: middle;color: #353B4B; font-family: Arial, Helvetica, sans-serif; font-size: 8px;line-height: 13px;padding-right: 0;padding-left: 10px;padding-bottom: 10px;font-weight: 700;white-space: nowrap;border-top: 1px solid #353B4B;">
+                    $ [EndingBalance] </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <footer>
+          <div class="footer-inner">
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+              [DisclaimerText]</p>
+            <div class='payment-instructions-text'
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;padding-bottom: 17px;">
+              [PaymentInstructionText] </div>
+            <p
+              style="margin: 0;color: #353B4B;font-family: Arial, Helvetica, sans-serif; font-size: 7px;line-height: 11px;font-weight: 700;">
+              Please include the Client, Matter, or Invoice Number with all payments. </p>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

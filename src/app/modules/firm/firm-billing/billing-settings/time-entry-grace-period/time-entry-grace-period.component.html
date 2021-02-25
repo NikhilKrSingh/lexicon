@@ -1,0 +1,60 @@
+<div class="d-flex justify-content-between align-items-start">
+  <div>
+    <div class="d-flex mb-8 align-items-center">
+      <h3 class="mb-0">Configure Time Entry Grace Period</h3>
+      <em (click)="edit()" *ngIf="!isEdit" class="cursor-pointer icon icon-edit ml-12 icon-color" id="edit-click"></em>
+    </div>
+    <p class="lh-20">During this period, users can apply time to the previous Bill Generation Period and have it apply to its pre-bill.</p>
+  </div>
+</div>
+<div class="row gutter-16">
+  <div class="col-2">
+    <div class="form-group">
+      <label> Days <sup>*</sup></label>
+      <input type="text" class="form-control" [disabled]="!isEdit" (keypress)="checkNumber($event)"
+        [(ngModel)]='billingSettings.timeEntryGracePeriod' id="days-text">
+    </div>
+  </div>
+</div>
+<div class="form-group mb-0">
+  <label> End Time <sup>*</sup></label>
+  <div class="row gutter-16">
+    <div class="col-auto queue-time">
+      <div class="position-relative cust-spinner">
+        <input readonly [disabled]="!isEdit" maxlength="2" [(ngModel)]="hour" placeholder="00" type="text" class="form-control number-control custom-readonly" id="end-time">
+          <div class="cust-spinn-arrow">
+            <span class="up-spin" (click)="changeHour('up')">
+              <em class="icon icon-angle-up"></em>
+            </span>
+            <span class="down-spin" (click)="changeHour('down')">
+              <em class="icon icon-angle-down"></em>
+            </span>
+          </div>
+      </div>
+    </div>
+    <div class="col-auto colon-dot queue-time">
+      <div class="position-relative cust-spinner">
+        <input readonly [disabled]="!isEdit" maxlength="2" placeholder="00" [(ngModel)]="minutes" type="text" class="form-control number-control custom-readonly" id="end-time-two">
+        <div class="cust-spinn-arrow">
+          <span class="up-spin" (click)="changeMinute('up')">
+            <em class="icon icon-angle-up"></em>
+          </span>
+          <span class="down-spin" (click)="changeMinute('down')">
+            <em class="icon icon-angle-down"></em>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto queue-time">
+      <ul class="time-switch d-flex list-unstyled m-0" *ngIf="isEdit">
+        <li><a (click)="setAmPm(true)" [ngClass]="{'active' : isAM}" href="javascript:void(0);" id="set-am">AM</a></li>
+        <li><a (click)="setAmPm(false)" [ngClass]="{'active' : !isAM}" href="javascript:void(0);" id="set-pm">PM</a></li>
+      </ul>
+      <ul class="time-switch d-flex list-unstyled m-0" *ngIf="!isEdit">
+        <li><a [ngClass]="isAM ? 'dark-disabled': 'disabled'" href="javascript:void(0);" id="set-am">AM</a></li>
+        <li><a [ngClass]="!isAM ? 'dark-disabled': 'disabled'"href="javascript:void(0);" id="set-pm">PM</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+  

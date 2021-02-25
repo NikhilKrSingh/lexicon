@@ -1,0 +1,35 @@
+<div class="card gray-card card-full-h">
+  <div class="card-body">
+    <h4 class="mb-8">Charges Breakdown <span class="font-weight-normal">In USD</span></h4>
+    <div>
+      <div class="row mb-8">
+        <div class="col-12">
+          <div class="d-flex">
+            <span class="d-block time"></span>
+            <span class="d-block ml-2 legend-title">Time</span>
+            <span class="d-block disbursement"></span>
+            <span class="d-block ml-2 legend-title">Disbursement</span>
+          </div>
+        </div>
+      </div>
+      <div class="bill-chart" *ngIf="showChartData" #barChart>
+        <canvas baseChart
+                [datasets]="barChartData"
+                [labels]="barChartLabels"
+                [options]="barChartOptions"
+                [plugins]="barChartPlugins"
+                [legend]="false"
+                [chartType]="barChartType"
+                [colors]="barChartColors">
+        </canvas>
+      </div>
+      <div class="no-record" *ngIf="!showChartData">
+        <span class="helper-text">No charges yet recorded</span>
+      </div>
+      <app-loader [active]="chartDataLoading"></app-loader>
+    </div>
+  </div>
+</div>
+
+
+

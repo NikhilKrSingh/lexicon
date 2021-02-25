@@ -1,0 +1,23 @@
+.access-denied {
+    padding-top: 80px;
+    padding-bottom: 80px;
+    .card {
+      max-width: 440px;
+    }
+  }
+  .access-circle {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #e7edf3;
+    font-size: 37px;
+    line-height: 62px;
+    color: #e7edf3;
+    border-radius: 100%;
+    .icon {
+      width: 29px;
+      height: 40px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+  

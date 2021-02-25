@@ -1,0 +1,46 @@
+<div *ngIf="!loading">
+  <div class="sign-form-wrap pb-8">
+    <div class="sign-form-block" *ngFor="let ob of signersArr; trackBy : trackByFn; let i = index;let last = last">
+      <div class="form-group position-relative" [ngClass]="{'has-error': ob.errorExists}">
+        <div class="sign-check d-flex align-items-center pl-16">
+          <!-- <div class="custom-control custom-checkbox pr-0 m-0">
+            <input type="checkbox" class="custom-control-input" id="sign-check-{{i}}" [(ngModel)]="ob.inpersonSignature">
+            <label class="custom-control-label lh-20 text-nowrap" for="sign-check-{{i}}">In-Person
+              Signature</label>
+          </div> -->
+          <div class="ml-16 cursor-pointer" *ngIf="i > 0 && last" (click)="removeSigner(i)">
+            <em class="icon icon-remove icon-color"></em>
+          </div>
+          <!-- <div class="info-hover position-relative ml-16" *ngIf="i === 0">
+            <em class="icon icon-question-circle"></em>
+            <div class="tooltip bs-tooltip-right" role="tooltip">
+              <div class="arrow"></div>
+              <div class="tooltip-inner">
+                <p>This allows the signer to hand enter their signature. This is useful for signers who may
+                  want to delegate their signing authority or you are unsure who will be signing.</p>
+              </div>
+            </div>
+          </div> -->
+        </div>
+        <label>Signer {{ i+1 }} <sup>*</sup></label>
+        <ng-select [items]="ob.items"  [clearable]="false" [searchable]="false" placeholder="Select Signer" [(ngModel)]="ob.role" [bindValue]="'id'" [bindLabel]="'name'" (change)="signerChange(i)" id="select-signer"></ng-select>
+        <span class="field-message text-danger" *ngIf="ob.errorExists"><em class="icon icon-error mr-4"></em> Please select a signer</span>
+      </div>
+      <div class="form-group" [ngClass]="{'has-error': ob.otherNameErr}" *ngIf="ob.role === otherRoleId">
+        <label>Name <sup>*</sup></label>
+        <input type="text" class="form-control" [(ngModel)]="ob.name" placeholder="Enter name" (keyup)="checkNameEmail(i, 'name')" id="enter-name">
+        <span class="field-message text-danger" *ngIf="ob.otherNameErr"><em class="icon icon-error mr-4"></em> Please enter a name</span>
+      </div>
+      <div class="form-group" [ngClass]="{'has-error': ob.otherEmailErr}" *ngIf="ob.role === otherRoleId">
+        <label>Email Address <sup>*</sup></label>
+        <input type="email" class="form-control" [(ngModel)]="ob.email" placeholder="Enter email address" (keyup)="checkNameEmail(i, 'email')" id="enter-email">
+        <span class="field-message text-danger" *ngIf="ob.otherEmailErr"><em class="icon icon-error mr-4"></em> Please enter a valid email</span>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-link btn-icon p-0 d-flex align-items-center" type="button" (click)="addSigner()" id="add-signer">
+    <em class="icon icon-add-circle"></em> Add Signer
+  </button>
+</div>
+
+<app-loader [active]="loading"></app-loader>

@@ -1,0 +1,314 @@
+<div class="top-bar">
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="header-search flex-fill">
+      <form action="#">
+        <div class="header-search-wrapper" [class.focused]="addClassFlag">
+          
+          <div class="dropdown dropdown-hover-table dropdown-toggle d-flex align-items-center"
+            [class.active]="currentActive" (click)="openMenu()" appAutoCloseOutsideClick
+            (outsideClick)="onClickedOutside($event)" data-toggle="dropdown">
+            <span class="dropdown-label">{{searchFilter}}</span>
+            <div class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" *ngFor="let filter of searchFilterList; trackBy : trackByFn" (click)="changeFilter(filter.moduleName)"
+                href="javascript:void(0)">{{filter.moduleName}}</a>
+            </div>
+          </div>
+          <input type="text" class="form-control search-input" (blur)="addClassFlag=false"
+            (focus)="addClassFlag=true;onSearchBoxClick()" name="q" id="q"
+            placeholder="Search for matters, contacts, clients, etc..." [formControl]="searchText" required=""
+            autocomplete="off">
+          <button class="btn" type="button" id="globalSearchBtnId">Search</button>
+          <div class="search-result-box pt-8 pb-8 pr-8" appAutoCloseOutsideClick
+            (outsideClick)="onsearchResultOutsideClick($event)" *ngIf="showSearchBox">
+            
+            <div class="search-result" (scroll)="onScroll($event)" slimScroll [options]="opts"
+              [scrollEvents]="scrollEvents">
+              <h4 class="d-inline-block mt-8 mb-8 pr-16 pl-16" *ngIf="!isSearchLoading">
+                {{(totalResultCount > 0) ? (totalResultCount == 1) ? totalResultCount + ' result': totalResultCount + ' results'  : '0 results found'}}
+              </h4><a *ngIf="searchResultList.length && !isSearchLoading" href="javascript:void(0)" class="view-all-result"
+                (click)="viewAll()">View All Results</a>
+                <app-search-loader  [active]="isSearchLoading" [loaderMessage]="'Loading Search Results'"></app-search-loader>
+              
+              <div class="mt-6 mb-6 pr-16 pl-16" *ngIf="searchResultList.length==0 && !isSearchLoading">
+                <h5><b>We couldn't find anything matching your search.</b></h5>
+                <p>Try again with a different term.</p>
+              </div>
+              <div class="result-row d-flex p-16 cursor-pointer" *ngFor="let item of searchResultList; trackBy :trackByFn;let i=index"
+                (click)="redirectToPage(item)">
+                <div class="result-icon pr-16">
+                  <i class="icon icon-matters" *ngIf="item.resultType == 'Matter'"></i>
+                  <i class="icon icon-clients" *ngIf="item.resultType == 'Client'"></i>
+                  <i class="icon icon-employees" *ngIf="item.resultType == 'Employee'"></i>
+                  <i class="icon icon-building" *ngIf="item.resultType == 'Office'"></i>
+                  <i class="icon icon-contacts" *ngIf="item.resultType == 'Contact'"></i>
+                  <img [src]="item.resultName | commonService: 'getFileImage'" width="20px"
+                    *ngIf="item.resultType == 'Document'">
+
+
+                </div>
+                <div class="result-content d-flex flex-column flex-fill">
+                  <div class="result-title mb-8 info-hover d-flex">
+                    <span id="mainHeading_{{item.id}}" (mouseenter)="addClass(true, item)"
+                      (mouseleave)="addClass(false, item)"
+                      [innerHTML]="item.resultName && item.resultName.length > 24 ? (item.resultName | slice:0:24) + '...' : item.resultName | highlightText : searchText.value">
+                    </span>
+                    <span class="text-danger font-weight-normal small ml-8 d-flex align-items-center"
+                      *ngIf="item.resultType == 'Contact' && item.metaData[7].name == 'True'">
+                      <i class="icon icon-close-fill text-danger icon-small mr-4"></i> Do Not Contact
+                    </span>
+                    <div class="tooltip bs-tooltip-bottom" role="tooltip" *ngIf="item.resultName.length > 24"
+                      data-placement="bottom">
+                      <div class="arrow"></div>
+                      <div class="tooltip-inner tooltip-lg">
+                        <p>{{ item.resultName }} </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="result-content-row d-flex align-items-center" *ngIf="item.resultType == 'Matter'">
+                    <div class="row w-100">
+                      <div class="w-20">
+                        <span class="small helper-text d-block mb-8">Client Name</span>
+                        <span [innerHTML]="item.metaData[2].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-22">
+                        <span class="small helper-text d-block mb-8">Opposing Party</span><span
+                          [innerHTML]="item.metaData[6].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-20">
+                        <span class="small helper-text d-block mb-8">Attorney</span><span
+                          [innerHTML]="item.metaData[5].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-20">
+                        <span class="small helper-text d-block mb-8">Matter Number</span><span
+                          [innerHTML]="item.metaData[4].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-20">
+                        <span class="small helper-text d-block mb-8">Matter Office</span><span
+                          [innerHTML]="item.metaData[3].name | highlightText : searchText.value"></span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="result-content-row d-flex align-items-center" *ngIf="item.resultType == 'Client'">
+                    <div class="row w-100">
+                      
+                      <div class="w-25" *ngIf="item.metaData[5].name=='True'">
+                        <span class="small helper-text d-block mb-8">Primary Contact</span><span
+                          [innerHTML]="item.metaData[9].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-25"
+                        *ngIf="item.metaData && item.metaData[8] && item.metaData[8].name && item.metaData[8].name != '' && item.metaData[8].name != '--'">
+                        <span class="small helper-text d-block mb-8">Phone</span><span
+                          [innerHTML]="item.metaData[8].name | phoneFormatter | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-50"
+                        *ngIf="item.metaData && item.metaData[2] && item.metaData[2].name && item.metaData[2].name != '' && item.metaData[2].name !='--' && item.metaData[5].name!='True'">
+                        <span class="small helper-text d-block mb-8">Email</span><span
+                          [innerHTML]="item.metaData[2].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-50"
+                        *ngIf="item.metaData && item.metaData[2] && item.metaData[2].name !='--' && item.metaData[2].name && item.metaData[5].name=='True'">
+                        <span class="small helper-text d-block mb-8">Email</span><span
+                          [innerHTML]="item.metaData[2].name | highlightText : searchText.value"></span>
+                      </div>
+                      
+                    </div>
+                  </div>
+                  
+                  <div class="result-content-row d-flex align-items-center" *ngIf="item.resultType == 'Employee'">
+                    <div class="row w-100">
+                      
+                      <div class="w-25">
+                        <span class="small helper-text d-block mb-8">Email Address</span><span
+                          [innerHTML]="item.metaData[2].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-15">
+                        <span class="small helper-text d-block mb-8">Job Family</span><span
+                          [innerHTML]="item.metaData[11].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-20">
+                        <span class="small helper-text d-block mb-8">Job Title</span><span
+                          [innerHTML]="item.metaData[3].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-20">
+                        <span class="small helper-text d-block mb-8">Primary Phone</span><span
+                          [innerHTML]="item.metaData[8].name | phoneFormatter | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-20">
+                        <span class="small helper-text d-block mb-8">Primary Office</span><span
+                          [innerHTML]="item.metaData[9].name | highlightText : searchText.value"></span>
+                      </div>
+
+                    </div>
+                  </div>
+                  
+                  <div class="result-content-row d-flex align-items-center" *ngIf="item.resultType == 'Contact'">
+                    <div class="row w-100">
+                      <div class="w-30">
+                        <span class="small helper-text d-block mb-8">Contact Number</span>
+                        <span [innerHTML]="item.metaData[13].name | highlightText : searchText.value"></span>
+                      </div>
+                  
+                      <div class="w-30">
+                        <span class="small helper-text d-block mb-8">Contact Type</span>
+                        <span [innerHTML]="item | contactType | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-40"  *ngIf="item.metaData[12].name == 'True' && item.metaData[7].name != 'True'">
+                        <span class="small helper-text d-block mb-8">Preferred Contact</span>
+                        <span *ngIf="item.metaData && item.metaData[14]" [innerHTML]="(item.metaData[14].name == 'Email' ? item.metaData[2].name : item.metaData[8].name | phoneFormatter) | highlightText : searchText.value"></span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="result-content-row d-flex align-items-center" *ngIf="item.resultType == 'Office'">
+                    <div class="row w-100">
+                      <div class="w-25">
+                        <span class="small helper-text d-block mb-8">Address</span><span
+                          [innerHTML]="item.metaData[9].name | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-40">
+                        <span class="small helper-text d-block mb-8">Phone Number</span><span
+                          [innerHTML]="item.metaData[10].name | phoneFormatter | highlightText : searchText.value"></span>
+                      </div>
+                      <div class="w-30">
+                        <span class="small helper-text d-block mb-8">Status</span><span
+                          [innerHTML]="item.metaData[8].name | highlightText : searchText.value"></span>
+                      </div>
+                      
+                    </div>
+                  </div>
+                  
+                  <div class="result-content-row d-flex align-items-center" *ngIf="item.resultType == 'Document'">
+                    <div class="row w-100">
+                      <div class="w-25 pathstyle">
+                        <span class="small helper-text d-block mb-8">Document Path</span>
+                        <ul class="list-unstyled searchcrumb d-flex align-items-center small mb-12 flex-wrap">
+                          <li
+                            *ngFor="let path of item.metaData[7].name | commonService: 'splitPath'; let i=index">
+                            <span [innerHTML]="path| highlightText : searchText.value"></span>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="w-25">
+                        <span class="small helper-text d-block mb-8">Owner</span> <span
+                          [innerHTML]="item.metaData[4].name | highlightText : searchText.value"></span>
+                      </div>
+
+                      <div class="w-25 overflow-visible">
+                        <div class="info-hover position-relative d-inline-block">
+                          <span class="small helper-text d-block mb-8">Category</span>
+                          <span id="categoryHeading_{{item.id}}" (mouseenter)="addClass(true, item, true)"
+                            (mouseleave)="addClass(false, item, true)"
+                            [innerHTML]="item.metaData[10].name && item.metaData[10].name.length > 15 ? (item.metaData[10].name | slice:0:15) + '...' : item.metaData[10].name | highlightText : searchText.value"></span>
+                          <div class="tooltip center bs-tooltip-bottom" role="tooltip"
+                            *ngIf="item.metaData[10] && item.metaData[10].name.length > 15" data-placement="bottom">
+                            <div class="arrow"></div>
+                            <div class="tooltip-inner tooltip-lg">
+                              <p>{{ item.metaData[10].name }} </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="w-25">
+                        <span class="small helper-text d-block mb-8">Last Updated</span> <span
+                          *ngIf="item.lastUpdated">{{ item.lastUpdated | date: 'MMM. dd, yyyy, hh:mmaaaaa\'m\''}}</span><span
+                          *ngIf="!item.lastUpdated">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="right-nav ml-md-12 ml-0">
+      <ul class="d-flex align-items-center justify-content-end">
+        <li *ngIf='permissionList.TIMEKEEPING_SELFisEdit || permissionList.TIMEKEEPING_OTHERSisAdmin'>
+          <button class="btn btn-outline-primary btn-icon" id="log-time-from-header" type="button" (click)='logTime()' >
+            <i class="icon icon-alarm"></i>
+            Log Time
+          </button>
+        </li>
+        <li class="coming-soon-div1">
+          <div class="notification-wrap">
+            <a href="javascript:void(0)" class="btn-icon notification" (click)="openQuickView()"><i
+                class="icon icon-bell"></i>
+              <span *ngIf="unReadNotificationCount" class="notify-active">{{unReadNotificationCount}}</span>
+            </a>
+            <div *ngIf="quickViewList.length" appAutoCloseOutsideClick
+              (outsideClick)="onClickedOutsideQuickView($event)" class="notification-list "
+              [ngClass]="!isShowQuickView?'d-none':''">
+              <div (click)="openMessage(row)" class="notify-item  d-flex align-items-center"
+                [ngClass]="row.markAsRead?'':'unread'" *ngFor="let row of quickViewList; trackBy :trackByFn">
+                <em class="icon icon-matters mr-16"
+                  *ngIf="row.category == 'Matters' || row.category == 'Matter' || row.category == 'Matter Ledger'"></em>
+                <em class="icon icon-clients mr-16"
+                  *ngIf="row.category == 'Client' || row.category == 'Potential Client' || row.category == 'Potential Clients'"></em>
+                <em class="icon icon-contacts mr-16"
+                  *ngIf="row.category == 'Profile Billing' || row.category == 'Pre Bill'"></em>
+                <em class="icon icon-calendar mr-16"
+                  *ngIf="row.category == 'Calendar' || row.category == 'Calendar Event'"></em>
+                <em class="icon icon-building mr-16" *ngIf="row.category == 'Office'"></em>
+                <em class="icon icon-employees mr-16" *ngIf="row.category == 'Employee'"></em>
+                <em class="icon icon-timekeeping mr-16" *ngIf="row.category == 'Timesheet'"></em>
+                <em class="icon icon-documents mr-16"
+                  *ngIf="row.category == 'DMS Path' || row.category == 'DMS Matter Folder'"></em>
+                <p class="m-0 flex-fill">{{row.notificationMessage}}</p>
+                <div class="notify-time custom-time pl-16">
+                  <span>{{row.notificationDate}}</span>
+                </div>
+              </div>
+              <div class="notify-ftr text-right">
+                <a href="javascript:void(0)" (click)="viewAllNotifications()" class="btn-link" id="view-all-notification">View All Notifications
+                  <span *ngIf="unReadNotificationCount"> ({{unReadNotificationCount}} Unread)</span></a>
+              </div>
+            </div>
+            <div *ngIf="!quickViewList.length" appAutoCloseOutsideClick
+              (outsideClick)="onClickedOutsideQuickView($event)" class="notification-list "
+              [ngClass]="!isShowQuickView?'d-none':''">
+              <div class="notify-item  d-flex align-items-center" *ngIf="!notificationLoader">
+                <p class="m-0 flex-fill">You have no notifications.</p>
+              </div>
+
+              <div class="notify-item  d-flex align-items-center" *ngIf="notificationLoader">
+                <div class="p-5 flex-fill">
+                  <app-loader [active]="notificationLoader"></app-loader>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="prfile">
+          <div class="dropdown dropdown-hover-table dropdown-toggle d-flex justify-content-end align-items-center"
+          [class.active]="currentActive1" (click)="openMenu1()" appAutoCloseOutsideClick
+          (outsideClick)="onClickedOutside1($event)" data-toggle="dropdown">
+            <span class="user-img">
+              <img *ngIf='!profileImage' src="assets/images/user.png" class="prfile-img">
+              <img *ngIf='profileImage' [src]=" profileImage | safeResource" class="prfile-img">
+            </span>
+            <div class="text-left">
+              <span class="dropdown-label">{{ userDetails?.name }}</span>
+            </div>
+
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/employee/profile']"
+                [queryParams]="{employeeId: userDetails?.id}" id="employee-profile">Profile</a>
+              <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/calendar/settings']" id="profile-settings">Profile
+                Settings</a>
+              <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/change-tenant']" id="change-tenant" *ngIf="userTenantCount > 1">Change Tenant</a>
+              <a class="dropdown-item" href="javascript:void(0)" [routerLink]="['/notifications/support']"
+                *ngIf='permissionList?.SUPPORTisAdmin' id="support">Support</a>
+              <a class="dropdown-item" href="javascript:void(0)" (click)="doLogout()" id="logout">Log Out</a>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

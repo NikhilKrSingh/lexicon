@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>UI/Icon/text editor/italize</title>
+    <defs>
+        <polygon id="path-1" points="2.66666667 0 2.66666667 2.14285714 4.14 2.14285714 1.86 7.85714286 0 7.85714286 0 10 5.33333333 10 5.33333333 7.85714286 3.86 7.85714286 6.14 2.14285714 8 2.14285714 8 0"></polygon>
+    </defs>
+    <g id="UI/Icon/text-editor/italize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Rectangle" transform="translate(4.000000, 3.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <!-- <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use> -->
+            <rect fill="#4E5F7B" mask="url(#mask-2)" x="-4" y="-3" width="16" height="16"></rect>
+        </g>
+    </g>
+</svg>

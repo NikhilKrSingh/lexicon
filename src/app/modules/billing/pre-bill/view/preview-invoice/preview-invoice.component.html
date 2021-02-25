@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="main-content">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+      <li class="breadcrumb-item" [routerLink]="['/billing/pre-bills']"><a href="javascript:void(0)">Pre-Bills</a></li>
+      <li class="breadcrumb-item active" aria-current="page" [title]='matterDetails?.matterName'>
+        <a href="javascript:void(0)" [routerLink]="['/billing/pre-bills/view']"
+          [queryParams]="{matterId: matterId,prebillingId: preBillId}">
+          <ng-container *ngIf='matterDetails?.matterName?.length < 30'>
+            Pre-Bill - {{matterDetails?.matterName}}
+          </ng-container>
+          <ng-container *ngIf='matterDetails?.matterName?.length >= 30'>
+            Pre-Bill - {{matterDetails?.matterName?.slice(0, 25)}}...
+          </ng-container>
+        </a>
+      </li>
+      <li class="breadcrumb-item active">Preview Invoice</li>
+    </ol>
+    <div class="d-flex align-items-end justify-content-between mb-32">
+      <div class="profile-content d-flex align-items-start profile-client">
+        <div class="profile-heading mr-16">
+          <h2 class="mt-0 mb-2">Preview Invoice</h2>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="info-block pt-0">
+          <div class="d-flex justify-content-between align-items-center mb-32">
+            <h2 class="mb-0">Invoice</h2>
+          </div>
+          <ng-container *ngIf='preBillId'>
+            <app-common-invoice-pdf [callback]='loaderCallback' [prebillId]='preBillId' [billNowData]='billNowModel'>
+            </app-common-invoice-pdf>
+          </ng-container>
+        </div>
+        <app-loader [active]='loading'></app-loader>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end pb-24">
+      <div class="btn-group">
+        <button type="button" class="btn btn-light" [routerLink]="['/billing/pre-bills/view']"
+          [queryParams]="{matterId: matterId,prebillingId: preBillId}" id="return-to-pre-bill">Return to Pre Bill</button>
+      </div>
+    </div>
+  </div>
+</div>

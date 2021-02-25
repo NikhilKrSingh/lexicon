@@ -1,0 +1,10 @@
+<div class="aside-nav open">
+  <div class="mainsidebar-flex">
+    <div class="logo text-center">
+      <a [routerLink]="['/dmsportal/dashboard']" class="d-block">
+        <img *ngIf="!logoImage" src="assets/images/default-logo-lexicon.png" height="64">
+        <img *ngIf="logoImage" [src]="logoImage" height="64">
+      </a>
+    </div>
+  </div>
+</div>

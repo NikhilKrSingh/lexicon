@@ -1,0 +1,34 @@
+<div class="full-cal-wraps align-items-stretch remove-highlight find-time-block">
+  <ng-container *ngIf="options">
+    <div class="fc-toolbar fc-header-toolbar">
+      <div class="d-flex justify-content-center w-100">
+        <!-- <div class="fc-left"></div> -->
+        <div class="fc-center">
+          <button type="button" (click)="goToPrevious()"
+                  class="fc-prev-button fc-button fc-button-primary" aria-label="prev" id="pre-click">
+            <span class="fc-icon fc-icon-chevron-left"></span>
+          </button>
+          <h4 class="pb-15 mb-0">{{calendarTitle}}</h4>
+          <button type="button" (click)="goToNext()"
+                  class="fc-next-button fc-button fc-button-primary" aria-label="next" id="next-click">
+            <span class="fc-icon fc-icon-chevron-right"></span>
+          </button>
+        </div>
+        <!-- <div class="fc-right"></div> -->
+      </div>
+    </div>
+    <full-calendar
+      class="main-full-cal" defaultView="resourceTimeGridDay" #calendar
+      [schedulerLicenseKey]='calendar_key' [events]="eventsArr" [resources]="resourceArr"
+      [plugins]="calendarPlugins" [allDayText]="''" (resourceRender)="displayResourceData($event)"
+      [nowIndicator]="options.nowIndicator" [views]="options.views" [allDaySlot]="true" [editable]="false"
+      [slotDuration]="'00:30:00'" [header]="options.header" [businessHours]="options.businessHours"
+      [scrollTime]="options.scrollTime"
+      [customButtons]="(options.customButtons) ? options.customButtons : null"
+      (dateClick)="dateClick($event)"
+      (eventDragStop)="eventDragStop($event)" (eventClick)="eventClick($event)" deepChangeDetection="true"
+      aspectRatio=" 1.85" height="150" (datesRender)="changeView($event)">
+    </full-calendar>
+  </ng-container>
+  <app-loader [active]="eventsLoading"></app-loader>
+</div>

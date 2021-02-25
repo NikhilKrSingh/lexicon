@@ -1,0 +1,221 @@
+<div [formGroup]='creditCardForm'>
+  <div class="row gutter-16">
+    <div class="col-12">
+      <div class="form-group">
+        <label class="mb-16">Select personal or company credit card</label>
+        <div class="custom-control custom-radio">
+          <input type="radio" id="customRadio1" name="isCompany" class="custom-control-input" [value]='false'
+            formControlName='isCompany'>
+          <label class="custom-control-label" for="customRadio1">Personal</label>
+        </div>
+        <div class="custom-control custom-radio">
+          <input type="radio" id="customRadio2" name="isCompany" class="custom-control-input" [value]='true'
+            formControlName='isCompany'>
+          <label class="custom-control-label" for="customRadio2">Company</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row gutter-16">
+    <ng-container *ngIf='!creditCardForm?.value?.isCompany'>
+      <div class="col-6">
+        <div class="form-group" [class.has-error]="f['firstName'].errors?.insecure_input || (formSubmitted && f['firstName'].errors?.required)">
+          <label>First Name <sup>*</sup></label>
+          <input type="text" class="form-control" placeholder="Enter first Name on the card"
+            formControlName='firstName' id="cc-firstname">
+            <span class="field-message text-danger" *ngIf="formSubmitted && f['firstName'].errors?.required">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data.first_name_error}}
+            </span>
+            <span class="field-message text-danger" *ngIf="f['firstName'].errors?.insecure_input">
+              <em class="icon icon-error mr-4"></em>
+              {{error_data.insecure_input}}
+            </span>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group" [class.has-error]="f['lastName'].errors?.insecure_input || (formSubmitted && f['lastName'].errors?.required)">
+          <label>Last Name <sup>*</sup></label>
+          <input type="text" class="form-control" id="cc-lastname" placeholder="Enter last Name on the card" formControlName='lastName'>
+          <span class="field-message text-danger"*ngIf="formSubmitted && f['lastName'].errors?.required">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.last_name_error}}
+          </span>
+          <span class="field-message text-danger" *ngIf="f['lastName'].errors?.insecure_input">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.insecure_input}}
+          </span>
+        </div>
+      </div>
+    </ng-container>
+    <div class="col-12" *ngIf='creditCardForm?.value?.isCompany'>
+      <div class="form-group" [class.has-error]="f['companyName'].errors?.insecure_input || (formSubmitted && f['companyName'].errors?.required)">
+        <label>Company Name <sup>*</sup></label>
+        <input type="text" class="form-control" id="cc-companyname" placeholder="Enter Company Name" formControlName='companyName'>
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['companyName'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+            {{error_data.company_name_error}}
+        </span>
+        <span class="field-message text-danger" *ngIf="f['companyName'].errors?.insecure_input">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group" [class.has-error]="f['cardNumber'].errors?.mask?.requiredMask || (formSubmitted && f['cardNumber'].errors?.required) || f['cardNumber'].errors?.minlength">
+        <label>Card Number <sup>*</sup></label>
+        <input type="text" class="form-control" mask="0000-0000-0000-0000" [showMaskTyped]="true"
+          placeholder="Enter card number" formControlName='cardNumber' id="cc-cardnumber">
+          <span class="field-message text-danger" *ngIf="formSubmitted && f['cardNumber'].errors?.required">
+            <em class="icon icon-error mr-4"></em>
+              Please enter card number.
+          </span>
+          <span class="field-message text-danger" *ngIf="f['cardNumber'].errors?.mask?.requiredMask || f['cardNumber'].errors?.minlength">
+            <em class="icon icon-error mr-4"></em>
+              {{error_data.card_number_error}}
+          </span>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="form-group" [class.has-error]="f['expirationDate'].errors?.mask?.requiredMask || (formSubmitted && f['expirationDate'].errors?.required)">
+        <label>Expiration Date <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="mm/yyyy" [dropSpecialCharacters]='false' mask="00/0000"
+          formControlName='expirationDate' id="cc-expiredate">
+          <span class="field-message text-danger" *ngIf="formSubmitted && f['expirationDate'].errors?.required">
+            <em class="icon icon-error mr-4"></em>
+              Please enter expiration date.
+          </span>
+          <span class="field-message text-danger" *ngIf="f['expirationDate'].errors?.mask?.requiredMask">
+            <em class="icon icon-error mr-4"></em>
+              {{error_data.expiry_date_error}}
+          </span>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="form-group" [class.has-error]="f['CVV'].errors?.mask?.requiredMask || (formSubmitted && f['CVV'].errors?.required)">
+        <label>CVV <sup>*</sup></label>
+        <input type="text" class="form-control" id="cc-cvvnumber" mask="000" placeholder="Enter CVV" formControlName='CVV'>
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['CVV'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          Please enter CVV.
+        </span>
+        <span class="field-message text-danger" *ngIf="f['CVV'].errors?.mask?.requiredMask">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.CVV_error}}
+        </span>
+      </div>
+    </div>
+  </div>
+  <h4 class="text-xlarge mt-0 mb-16">Billing Information</h4>
+  <div class="custom-control custom-checkbox mb-12">
+    <input type="checkbox" class="custom-control-input" id="billing-cc-customCheck1" formControlName='isSameAsPrimary'>
+    <label class="custom-control-label text-transform-none" for="billing-cc-customCheck1">Same as Primary Address</label>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="form-group" [class.has-error]="f['address'].errors?.insecure_input || (formSubmitted && f['address'].errors?.required)">
+        <label>Street Address <sup>*</sup></label>
+        <input type="text" id="cc-streetaddress" class="form-control" placeholder="Enter street address" formControlName='address' [readOnly]="creditCardForm.value.isSameAsPrimary">
+        <span class="field-message text-danger" *ngIf="formSubmitted && f['address'].errors?.required">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.street_address_error}}
+        </span>
+        <span class="field-message text-danger" *ngIf="f['address'].errors?.insecure_input">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.insecure_input}}
+        </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group" [class.has-error]="formSubmitted && f['address2'].errors">
+        <label>Apt, Suite, Unit</label>
+        <input type="text" class="form-control" placeholder="Enter apartment, suite, or unit number"
+          formControlName='address2' id="cc-aptsuiteunit" [readOnly]="creditCardForm.value.isSameAsPrimary">
+          <span class="field-message text-danger">
+            <em class="icon icon-error mr-4"></em>
+            {{error_data.insecure_input}}
+          </span>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="row gutter-16">
+        <div class="col-4">
+          <div class="form-group" [class.has-error]="(f['zipCode'].errors?.mask?.requiredMask || (formSubmitted && f['zipCode'].errors?.required)) || (formSubmitted && validZipErr) && !this.creditCardForm.get('isSameAsPrimary').value">
+            <label>ZIP <sup>*</sup></label>
+            <input 
+              type="text" 
+              id="cc-zipcode" 
+              class="form-control" 
+              minlength="3"
+              maxlength="6"
+              (keypress)="checkNumber($event)"
+              (keyup)="getCityState($event.target.value)"
+              placeholder="Enter zip code" 
+              [readOnly]="creditCardForm.value.isSameAsPrimary"
+              formControlName='zipCode'>
+              <span class="field-message text-danger" *ngIf="(formSubmitted && f['zipCode'].errors?.required) && !validZipErr && !this.creditCardForm.get('isSameAsPrimary').value">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data?.zip_code_required}}
+              </span>
+              <span class="field-message text-danger" *ngIf="formSubmitted && validZipErr && !this.creditCardForm.get('isSameAsPrimary').value">
+                <em class="icon icon-error mr-4"></em>
+                {{error_data?.zip_code_error}}
+              </span>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="form-group">
+            <label>State <sup>*</sup></label>
+            <ng-select *ngIf="stateList?.length > 1 && !creditCardForm.value.isSameAsPrimary"
+              id="cc-state" 
+              [items]="stateList" 
+              placeholder="State" 
+              formControlName='state' 
+              [bindValue]="'code'"
+              [bindLabel]="'name'" 
+              [clearable]="false"
+              [notFoundText]="'No record found'" 
+              [selectOnTab]="true">
+            </ng-select>
+            <input *ngIf="stateList?.length <= 1 || creditCardForm.value.isSameAsPrimary" 
+              type="text" 
+              class="form-control" 
+              placeholder="State"
+              [(ngModel)]="singleState" 
+              [ngModelOptions]="{standalone: true}"
+              [readOnly]='true' id="state">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-group">
+        <label>City <sup>*</sup></label>
+        <ng-select *ngIf="cityList?.length > 1 && !creditCardForm.value.isSameAsPrimary" 
+          [items]="cityList" 
+          placeholder="City" 
+          formControlName="city"
+          [clearable]="false"
+          [notFoundText]="'No record found'" 
+          [selectOnTab]="true" id="city">
+        </ng-select>
+        <input *ngIf="cityList?.length <= 1 || creditCardForm.value.isSameAsPrimary"
+          type="text" 
+          id="cc-city" 
+          class="form-control" 
+          placeholder="City" 
+          [readOnly]='true'
+          formControlName='city'>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex justify-content-end mb-16">
+    <div class="btn-group">
+      <button type="button" class="btn btn-light" id="cc-cancel-btn" (click)='close()'>Cancel</button>
+      <button type="button" class="btn btn-primary" id="cc-save-btn" (click)="save()">
+        Save Credit Card
+      </button>
+    </div>
+  </div>
+</div>

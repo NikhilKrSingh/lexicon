@@ -1,0 +1,64 @@
+.heading {
+    &.d-flex {
+        .btn-group{
+            .btn-icon{
+                .icon{ vertical-align: middle; font-size: 16px;}
+            }
+        }
+    }
+}
+.form-covers{position: relative;
+    .search-result-box{top: 105%;-webkit-box-shadow: 0 2px 10px 0 rgba(0,0,0,0.15); box-shadow: 0 2px 10px 0 rgba(0,0,0,0.15);}
+}
+.icon-big{font-size: 120%;}
+.form-preview{
+    .form-group{line-height:20px;}
+}
+.bdr-tb-divider{border-bottom: 1px solid #D8DDE3; border-top: 1px solid #D8DDE3;
+}
+
+.time-bill{
+    .text-xlarge{
+        line-height: 30px;
+    }
+}
+
+.title-row{
+    .badge{
+        padding: 3px 19px;
+        font-weight: 500;
+        line-height: 20px;
+    }
+    .badge-success{
+        background-color: #E1F2E2;
+        color: #144F16;
+    }
+    .badge-danger{
+        background-color: #FFF1DC;
+        color: #523811;
+    }
+}
+
+.visble-to-client{
+    bottom: -13px;
+    position: relative;
+}
+
+.search-result{max-height: 250px;}
+
+.search-panel + .search-panel {
+    border-top: none;
+}
+
+.top-border-search-panel{
+    position: relative;
+    border-bottom: 1px solid #c4ccd4;
+    height: 1px;
+}
+.status-dropdown .ng-select .ng-select-container, .status-dropdown .ng-select-container{
+  background-color: #ffffff !important;
+}
+
+.word-wrap{
+    word-wrap: break-word;
+}

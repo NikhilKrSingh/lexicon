@@ -1,0 +1,47 @@
+<form>
+  <div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+        <li class="breadcrumb-item active" aria-current="page"> Cash Requirement Rollup Report</li>
+      </ol>
+      <div class="heading">
+        <h1> Cash Requirement Rollup Report</h1>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="mb-8">Generate Report</h2>
+          <p class="lh-20">Generate your report by selecting the options below.</p>
+          <div class="row gutter-16">
+            <div class="col-5">
+              <div class="form-group">
+                <label>Date Range Type <sup>*</sup></label>
+                <ng-select [items]="dateRangeType" placeholder="Select Date Range Type" [(ngModel)]="selectedType"
+                  [ngModelOptions]="{standalone: true}" [bindValue]="'key'" [bindLabel]="'value'" [searchable]="false"
+                  [selectOnTab]="true" [notFoundText]="'No record found'" id="date-range-type">
+                </ng-select>
+
+              </div>
+              <div class="form-group">
+                <app-date-range-report (startDate)="startDate($event)" [title]="'Date Range'"
+                  (endDate)="endDate($event)" [startEndDateAsTodayFlag]="true"></app-date-range-report>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-loader [active]='loading'></app-loader>
+
+      <div class="d-flex justify-content-end pt-8">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" [routerLink]="['../../reporting']" id="cancel-btn">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="!exportCsvFlag || !selectedType"
+            (click)="submitCashRequirementRollupReport()" id="export-to-csv">Export to CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

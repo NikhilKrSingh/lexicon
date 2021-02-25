@@ -1,0 +1,27 @@
+
+<div class="modal-body pb-0">
+  <div class="d-flex align-items-start pt-8">
+    <em class="icon icon-error text-danger fs-32"></em>
+    <div class="pl-16">
+      <h3 class="modal-title mb-20 mt-4">Time Zone Required</h3>
+      <p class="lh-20">Selecting a Time Zone is required for your Lexicon profile. You can always edit this selection
+        via the Calendar tab within your Profile Settings.</p>
+      <p class="lh-20">Please select a time zone below.</p>
+      <div class="form-group section-area" [class.has-error]="noSelectedTimeZone && formSubmitted">
+        <label>Time Zone <sup>*</sup></label>
+        <ng-select [items]="timeZones" placeholder="Select Time Zone" [(ngModel)]='calendarSettings.timeZoneId' [bindValue]="'id'" [bindLabel]="'name'" [clearable]='false'
+          [selectOnTab]="true" id="timezone-select">
+        </ng-select>
+        <span class="field-message text-danger" *ngIf="noSelectedTimeZone && formSubmitted">
+          <em class="icon icon-error mr-4"></em>
+          {{error_data.select_time_zone_error}}
+        </span>
+        <app-loader [active]="loading"></app-loader>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)='save()' id="save-time-zone">Save Time Zone</button>
+</div>
+<app-loader [active]="saveLoading"></app-loader>

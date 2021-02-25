@@ -1,0 +1,62 @@
+<form>
+  <div class="container">
+    <div class="main-content">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" [routerLink]="['../../reporting']">Reporting</a></li>
+        <li class="breadcrumb-item active" aria-current="page"> User Account Details Report</li>
+      </ol>
+      <div class="heading">
+        <h1> User Account Details Report</h1>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h2 class="mb-8">Generate Report</h2>
+          <p class="lh-20">Generate your report by selecting the options below.</p>
+          <div class="row gutter-16">
+            <div class="col-5">
+              <div class="form-group">
+                <app-date-range-report (startDate)="startDate($event)" [title]="'Last Login Date Range'"
+                  (endDate)="endDate($event)" [startEndDateAsTodayFlag]="false"></app-date-range-report>
+              </div>
+
+              <div class="form-group">
+                <label>Status of employees to consider <sup>*</sup></label>
+                <span class="ml-12 text-danger" *ngIf="!isActive && !isInActive && !isPending">
+                    <em class="icon icon-error mr-4"></em>
+                    Must select at least one status
+                  </span>
+                <div class="custom-control custom-checkbox mt-12">
+                    <input type="checkbox" class="custom-control-input" id="customCheck1_email" name="active" [value]='true'
+                      [(ngModel)]='isActive' [ngModelOptions]="{standalone: true}">
+                    <label class="custom-control-label" for="customCheck1_email">Active</label>
+                  </div>
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="customCheck2_inactive" name="inactive" [value]='true'
+                      [(ngModel)]='isInActive' [ngModelOptions]="{standalone: true}">
+                    <label class="custom-control-label" for="customCheck2_inactive">Inactive</label>
+                  </div>
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="customCheck3_pending" name="pending" [value]='true'
+                      [(ngModel)]='isPending' [ngModelOptions]="{standalone: true}">
+                    <label class="custom-control-label" for="customCheck3_pending">Pending</label>
+                  </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <app-loader [active]='loading'></app-loader>
+
+      <div class="d-flex justify-content-end pt-8">
+        <div class="btn-group">
+          <button type="button" class="btn btn-light" [routerLink]="['../../reporting']">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="!exportCsvFlag|| (!isActive && !isInActive && !isPending)"
+            (click)="submitUserAccountDetailReport()">Export to CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

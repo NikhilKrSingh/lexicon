@@ -1,0 +1,341 @@
+
+<div class="modal-header d-block pb-24">
+  <h3 class="modal-title mb-0">{{(isEdit) ? 'Edit Time Entry' : 'Create New Time Entry'}}</h3>
+  <button type="button" class="close" (click)="close(null);" aria-label="Close" id="closeId">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <form [formGroup]="timeEntryForm">
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="form-group" [class.has-error]="incorrectTimekeeper && formSubmitted">
+          <label>Timekeeper <sup>*</sup></label>
+          <div class="search-group position-relative">
+            <form action="#" (click)="setEmployeeList()" (outsideClick)="clearDropDown('employeeListPopUp')"
+              appAutoCloseOutsideClick>
+              <span class="search-icn"></span>
+              <input #employeeFilterPopup type="text" class="form-control border-radius-20" [(ngModel)]="searchEmployee"
+                (ngModelChange)="incorrectTimekeeper = false;" [ngModelOptions]="{standalone: true}"
+                placeholder="Search timekeeper" (keyup)="updateTimekeeperFilter($event,'2')" (keydown.tab)="actionDropDown()"
+                (keydown.enter)="actionDropDown()" autocomplete="off" id="timekeeper-search-text"
+                [disabled]="disabledTimekeeper">
+              <span class="field-message text-danger">
+                <em class="icon icon-error mr-4"></em>
+                Please select a timekeeper.
+              </span>
+              <div class="search-group-result px-0 mt-4 " *ngIf="employeeListPopUp.length>0">
+                <div>
+                  <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{employeeListPopUp.length}} results</h5>
+                </div>
+                <div class="search-collapse custom-style-scroll">
+                  <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                    *ngFor="let item of employeeListPopUp; trackBy :trackByFn;let i = index; let first = first"
+                    [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}">
+                    <div class="search-panel-head" (click)="selectTimekeeper(item)" id="select-employee-record-{{i}}">
+                      <em class="search-res-icon icon icon-employees"></em>
+                      <span>
+                        <span
+                          [innerHTML]="((!item.firstName) ? item.lastName : item.lastName+', '+item.firstName) | highlightText : employeeFilterPopup?.value"></span>
+                      </span>
+                      <span class="small helper-text font-weight-medium d-block mt-4">Employee</span>
+                      <span class="arrow" (click)="$event.stopPropagation(); item.showGrid=!item.showGrid">
+                        <em class="icon icon-angle-down"></em></span>
+                    </div>
+                    <div class="search-panel-body">
+                      <div class="mt-12">
+                        <span class="small helper-text d-block mb-4 font-weight-medium">
+                          Phone Number
+                        </span>
+                        {{item.preferredPhone}}
+                      </div>
+                      <div class="mt-12" *ngIf="item?.email">
+                        <span class="small helper-text d-block mb-4 font-weight-medium">
+                          Email Address
+                        </span>
+                        {{item?.email}}
+                      </div>
+                    </div>
+                    <div class="top-border-search-panel pt-16"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="search-group-result px-0 mt-4 " *ngIf="isTimekeepingSearchLoading">
+                <app-search-loader [active]="isTimekeepingSearchLoading" [loaderMessage]="'Loading Search Results'">
+                </app-search-loader>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-4 mb-12">
+        <div class="form-group" [class.has-error]="f['dateOfService'].errors && formSubmitted">
+          <label>Date of Service <sup>*</sup></label>
+          <div style="width: 165px;">
+            <app-date-picker [isForm]='true' [dateform]='timeEntryForm' controlName='dateOfService' [reset]="dateReset" id="dateOfServiceId" (dataChange)="checkDate()">
+            </app-date-picker>
+          </div>
+          <span class="field-message text-danger"
+            *ngIf="f['dateOfService'].errors && formSubmitted ? !!f['dateOfService'].errors.required : false">
+            <em class="icon icon-error mr-4"></em>
+            Please select date of service
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="form-group" [class.has-error]="(clientError && formSubmitted) || incorrectClient">
+          <label>Client / Overhead <sup>*</sup></label>
+          <div class="search-group position-relative">
+            <form select="#" (click)="setClientList()" (outsideClick)="clearDropDown('clientListPopUp')"
+              appAutoCloseOutsideClick>
+              <span class="search-icn"></span>
+              <input #clientFilterPopup type="text" class="form-control border-radius-20" id="client"
+                placeholder="Search clients or select as overhead" [(ngModel)]="searchclient" (ngModelChange)="incorrectClient = false;" [ngModelOptions]="{standalone: true}" (keyup)="updateClientFilter($event,'2')" (keydown.tab)="actionDropDown()" (keydown.enter)="actionDropDown(metterFilterPopup)" [disabled]="!isEdit" autocomplete="off">
+              <div class="search-group-result px-0 mt-4 " *ngIf="clientListPopUp?.length>0">
+
+                <div>
+                  <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{clientListPopUp.length}}
+                    results</h5>
+                </div>
+                <div class="search-collapse">
+                  <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                    *ngFor="let item of clientListPopUp; trackBy :trackByFn;let i = index; let first = first"
+                    [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}">
+                    <div class="search-panel-head">
+                      <em class="search-res-icon icon icon-clients"></em>
+                      <div (click)="selectClient(item)">
+                        <span *ngIf='item.isCompany'>
+                          <span [innerHTML]="item.companyName | highlightText : clientFilterPopup?.value"></span>
+                        </span>
+                        <span *ngIf='!item.isCompany'>
+                          <span
+                            [innerHTML]="((!item.firstName) ? item.lastName : item.lastName+', '+item.firstName) | highlightText : clientFilterPopup?.value"></span>
+                        </span>
+                        <span class="small helper-text font-weight-medium d-block mt-4" *ngIf="item.id">Client</span>
+                      </div>
+                      <!-- <span class="arrow" (click)="item.showGrid=!item.showGrid" >
+                        <em class="icon icon-angle-down"></em></span> -->
+                        <span class="arrow" (click)=" $event.stopPropagation(); item.showGrid=!item.showGrid" *ngIf="item.id">
+                          <em class="icon icon-angle-down" ></em></span>
+                    </div>
+                    <div class="search-panel-body">
+                      <div class="mt-12">
+                        <span class="small helper-text d-block mb-4 font-weight-medium">
+                          Phone Number
+                        </span>
+                        {{item.preferredPhone}}
+                      </div>
+                    </div>
+                    <div class="top-border-search-panel pt-16"></div>
+                  </div>
+
+                </div>
+
+              </div>
+              <div class="search-group-result px-0 mt-4 " *ngIf="isSearchLoading">
+                <app-search-loader [active]="isSearchLoading" [loaderMessage]="'Loading Search Results'">
+                </app-search-loader>
+              </div>
+              <span class="field-message text-danger" *ngIf="clientError && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Please select client
+              </span>
+              <span class="field-message text-danger" *ngIf="incorrectClient">
+                <em class="icon icon-error mr-4"></em>
+                Please enter a valid client.
+              </span>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group" [class.has-error]="(matterError && formSubmitted) || incorrectMatter">
+          <label>Matter / Overhead <sup>*</sup></label>
+          <div class="search-group position-relative">
+            <form selectMatter="#" (click)="setMatterList()" (outsideClick)="clearDropDown('matterListPopUp')"
+              appAutoCloseOutsideClick>
+              <span class="search-icn"></span>
+              <input id="metterFilterPopupp" #metterFilterPopup type="text" class="form-control border-radius-20" (ngModelChange)="incorrectMatter = false;"
+                placeholder="Search matters" [(ngModel)]="searchMatter" [ngModelOptions]="{standalone: true}" (keyup)="updateMatterFilter($event,'2')" (keydown.tab)="actionDropDown(metterFilterPopup, 'code')" (keydown.enter)="actionDropDown(chargeCode, 'code')" [readOnly]="disabledMatter || !isEdit" autocomplete="off">
+              <div class="search-group-result px-0 mt-4" *ngIf="matterListPopUp?.length>0">
+                <div>
+                  <h5 class="d-inline-block text-large lh-20 mt-8 mb-4 px-16">{{matterListPopUp.length}}
+                    results</h5>
+                </div>
+                <div class="search-collapse">
+                  <div class="search-panel px-16 pt-16 pb-0" [ngClass]="(item.showGrid)?'search-panel-open':''"
+                    [ngStyle]="first ? {'background-color' : '#D8DDE3'} : {'background-color' : 'white'}"
+                    *ngFor="let item of matterListPopUp; trackBy :trackByFn;let i = index; let first=first">
+                    <div class="search-panel-head">
+                      <em class="search-res-icon icon icon-matters"></em>
+                      <div (click)="selectMatter(item, ' ');">
+                        <span [innerHTML]="item.matterName | highlightText : metterFilterPopup?.value"></span>
+                        <span *ngIf="item.id">-</span>
+                        <span *ngIf="item.id"
+                          [innerHTML]="item.matterNumber | highlightText : metterFilterPopup?.value"></span>
+                      </div>
+                     <span class="arrow" (click)=" $event.stopPropagation(); item.showGrid=!item.showGrid" *ngIf="item.id">
+                        <em class="icon icon-angle-down" ></em></span>
+                    </div>
+                    <div class="search-panel-body">
+                      <div class="mt-12">
+                        <span class="small helper-text d-block mb-4 font-weight-medium">
+                          Client Name
+                        </span>
+                        {{item.client != null ? (item.client.isCompany ? item.client.companyName : (item.client.firstName + ', ' + item.client.lastName)) : searchclient }}
+                      </div>
+                      <div class="mt-12">
+                        <span class="small helper-text d-block mb-4 font-weight-medium">
+                          Attorney
+                        </span>
+                        <span *ngFor="let att of item.responsibleAttorny;trackBy: trackByFn">
+                          {{att.name}}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="top-border-search-panel pt-16"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="search-group-result px-0 mt-4 " *ngIf="isMatterSearchLoading">
+                <app-search-loader [active]="isMatterSearchLoading" [loaderMessage]="'Loading Search Results'">
+                </app-search-loader>
+              </div>
+              <span class="field-message text-danger" *ngIf="matterError && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Please select matter
+              </span>
+              <span class="field-message text-danger" *ngIf="incorrectMatter">
+                <em class="icon icon-error mr-4"></em>
+                  Please enter a valid matter.
+              </span>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="row gutter-16">
+      <div class="col-3">
+        <div class="form-group" [class.has-error]="chargeCodeError && formSubmitted">
+          <label>Charge Code <sup>*</sup></label>
+          <div class="search-group position-relative">
+            <form action="#" (outsideClick)="clearChargeCode()" appAutoCloseOutsideClick>
+              <span class="search-icn"></span>
+              <input type="text" class="form-control border-radius-20" [(ngModel)]="code" [ngModelOptions]="{standalone: true}" #chargeCode
+                placeholder="Search charge codes" (keyup)="updateFilter($event,'2')" (focus)="updateFilter()" id="chargeCodeId">
+              <div class="search-group-result d-block mt-4 p-0" *ngIf="filterdisbursementTypeListPopUP.length>0">
+                <div class="search-g-result-inner">
+                  <div class="search-collapse">
+                    <div class="search-panel px-16" *ngFor="let item of filterdisbursementTypeListPopUP;trackBy :trackByFn;">
+                      <div class="search-panel-head p-0" (click)="selectChargeCode(item)">
+                        <div class="text-large font-weight-medium"> {{item.code}} </div>
+                        <span class="small helper-text font-weight-medium d-block mt-4">
+                          {{item.description}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <span class="field-message text-danger" *ngIf="chargeCodeError && formSubmitted">
+                <em class="icon icon-error mr-4"></em>
+                Please select charge code
+              </span>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="form-group" [class.has-error]="f['timeWorked'].errors && formSubmitted">
+          <div class="d-flex justify-content-between">
+            <label>Time Worked <sup>*</sup></label>
+            <span class="small helper-text mb-4 lh-18">(Positive or Negative)</span>
+          </div>
+          <input type="text" #timeworkedInput [placeholder]="timeworkedInputPlaceholder" (change)="modelChanged()" class="form-control" (keypress)="checkNumber($event)"
+            formControlName="timeWorked" id="timeWorkedId">
+          <span class="field-message text-danger"
+            *ngIf="f['timeWorked'].errors && formSubmitted ? !!f['timeWorked'].errors.required : false">
+            <em class="icon icon-error mr-4"></em>
+            Please enter time worked
+          </span>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label>Calculated Charge</label>
+          <input type="text" class="form-control" placeholder="Rate" [(ngModel)]="rate"
+            [ngModelOptions]="{standalone: true}" [prefix]="chargePrefix" mask="separator.2" thousandSeparator=","
+            disabled id="calculatedChargeId">
+        </div>
+      </div>
+    </div>
+    <div class="row gutter-16">
+      <div class="col-6">
+        <div class="d-flex justify-content-between">
+          <h4 class="mb-16 mt-0 pt-8">Billing Narrative</h4>
+        </div>
+        <div class="form-group position-relative" [class.has-error]="f['description'].errors && formSubmitted">
+          <label>Billing Narrative <sup
+              *ngIf="!timeEntryForm.controls['description'].disabled && !isBillingNarratibeDisabled">*</sup></label>
+          <textarea class="form-control non-resize" rows="4" maxlength="1000" formControlName="description"
+            placeholder="Describe the work performed" (blur)="copytoNote()" (keydown.tab)="copytoNote()"
+            [disabled]="isBillingNarratibeDisabled" [readOnly]='isBillingNarratibeDisabled' id="billingNarrativeId"></textarea>
+          <span class="field-message text-danger"
+            *ngIf="f['description'].errors && formSubmitted ? !!f['description'].errors.required : false">
+            <em class="icon icon-error mr-4"></em>
+            Please enter billing narrative.
+          </span>
+        </div>
+
+      </div>
+      <div class="col-6" *ngIf="!isEdit">
+        <div class="d-flex justify-content-between">
+          <h4 class="mb-16 mt-0 pt-8">Note to File</h4>
+          <div class="text-right visble-to-client pt-8">
+            <div class="custom-control custom-checkbox pr-0 ml-auto">
+              <input type="checkbox" class="custom-control-input" id="visibletoclient" formControlName="visibleToClient"
+                [attr.disabled]="(clientDetail?.id === 0 || disbursementTypeDetail?.billingTo?.code == 'OVERHEAD' || isMatterCleared) ? true : null">
+              <label class="custom-control-label" for="visibletoclient">Visible to Client</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group position-relative" [class.has-error]="f['note'].errors && formSubmitted">
+          <div class="d-flex justify-content-between">
+            <label>Notes <sup>*</sup></label>
+            <div id="dateOfServiceId" class='mb-4 lh-18'>Date of Service: {{timeEntryForm.controls.dateOfService?.value | date: 'MM/dd/yyyy' }}</div>
+          </div>
+          <textarea class="form-control non-resize" rows="4" placeholder="Enter notes" formControlName="note"
+            maxlength="1000" id="notesId"></textarea>
+          <span class="field-message text-danger"
+            *ngIf="f['note'].errors && formSubmitted ? !!f['note'].errors.required : false">
+            <em class="icon icon-error mr-4"></em>
+            Please enter note to file.
+          </span>
+        </div>
+      </div>
+      <div class="col-6" *ngIf="isEdit">
+        <div class="d-flex justify-content-between">
+          <h4 class="mb-16 mt-0 pt-8">Change Notes</h4>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea class="form-control non-resize" rows="4"
+            placeholder="Enter change notes for the audit history (optional)" [(ngModel)]="changeNote"
+            [ngModelOptions]="{standalone: true}" id="changeNotesId"></textarea>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="close(null);reset();" id="cancleId">Cancel</button>
+  <button type="button" *ngIf="!isEdit" class="btn btn-outline-primary" (click)="enterTime(true, timeworkedInput)" id="submitAndCreateAnotherId">
+    Submit and Create Another
+  </button>
+  <button type="button" class="btn btn-primary" (click)="enterTime()" id="submitId">Submit</button>
+</div>
+
+
+<app-loader [active]='loading || timeKeeperLoading'></app-loader>

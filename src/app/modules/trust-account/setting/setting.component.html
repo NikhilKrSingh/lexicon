@@ -1,0 +1,232 @@
+<div class="container">
+    <div class="main-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+            <li class="breadcrumb-item active"><a>Trust Accounting</a></li>
+        </ol>
+        <div class="heading">
+            <h1>Trust Accounting</h1>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                
+                
+                <div class="d-flex align-items-center mb-8">
+                    <h5 class="m-0 font-weight-bold">Enable Trust Accounting</h5>
+                    <div class="toggle-switch ml-28">
+                        <label>
+                            <input type="checkbox" name="trustAccountingFlag"
+                                [attr.disabled]="!isShowTrustAccountingFlagSection ? '' : null"
+                                [(ngModel)]="trustAccountingFlag" (click)="changeAccountStatusCheck($event, trustAccountingFlag)" id="trust-ac-flag">
+                            <span class="switch-style"></span>
+                        </label>
+                    </div>
+                </div>
+                <p class="small mb-0">Enable or disable for the entire system. <br>
+                    Must set up at least one Trust-type account to use Trust Accounting.</p>
+            </div>
+        </div>
+        <div class="card" *ngIf="trustAccountingFlag">
+            <div *ngIf="isShowTrustAccountingSection" class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-24">
+                            <h2 class="mb-24">Trust Account Settings</h2>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-light" *ngIf="isEdit"
+                                    (click)="cancelBtn()" id="edit-cancel-btn">Cancel</button>
+                                <button type="button" class="btn btn-primary" (click)="editBtn()" *ngIf="!isEdit" id="edit-setting-btn">Edit
+                                    Settings</button>
+                                <button type="button" class="btn btn-primary" [disabled]="!isCheckValidForms"
+                                    (click)='saveBtn()' *ngIf="isEdit" id="save-changes-btn">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="info-block" *ngIf="isValidTenantTier">
+                            <h5 class="mb-8 mt-0 font-weight-bold">Trust Transfer Queue Processing Time</h5>
+                            <p class="mb-16 small">Trust transfers marked as <em>Approved</em> will process daily at the
+                                time shown below. <br>Be sure to verify that your bank supports your selected transfer time.</p>
+                            
+                            <form [formGroup]="queueTimeForm">
+                                <div class="row">
+                                    <div class="col-auto queue-time">
+                                        <div class="position-relative cust-spinner">
+                                        <input onchange="if(parseInt(this.value,10)<10)this.value='0'+this.value;"
+                                            formControlName="queueTimeHour" maxlength="2"
+                                            onkeypress="return (event.charCode == 8 || event.charCode == 0 || event.charCode == 13) ? null : false"
+                                            min="0" max="12" placeholder="00" [attr.disabled]="!isEdit ? '' : null"
+                                            type="number" class="form-control number-control" id="queue-time-hour">
+                                        </div>
+                                    </div>
+                                    <div class="col-auto colon-dot queue-time">
+                                        <div class="position-relative cust-spinner">
+                                        <input onchange="if(parseInt(this.value,10)<10)this.value='0'+this.value;"
+                                            formControlName="queueTimeSecond" maxlength="2"
+                                            onkeypress="return (event.charCode == 8 || event.charCode == 0 || event.charCode == 13) ? null : false"
+                                            min="0" max="59" step="1" placeholder="00"
+                                            [attr.disabled]="!isEdit ? '' : null" type="number"
+                                            class="form-control number-control" id="queue-time-second">
+                                        </div>
+                                    </div>
+                                    <div class="col-auto queue-time">
+                                        <ul class="time-switch d-flex list-unstyled m-0">
+                                            <li><a (click)="setAmPm(true)" [ngClass]="{'active' : isAM && isEdit, 'disabled': isAM && !isEdit}"
+                                                    href="javascript:void(0);" id="set-am">AM</a></li>
+                                            <li><a (click)="setAmPm(false)" [ngClass]="{'active' : !isAM && isEdit, 'disabled': !isAM && !isEdit}"
+                                                    href="javascript:void(0);" id="set-pm">PM</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="info-block pt-32" *ngIf="isValidTenantTier">
+                            <h5 class="mb-8 mt-0 font-weight-bold">Trust Payment Grace Period</h5>
+                            <p class="mb-16 small">Specifies number of days after an invoice is due before client’s bill
+                                is automatically paid from their primary retainer trust account. </p>
+                            <div class="d-flex align-items-center form-group">
+                                <form [formGroup]="trustPaymentGracePeriodForm">
+                                    <div class="position-relative cust-spinner">
+                                    <input type="number" formControlName="trustPaymentGracePeriod" [attr.disabled]="!isEdit ? '' : null"
+                                        onkeypress="return (event.charCode == 8 || event.charCode == 0 || event.charCode == 13) ? null : event.charCode >= 48 && event.charCode <= 57"
+                                        min="0" class="form-control number-control" id="trust-grace-period">
+                                    </div>
+                                </form>
+                                <span class="ml-8">days</span>
+                            </div>
+                        </div>
+                        <div class="info-block pt-32">
+                            <h5 class="mb-8 mt-0 font-weight-bold">Target Account for Overpayments</h5>
+                            <p class="mb-16 small">Sets which account receives overpayment funds by default.<br> Payment
+                                into Accounts Receivable Balance will appear as a negative balance due.</p>
+                            <div>
+                                <div class="custom-control custom-radio pr-0 mb-12">
+                                    <input type="radio" id="TAO-1" (click)="overPaymentCheck()" name="TAO" [attr.disabled]="!isEdit ? '' : null"
+                                        class="custom-control-input" [checked]="overPaymentOption">
+                                    <label class="custom-control-label" for="TAO-1">Accounts Receivable Balance</label>
+                                </div>
+                                <div class="custom-control custom-radio pr-0 mb-0">
+                                    <input type="radio" id="TAO-2" name="TAO" class="custom-control-input" [attr.disabled]="!isEdit ? '' : null"
+                                        (click)="overPaymentCheck()" [checked]="!overPaymentOption">
+                                    <label class="custom-control-label" for="TAO-2">Primary Retainer Trust
+                                        Account</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+<app-loader [active]="loading"></app-loader>
+
+
+<ng-template #EditTrustAccount let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Edit Trust Account</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <div class="form-group">
+            <label>Account Name <sup>*</sup></label>
+            <input type="text" class="form-control" value="Bank Account 1 Nickname" id="accountname">
+        </div>
+        <div class="form-group">
+            <label>Routing Number <sup>*</sup></label>
+            <input type="text" class="form-control" value="123456789" id="routing-number">
+        </div>
+        <div class="form-group">
+            <label>Bank Account Number <sup>*</sup></label>
+            <input type="text" class="form-control" value="1234 4567 8344 4459" id="bank-ac-number">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-changes-btn">Save Changes</button>
+    </div>
+</ng-template>
+
+
+<ng-template #CreateTrustAccount let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Create Trust Account</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <div class="form-group">
+            <label>Account Name <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Enter Bank Account (Nick)Name" id="acname">
+        </div>
+        <div class="form-group">
+            <label>Routing Number <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Enter Routing Number" id="routing-number">
+        </div>
+        <div class="form-group">
+            <label>Bank Account Number <sup>*</sup></label>
+            <input type="text" class="form-control" placeholder="Enter Bank Account Number" id="bank-ac-number">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id='cancel-btn'>Cancel</button>
+        <button type="button" class="btn btn-primary" id="create-trust-ac">Create Trust Account</button>
+    </div>
+</ng-template>
+
+
+
+<ng-template #DeleteTrustAccount let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Delete Trust Account</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        Are you sure you want to delete this trust account? This action cannot be undone.
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="delete-trust-ac">Delete Trust Account</button>
+    </div>
+</ng-template>
+
+
+<ng-template #DeactivateTrustAccount let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Deactivate Trust Account</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        Are you sure you want to deactivate this trust account? You can always <strong>Reactivate</strong> the account
+        at a future date if it’s not <strong>Deleted</strong>.
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="deactivate-trust-ac">Deactivate Trust Account</button>
+    </div>
+</ng-template>
+
+
+<ng-template #ReactivateTrustAccount let-modal>
+    <div class="modal-header d-block pb-24">
+        <h3 class="modal-title mb-0">Reactivate Trust Account</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close" id="close-btn">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        Are you sure you want to reactivate this trust account?
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')" id="cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="reactivate-trust-ac">Reactivate Trust Account</button>
+    </div>
+</ng-template>

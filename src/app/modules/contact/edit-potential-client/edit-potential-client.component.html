@@ -1,0 +1,774 @@
+<div class="container">
+        <div class="main-content">
+            <ol class="breadcrumb mb-32">
+                    <li class="breadcrumb-item" [routerLink]="['/dashboard']"><a href="javascript:void(0)">Dashboard</a></li>
+                    <li class="breadcrumb-item" [routerLink]="['/contact/potential-client']"><a href="javascript:void(0)">Contact Directory</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Contact Profile</li>
+            </ol>
+            <div class="d-flex align-items-center justify-content-between mb-32">
+                <div class="profile-content d-flex align-items-center profile-client">
+                    <div class="profile-heading mr-16">
+                        <h2 class="mt-0 mb-2">Brian McAhn Takt</h2>
+                        <span class="text-small font-weight-medium d-flex align-items-center">Individual Contact</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary">Reassign</button>
+                    <button type="button" class="btn btn-outline-primary">Manage Initial Consultation</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="card card-full-h">
+                        <div class="card-body">
+                            <h3 class="mb-24 d-flex align-items-center justify-content-between">General Information <a href="javascript:void(0);" class="ml-8 px-4 lh-20"
+                              (click)="openPersonalinfo(EditGenInfo,'lg','')"><em class="icon icon-edit icon-color small"></em></a></h3>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Salutation</span> Mr.
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">First Name</span> Brian
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Middle Name</span>
+                                        Anthony </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Last Name</span> McAhn Takt
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Suffix</span> Jr
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Former Name</span> Tony
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Gender</span> Male
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Status</span> Active
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Initial Contact Date</span>
+                                        8/12/19
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Created By
+                                    </span> Tony McTurney</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Initial Contact Date</span>
+                                        9/3/19
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card card-full-h">
+                        <div class="card-body">
+                            <h3 class="mb-24 d-flex align-items-center justify-content-between">Contact Information <a href="javascript:void(0);" class="ml-8 px-4 lh-20"
+                              (click)="openPersonalinfo(EditConInfo,'lg','')"><em class="icon icon-edit icon-color small"></em></a></h3>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-24">
+                                        <span class="small helper-text d-block mb-8">Primary Address</span>
+                                        123 Main Street <br>
+                                        Suite G <br>
+                                        Minneapolis, MN 55430
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-24">
+                                        <span class="small helper-text d-block mb-8">Invoice Address</span>
+                                        123 Main Street <br>
+                                        Suite G <br>
+                                        Minneapolis, MN 55430
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Primary Phone</span>
+                                        (312) 456-7890
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Cell Phone</span>
+                                        (312) 555-5555
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Email Address</span> <a
+                                            class="text-decoration font-weight-medium" href="mailto:jhamilton@gmail.com">
+                                            jhamilton@gmail.com</a> <span class="copy-file"> <i
+                                                class="icon icon-file-copy"></i></span></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Preferred Contact Method</span>
+                                        Email
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-24"><span class="small helper-text d-block mb-8">Automatic Notifications</span>
+                                        Email
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card card-full-h">
+                        <div class="card-body">
+                            <h3 class="mb-24 d-flex align-items-center justify-content-between">Matter Details <a href="javascript:void(0);" class="ml-8 px-4 lh-20"
+                              (click)="openPersonalinfo(EditMatterInfo,'lg','')"><em class="icon icon-edit icon-color small"></em></a></h3>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-24">
+                                        <span class="small helper-text d-block mb-8">Consultation Law Office</span>
+                                        Minneapolis
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-24">
+                                        <span class="small helper-text d-block mb-8">Practice Area</span>
+                                        Practice Area
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-24">
+                                        <span class="small helper-text d-block mb-8">Matter Type</span>
+                                        Matter Type
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-24">
+                                        <span class="small helper-text d-block mb-8">Jurisdiction of Matter</span>
+                                        State <br>County
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-24">
+                                        <span class="small helper-text d-block mb-8">Consult Attorney</span>
+                                        Lauren Harman
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="nav nav-tabs d-inline-flex flex-nowrap" role="tablist">
+                    <a href="javascript:void(0);" (click)="selecttabs1 = mytabs" *ngFor="let mytabs of alltabs1;trackBy: trackByFn" role="tab" class="nav-link flex-fill" [class.active]="selecttabs1 === mytabs">{{ mytabs }}</a>
+                </div>
+                <div class="card tlr-0">
+                    <div class="card-body p-0">
+                        <div class="tab-content p-32">
+                            <div *ngIf="selecttabs1 === alltabs1[0]" class="tab-pane fade show active" role="tabpanel">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-24">
+                                        <h2 class="mb-0">Matter Associations</h2>
+                                        <button type="button" class="btn btn-primary">Add/Edit Associations</button>
+                                    </div>
+                                    <div class="info-block">
+                                        <h3 class="mb-16">Opposing Party</h3>
+                                        <div class="custom-table">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-borderless">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Type</th>
+                                                            <th>Email Address</th>
+                                                            <th>Phone Number</th>
+                                                            <th>Status</th>
+                                                            <th class="text-right">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Hall, Marylin</td>
+                                                            <td>Individual</td>
+                                                            <td>duncan_raymond@email.com</td>
+                                                            <td>(312) 867-5309</td>
+                                                            <td>Active</td>
+                                                            <td class="text-right">
+                                                                <div class="icon-group d-flex justify-content-end">
+                                                                    <span>
+                                                                        <em class="icon icon-edit icon-color"></em>
+                                                                    </span>
+                                                                    <span>
+                                                                        <em class="icon icon-remove icon-color"></em>
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="info-block pt-32">
+                                        <h3 class="mb-24">Opposing Counsel</h3>
+                                        <div class="custom-control custom-checkbox mb-16">
+                                            <input type="checkbox" class="custom-control-input" id="oppo">
+                                            <label class="custom-control-label" for="oppo">Opposing Party is Representing Themselves</label>
+                                        </div>
+                                        <div class="custom-table">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-borderless">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Company</th>
+                                                            <th>Email Address</th>
+                                                            <th>Phone Number</th>
+                                                            <th>Status</th>
+                                                            <th class="text-right">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Duncan, Raymond</td>
+                                                            <td>Law Office Name</td>
+                                                            <td>duncan_raymond@email.com</td>
+                                                            <td>(312) 867-5309</td>
+                                                            <td>Active</td>
+                                                            <td class="text-right">
+                                                                <div class="icon-group d-flex justify-content-end">
+                                                                    <span>
+                                                                        <em class="icon icon-edit icon-color"></em>
+                                                                    </span>
+                                                                    <span>
+                                                                        <em class="icon icon-remove icon-color"></em>
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="info-block pt-32">
+                                        <h3 class="mb-16">Expert Witness</h3>
+                                        <div class="custom-table">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-borderless">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Company</th>
+                                                            <th>Email Address</th>
+                                                            <th>Phone Number</th>
+                                                            <th>Status</th>
+                                                            <th class="text-right">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Duncan, Raymond</td>
+                                                            <td>Law Office Name</td>
+                                                            <td>duncan_raymond@email.com</td>
+                                                            <td>(312) 867-5309</td>
+                                                            <td>Active</td>
+                                                            <td class="text-right">
+                                                                <div class="icon-group d-flex justify-content-end">
+                                                                    <span>
+                                                                        <em class="icon icon-edit icon-color"></em>
+                                                                    </span>
+                                                                    <span>
+                                                                        <em class="icon icon-remove icon-color"></em>
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pt-48">
+                                    <h2 class="mb-24">Client Associations</h2>
+                                    <div class="info-block">
+                                        <h3 class="mb-16">Vendor</h3>
+                                        <div class="custom-table">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-borderless">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Company</th>
+                                                            <th>Email Address</th>
+                                                            <th>Phone Number</th>
+                                                            <th>Status</th>
+                                                            <th class="text-right">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Law Office Name</td>
+                                                            <td>Law Office Name</td>
+                                                            <td>duncan_raymond@email.com</td>
+                                                            <td>(312) 867-5309</td>
+                                                            <td>Active</td>
+                                                            <td class="text-right">
+                                                                <div class="icon-group d-flex justify-content-end">
+                                                                    <span>
+                                                                        <em class="icon icon-edit icon-color"></em>
+                                                                    </span>
+                                                                    <span>
+                                                                        <em class="icon icon-remove icon-color"></em>
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="info-block">
+                                        <h3 class="mb-16">Subsidiary</h3>
+                                        <div class="custom-table">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-borderless">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Company</th>
+                                                            <th>Email Address</th>
+                                                            <th>Phone Number</th>
+                                                            <th>Status</th>
+                                                            <th class="text-right">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>Law Office Name</td>
+                                                            <td>Law Office Name</td>
+                                                            <td>duncan_raymond@email.com</td>
+                                                            <td>(312) 867-5309</td>
+                                                            <td>Active</td>
+                                                            <td class="text-right">
+                                                                <div class="icon-group d-flex justify-content-end">
+                                                                    <span>
+                                                                        <em class="icon icon-edit icon-color"></em>
+                                                                    </span>
+                                                                    <span>
+                                                                        <em class="icon icon-remove icon-color"></em>
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="selecttabs1 === alltabs1[1]" class="tab-pane fade show active" role="tabpanel">
+                                <h3 class="mb-24">Notes</h3>
+                                <div class="d-flex align-items-center mb-24 w-100">
+                                    <div class="header-search flex-fill">
+                                        <form action="#" class="small-search">
+                                            <div class="header-search-wrapper">
+                                                <input type="text" class="form-control search-input" name="q" id="q"
+                                                    placeholder="Search Matters" required="">
+                                                <button class="btn" type="submit">Search</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <h4 class="text-center">  DATA-Table space</h4>
+                                <button class="btn btn-link btn-icon px-0 d-flex align-items-center" type="button" (click)="openPersonalinfo(AddNote,'lg','')"><i class="icon icon-add-circle"></i> Add Note</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+<ng-template #EditGenInfo let-modal>
+    <div class="modal-header pb-24 d-block">
+        <h3 class="modal-title mb-0">Edit General Information</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Salutation <sup>*</sup></label>
+                    <select class="custom-select">
+                        <option>Mr.</option>
+                        <option>Mrs.</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>First Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="First Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Middle Name</label>
+                    <input type="text" class="form-control" value="Middle Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Last Name <sup>*</sup></label>
+                    <input type="text" class="form-control" value="Last Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Suffix</label>
+                    <select class="custom-select">
+                        <option>Suffix 1</option>
+                        <option>Suffix 2</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Former Name</label>
+                    <input type="text" class="form-control" value="Former Name">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select class="custom-select">
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="custom-select">
+                        <option>Active</option>
+                        <option>Pending</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Initial Contact Date</label>
+                    <input type="date" class="form-control" value="8/12/19">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Created By</label>
+                    <input type="text" class="form-control" value="Tony McTurney">
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-group">
+                    <label>Created By</label>
+                    <textarea class="form-control" rows="4" placeholder="Enter change notes (optional)"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>
+
+
+<ng-template #EditConInfo let-modal>
+    <div class="modal-header pb-16 d-block">
+        <h3 class="modal-title mb-0">Edit Contact Information</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body pb-0">
+        <div class="row">
+            <div class="col-6">
+                <div class="row gutter-16">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Primary Address <sup>*</sup></label>
+                            <input type="text" class="form-control" value="123 Main Street">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Primary Address 2</label>
+                            <input type="text" class="form-control" placeholder="Enter a second address">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>City <sup>*</sup></label>
+                            <input type="text" class="form-control" value="Minneapolis">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>State <sup>*</sup></label>
+                            <select class="custom-select">
+                                <option>MN</option>
+                                <option>NY</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Zip Code <sup>*</sup></label>
+                            <input type="text" class="form-control" value="55430">
+                            <small class="helper-text d-block pt-4 font-weight-normal">CDT (Central Daylight Time)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="row gutter-16">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Primary Address <sup>*</sup></label>
+                            <input type="text" class="form-control" value="123 Main Street">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Primary Address 2</label>
+                            <input type="text" class="form-control" placeholder="Enter a second address">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>City <sup>*</sup></label>
+                            <input type="text" class="form-control" value="Minneapolis">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>State <sup>*</sup></label>
+                            <select class="custom-select">
+                                <option>MN</option>
+                                <option>NY</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Zip Code <sup>*</sup></label>
+                            <input type="text" class="form-control" value="55430">
+                            <small class="helper-text d-block pt-4 font-weight-normal">CDT (Central Daylight Time)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Primary Phone <sup>*</sup></label>
+                    <input type="text" class="form-control" value="(312) 456-7890">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Cell Phone  <sup>*</sup></label>
+                    <input type="text" class="form-control" value="(312) 456-7890">
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label>Email Address <sup>*</sup></label>
+                    <input type="email" class="form-control" value="m.foltynewicz@email.com">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-10">
+                <div class="row gutter-16">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox mb-8 pr-0">
+                                <input class="custom-control-input" formControlName="retainer" id="Marknot" type="checkbox">
+                                <label class="custom-control-label" for="Marknot">Mark as Do Not Contact</label>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label class="mb-12">Preferred Contact Method</label>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="call" name="preffmethod" class="custom-control-input">
+                                <label class="custom-control-label" for="call">Call</label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="email" name="preffmethod" class="custom-control-input" checked>
+                                <label class="custom-control-label" for="email">Email</label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="text" name="preffmethod" class="custom-control-input">
+                                <label class="custom-control-label" for="text">Text</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label class="mb-12">Automatic Notifications</label>
+                            <div class="custom-control custom-checkbox pr-0">
+                                <input type="checkbox" class="custom-control-input" id="Automatic1" checked>
+                                <label class="custom-control-label" for="Automatic1">Email</label>
+                            </div>
+                            <div class="custom-control custom-checkbox pr-0">
+                                <input type="checkbox" class="custom-control-input" id="Automatic2">
+                                <label class="custom-control-label" for="Automatic2">SMS</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-group">
+                    <label>Change Notes</label>
+                    <textarea class="form-control" rows="4" placeholder="Enter change notes (optional)"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>
+
+
+<ng-template #AddNote let-modal>
+    <div class="modal-header pb-24 d-block">
+        <h3 class="modal-title mb-0">Add Note</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="row gutter-16">
+            <div class="col-3">
+                <div class="form-group">
+                    <label>Applicable Date</label>
+                    <input type="date" class="form-control" value="08/12/2019">
+                </div>
+            </div>
+        </div>
+        <div class="custom-control custom-checkbox mb-24">
+            <input type="checkbox" class="custom-control-input" id="customCheck1">
+            <label class="custom-control-label" for="customCheck1">Visible to Client</label>
+        </div>
+        <div class="form-group">
+            <label>Note Text <sup>*</sup></label>
+            
+            <h4>Put richtexteditor here</h4>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>
+
+
+<ng-template #EditMatterInfo let-modal>
+    <div class="modal-header pb-24 d-block">
+        <h3 class="modal-title mb-0">Edit Matter Details</h3>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <em class="icon icon-close"></em>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="row gutter-16">
+            <div class="col-4">
+                <div class="form-group">
+                    <label>Consultation Law Office</label>
+                    <select class="custom-select">
+                        <option>Minneapolis</option>
+                        <option>Minneapolis</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label>Practice Area</label>
+                    <select class="custom-select">
+                        <option>Practice Area</option>
+                        <option>Practice Area 1</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label>Matter Type</label>
+                    <select class="custom-select">
+                        <option>Matter Type</option>
+                        <option>Matter Type 1</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label>Jurisdiction of Matter</label>
+                    <select class="custom-select">
+                        <option>Minnesota</option>
+                        <option>Minnesota 1</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <select class="custom-select">
+                        <option>Hennepin County</option>
+                        <option>Hennepin County 1</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="text-xlarge mt-0 mb-24">Consultation Attorney</h4>
+        <div class="header-search flex-fill d-flex mb-24">
+            <form action="#">
+                <div class="header-search-wrapper">
+                <input type="text" class="form-control search-input" placeholder="Consultation Attorney">
+                <button class="btn" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <h4 class="text-center">  DATA-Table space</h4>
+        <div>
+            <p class="mb-12">You may leave change notes for the audit history (optional).</p>
+            <textarea class="form-control non-resize" rows="4" placeholder="Enter Note Text"></textarea>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="modal.dismiss('Cross click')">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</ng-template>

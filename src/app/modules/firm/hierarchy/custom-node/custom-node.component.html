@@ -1,0 +1,32 @@
+<div class="modal-header d-block pb-32">
+  <h3 class="modal-title mb-0" *ngIf='!echelon.id'>Add Hierarchy Node</h3>
+  <h3 class="modal-title mb-0" *ngIf='echelon.id'>Edit Hierarchy Node</h3>
+  <button type="button" class="close" (click)="cancel()" aria-label="Close">
+    <em class="icon icon-close"></em>
+  </button>
+</div>
+<div class="modal-body pb-0">
+  <div class="form-group">
+    <label>Hierarchy Level <sup>*</sup></label>
+    <ng-select [items]="hierarchy" [clearable]='false' placeholder="Select Hierarchy Level"
+      [(ngModel)]="echelon.hierarchyId" [selectOnTab]="true" [bindValue]="'id'" [bindLabel]="'name'" [notFoundText]="'No record found'"
+      (change)='setParentLevelEchelons($event)' [disabled]='echelon.id' id="hierarchy-lvl">
+    </ng-select>
+  </div>
+  <div class="form-group">
+    <label>Parent Node <sup>*</sup></label>
+    <ng-select [items]="parentLevelEchelons" [clearable]='false' placeholder="Select Parent Node"
+      [(ngModel)]="echelon.parentId" [bindValue]="'id'"[selectOnTab]="true"  [bindLabel]="'name'" [notFoundText]="'No record found'"
+      [disabled]='echelon.id' id="parent-node">
+    </ng-select>
+  </div>
+  <div class="form-group">
+    <label>Node Name <sup>*</sup></label>
+    <input type="text" class="form-control" placeholder="Enter node name" [(ngModel)]="echelon.name" id="node-name">
+  </div>
+  
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-light" (click)="cancel()" id="cancel-btn">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)='ok()' id="save-btn">Save</button>
+</div>
